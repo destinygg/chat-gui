@@ -1,4 +1,4 @@
-# Destiny.gg
+# Destiny.gg chat GUI
 Source code for the chat gui [www.destiny.gg](http://www.destiny.gg/)
 This is a work in progress!
 
