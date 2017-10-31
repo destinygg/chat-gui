@@ -1,0 +1,16 @@
+*.sublime-*
+/.settings
+/.externalToolBuilders
+/.project
+/.buildpath
+/.sass-cache
+/.tscache
+
+/composer.lock
+/deployment.properties
+/node_modules
+/scripts/redis/*.hash
+.DS_Store
+*.swp
+
+/.idea
