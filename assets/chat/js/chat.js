@@ -651,19 +651,19 @@ class Chat {
     }
 
     censor(nick){
-        this.mainwindow.lock();
-        const c = this.mainwindow.getlines(`.msg-chat[data-username="${nick.toLowerCase()}"]`);
-        switch(this.settings.get('showremoved')) {
+        this.mainwindow.lock()
+        const c = this.mainwindow.getlines(`.msg-chat[data-username="${nick.toLowerCase()}"]`)
+        switch(parseInt(this.settings.get('showremoved') || 1)) {
             case 0: // remove
-                c.remove();
-                break;
+                c.remove()
+                break
             case 1: // censor
-                c.addClass('censored');
-                break;
+                c.addClass('censored')
+                break
             case 2: // do nothing
-                break;
+                break
         }
-        this.mainwindow.unlock();
+        this.mainwindow.unlock()
     }
 
     ignored(nick, text=null){
@@ -752,12 +752,12 @@ class Chat {
 
     onMUTE(data){
         // data.data is the nick which has been banned, no info about duration
-        this.censor(data.data)
         if(this.user.username.toLowerCase() === data.data.toLowerCase()) {
             MessageBuilder.command(`You have been muted by ${data.nick}.`, data.timestamp).into(this)
         } else {
             MessageBuilder.command(`${data.data} muted by ${data.nick}.`, data.timestamp).into(this)
         }
+        this.censor(data.data)
     }
 
     onUNMUTE(data){

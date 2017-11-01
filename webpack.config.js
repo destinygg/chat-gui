@@ -1,19 +1,26 @@
 require('webpack');
 
+const path = require('path');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
-const CleanWebpackPlugin = require('clean-webpack-plugin');
+//const CleanWebpackPlugin = require('clean-webpack-plugin');
 
 module.exports = {
+    devServer: {
+        contentBase: path.join(__dirname, "static"),
+        compress: true,
+        port: 8282
+    },
     entry: {
-        chat      : './assets/chat.js',
-        streamchat: './assets/streamchat.js'
+        chat       : './assets/chat.js',
+        streamchat : './assets/streamchat.js',
+        test       : './assets/test.js'
     },
     output: {
         path     : __dirname + '/static',
         filename : '[name].js'
     },
     plugins: [
-        new CleanWebpackPlugin(['static'], {root: __dirname, verbose: false, exclude: ['cache']}),
+        /*new CleanWebpackPlugin(['static'], {root: __dirname, verbose: false, exclude: ['cache', 'index.htm']}),*/
         new ExtractTextPlugin({filename: '[name].css'})
     ],
     watchOptions: {

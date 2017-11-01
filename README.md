@@ -1,4 +1,5 @@
-# Destiny.gg chat GUI
+# Destiny.gg Chat GUI
+
 Source code for the chat gui [www.destiny.gg](http://www.destiny.gg/)
 This is a work in progress!
 
@@ -6,22 +7,10 @@ This is a work in progress!
 
 See [LICENSE.md](LICENSE.md)
 
-## Requirements
-
-### Building
-
-[nodejs](http://nodejs.org/) Dependency manager
-
-[webpack](https://webpack.github.io/) Project builder
-
-[glue](http://glue.readthedocs.org/) Glue is a simple command line tool to generate CSS sprites
-
 #### Install the node dependencies
 
 ```shell
-npm install webpack -g
 npm install
-composer install -no-dev
 ```
 
 #### You can now build the project.
@@ -41,17 +30,16 @@ webpack -w
 ```
 or
 ```shell
-webpack
+npm run watch
 ```
 
-#### Additional scripts
+#### Implementation & Testing
 
-Compiles single images from multiple and outputs a css file. Does this for `./assets/emotes` and `./assets/icons`
 ```shell
-npm run glue
+npm run server
 ```
 
-Pulls the latest list of TLD and outputs a json file `./assets/tld.json`
-```shell
-npm run tld
+You can then test it by going to something like this....
+```
+http://localhost:8282/index.htm?u=wss://www.destiny.gg/ws&a=http://localhost:8181
 ```
