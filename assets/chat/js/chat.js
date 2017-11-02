@@ -20,6 +20,7 @@ const regextime = /(\d+(?:\.\d*)?)([a-z]+)?/ig
 const regexsafe = /[\-\[\]\/{}()*+?.\\\^$|]/g
 const nickmessageregex = /(?:(?:^|\s)@?)([a-zA-Z0-9_]{3,20})(?=$|\s|[\.\?!,])/g
 const nickregex = /^[a-zA-Z0-9_]{3,20}$/
+const nsfwnsfl = new RegExp(`\\b(?:NSFL|NSFW)\\b`, 'i')
 const tagcolors = [
     "green",
     "yellow",
@@ -84,7 +85,8 @@ const settingsdefault = new Map([
     ['notificationtimeout', true],
     ['ignorementions', false],
     ['autocompletehelper', false],
-    ['taggedvisibility', false]
+    ['taggedvisibility', false],
+    ['hidensfw', false]
 ])
 const commandsinfo = new Map([
     ['help',            {desc: 'Helpful information.'}],
@@ -667,7 +669,9 @@ class Chat {
     }
 
     ignored(nick, text=null){
-        return this.ignoring.has(nick.toLowerCase()) || (this.ignoreregex && text !== null && this.settings.get('ignorementions') && this.ignoreregex.test(text));
+        return this.ignoring.has(nick.toLowerCase()) ||
+            (text !== null && this.settings.get('ignorementions') && this.ignoreregex && this.ignoreregex.test(text)) ||
+            (text !== null && this.settings.get('hidensfw') && nsfwnsfl.test(text));
     }
 
     ignore(nick, ignore=true){
