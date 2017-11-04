@@ -23,14 +23,14 @@ const argWs = parameterByName('u') || `ws://localhost:9000`
 const argUrl = parameterByName('a') || `http://localhost:8181`
 
 $.when(
-    new Promise(res => $.getJSON(`${argUrl}/api/chat/me`).done(res).fail(() => res(null))),
-    new Promise(res => $.getJSON(`${argUrl}/api/chat/history`).done(res).fail(() => res(null)))
-).then((userAndSettings, history) =>
-    new Chat()
+    new Promise(res => $.ajax({url:`${argUrl}/api/chat/me`, xhrFields: {withCredentials: true}}).done(res).fail(() => res(null))),
+    new Promise(res => $.ajax({url:`${argUrl}/api/chat/history`, xhrFields: {withCredentials: true}}).done(res).fail(() => res(null)))
+).then((userAndSettings, history) => {
+    return new Chat()
         .withUserAndSettings(userAndSettings)
         .withEmotes(emotes)
         .withGui()
         .withHistory(history)
         .withWhispers()
         .connect(argWs)
-)
+})

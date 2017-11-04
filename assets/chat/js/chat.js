@@ -241,7 +241,8 @@ class Chat {
     withSettings(settings){
         // If authed and #settings.profilesettings=true use #settings
         // Else use whats in LocalStorage#chat.settings
-        let stored = this.authenticated && settings.get('profilesettings') ? settings : new Map(ChatStore.read('chat.settings') || []);
+        let stored = settings !== null && this.authenticated && settings.get('profilesettings') ? settings : new Map(ChatStore.read('chat.settings') || []);
+
         // Loop through settings and apply any settings found in the #stored data
         if(stored.size > 0) {
             [...this.settings.keys()]
@@ -249,10 +250,12 @@ class Chat {
                 .forEach(k => this.settings.set(k, stored.get(k)));
         }
         // Upgrade if schema is out of date
-        const oldversion = parseInt(stored.get('schemaversion') || -1);
+        const oldversion = stored.has('schemaversion') ? parseInt(stored.get('schemaversion')): -1;
         const newversion = settingsdefault.get('schemaversion');
-        if(oldversion !== -1 && newversion !== oldversion) {
-            Settings.upgrade(this, oldversion, newversion);
+        if(oldversion !== -1 && newversion > oldversion) {
+            Settings.upgrade(this, oldversion, newversion)
+            this.settings.set('schemaversion', newversion)
+            this.saveSettings()
         }
 
         this.taggednicks = new Map(this.settings.get('taggednicks'));
