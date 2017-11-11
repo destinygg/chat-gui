@@ -55,7 +55,7 @@ const errorstrings = new Map([
 ])
 const hintstrings = new Map([
     ['slashhelp', 'Type in /help for more a list of commands, do advanced things like modify your scroll-back size'],
-    ['tabcompletion', 'Use the tab key to auto-complete usernames and emotes (for user only completion prepend a @ or press shift)'],
+    ['tabcompletion', 'Use the tab key to auto-complete names and emotes (for user only completion prepend a @ or press shift)'],
     ['hoveremotes', 'Hovering your mouse over an emote will show you the emote code'],
     ['highlight', 'Chat messages containing your username will be highlighted'],
     ['notify', 'Use /msg <username> to send a private message to someone'],
@@ -550,7 +550,7 @@ class Chat {
                 (this.regexhighlightcustom && this.regexhighlightcustom.test(message.user.username + ' ' + message.message))
             );
         }
-        // Only user messages can "continue"
+
         /* else if(win.lastmessage && win.lastmessage.type === message.type && [MessageTypes.ERROR,MessageTypes.INFO,MessageTypes.COMMAND,MessageTypes.STATUS].indexOf(message.type)){
             message.continued = true
         }*/
@@ -1177,12 +1177,16 @@ class Chat {
             MessageBuilder.error('Cannot tag yourself').into(this);
             return;
         }
+        if(!this.users.has(n)) {
+            MessageBuilder.error('User must be present in chat to tag.').into(this);
+            return;
+        }
         const color = parts[1] && tagcolors.indexOf(parts[1]) !== -1 ? parts[1] : tagcolors[Math.floor(Math.random()*tagcolors.length)];
         this.mainwindow.getlines(`.msg-user[data-username="${n}"]`)
             .removeClass(Chat.removeClasses('msg-tagged'))
             .addClass(`msg-tagged msg-tagged-${color}`);
         this.taggednicks.set(n, color);
-        MessageBuilder.info(`Tagged ${this.user.username} as ${color}`).into(this);
+        MessageBuilder.info(`Tagged ${parts[0]} as ${color}`).into(this);
 
         this.settings.set('taggednicks', [...this.taggednicks]);
         this.applySettings();
@@ -1317,7 +1321,7 @@ class Chat {
             const n = new Notification(title, {
                 body : message,
                 tag  : `dgg${timestamp}`,
-                icon : '/notifyicon.png',
+                icon : '/notifyicon.png?v2',
                 dir  : 'auto'
             });
             if(timeout) setTimeout(() => n.close(), 8000);
