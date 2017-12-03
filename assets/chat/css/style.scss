@@ -308,66 +308,76 @@ a.user {
     color: $color-label-user;
 }
 a.user:hover {
-    color: $color-label-user-alt;
+    color: lighten($color-label-user,20%);
 }
 
-/* T1,T2 */
-a.subscriber {
-    color: $color-label-sub;
+/* T1, TWITCH */
+a.flair9,
+a.flair13 {
+    color: $color-label-sub1;
 }
-a.subscriber:hover {
-    color: $color-label-sub-alt;
+a.flair9:hover,
+a.flair13:hover {
+    color: lighten($color-label-sub1,20%);
+}
+
+/* T2 */
+a.flair1 {
+    color: $color-label-sub2;
+}
+a.flair1:hover {
+    color: lighten($color-label-sub2,20%);
 }
 
 /* T3 */
 a.flair3 {
-    color: $color-label-sub2;
+    color: $color-label-sub3;
 }
 a.flair3:hover {
-    color: $color-label-sub2-alt;
+    color: lighten($color-label-sub3,20%);
 }
 
 /* T4 */
 a.flair8 {
-    color: $color-label-sub3;
+    color: $color-label-sub4;
 }
 a.flair8:hover {
-    color: $color-label-sub3-alt;
+    color: lighten($color-label-sub4,20%);
 }
 
 a.vip {
     color: $color-label-vip;
 }
 a.vip:hover {
-    color: $color-label-vip-alt;
+    color: lighten($color-label-vip,20%);
 }
 
 a.bot {
     color: $color-label-bot;
 }
 a.bot:hover {
-    color: $color-label-bot-alt;
+    color: lighten($color-label-bot,20%);
 }
 
 a.admin {
     color: $color-label-admin;
 }
 a.admin:hover {
-    color: $color-label-admin-alt;
+    color: lighten($color-label-admin,20%);
 }
 
 a.flair11 {
     color: $color-label-bot2;
 }
 a.flair11:hover {
-    color: $color-label-user;
+    color: lighten($color-label-bot2,20%);
 }
 
 a.flair12 {
     color: $color-broadcaster;
 }
 a.flair12:hover {
-    color: $color-broadcaster-alt;
+    color: lighten($color-broadcaster,20%);
 }
 
 /* Hidden Flairs */
@@ -380,10 +390,10 @@ a.flair12:hover {
 .msg-user {
     .features {
         display: inline-block;
+        vertical-align: top;
         height: 16px;
         .flair {
             display: inline-block;
-            vertical-align: top;
             line-height: 16px;
             margin: 0;
             opacity: 1;

@@ -5,11 +5,11 @@
     25%, 75% { opacity: 0 }
 }
 @keyframes emote-hit {
-    0% { color: $color-label-admin-alt; font-size:200%; }
+    0% { color: #B91010; font-size:200%; }
     1% { color: $color-light; font-size:190%; }
-    2% { color: $color-label-admin-alt; font-size:200%; }
+    2% { color: #B91010; font-size:200%; }
     3% { color: $color-light; font-size:190%; }
-    4% { color: $color-label-admin-alt; font-size:200%; }
+    4% { color: #B91010; font-size:200%; }
     100% { color: $color-light; font-size:120%; }
 }
 
@@ -387,20 +387,6 @@
     100%{ -webkit-transform: rotate(-360deg); }
 }
 
-.icon-flair11,
-.icon-flair13,
-.icon-flair1,
-.icon-flair3,
-.icon-flair8 {
-    transition: rotate 0.2s ease-in-out;
-}
-.icon-flair11:hover,
-.icon-flair13:hover,
-.icon-flair1:hover,
-.icon-flair3:hover,
-.icon-flair8:hover {
-    animation: spin 3s infinite linear;
-}
 
 .chat-emote-OverRustle {
     animation: rustle 100ms 7;
