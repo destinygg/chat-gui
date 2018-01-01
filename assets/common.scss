@@ -1,10 +1,3 @@
-/* Dimensions */
-$screen-xxs:            650px;
-$screen-xs-max:         829px;
-$screen-sm-min:         830px; /* if you change this value, you need to change the value in ui.js ^disableWidth */
-$screen-md-max:         991px;
-$screen-lg-min:         1200px;
-
 $color-light:           #FFF7F9;
 $color-dark:            #201F1E;
 $color-accent:          #4A8ECC;
@@ -16,13 +9,6 @@ $text-color2:           #666666;
 $text-color3:           #333333;
 $text-color-disabled:   #494949;
 
-$color-alert-bg:        #B91010;
-$color-alert-text:      #B91010;
-$color-warn-bg:         #f89406;
-$color-warn-text:       #f89406;
-$color-success-bg:      #4DB524;
-$color-success-text:    #4DB524;
-
 $color-surface-light1:  #FFFFFF;
 $color-surface-light2:  #F5F5F5;
 $color-surface-light3:  #EEEEEE;
@@ -31,9 +17,8 @@ $color-surface-dark2:   #111111;
 $color-surface-dark3:   #222222;
 $color-surface-dark4:   #333333;
 
-/* Chat */
 $color-chat-text1:      #DEDEDE;
-$color-chat-text2:      #9E9E9E;
+$color-chat-text2:      #B9B9B9;
 $color-chat-text3:      #838383;
 $color-chat-disabled:   #414141;
 $color-chat-place:      #404040;
@@ -45,7 +30,7 @@ $color-chat-bg:         #080808;
 
 $color-label-bot:       #0088CC;
 $color-label-bot2:      #929292;
-$color-label-user:      #CACACA;
+$color-label-user:      #DCDCDC;
 $color-label-sub1:      #59AEEA;
 $color-label-sub2:      #2ADDC8;
 $color-label-sub3:      #4DB524;

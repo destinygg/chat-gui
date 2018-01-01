@@ -7,19 +7,19 @@
 *, *::before, *::after { box-sizing: inherit; }
 html { box-sizing: border-box; }
 
-$chatchromefont     : "Roboto", Helvetica, "Trebuchet MS", Verdana, sans-serif;
-$chatlinesfont      : "Roboto", Helvetica, "Trebuchet MS", Verdana, sans-serif;
-$chatminwidth       : 300px;
-$menuwidthmax       : 320px;
-$menubottommax      : 90px;
+$chat-chrome-font   : "Roboto", Helvetica, "Trebuchet MS", Verdana, sans-serif;
+$chat-lines-font    : "Roboto", Helvetica, "Trebuchet MS", Verdana, sans-serif;
+$chat-min-width     : 300px;
+$menu-width-max     : 320px;
+$menu-bottom-max    : 90px;
 $text-size-sm       : 11px;
 $text-size-md       : 13px;
 $text-size-lg       : 16px;
-$chat-line-height   : 20px;
+$chat-line-height   : 22px;
 $chat-gutter-sm     : 6px;
 
 body, textarea, input, button {
-    font-family: $chatchromefont;
+    font-family: $chat-chrome-font;
     font-size: 14px;
     line-height: 1.42857143;
     text-rendering: optimizeLegibility;
@@ -85,7 +85,7 @@ label small {
 /* Layout */
 #chat {
     border-radius: 0;
-    min-width: $chatminwidth;
+    min-width: $chat-min-width;
     display: flex;
     flex-direction: column;
     position: relative;
@@ -203,16 +203,12 @@ label small {
     color: $color-chat-place;
 }
 
-.chat-autocomplete-in #chat-input-control  {
-    border-radius: 0 0 3px 3px;
-}
-
 .chat-output {
     width: 100%;
     height: 100%;
 }
 .chat-lines {
-    font-family: $chatlinesfont;
+    font-family: $chat-lines-font;
     font-size: $text-size-md;
     line-height: $chat-line-height;
     backface-visibility: hidden;
@@ -735,13 +731,16 @@ a.flair12:hover {
 .chat-scroll-notify:hover {
     color: $color-chat-text1;
 }
-.chat-output.chat-unpinned .chat-scroll-notify {
-    display: block;
-}
-
 #chat.chat-autocomplete-in .chat-scroll-notify  {
     display: none;
 }
+.chat-output.chat-unpinned .chat-scroll-notify {
+    display: block;
+}
+#chat.chat-autocomplete-in #chat-input-control  {
+    border-radius: 0 0 3px 3px;
+}
+
 .chat-output-whisper .msg-chat {
     line-height: 150%;
 }
@@ -753,7 +752,7 @@ a.flair12:hover {
     100% { opacity: 1; }
 }
 #chat-auto-complete {
-    pointer-events:none;
+    pointer-events: none;
     transition: opacity 250ms ease-out;
     opacity: 0;
     z-index: 131;
@@ -808,8 +807,8 @@ a.flair12:hover {
     z-index: 220;
     height: auto;
     width: 100%;
-    bottom: $menubottommax;
-    max-width: $menuwidthmax;
+    bottom: $menu-bottom-max;
+    max-width: $menu-width-max;
     right: 0;
     top: 0;
     .toolbar {
@@ -873,7 +872,7 @@ a.flair12:hover {
     }
 }
 #chat-emote-list {
-    min-width: $menuwidthmax;
+    min-width: $menu-width-max;
     .content {
         text-align: center;
         outline: 0;
@@ -895,7 +894,7 @@ a.flair12:hover {
     }
 }
 #chat-whisper-users {
-    min-width: $menuwidthmax;
+    min-width: $menu-width-max;
     .content > ul {
         margin: 0;
         padding: 10px 0;

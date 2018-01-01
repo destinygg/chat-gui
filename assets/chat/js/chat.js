@@ -17,8 +17,8 @@ import Settings from './settings'
 import ChatWindow from './window'
 
 const regextime = /(\d+(?:\.\d*)?)([a-z]+)?/ig
-const regexsafe = /[\-\[\]\/{}()*+?.\\\^$|]/g
-const nickmessageregex = /(?:(?:^|\s)@?)([a-zA-Z0-9_]{3,20})(?=$|\s|[\.\?!,])/g
+const regexsafe = /[\-\[\]\/{}()*+?.\\^$|]/g
+const nickmessageregex = /(?:(?:^|\s)@?)([a-zA-Z0-9_]{3,20})(?=$|\s|[.?!,])/g
 const nickregex = /^[a-zA-Z0-9_]{3,20}$/
 const nsfwnsfl = new RegExp(`\\b(?:NSFL|NSFW)\\b`, 'i')
 const tagcolors = [
@@ -84,7 +84,7 @@ const settingsdefault = new Map([
     ['focusmentioned', false],
     ['notificationtimeout', true],
     ['ignorementions', false],
-    ['autocompletehelper', false],
+    ['autocompletehelper', true],
     ['taggedvisibility', false],
     ['hidensfw', false]
 ])
