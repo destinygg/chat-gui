@@ -1,28 +1,69 @@
 const fs = require('fs');
-const del = require('del');
-const exec = require('child_process').exec;
+const path = require('path');
+const Spritesmith = require('spritesmith');
+const NEWLINE = "\r\n";
 
-const glueEmoticons = function (cb) {
-    del('assets/emotes/emotes.css');
-    exec(['glue', 'assets/emotes/emoticons', '--sprite-namespace= --namespace=chat-emote.chat-emote --css=assets/emotes --css-template=assets/emotes/emoticons.jinja --img=assets/emotes --url=../../emotes/ --pseudo-class-separator=_'].join(' '), function(err, stdout, stderr) {
-        if (err || stderr) throw err;
-        fs.renameSync('assets/emotes/emoticons.css', 'assets/emotes/emoticons.scss');
-        cb();
+const glueImages = function (dir, name, cb) {
+    let out = dir + name + '.png';
+    fs.readdir(dir + name + '/', (err, files) => {
+        if(err) throw err;
+        const paths = files.map(a => dir + name + '/' +a);
+        Spritesmith.run({
+            src: paths,
+            algorithm: 'binary-tree',
+            padding: 2
+        }, (err, result) => {
+            if (err) throw err;
+            fs.writeFileSync(out, result.image);
+            if (cb) cb(dir, name, result.coordinates);
+        });
     });
 };
 
-const glueIcons = function (cb) {
-    del('assets/icons/icons.css');
-    exec(['glue', 'assets/icons/icons', '--sprite-namespace= --namespace=icon --css=assets/icons --css-template=assets/icons/icons.jinja --img=assets/icons --url=../../icons/ --pseudo-class-separator=_'].join(' '), function(err, stdout, stderr) {
-        if (err || stderr) throw err;
-        fs.renameSync('assets/icons/icons.css', 'assets/icons/icons.scss');
-        cb();
-    });
-};
-
-glueEmoticons(function(){
-    console.log('Completed emoticons');
+glueImages('./assets/emotes/', 'emoticons', function(dir, name, coordinates){
+    const names = Object.keys(coordinates).map(f => path.basename(f, path.extname(f)))
+                        .map(a => '.chat-emote.chat-emote-' + a)
+                        .join(',');
+    let scss = '';
+    scss += names + '{' + NEWLINE;
+    scss += `    background-image:url('../../emotes/${name}.png');` + NEWLINE;
+    scss += `    background-repeat:no-repeat;` + NEWLINE;
+    scss += `}`;
+    scss += NEWLINE;
+    scss += Object.keys(coordinates).map(f => {
+        let name = path.basename(f, path.extname(f)), d = coordinates[f];
+        return ''+
+        `.chat-emote.chat-emote-${name} {` + NEWLINE +
+        `    background-position: -${d.x}px -${d.y}px;` + NEWLINE +
+        `    width: ${d.width}px;` + NEWLINE +
+        `    height: ${d.height}px;` + NEWLINE +
+        `    margin-top: -${d.height}px;` + NEWLINE +
+        `}`;
+    }).join(NEWLINE);
+    fs.writeFileSync('./assets/emotes/emoticons.scss', scss);
+    console.log(`Completed ${name} sprites`);
 });
-glueIcons(function(){
-    console.log('Completed icons');
+
+glueImages('./assets/icons/', 'icons', function(dir, name, coordinates){
+    const names = Object.keys(coordinates).map(f => path.basename(f, path.extname(f)))
+                        .map(a => '.icon-' + a)
+                        .join(',');
+    let scss = '';
+    scss += names + '{' + NEWLINE;
+    scss += `    background-image:url('../../icons/${name}.png');` + NEWLINE;
+    scss += `    background-repeat:no-repeat;` + NEWLINE;
+    scss += `    display: inline-block;` + NEWLINE;
+    scss += `}`;
+    scss += NEWLINE;
+    scss += Object.keys(coordinates).map(f => {
+        let name = path.basename(f, path.extname(f)), d = coordinates[f];
+        return ''+
+        `.icon-${name} {` + NEWLINE +
+        `    background-position: -${d.x}px -${d.y}px;` + NEWLINE +
+        `    width: ${d.width}px;` + NEWLINE +
+        `    height: ${d.height}px;` + NEWLINE +
+        `}`;
+    }).join(NEWLINE);
+    fs.writeFileSync('./assets/icons/icons.scss', scss);
+    console.log(`Completed ${name} sprites`);
 });

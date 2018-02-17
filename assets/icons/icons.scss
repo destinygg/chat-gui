@@ -1,202 +1,140 @@
-/* glue: 0.11.1 hash: 1be13b63fd */
-.icon-tv,.icon-subscriber,.icon-flair8,.icon-flair3,.icon-flair13,.icon-flair1,.icon-twitter,.icon-twitch,.icon-status,.icon-reddit,.icon-protected,.icon-moderator,.icon-info,.icon-google,.icon-flair9,.icon-flair6,.icon-flair5,.icon-flair4,.icon-flair2,.icon-flair15,.icon-flair12,.icon-flair11,.icon-flair10,.icon-eve,.icon-error,.icon-command,.icon-bot:hover,.icon-bot{
-    display: inline-block;
+.icon-bot,.icon-command,.icon-error,.icon-eve,.icon-flair1,.icon-flair10,.icon-flair11,.icon-flair12,.icon-flair13,.icon-flair15,.icon-flair2,.icon-flair3,.icon-flair4,.icon-flair5,.icon-flair6,.icon-flair8,.icon-flair9,.icon-google,.icon-info,.icon-moderator,.icon-protected,.icon-reddit,.icon-status,.icon-subscriber,.icon-tv,.icon-twitch,.icon-twitter{
     background-image:url('../../icons/icons.png');
     background-repeat:no-repeat;
-}
-
-.icon-tv{
     display: inline-block;
-    background-position:0 0;
-    width:30px;
-    height:19px;
 }
-
-.icon-subscriber{
-    display: inline-block;
-    background-position:-30px 0;
-    width:18px;
-    height:18px;
+.icon-bot {
+    background-position: -36px -59px;
+    width: 16px;
+    height: 16px;
 }
-
-.icon-flair8{
-    display: inline-block;
-    background-position:0 -19px;
-    width:18px;
-    height:18px;
+.icon-command {
+    background-position: -0px -59px;
+    width: 16px;
+    height: 16px;
 }
-
-.icon-flair3{
-    display: inline-block;
-    background-position:-18px -19px;
-    width:18px;
-    height:18px;
+.icon-error {
+    background-position: -36px -41px;
+    width: 16px;
+    height: 16px;
 }
-
-.icon-flair13{
-    display: inline-block;
-    background-position:-48px 0;
-    width:18px;
-    height:18px;
+.icon-eve {
+    background-position: -72px -18px;
+    width: 16px;
+    height: 16px;
 }
-
-.icon-flair1{
-    display: inline-block;
-    background-position:-48px -18px;
-    width:18px;
-    height:18px;
+.icon-flair1 {
+    background-position: -32px -0px;
+    width: 18px;
+    height: 18px;
 }
-
-.icon-twitter{
-    display: inline-block;
-    background-position:0 -37px;
-    width:16px;
-    height:16px;
+.icon-flair10 {
+    background-position: -18px -77px;
+    width: 16px;
+    height: 16px;
 }
-
-.icon-twitch{
-    display: inline-block;
-    background-position:-16px -37px;
-    width:16px;
-    height:16px;
+.icon-flair11 {
+    background-position: -36px -77px;
+    width: 16px;
+    height: 16px;
 }
-
-.icon-status{
-    display: inline-block;
-    background-position:-32px -37px;
-    width:16px;
-    height:16px;
+.icon-flair12 {
+    background-position: -18px -41px;
+    width: 16px;
+    height: 16px;
 }
-
-.icon-reddit{
-    display: inline-block;
-    background-position:-48px -37px;
-    width:16px;
-    height:16px;
+.icon-flair13 {
+    background-position: -0px -21px;
+    width: 18px;
+    height: 18px;
 }
-
-.icon-protected{
-    display: inline-block;
-    background-position:-66px 0;
-    width:16px;
-    height:16px;
+.icon-flair15 {
+    background-position: -54px -41px;
+    width: 16px;
+    height: 16px;
 }
-
-.icon-moderator{
-    display: inline-block;
-    background-position:-66px -16px;
-    width:16px;
-    height:16px;
+.icon-flair2 {
+    background-position: -72px -0px;
+    width: 16px;
+    height: 16px;
 }
-
-.icon-info{
-    display: inline-block;
-    background-position:-66px -32px;
-    width:16px;
-    height:16px;
+.icon-flair3 {
+    background-position: -20px -21px;
+    width: 18px;
+    height: 18px;
 }
-
-.icon-google{
-    display: inline-block;
-    background-position:0 -53px;
-    width:16px;
-    height:16px;
+.icon-flair4 {
+    background-position: -72px -36px;
+    width: 16px;
+    height: 16px;
 }
-
-.icon-flair9{
-    display: inline-block;
-    background-position:-16px -53px;
-    width:16px;
-    height:16px;
+.icon-flair5 {
+    background-position: -0px -41px;
+    width: 16px;
+    height: 16px;
 }
-
-.icon-flair6{
-    display: inline-block;
-    background-position:-32px -53px;
-    width:16px;
-    height:16px;
+.icon-flair6 {
+    background-position: -18px -59px;
+    width: 16px;
+    height: 16px;
 }
-
-.icon-flair5{
-    display: inline-block;
-    background-position:-48px -53px;
-    width:16px;
-    height:16px;
+.icon-flair8 {
+    background-position: -52px -0px;
+    width: 18px;
+    height: 18px;
 }
-
-.icon-flair4{
-    display: inline-block;
-    background-position:-64px -53px;
-    width:16px;
-    height:16px;
+.icon-flair9 {
+    background-position: -54px -59px;
+    width: 16px;
+    height: 16px;
 }
-
-.icon-flair2{
-    display: inline-block;
-    background-position:-82px 0;
-    width:16px;
-    height:16px;
+.icon-google {
+    background-position: -72px -59px;
+    width: 16px;
+    height: 16px;
 }
-
-.icon-flair15{
-    display: inline-block;
-    background-position:-82px -16px;
-    width:16px;
-    height:16px;
+.icon-info {
+    background-position: -90px -0px;
+    width: 16px;
+    height: 16px;
 }
-
-.icon-flair12{
-    display: inline-block;
-    background-position:-82px -32px;
-    width:16px;
-    height:16px;
+.icon-moderator {
+    background-position: -90px -18px;
+    width: 16px;
+    height: 16px;
 }
-
-.icon-flair11{
-    display: inline-block;
-    background-position:-82px -48px;
-    width:16px;
-    height:16px;
+.icon-protected {
+    background-position: -90px -36px;
+    width: 16px;
+    height: 16px;
 }
-
-.icon-flair10{
-    display: inline-block;
-    background-position:0 -69px;
-    width:16px;
-    height:16px;
+.icon-reddit {
+    background-position: -90px -54px;
+    width: 16px;
+    height: 16px;
 }
-
-.icon-eve{
-    display: inline-block;
-    background-position:-16px -69px;
-    width:16px;
-    height:16px;
+.icon-status {
+    background-position: -0px -77px;
+    width: 16px;
+    height: 16px;
 }
-
-.icon-error{
-    display: inline-block;
-    background-position:-32px -69px;
-    width:16px;
-    height:16px;
+.icon-subscriber {
+    background-position: -52px -20px;
+    width: 18px;
+    height: 18px;
 }
-
-.icon-command{
-    display: inline-block;
-    background-position:-48px -69px;
-    width:16px;
-    height:16px;
+.icon-tv {
+    background-position: -0px -0px;
+    width: 30px;
+    height: 19px;
 }
-
-.icon-bot:hover{
-    display: inline-block;
-    background-position:-64px -69px;
-    width:16px;
-    height:16px;
+.icon-twitch {
+    background-position: -54px -77px;
+    width: 16px;
+    height: 16px;
 }
-
-.icon-bot{
-    display: inline-block;
-    background-position:-80px -69px;
-    width:16px;
-    height:16px;
+.icon-twitter {
+    background-position: -72px -77px;
+    width: 16px;
+    height: 16px;
 }

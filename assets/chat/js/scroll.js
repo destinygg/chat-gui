@@ -20,7 +20,6 @@ class ChatScrollPlugin {
         this.scroller = el.nanoScroller({
             sliderMinHeight: 40,
             disableResize: true,
-            preventPageScrolling: true,
             alwaysVisible: is_touch_device
         })[0].nanoscroller;
     }
