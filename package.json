@@ -1,6 +1,6 @@
 {
   "name": "dgg-chat-gui",
-  "version": "2.1.20",
+  "version": "2.1.21",
   "description": "Destiny.gg chat client front-end",
   "main": "destiny",
   "scripts": {
@@ -37,13 +37,12 @@
     "core-js": "~2.5.3",
     "css-loader": "~0.28.9",
     "extract-text-webpack-plugin": "~3.0.2",
-    "file-loader": "~1.1.6",
+    "file-loader": "^1.1.7",
     "font-awesome": "~4.7.0",
     "jquery": "~3.3.1",
     "jquery-validation": "~1.17.0",
     "json-loader": "~0.5.7",
     "moment": "~2.20.1",
-    "nanoscroller": "~0.8.7",
     "node-sass": "~4.7.2",
     "normalize.css": "~8.0.0",
     "postcss-loader": "~2.1.0",
