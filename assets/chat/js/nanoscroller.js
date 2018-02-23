@@ -156,7 +156,7 @@ function NanoScroll(el, options) {
     browserScrollbarWidth = !browserScrollbarWidth || browserScrollbarWidth<0 ? getBrowserScrollbarWidth() : browserScrollbarWidth;
     this.$el = $(this.el);
     this.doc = $(this.options.documentContext || document);
-    this.win = this.options.windowContext || window;
+    this.win = $(this.options.windowContext || window);
     this.body = this.doc.find('body');
     this.$content = this.$el.children(`.${this.options.contentClass}`);
     this.$content.attr('tabindex', this.options.tabIndex || 0);
@@ -307,36 +307,34 @@ NanoScroll.prototype.createEvents = function () {
 };
 
 NanoScroll.prototype.addEvents = function () {
-    let events = this.events,
-        c = this.$content.get(0),
-        pane = this.pane.get(0);
+    let events = this.events;
     this.removeEvents();
     if (!this.options.disableResize) {
-        this.win.addEventListener(RESIZE, events[RESIZE], passive);
+        this.win.bind(RESIZE, events[RESIZE]);
     }
     if (!this.iOSNativeScrolling) {
         this.slider.bind(MOUSEDOWN, events[DOWN]);
         this.pane.bind(MOUSEDOWN, events[PANEDOWN]);
-        pane.addEventListener(MOUSEWHEEL, events[WHEEL], passive);
-        pane.addEventListener(DOMSCROLL, events[WHEEL], passive);
+        this.pane.bind(MOUSEWHEEL, events[WHEEL]);
+        this.pane.bind(DOMSCROLL, events[WHEEL]);
     }
-    c.addEventListener(TOUCHMOVE, events[SCROLL], passive);
-    c.addEventListener(MOUSEWHEEL, events[SCROLL], passive);
-    c.addEventListener(DOMSCROLL, events[SCROLL], passive);
-    c.addEventListener(SCROLL, events[SCROLL], passive);
+    this.$content.bind(TOUCHMOVE, events[SCROLL]);
+    this.$content.bind(MOUSEWHEEL, events[SCROLL]);
+    this.$content.bind(DOMSCROLL, events[SCROLL]);
+    this.$content.bind(SCROLL, events[SCROLL]);
 };
 
 NanoScroll.prototype.removeEvents = function () {
     let events = this.events, c = this.$content.get(0);
-    this.win.removeEventListener(RESIZE, events[RESIZE]);
+    this.win.unbind(RESIZE, events[RESIZE]);
     if (!this.iOSNativeScrolling) {
         this.slider.unbind();
         this.pane.unbind();
     }
-    c.removeEventListener(TOUCHMOVE, events[SCROLL]);
-    c.removeEventListener(MOUSEWHEEL, events[SCROLL]);
-    c.removeEventListener(DOMSCROLL, events[SCROLL]);
-    c.removeEventListener(SCROLL, events[SCROLL]);
+    this.$content.unbind(TOUCHMOVE, events[SCROLL]);
+    this.$content.unbind(MOUSEWHEEL, events[SCROLL]);
+    this.$content.unbind(DOMSCROLL, events[SCROLL]);
+    this.$content.unbind(SCROLL, events[SCROLL]);
 };
 
 NanoScroll.prototype.generate = function () {

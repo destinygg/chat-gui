@@ -26,12 +26,12 @@ class ChatScrollPlugin {
             disableResize: true,
             alwaysVisible: is_touch_device
         });
-
     }
 
     isPinned(){
         // 30 is used to allow the scrollbar to be just offset, but still count as scrolled to bottom
-        return !this.scroller.isActive ? true : (this.scroller.contentScrollTop >= this.scroller.maxScrollTop - 30);
+        let pinned = !this.scroller.isActive ? true : (this.scroller.contentScrollTop >= this.scroller.maxScrollTop - 30);
+        return pinned;
     }
 
     updateAndPin(pin){
