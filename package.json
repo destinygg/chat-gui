@@ -1,6 +1,6 @@
 {
   "name": "dgg-chat-gui",
-  "version": "2.1.22",
+  "version": "2.1.23",
   "description": "Destiny.gg chat client front-end",
   "main": "destiny",
   "scripts": {
@@ -53,7 +53,8 @@
     "ts-loader": "~3.5.0",
     "typescript": "~2.7.2",
     "webpack": "~3.11.0",
-    "webpack-dev-server": "~2.11.1"
+    "webpack-dev-server": "~2.11.1",
+    "nanoscroller": "~0.8.7"
   },
   "engines": {
     "node": "~5.0.2",

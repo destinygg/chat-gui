@@ -1,6 +1,6 @@
 /* global $ */
 
-import {NanoScroll} from './nanoscroller.js'
+require('nanoscroller');
 
 const is_touch_device =  'ontouchstart' in window        // works on most browsers
                       || navigator['maxTouchPoints']     // works on IE10/11 and Surface
@@ -21,17 +21,16 @@ class ChatScrollPlugin {
                 return false;
             });
         }
-        this.scroller = new NanoScroll(el, {
+        this.scroller = $el.nanoScroller({
             sliderMinHeight: 40,
             disableResize: true,
             alwaysVisible: is_touch_device
-        });
+        })[0].nanoscroller;
     }
 
     isPinned(){
         // 30 is used to allow the scrollbar to be just offset, but still count as scrolled to bottom
-        let pinned = !this.scroller.isActive ? true : (this.scroller.contentScrollTop >= this.scroller.maxScrollTop - 30);
-        return pinned;
+        return !this.scroller.isActive ? true : (this.scroller.contentScrollTop >= this.scroller.maxScrollTop - 30);
     }
 
     updateAndPin(pin){
