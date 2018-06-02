@@ -1,15 +1,15 @@
-.icon-bot,.icon-command,.icon-error,.icon-eve,.icon-flair1,.icon-flair10,.icon-flair11,.icon-flair12,.icon-flair13,.icon-flair15,.icon-flair2,.icon-flair3,.icon-flair4,.icon-flair5,.icon-flair6,.icon-flair8,.icon-flair9,.icon-google,.icon-info,.icon-moderator,.icon-protected,.icon-reddit,.icon-status,.icon-subscriber,.icon-tv,.icon-twitch,.icon-twitter{
+.icon-bot,.icon-command,.icon-error,.icon-eve,.icon-flair1,.icon-flair10,.icon-flair11,.icon-flair12,.icon-flair13,.icon-flair15,.icon-flair19,.icon-flair2,.icon-flair3,.icon-flair4,.icon-flair5,.icon-flair6,.icon-flair8,.icon-flair9,.icon-google,.icon-info,.icon-moderator,.icon-protected,.icon-reddit,.icon-status,.icon-subscriber,.icon-tv,.icon-twitch,.icon-twitter{
     background-image:url('../../icons/icons.png');
     background-repeat:no-repeat;
     display: inline-block;
 }
 .icon-bot {
-    background-position: -36px -59px;
+    background-position: -54px -59px;
     width: 16px;
     height: 16px;
 }
 .icon-command {
-    background-position: -0px -59px;
+    background-position: -18px -59px;
     width: 16px;
     height: 16px;
 }
@@ -19,7 +19,7 @@
     height: 16px;
 }
 .icon-eve {
-    background-position: -72px -18px;
+    background-position: -72px -36px;
     width: 16px;
     height: 16px;
 }
@@ -29,12 +29,12 @@
     height: 18px;
 }
 .icon-flair10 {
-    background-position: -18px -77px;
+    background-position: -36px -77px;
     width: 16px;
     height: 16px;
 }
 .icon-flair11 {
-    background-position: -36px -77px;
+    background-position: -54px -77px;
     width: 16px;
     height: 16px;
 }
@@ -53,8 +53,13 @@
     width: 16px;
     height: 16px;
 }
-.icon-flair2 {
+.icon-flair19 {
     background-position: -72px -0px;
+    width: 16px;
+    height: 16px;
+}
+.icon-flair2 {
+    background-position: -72px -18px;
     width: 16px;
     height: 16px;
 }
@@ -64,7 +69,7 @@
     height: 18px;
 }
 .icon-flair4 {
-    background-position: -72px -36px;
+    background-position: -0px -59px;
     width: 16px;
     height: 16px;
 }
@@ -74,7 +79,7 @@
     height: 16px;
 }
 .icon-flair6 {
-    background-position: -18px -59px;
+    background-position: -36px -59px;
     width: 16px;
     height: 16px;
 }
@@ -84,37 +89,37 @@
     height: 18px;
 }
 .icon-flair9 {
-    background-position: -54px -59px;
-    width: 16px;
-    height: 16px;
-}
-.icon-google {
     background-position: -72px -59px;
     width: 16px;
     height: 16px;
 }
-.icon-info {
+.icon-google {
     background-position: -90px -0px;
     width: 16px;
     height: 16px;
 }
-.icon-moderator {
+.icon-info {
     background-position: -90px -18px;
     width: 16px;
     height: 16px;
 }
-.icon-protected {
+.icon-moderator {
     background-position: -90px -36px;
     width: 16px;
     height: 16px;
 }
-.icon-reddit {
+.icon-protected {
     background-position: -90px -54px;
     width: 16px;
     height: 16px;
 }
-.icon-status {
+.icon-reddit {
     background-position: -0px -77px;
+    width: 16px;
+    height: 16px;
+}
+.icon-status {
+    background-position: -18px -77px;
     width: 16px;
     height: 16px;
 }
@@ -129,12 +134,12 @@
     height: 19px;
 }
 .icon-twitch {
-    background-position: -54px -77px;
+    background-position: -72px -77px;
     width: 16px;
     height: 16px;
 }
 .icon-twitter {
-    background-position: -72px -77px;
+    background-position: -90px -77px;
     width: 16px;
     height: 16px;
 }
