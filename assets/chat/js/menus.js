@@ -219,7 +219,7 @@ class ChatUserMenu extends ChatMenu {
         this.chat.source.on('JOIN', data => this.addAndRedraw(data.nick));
         this.chat.source.on('QUIT', data => this.removeAndRedraw(data.nick));
         this.chat.source.on('NAMES', data => this.addAll());
-        this.searchinput.on('keyup', debounce(100, () => {
+        this.searchinput.on('keyup', debounce(100, false, () => {
             this.searchterm = this.searchinput.val();
             this.filter();
             this.redraw();

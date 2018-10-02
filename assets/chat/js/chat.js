@@ -22,16 +22,16 @@ const nickmessageregex = /(?:(?:^|\s)@?)([a-zA-Z0-9_]{3,20})(?=$|\s|[.?!,])/g
 const nickregex = /^[a-zA-Z0-9_]{3,20}$/
 const nsfwnsfl = new RegExp(`\\b(?:NSFL|NSFW)\\b`, 'i')
 const tagcolors = [
-    "green",
-    "yellow",
-    "orange",
-    "red",
-    "purple",
-    "blue",
-    "sky",
-    "lime",
-    "pink",
-    "black"
+    'green',
+    'yellow',
+    'orange',
+    'red',
+    'purple',
+    'blue',
+    'sky',
+    'lime',
+    'pink',
+    'black'
 ]
 const errorstrings = new Map([
     ['unknown', 'Unknown error, this usually indicates an internal problem :('],
@@ -108,7 +108,8 @@ const commandsinfo = new Map([
     ['mentions',        {desc: 'Return a list of messages where <nick> is mentioned', alias: ['m']}],
     ['tag',             {desc: 'Mark a users messages'}],
     ['untag',           {desc: 'No longer mark the users messages'}],
-    ['exit',            {desc: 'Exit the conversation you are in.'}]
+    ['exit',            {desc: 'Exit the conversation you are in.'}],
+    ['reply',           {desc: 'Reply to the last private message.', alias: ['r']}]
 ])
 const banstruct = {
     id: 0,
@@ -121,7 +122,7 @@ const banstruct = {
     starttimestamp: '',
     endtimestamp: ''
 }
-const debounceFocus = debounce(10, c => c.input.focus())
+const debounceFocus = debounce(10, false, c => c.input.focus())
 const focusIfNothingSelected = chat => {
     if(window.getSelection().isCollapsed && !chat.input.is(':focus')) {
         debounceFocus(chat);
@@ -137,33 +138,32 @@ const extractHostname = (url) => {
 class Chat {
 
     constructor(){
-        /** @type JQuery */
-        this.ui              = null;
-        this.css             = null;
-        this.output          = null;
-        this.input           = null;
-        this.loginscrn       = null;
-        this.loadingscrn     = null;
-        this.showmotd        = true;
-        this.authenticated   = false;
-        this.backlogloading  = false;
-        this.unresolved      = [];
-        this.emoticons       = new Set();
-        this.twitchemotes    = new Set();
-        this.user            = new ChatUser();
-        this.users           = new Map();
-        this.whispers        = new Map();
-        this.windows         = new Map();
-        this.settings        = new Map([...settingsdefault]);
-        this.autocomplete    = new ChatAutoComplete();
-        this.menus           = new Map();
-        this.taggednicks     = new Map();
-        this.ignoring        = new Set();
-        this.mainwindow      = null;
-
+        this.ui = null;
+        this.css = null;
+        this.output = null;
+        this.input = null;
+        this.loginscrn = null;
+        this.loadingscrn = null;
+        this.showmotd = true;
+        this.authenticated = false;
+        this.backlogloading = false;
+        this.unresolved = [];
+        this.emoticons = new Set();
+        this.twitchemotes = new Set();
+        this.user = new ChatUser();
+        this.users = new Map();
+        this.whispers = new Map();
+        this.windows = new Map();
+        this.settings = new Map([...settingsdefault]);
+        this.autocomplete = new ChatAutoComplete();
+        this.menus = new Map();
+        this.taggednicks = new Map();
+        this.ignoring = new Set();
+        this.mainwindow = null;
         this.regexhighlightcustom = null;
         this.regexhighlightnicks = null;
         this.regexhighlightself = null;
+        this.replyusername = null;
 
         // An interface to tell the chat to do things via chat commands, or via emit
         // e.g. control.emit('CONNECT', 'ws://localhost:9001') is essentially chat.cmdCONNECT('ws://localhost:9001')
@@ -172,59 +172,61 @@ class Chat {
         // The websocket connection, emits events from the chat server
         this.source = new ChatSource();
 
-        this.source.on('REFRESH',          () => window.location.reload(false));
-        this.source.on('PING',             data => this.source.send('PONG', data));
-        this.source.on('CONNECTING',       data => this.onCONNECTING(data));
-        this.source.on('OPEN',             data => this.onOPEN(data));
-        this.source.on('DISPATCH',         data => this.onDISPATCH(data));
-        this.source.on('CLOSE',            data => this.onCLOSE(data));
-        this.source.on('NAMES',            data => this.onNAMES(data));
-        this.source.on('QUIT',             data => this.onQUIT(data));
-        this.source.on('MSG',              data => this.onMSG(data));
-        this.source.on('MUTE',             data => this.onMUTE(data));
-        this.source.on('UNMUTE',           data => this.onUNMUTE(data));
-        this.source.on('BAN',              data => this.onBAN(data));
-        this.source.on('UNBAN',            data => this.onUNBAN(data));
-        this.source.on('ERR',              data => this.onERR(data));
-        this.source.on('SOCKETERROR',      data => this.onSOCKETERROR(data));
-        this.source.on('SUBONLY',          data => this.onSUBONLY(data));
-        this.source.on('BROADCAST',        data => this.onBROADCAST(data));
-        this.source.on('PRIVMSGSENT',      data => this.onPRIVMSGSENT(data));
-        this.source.on('PRIVMSG',          data => this.onPRIVMSG(data));
+        this.source.on('REFRESH', () => window.location.reload(false));
+        this.source.on('PING', data => this.source.send('PONG', data));
+        this.source.on('CONNECTING', data => this.onCONNECTING(data));
+        this.source.on('OPEN', data => this.onOPEN(data));
+        this.source.on('DISPATCH', data => this.onDISPATCH(data));
+        this.source.on('CLOSE', data => this.onCLOSE(data));
+        this.source.on('NAMES', data => this.onNAMES(data));
+        this.source.on('QUIT', data => this.onQUIT(data));
+        this.source.on('MSG', data => this.onMSG(data));
+        this.source.on('MUTE', data => this.onMUTE(data));
+        this.source.on('UNMUTE', data => this.onUNMUTE(data));
+        this.source.on('BAN', data => this.onBAN(data));
+        this.source.on('UNBAN', data => this.onUNBAN(data));
+        this.source.on('ERR', data => this.onERR(data));
+        this.source.on('SOCKETERROR', data => this.onSOCKETERROR(data));
+        this.source.on('SUBONLY', data => this.onSUBONLY(data));
+        this.source.on('BROADCAST', data => this.onBROADCAST(data));
+        this.source.on('PRIVMSGSENT', data => this.onPRIVMSGSENT(data));
+        this.source.on('PRIVMSG', data => this.onPRIVMSG(data));
 
-        this.control.on('SEND',            data => this.cmdSEND(data));
-        this.control.on('HINT',            data => this.cmdHINT(data));
-        this.control.on('EMOTES',          data => this.cmdEMOTES(data));
-        this.control.on('HELP',            data => this.cmdHELP(data));
-        this.control.on('IGNORE',          data => this.cmdIGNORE(data));
-        this.control.on('UNIGNORE',        data => this.cmdUNIGNORE(data));
-        this.control.on('MUTE',            data => this.cmdMUTE(data));
-        this.control.on('BAN',             data => this.cmdBAN(data, 'BAN'));
-        this.control.on('IPBAN',           data => this.cmdBAN(data, 'IPBAN'));
-        this.control.on('UNMUTE',          data => this.cmdUNBAN(data, 'UNMUTE'));
-        this.control.on('UNBAN',           data => this.cmdUNBAN(data, 'UNBAN'));
-        this.control.on('SUBONLY',         data => this.cmdSUBONLY(data, 'SUBONLY'));
-        this.control.on('MAXLINES',        data => this.cmdMAXLINES(data, 'MAXLINES'));
-        this.control.on('UNHIGHLIGHT',     data => this.cmdHIGHLIGHT(data, 'UNHIGHLIGHT'));
-        this.control.on('HIGHLIGHT',       data => this.cmdHIGHLIGHT(data, 'HIGHLIGHT'));
+        this.control.on('SEND', data => this.cmdSEND(data));
+        this.control.on('HINT', data => this.cmdHINT(data));
+        this.control.on('EMOTES', data => this.cmdEMOTES(data));
+        this.control.on('HELP', data => this.cmdHELP(data));
+        this.control.on('IGNORE', data => this.cmdIGNORE(data));
+        this.control.on('UNIGNORE', data => this.cmdUNIGNORE(data));
+        this.control.on('MUTE', data => this.cmdMUTE(data));
+        this.control.on('BAN', data => this.cmdBAN(data, 'BAN'));
+        this.control.on('IPBAN', data => this.cmdBAN(data, 'IPBAN'));
+        this.control.on('UNMUTE', data => this.cmdUNBAN(data, 'UNMUTE'));
+        this.control.on('UNBAN', data => this.cmdUNBAN(data, 'UNBAN'));
+        this.control.on('SUBONLY', data => this.cmdSUBONLY(data, 'SUBONLY'));
+        this.control.on('MAXLINES', data => this.cmdMAXLINES(data, 'MAXLINES'));
+        this.control.on('UNHIGHLIGHT', data => this.cmdHIGHLIGHT(data, 'UNHIGHLIGHT'));
+        this.control.on('HIGHLIGHT', data => this.cmdHIGHLIGHT(data, 'HIGHLIGHT'));
         this.control.on('TIMESTAMPFORMAT', data => this.cmdTIMESTAMPFORMAT(data));
-        this.control.on('BROADCAST',       data => this.cmdBROADCAST(data));
-        this.control.on('CONNECT',         data => this.cmdCONNECT(data));
-        this.control.on('TAG',             data => this.cmdTAG(data));
-        this.control.on('UNTAG',           data => this.cmdUNTAG(data));
-        this.control.on('BANINFO',         data => this.cmdBANINFO(data));
-        this.control.on('EXIT',            data => this.cmdEXIT(data));
-        this.control.on('MESSAGE',         data => this.cmdWHISPER(data));
-        this.control.on('MSG',             data => this.cmdWHISPER(data));
-        this.control.on('WHISPER',         data => this.cmdWHISPER(data));
-        this.control.on('W',               data => this.cmdWHISPER(data));
-        this.control.on('TELL',            data => this.cmdWHISPER(data));
-        this.control.on('T',               data => this.cmdWHISPER(data));
-        this.control.on('NOTIFY',          data => this.cmdWHISPER(data));
-        this.control.on('MENTIONS',        data => this.cmdMENTIONS(data));
-        this.control.on('M',               data => this.cmdMENTIONS(data));
-        this.control.on('STALK',           data => this.cmdSTALK(data));
-        this.control.on('S',               data => this.cmdSTALK(data));
+        this.control.on('BROADCAST', data => this.cmdBROADCAST(data));
+        this.control.on('CONNECT', data => this.cmdCONNECT(data));
+        this.control.on('TAG', data => this.cmdTAG(data));
+        this.control.on('UNTAG', data => this.cmdUNTAG(data));
+        this.control.on('BANINFO', data => this.cmdBANINFO(data));
+        this.control.on('EXIT', data => this.cmdEXIT(data));
+        this.control.on('MESSAGE', data => this.cmdWHISPER(data));
+        this.control.on('MSG', data => this.cmdWHISPER(data));
+        this.control.on('WHISPER', data => this.cmdWHISPER(data));
+        this.control.on('W', data => this.cmdWHISPER(data));
+        this.control.on('TELL', data => this.cmdWHISPER(data));
+        this.control.on('T', data => this.cmdWHISPER(data));
+        this.control.on('NOTIFY', data => this.cmdWHISPER(data));
+        this.control.on('MENTIONS', data => this.cmdMENTIONS(data));
+        this.control.on('M', data => this.cmdMENTIONS(data));
+        this.control.on('STALK', data => this.cmdSTALK(data));
+        this.control.on('S', data => this.cmdSTALK(data));
+        this.control.on('R', data => this.cmdREPLY(data));
+        this.control.on('REPLY', data => this.cmdREPLY(data));
     }
 
     withUserAndSettings(data){
@@ -301,12 +303,7 @@ class Chat {
             if(isKeyCode(e, KEYCODES.ENTER) && !e.shiftKey && !e.ctrlKey) {
                 e.preventDefault()
                 e.stopPropagation()
-                if(!this.authenticated) {
-                    this.loginscrn.show()
-                } else {
-                    this.control.emit('SEND', this.input.val().toString().trim())
-                    this.input.val('')
-                }
+                this.control.emit('SEND', this.input.val().toString().trim())
                 this.input.focus()
             }
         })
@@ -332,7 +329,7 @@ class Chat {
         })
 
         // Visibility
-        document.addEventListener('visibilitychange', debounce(100, () => {
+        document.addEventListener('visibilitychange', debounce(100, false, () => {
             this.ishidden = (document['visibilityState'] || 'visible') !== 'visible'
             if(!this.ishidden)
                 focusIfNothingSelected(this)
@@ -342,7 +339,7 @@ class Chat {
 
         // Resize
         let resizing = false
-        const onresizecomplete = debounce(100, () => {
+        const onresizecomplete = debounce(100, false, () => {
             resizing = false
             this.getActiveWindow().unlock()
             focusIfNothingSelected(this)
@@ -466,7 +463,7 @@ class Chat {
     // De-bounced saveSettings
     commitSettings(){
         if(!this.debouncedsave) {
-            this.debouncedsave = debounce(1000, () => this.saveSettings());
+            this.debouncedsave = debounce(1000, false, () => this.saveSettings());
         }
         this.debouncedsave();
     }
@@ -828,6 +825,7 @@ class Chat {
     onPRIVMSG(data) {
         const normalized = data.nick.toLowerCase()
         if (!this.ignored(normalized, data.data)){
+
             if(!this.whispers.has(normalized))
                 this.whispers.set(normalized, {nick:data.nick, unread:0, open: false})
 
@@ -847,6 +845,7 @@ class Chat {
                 $.ajax({url: `/api/messages/msg/${messageid}/open`, method:'post'})
             else
                 conv.unread++
+            this.replyusername = user.username;
             this.menus.get('whisper-users').redraw()
             this.redrawWindowIndicators()
         }
@@ -859,31 +858,42 @@ class Chat {
     cmdSEND(str) {
         if(str !== ''){
             const win = this.getActiveWindow(),
-                 isme = str.substring(0, 4).toLowerCase() === '/me ',
-            iscommand = !isme && str.substring(0, 1) === '/' && str.substring(0, 2) !== '//'
+                isme = str.substring(0, 4).toLowerCase() === '/me ',
+                iscommand = !isme && str.substring(0, 1) === '/' && str.substring(0, 2) !== '//';
+
             // COMMAND
             if (iscommand) {
                 const command = iscommand ? str.split(' ', 1)[0] : '',
-                   normalized = command.substring(1).toUpperCase()
-                if(win !== this.mainwindow && normalized !== 'EXIT'){
+                    normalized = command.substring(1).toUpperCase();
+
+                // Clear the input and add to history, before we do the emit
+                // This makes it possible for commands to change the input.value, else it would be cleared after the command is run.
+                this.inputhistory.add(str)
+                this.input.val('')
+
+                if (win !== this.mainwindow && normalized !== 'EXIT') {
                     MessageBuilder.error(`No commands in private windows. Try /exit`).into(this, win)
-                } else if(this.control.listeners.has(normalized)) {
-                    const parts = (str.substring(command.length+1) || '').match(/([^ ]+)/g)
+                } else if (this.control.listeners.has(normalized)) {
+                    const parts = (str.substring(command.length + 1) || '').match(/([^ ]+)/g)
                     this.control.emit(normalized, parts || [])
                 } else {
                     MessageBuilder.error(`Unknown command. Try /help`).into(this, win)
                 }
-                this.inputhistory.add(str)
+            }
+            // LOGIN
+            else if (!this.authenticated) {
+                this.loginscrn.show()
             }
             // WHISPER
-            else if(win !== this.mainwindow) {
+            else if (win !== this.mainwindow) {
                 MessageBuilder.message(str, this.user).into(this, win)
                 this.source.send('PRIVMSG', {nick: win.name, data: str})
+                this.input.val('')
             }
             // MESSAGE
             else {
                 const textonly = (isme ? str.substring(4) : str).trim()
-                if (this.source.isConnected() && !this.emoticons.has(textonly) && !this.twitchemotes.has(textonly)){
+                if (this.source.isConnected() && !this.emoticons.has(textonly) && !this.twitchemotes.has(textonly)) {
                     // We add the message to the gui immediately
                     // But we will also get the MSG event, so we need to make sure we dont add the message to the gui again.
                     // We do this by storing the message in the unresolved array
@@ -894,12 +904,13 @@ class Chat {
                 }
                 this.source.send('MSG', {data: str})
                 this.inputhistory.add(str)
+                this.input.val('')
             }
         }
     }
 
     cmdEMOTES(){
-        MessageBuilder.info(`Available emoticons: ${[...this.emoticons].join(', ')} (www.destiny.gg/emotes)`).into(this);
+        MessageBuilder.info(`Available emoticons: ${[...this.emoticons].join(', ')}`).into(this);
     }
 
     cmdHELP(){
@@ -1074,6 +1085,7 @@ class Chat {
             MessageBuilder.error('Cannot send a message to yourself').into(this);
         } else {
             const data = parts.slice(1, parts.length).join(' ');
+            this.replyusername = parts[0];
             this.source.send('PRIVMSG', {nick: parts[0], data: data});
         }
     }
@@ -1248,6 +1260,18 @@ class Chat {
             this.windowToFront(this.mainwindow.name)
             this.removeWindow(win.name)
         }
+    }
+
+    cmdREPLY(){
+        const win = this.getActiveWindow()
+        const lastuser = win.lastmessage && win.lastmessage.user ? win.lastmessage.user.username : null;
+        const username = this.replyusername !== null && this.replyusername !== '' ? this.replyusername : lastuser;
+        if (username === null) {
+            MessageBuilder.info(`No-one to reply to :(`).into(this);
+        } else {
+            this.input.val(`/w ${username} `)
+        }
+        this.input.focus()
     }
 
     openConversation(nick){

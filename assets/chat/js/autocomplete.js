@@ -143,7 +143,7 @@ class ChatAutoComplete {
         // Key press of characters that actually input into the field
         this.input.on('keypress', e => {
             const keycode = getKeyCode(e),
-                     char = String.fromCharCode(keycode) || ''
+                char = String.fromCharCode(keycode) || '';
             if(keycode === KEYCODES.ENTER) {
                 promoteIfSelected(this)
                 this.reset()
@@ -151,11 +151,17 @@ class ChatAutoComplete {
             else if (char.length > 0) {
                 promoteIfSelected(this)
                 const str = this.input.val().toString(),
-                   offset = this.input[0].selectionStart+1,
-                      pre = str.substring(0, offset),
-                     post = str.substring(offset)
-                const criteria = buildSearchCriteria(pre + char + post, offset)
+                    offset = this.input[0].selectionStart + 1,
+                    pre = str.substring(0, offset),
+                    post = str.substring(offset),
+                    criteria = buildSearchCriteria(pre + char + post, offset)
                 this.search(criteria)
+                // If the first result is exact, highlight it.
+                if (this.results.length > 0 && this.results[0].data === criteria.word) {
+                    this.selected = 0
+                    selectHelper(this)
+                    updateHelpers(this)
+                }
                 keypressed = true
             }
         })
@@ -163,15 +169,15 @@ class ChatAutoComplete {
         this.input.on('keyup', e => {
             const keycode = getKeyCode(e)
             if(keycode !== KEYCODES.TAB && keycode !== KEYCODES.ENTER) {
-                const needle = this.input.val().toString()
-                if(needle.trim().length === 0)
+                const str = this.input.val().toString()
+                if(str.trim().length === 0)
                     this.reset()
                 // If a key WAS pressed, but keypress event did not fire
                 // Check if the value changed between the key down, and key up
                 // Keys like `backspace`
-                else if (!keypressed && needle !== originval) {
+                else if (!keypressed && str !== originval) {
                     const offset = this.input[0].selectionStart
-                    const criteria = buildSearchCriteria(needle, offset)
+                    const criteria = buildSearchCriteria(str, offset)
                     this.search(criteria)
                 }
                 else if(shiftdown !== e.shiftKey && this.criteria !== null) {
@@ -202,7 +208,7 @@ class ChatAutoComplete {
             const regex = new RegExp('^' + Chat.makeSafeForRegex(criteria.pre), 'i');
             this.results = [...bucket.values()]
                 // filter exact matches
-                .filter(a => a.data !== criteria.word)
+                //.filter(a => a.data !== criteria.word)
                 // filter users if user search
                 .filter(a => (!a.isemote || !(criteria.useronly || useronly)) && regex.test(a.data))
                 .sort(sortResults)
