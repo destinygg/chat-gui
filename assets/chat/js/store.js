@@ -1,6 +1,6 @@
 /* global window */
 
-const localStorage = window.localStorage || {};
+const localStorage = window.localStorage || {setItem:() =>{}, getItem:() =>{}};
 const JSON = window.JSON;
 
 class ChatStore {

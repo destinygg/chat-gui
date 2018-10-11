@@ -18,6 +18,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 ;(function(win, doc, nav) {
     if ( /* Safari 6, Firefox 22 */ !('Notification' in win && 'permission' in win.Notification && 'requestPermission' in win.Notification)) {
+      const localStorage = window.localStorage || {setItem:() =>{}, getItem:() =>{}};
       const PERMISSION_DEFAULT = 'default',
             PERMISSION_GRANTED = 'granted',
             PERMISSION_DENIED = 'denied',
