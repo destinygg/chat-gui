@@ -2,9 +2,8 @@ import UserFeatures from './features';
 
 /** @var Array tlds */
 const tlds = require('../../tld.json');
-const gtld = "(?:"+ tlds.join('|') +")";
+const gtld = "(?:"+ [...tlds].join('|') +")";
 const el = document.createElement('div');
-let gemoteregex, twitchemoteregex;
 
 class HtmlTextFormatter {
 
@@ -18,14 +17,12 @@ class HtmlTextFormatter {
 class EmoteFormatter {
 
     format(chat, str, message=null){
-        if(!gemoteregex || !twitchemoteregex) {
-            const emoticons = [...chat.emoticons].join('|');
-            const twitchemotes = [...chat.twitchemotes].join('|');
-            gemoteregex = new RegExp(`(^|\\s)(${emoticons})(?=$|\\s)`, 'gm');
-            twitchemoteregex = new RegExp(`(^|\\s)(${emoticons}|${twitchemotes})(?=$|\\s)`, 'gm');
+        let regex = (message && message.user && message.user.hasFeature(UserFeatures.TWITCHSUB)) || (!message || !message.user) ? chat.emoteRegexTwitch : chat.emoteRegexNormal;
+        if (regex != null) {
+            return str.replace(regex, '$1<div title="$2" class="emote $2">$2 </div>');
+        } else {
+            return str;
         }
-        let regex = (message && message.user && message.user.hasFeature(UserFeatures.SUBSCRIBERT0)) || (!message || !message.user) ? twitchemoteregex : gemoteregex;
-        return str.replace(regex, '$1<div title="$2" class="chat-emote chat-emote-$2">$2 </div>');
     }
 
 }
@@ -34,20 +31,7 @@ class GreenTextFormatter {
 
     format(chat, str, message=null){
         if(message.user && str.indexOf('&gt;') === 0){
-            if(message.user.hasAnyFeatures(
-                    UserFeatures.SUBSCRIBER,
-                    UserFeatures.SUBSCRIBERT0,
-                    UserFeatures.SUBSCRIBERT1,
-                    UserFeatures.SUBSCRIBERT2,
-                    UserFeatures.SUBSCRIBERT3,
-                    UserFeatures.SUBSCRIBERT4,
-                    UserFeatures.NOTABLE,
-                    UserFeatures.TRUSTED,
-                    UserFeatures.CONTRIBUTOR,
-                    UserFeatures.COMPCHALLENGE,
-                    UserFeatures.ADMIN,
-                    UserFeatures.MODERATOR
-                ))
+            if(message.user.hasAnyFeatures(UserFeatures.SUBSCRIBER))
                 str = `<span class="greentext">${str}</span>`;``
         }
         return str;

@@ -8,7 +8,7 @@ import debounce from 'throttle-debounce/debounce'
 import {isKeyCode, KEYCODES} from "./const"
 
 function buildEmote(emote){
-    return `<div class="emote"><span title="${emote}" class="chat-emote chat-emote-${emote}">${emote}</span></div>`
+    return `<div class="emote-item"><span title="${emote}" class="emote ${emote}">${emote}</span></div>`
 }
 function getSettingValue(e){
     if(e.getAttribute('type') === 'checkbox') {
@@ -327,9 +327,7 @@ class ChatEmoteMenu extends ChatMenu {
         super(ui, btn, chat);
         this.temotes = this.ui.find('#twitch-emotes');
         this.demotes = this.ui.find('#destiny-emotes');
-        this.demotes.append([...this.chat.emoticons].map(buildEmote).join(''));
-        this.temotes.append([...this.chat.twitchemotes].map(buildEmote).join(''));
-        this.ui.on('click', '.chat-emote', e => {
+        this.ui.on('click', '.emote', e => {
             ChatMenu.closeMenus(chat);
             this.selectEmote(e.currentTarget.innerText);
         });
@@ -340,6 +338,8 @@ class ChatEmoteMenu extends ChatMenu {
             this.chat.input.focus();
         }
         super.show();
+        this.demotes.empty().append(this.chat.emotes.filter(v => !v['twitch']).map(v => v['prefix']).map(buildEmote).join(''));
+        this.temotes.empty().append(this.chat.emotes.filter(v => v['twitch']).map(v => v['prefix']).map(buildEmote).join(''));
     }
 
     selectEmote(emote){

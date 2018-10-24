@@ -12,7 +12,6 @@ import ChatAutoComplete from './autocomplete'
 import ChatInputHistory from './history'
 import ChatUserFocus from './focus'
 import ChatStore from './store'
-import UserFeatures from './features'
 import Settings from './settings'
 import ChatWindow from './window'
 
@@ -148,8 +147,13 @@ class Chat {
         this.authenticated = false;
         this.backlogloading = false;
         this.unresolved = [];
-        this.emoticons = new Set();
-        this.twitchemotes = new Set();
+
+        this.flairs = [];
+        this.emotes = [];
+        this.emotePrefixes = new Set();
+        this.emoteRegexNormal = null;
+        this.emoteRegexTwitch = null;
+
         this.user = new ChatUser();
         this.users = new Map();
         this.whispers = new Map();
@@ -293,8 +297,7 @@ class Chat {
             this.autocomplete.add(`/${k}`);
             (a['alias'] || []).forEach(k => this.autocomplete.add(`/${k}`))
         });
-        this.emoticons.forEach(e => this.autocomplete.add(e, true))
-        this.twitchemotes.forEach(e => this.autocomplete.add(e, true))
+        this.emotePrefixes.forEach(e => this.autocomplete.add(e, true))
         this.autocomplete.bind(this)
         this.applySettings(false)
 
@@ -413,8 +416,21 @@ class Chat {
     }
 
     withEmotes(emotes) {
-        this.emoticons = new Set(emotes['destiny']);
-        this.twitchemotes = new Set(emotes['twitch']);
+        const emoticons = emotes.filter(v => !v['twitch']).map(v => v['prefix']).join('|');
+        const twitchemotes = emotes.filter(v => v['twitch']).map(v => v['prefix']).join('|');
+        this.emotePrefixes = new Set([...emotes.map(v => v['prefix'])]);
+        this.emoteRegexNormal = new RegExp(`(^|\\s)(${emoticons})(?=$|\\s)`, 'gm');
+        this.emoteRegexTwitch = new RegExp(`(^|\\s)(${emoticons}|${twitchemotes})(?=$|\\s)`, 'gm');
+        this.emotes = emotes;
+        return this;
+    }
+
+    withFlairs(flairs) {
+        this.flairs = flairs;
+        this.flairTitles = this.flairs.reduce(function(map, v) {
+            map[v.name] = v.label;
+            return map;
+        }, {});
         return this;
     }
 
@@ -510,7 +526,7 @@ class Chat {
     }
 
     addMessage(message, win=null){
-        // Dont add the gui if user is ignored
+        // Don't add the gui if user is ignored
         if (message.type === MessageTypes.USER && this.ignored(message.user.nick, message.message))
             return
 
@@ -519,7 +535,7 @@ class Chat {
         win.lock()
 
         // Break the current combo if this message is not an emote
-        // We dont need to check what type the current message is, we just know that its a new message, so the combo is invalid.
+        // We don't need to check what type the current message is, we just know that its a new message, so the combo is invalid.
         if(win.lastmessage && win.lastmessage.type === MessageTypes.EMOTE && win.lastmessage.emotecount > 1)
             win.lastmessage.completeCombo()
 
@@ -537,8 +553,8 @@ class Chat {
             message.mentioned = Chat.extractNicks(message.message).filter(a => this.users.has(a.toLowerCase()))
             // set tagged state
             message.tag = this.taggednicks.get(message.user.nick.toLowerCase());
-            // set highlighted state if this is not the current users message or a bot, as well as other highlight criteria
-            message.highlighted = !message.isown && !message.user.hasFeature(UserFeatures.BOT) && (
+            // set highlighted state if this is not the current users message, as well as other highlight criteria
+            message.highlighted = !message.isown && (
                 // Check current user nick against msg.message (if highlight setting is on)
                 (this.regexhighlightself && this.settings.get('highlight') && this.regexhighlightself.test(message.message)) ||
                 // Check /highlight nicks against msg.nick
@@ -738,7 +754,7 @@ class Chat {
 
     onMSG(data){
         let textonly = Chat.extractTextOnly(data.data)
-        const isemote = this.emoticons.has(textonly) || this.twitchemotes.has(textonly)
+        const isemote = this.emotePrefixes.has(textonly)
         const win = this.mainwindow
         if(isemote && win.lastmessage !== null && Chat.extractTextOnly(win.lastmessage.message) === textonly){
             if(win.lastmessage.type === MessageTypes.EMOTE) {
@@ -813,7 +829,12 @@ class Chat {
     }
 
     onBROADCAST(data){
-        MessageBuilder.broadcast(data.data, data.timestamp).into(this)
+        // TODO kind of ... hackey
+        if (data.data.indexOf('A new emote is available') === 0) {
+            MessageBuilder.broadcast(data.data, data.timestamp).into(this)
+        } else {
+
+        }
     }
 
     onPRIVMSGSENT(){
@@ -893,7 +914,7 @@ class Chat {
             // MESSAGE
             else {
                 const textonly = (isme ? str.substring(4) : str).trim()
-                if (this.source.isConnected() && !this.emoticons.has(textonly) && !this.twitchemotes.has(textonly)) {
+                if (this.source.isConnected() && !this.emotePrefixes.has(textonly)) {
                     // We add the message to the gui immediately
                     // But we will also get the MSG event, so we need to make sure we dont add the message to the gui again.
                     // We do this by storing the message in the unresolved array
@@ -910,7 +931,7 @@ class Chat {
     }
 
     cmdEMOTES(){
-        MessageBuilder.info(`Available emoticons: ${[...this.emoticons].join(', ')}`).into(this);
+        MessageBuilder.info(`Available emoticons: ${[...this.emotes.map(v => v['prefix'])].join(', ')}`).into(this);
     }
 
     cmdHELP(){

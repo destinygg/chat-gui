@@ -41,5 +41,5 @@ npm run server
 
 You can then test it by going to something like this....
 ```
-http://localhost:8282/index.htm?u=wss://www.destiny.gg/ws&a=http://localhost:8181
+http://localhost:8282/index.htm?u=wss://www.destiny.gg/ws
 ```
