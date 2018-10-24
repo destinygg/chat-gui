@@ -20,30 +20,6 @@ const glueImages = function (dir, name, cb) {
     });
 };
 
-glueImages('./assets/emotes/', 'emoticons', function(dir, name, coordinates){
-    const names = Object.keys(coordinates).map(f => path.basename(f, path.extname(f)))
-                        .map(a => '.chat-emote.chat-emote-' + a)
-                        .join(',');
-    let scss = '';
-    scss += names + '{' + NEWLINE;
-    scss += `    background-image:url('../../emotes/${name}.png');` + NEWLINE;
-    scss += `    background-repeat:no-repeat;` + NEWLINE;
-    scss += `}`;
-    scss += NEWLINE;
-    scss += Object.keys(coordinates).map(f => {
-        let name = path.basename(f, path.extname(f)), d = coordinates[f];
-        return ''+
-        `.chat-emote.chat-emote-${name} {` + NEWLINE +
-        `    background-position: -${d.x}px -${d.y}px;` + NEWLINE +
-        `    width: ${d.width}px;` + NEWLINE +
-        `    height: ${d.height}px;` + NEWLINE +
-        `    margin-top: -${d.height}px;` + NEWLINE +
-        `}`;
-    }).join(NEWLINE);
-    fs.writeFileSync('./assets/emotes/emoticons.scss', scss);
-    console.log(`Completed ${name} sprites`);
-});
-
 glueImages('./assets/icons/', 'icons', function(dir, name, coordinates){
     const names = Object.keys(coordinates).map(f => path.basename(f, path.extname(f)))
                         .map(a => '.icon-' + a)
