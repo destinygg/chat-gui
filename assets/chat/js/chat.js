@@ -239,8 +239,13 @@ class Chat {
     }
 
     withUser(user){
-        this.user = this.addUser(user || {nick: 'Anonymous'});
-        this.authenticated = this.user !== null && this.user.username !== '' && this.user.username !== 'Anonymous';
+        if (!user || user.username === '') {
+            this.user = this.addUser({nick: 'User' + Math.floor(Math.random() * (99999 - 10000 + 1)) + 10000});
+            this.authenticated = false;
+        } else {
+            this.user = this.addUser(user);
+            this.authenticated = true;
+        }
         return this;
     }
 
@@ -553,8 +558,8 @@ class Chat {
             message.mentioned = Chat.extractNicks(message.message).filter(a => this.users.has(a.toLowerCase()))
             // set tagged state
             message.tag = this.taggednicks.get(message.user.nick.toLowerCase());
-            // set highlighted state if this is not the current users message, as well as other highlight criteria
-            message.highlighted = !message.isown && (
+            // set highlighted state
+            message.highlighted = this.authenticated && !message.isown && (
                 // Check current user nick against msg.message (if highlight setting is on)
                 (this.regexhighlightself && this.settings.get('highlight') && this.regexhighlightself.test(message.message)) ||
                 // Check /highlight nicks against msg.nick
