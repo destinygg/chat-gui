@@ -1,4 +1,4 @@
-/* global $, window, document, VERSION */
+/* global $, window, document */
 
 import {KEYCODES,DATE_FORMATS,isKeyCode} from './const'
 import debounce from 'throttle-debounce/debounce'

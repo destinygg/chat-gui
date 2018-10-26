@@ -21,8 +21,7 @@ module.exports = {
     },
     plugins: [
         new CleanWebpackPlugin(['static'], {root: __dirname, verbose: false, exclude: ['cache', 'index.htm']}),
-        new ExtractTextPlugin({filename: '[name].css'}),
-        new webpack.DefinePlugin({VERSION: JSON.stringify(pkg.version)})
+        new ExtractTextPlugin({filename: '[name].css'})
     ],
     watchOptions: {
         ignored: /node_modules/
