@@ -852,9 +852,11 @@ class Chat {
     onBROADCAST(data){
         // TODO kind of ... hackey
         if (data.data === 'reload') {
-            const retryMilli = Math.floor(Math.random() * 4000) + 4000
-            setTimeout(() => window.location.reload(false), retryMilli)
-            MessageBuilder.broadcast(`Restart incoming in ${Math.round(retryMilli/1000)} seconds ...`).into(this)
+            if (!this.backlogloading) {
+                const retryMilli = Math.floor(Math.random() * 4000) + 4000
+                setTimeout(() => window.location.reload(false), retryMilli)
+                MessageBuilder.broadcast(`Restart incoming in ${Math.round(retryMilli/1000)} seconds ...`).into(this)
+            }
         } else {
             MessageBuilder.broadcast(data.data, data.timestamp).into(this)
         }
