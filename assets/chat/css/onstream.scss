@@ -29,7 +29,8 @@ time,
 }
 
 .chat-lines,
-.msg-chat, .msg-chat .text:before,
+.msg-chat,
+.msg-chat .text:before,
 .greentext,
 .combo {
     color: $text-color;

@@ -30,10 +30,11 @@ function buildMessageTxt(chat, message){
     return `<span class="text">${msg}</span>`
 }
 function buildFeatures(user, chat){
-    const features = [...user.features || []].filter(v => !!chat.flairTitles[v]).map(e => {
-            return `<i class="flair ${e}" title="${chat.flairTitles[e]}"></i>`;
-        }).join('');
-    return features.length > 0 ? `<span class="features">${features}</span>` : '';
+    const features = (user.features || [])
+        .filter(e => chat.flairsMap.has(e))
+        .map(e => chat.flairsMap.get(e))
+        .reduce((str, e) => str + `<i class="flair ${e['name']}" title="${e['label']}"></i> `, '');
+    return features !== '' ? `<span class="features">${features}</span>` : '';
 }
 function buildTime(message){
     const datetime = message.timestamp.format(DATE_FORMATS.FULL);

@@ -1,5 +1,4 @@
 @import "../../common";
-@import "../../anim";
 @import "../../icons/icons";
 
 @import url("https://fonts.googleapis.com/css?family=Roboto:400,500,600,700");
@@ -58,8 +57,8 @@ label small {
 }
 
 @keyframes emote-complete {
-    0% { transform: translate(-10px, 0); opacity: 0;/* text-shadow: 0 0 3px rgba(white, 1);*/ }
-    2% { transform: translate(10px, 0); color: white; opacity: 1;/* text-shadow: 0 0 10px rgba(white, 0.5);*/ }
+    0% { transform: translate(-10px, 0); opacity: 0; }
+    2% { transform: translate(10px, 0); color: white; opacity: 1; }
     100% { transform: translate(0, 0); opacity: 1; }
 }
 @keyframes emote-greyout {
@@ -246,10 +245,6 @@ label small {
     hr {
         margin: 8px 0;
     }
-    .user {
-        font-weight: 500;
-        cursor: pointer;
-    }
     .chat-user {
         cursor: pointer;
         position: relative;
@@ -262,6 +257,11 @@ label small {
         font-size: $text-size-sm;
         color: $color-chat-disabled;
         display: none; /* hidden by default */
+    }
+    .user {
+        font-weight: 500;
+        cursor: pointer;
+        padding-left: 0.25em;
     }
     .greentext {
         color: $color-green-text;
@@ -291,91 +291,9 @@ label small {
         border-bottom: 1px dashed $color-underline-nsfl !important;
     }
 }
-.msg-chat:first-child {
-    margin-top: 0.5em;
-}
-.msg-chat:last-child {
-    margin-bottom: 0.5em;
-}
 
-/* Flairs */
-/* Default */
 a.user {
     color: $color-label-user;
-}
-a.user:hover {
-    color: lighten($color-label-user,20%);
-}
-
-/* T1, TWITCH */
-a.user {
-    &.flair9,
-    &.flair13 {
-        color: $color-label-sub1;
-    }
-    &.flair9:hover,
-    &.flair13:hover {
-        color: lighten($color-label-sub1,20%);
-    }
-
-    /* T2 */
-    &.flair1 {
-        color: $color-label-sub2;
-    }
-    &.flair1:hover {
-        color: lighten($color-label-sub2,20%);
-    }
-
-    /* T3 */
-    &.flair3 {
-        color: $color-label-sub3;
-    }
-    &.flair3:hover {
-        color: lighten($color-label-sub3,20%);
-    }
-
-    /* T4 */
-    &.flair8 {
-        color: $color-label-sub4;
-    }
-    &.flair8:hover {
-        color: lighten($color-label-sub4,20%);
-    }
-
-    &.vip {
-        color: $color-label-vip;
-    }
-    &.vip:hover {
-        color: lighten($color-label-vip,20%);
-    }
-
-    &.bot {
-        color: $color-label-bot;
-    }
-    &.bot:hover {
-        color: lighten($color-label-bot,20%);
-    }
-
-    &.admin {
-        color: $color-label-admin;
-    }
-    &.admin:hover {
-        color: lighten($color-label-admin,20%);
-    }
-
-    &.flair11 {
-        color: $color-label-bot2;
-    }
-    &.flair11:hover {
-        color: lighten($color-label-bot2,20%);
-    }
-
-    &.flair12 {
-        color: $color-broadcaster;
-    }
-    &.flair12:hover {
-        color: lighten($color-broadcaster,20%);
-    }
 }
 
 /* Base ChatUserMessage */
@@ -386,26 +304,8 @@ a.user {
     height: 18px;
     margin-left: -2px;
     .flair {
-        order: 5;
         line-height: 18px;
         margin-left: 2px;
-    }
-    .flair.protected,
-    .flair.moderator,
-    .flair.subscriber,
-    .flair.admin,
-    .flair.flair14,
-    .flair.vip {
-        display: none !important;
-    }
-    .flair15 {
-        order: 1;
-    }
-    .flair8,.flair3,.flair1,.flair13 {
-        order: 2;
-    }
-    .flair9 {
-        order: 3;
     }
 }
 
@@ -613,6 +513,14 @@ a.user {
 }
 
 /* Emotes and combo */
+@keyframes emote-hit {
+    0% { color: #B91010; font-size:200%; }
+    1% { color: $color-light; font-size:190%; }
+    2% { color: #B91010; font-size:200%; }
+    3% { color: $color-light; font-size:190%; }
+    4% { color: #B91010; font-size:200%; }
+    100% { color: $color-light; font-size:120%; }
+}
 .emote {
     display: inline-block;
     position: relative;
@@ -665,41 +573,23 @@ a.user {
         font-weight: bold;
     }
     &.x5 {
-        .count {
-            font-size: 150%;
-        }
+        .count { font-size: 150%; }
     }
     &.x10 {
-        .count {
-            font-size: 200%;
-        }
-        .combo {
-            font-weight: bold;
-        }
+        .count { font-size: 200%; }
+        .combo { font-weight: bold; }
     }
     &.x20 {
-        .count {
-            font-size: 300%;
-        }
-        .combo {
-            font-weight: bold;
-        }
+        .count { font-size: 300%; }
+        .combo { font-weight: bold; }
     }
     &.x30 {
-        .count {
-            font-size: 400%;
-        }
-        .combo {
-            font-weight: bold;
-        }
+        .count { font-size: 400%; }
+        .combo { font-weight: bold; }
     }
     &.x50 {
-        .count {
-            font-size: 500%;
-        }
-        .combo {
-            font-weight: bold;
-        }
+        .count { font-size: 500%; }
+        .combo { font-weight: bold; }
     }
     &.combo-complete {
         &.x10,

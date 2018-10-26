@@ -1,4 +1,4 @@
-/* global $, Notification */
+/* global $, Notification, VERSION */
 
 import ChatUser from './user'
 import ChatScrollPlugin from './scroll'
@@ -122,6 +122,7 @@ class ChatSettingsMenu extends ChatMenu {
 
     constructor(ui, btn, chat) {
         super(ui, btn, chat)
+        this.header = this.ui.find('h5 span')
         this.notificationEl = this.ui.find('#chat-settings-notification-permissions')
         this.ui.on('change', 'input[type="checkbox"],select', e => this.onSettingsChange(e))
         this.ui.on('keypress blur', 'textarea[name="customhighlight"]', e => this.onCustomHighlightChange(e))
@@ -195,6 +196,13 @@ class ChatSettingsMenu extends ChatMenu {
                     break;
             }
         });
+    }
+
+    redraw(){
+        if(this.visible){
+            this.header.text(`Settings (v${VERSION})`);
+        }
+        super.redraw();
     }
 }
 

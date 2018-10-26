@@ -1,8 +1,8 @@
-require('webpack');
-
+const webpack = require('webpack');
 const path = require('path');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
+const pkg = require('./package.json');
 
 module.exports = {
     devServer: {
@@ -21,7 +21,8 @@ module.exports = {
     },
     plugins: [
         new CleanWebpackPlugin(['static'], {root: __dirname, verbose: false, exclude: ['cache', 'index.htm']}),
-        new ExtractTextPlugin({filename: '[name].css'})
+        new ExtractTextPlugin({filename: '[name].css'}),
+        new webpack.DefinePlugin({VERSION: JSON.stringify(pkg.version)})
     ],
     watchOptions: {
         ignored: /node_modules/

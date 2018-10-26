@@ -1,4 +1,4 @@
-/* global $, window, document */
+/* global $, window, document, VERSION */
 
 import {KEYCODES,DATE_FORMATS,isKeyCode} from './const'
 import debounce from 'throttle-debounce/debounce'
@@ -148,8 +148,10 @@ class Chat {
         this.backlogloading = false;
         this.unresolved = [];
 
-        this.flairs = [];
-        this.emotes = [];
+        this.flairs = new Set();
+        this.emotes = new Set();
+        this.flairsMap = new Map();
+        this.emotesMap = new Map();
         this.emotePrefixes = new Set();
         this.emoteRegexNormal = null;
         this.emoteRegexTwitch = null;
@@ -234,8 +236,12 @@ class Chat {
     }
 
     withUserAndSettings(data){
-        return this.withUser(data)
-            .withSettings(data && data.hasOwnProperty('settings') ? new Map(data.settings) : new Map());
+        this.withUser(data)
+        this.withSettings(data && data.hasOwnProperty('settings') ? new Map(data.settings) : new Map())
+        if (this.authenticated) {
+            this.input.focus().attr('placeholder', `Write something ${this.user.username} ...`)
+        }
+        return this
     }
 
     withUser(user){
@@ -269,8 +275,9 @@ class Chat {
             this.saveSettings()
         }
 
-        this.taggednicks = new Map(this.settings.get('taggednicks'));
-        this.ignoring = new Set(this.settings.get('ignorenicks'));
+        this.taggednicks = new Map(this.settings.get('taggednicks'))
+        this.ignoring = new Set(this.settings.get('ignorenicks'))
+        this.applySettings(false)
         return this;
     }
 
@@ -302,9 +309,8 @@ class Chat {
             this.autocomplete.add(`/${k}`);
             (a['alias'] || []).forEach(k => this.autocomplete.add(`/${k}`))
         });
-        this.emotePrefixes.forEach(e => this.autocomplete.add(e, true))
+
         this.autocomplete.bind(this)
-        this.applySettings(false)
 
         // Chat input
         this.input.on('keypress', e => {
@@ -388,7 +394,7 @@ class Chat {
         // Login
         this.loginscrn.on('click', '#chat-btn-login', () => {
             this.loginscrn.hide()
-            try { window.top.showLoginModal() } catch(e){
+            try { window.top['showLoginModal']() } catch(e){
                 const uri = location.protocol+'//'+location.hostname+(location.port ? ':'+location.port: '')
                 try {
                     if(window.self === window.top){
@@ -415,28 +421,34 @@ class Chat {
 
         this.loadingscrn.fadeOut(250, () => this.loadingscrn.remove())
         this.mainwindow.updateAndPin()
-        this.input.focus()
-        this.input.focus().attr('placeholder', this.authenticated ? `Write something ${this.user.username} ...` : 'You need to be signed in to chat.')
+
+        this.input.focus().attr('placeholder', `Write something ...`)
+        MessageBuilder.status(`Welcome to DGG chat`).into(this)
         return this
     }
 
     withEmotes(emotes) {
-        const emoticons = emotes.filter(v => !v['twitch']).map(v => v['prefix']).join('|');
-        const twitchemotes = emotes.filter(v => v['twitch']).map(v => v['prefix']).join('|');
-        this.emotePrefixes = new Set([...emotes.map(v => v['prefix'])]);
-        this.emoteRegexNormal = new RegExp(`(^|\\s)(${emoticons})(?=$|\\s)`, 'gm');
-        this.emoteRegexTwitch = new RegExp(`(^|\\s)(${emoticons}|${twitchemotes})(?=$|\\s)`, 'gm');
-        this.emotes = emotes;
+        if (emotes) {
+            this.emotes = emotes;
+            this.emotesMap = new Map()
+            emotes.forEach(v => this.emotesMap.set(v.prefix, v))
+            const emoticons = emotes.filter(v => !v['twitch']).map(v => v['prefix']).join('|'),
+                twitchemotes = emotes.filter(v => v['twitch']).map(v => v['prefix']).join('|')
+            this.emoteRegexNormal = new RegExp(`(^|\\s)(${emoticons})(?=$|\\s)`, 'gm')
+            this.emoteRegexTwitch = new RegExp(`(^|\\s)(${emoticons}|${twitchemotes})(?=$|\\s)`, 'gm')
+            this.emotePrefixes = new Set([...emotes.map(v => v['prefix'])])
+            this.emotePrefixes.forEach(e => this.autocomplete.add(e, true))
+        }
         return this;
     }
 
     withFlairs(flairs) {
-        this.flairs = flairs;
-        this.flairTitles = this.flairs.reduce(function(map, v) {
-            map[v.name] = v.label;
-            return map;
-        }, {});
-        return this;
+        if (flairs) {
+            this.flairs = flairs;
+            this.flairsMap = new Map()
+            flairs.forEach(v => this.flairsMap.set(v.name, v))
+        }
+        return this
     }
 
     withHistory(history) {
@@ -734,15 +746,19 @@ class Chat {
     }
 
     onCONNECTING(url){
-        MessageBuilder.status(`Connecting to ${extractHostname(url)} ...`).into(this)
+        if (this.authenticated) {
+            MessageBuilder.status(`Connecting as ${this.user.username} to ${extractHostname(url)} ...`).into(this)
+        } else {
+            MessageBuilder.status(`Connecting to ${extractHostname(url)} ...`).into(this)
+        }
     }
 
     onOPEN(){
-        MessageBuilder.status(`Connection established.`).into(this)
+        //MessageBuilder.status(`Connection established.`).into(this)
     }
 
     onNAMES(data){
-        MessageBuilder.info(`Currently serving ${data['connectioncount']||0} connections and ${data['users'].length} users.`).into(this);
+        MessageBuilder.status(`Connected. serving ${data['connectioncount']||0} connections and ${data['users'].length} users.`).into(this);
         if(this.showmotd) {
             this.cmdHINT([Math.floor(Math.random() * hintstrings.size)]);
             this.showmotd = false;
@@ -835,10 +851,12 @@ class Chat {
 
     onBROADCAST(data){
         // TODO kind of ... hackey
-        if (data.data.indexOf('A new emote is available') === 0) {
-            MessageBuilder.broadcast(data.data, data.timestamp).into(this)
+        if (data.data === 'reload') {
+            const retryMilli = Math.floor(Math.random() * 4000) + 4000
+            setTimeout(() => window.location.reload(false), retryMilli)
+            MessageBuilder.broadcast(`Restart incoming in ${Math.round(retryMilli/1000)} seconds ...`).into(this)
         } else {
-
+            MessageBuilder.broadcast(data.data, data.timestamp).into(this)
         }
     }
 
@@ -1405,6 +1423,16 @@ class Chat {
             nanoseconds += +number;
         });
         return nanoseconds;
+    }
+
+    static loadCss(url) {
+        const link = document.createElement('link');
+        link.href = url;
+        link.type = 'text/css';
+        link.rel = 'stylesheet';
+        link.media = 'screen';
+        document.getElementsByTagName('head')[0].appendChild(link);
+        return link;
     }
 
 }

@@ -16,36 +16,28 @@ const parameterByName = name => {
     return decodeURIComponent(results[2].replace(/\+/g, " "));
 }
 
-const loadCss = function(url) {
-    const link = document.createElement('link');
-    link.href = url;
-    link.type = 'text/css';
-    link.rel = 'stylesheet';
-    link.media = 'screen';
-    document.getElementsByTagName('head')[0].appendChild(link);
-    return link;
-}
-
 const Chat = require('./chat/js/chat')['default']
 const argWs = parameterByName('u') || `ws://localhost:9000`
 const argUrl = parameterByName('a') || `http://localhost:8181`
 const argCdn = parameterByName('s') || `http://localhost:8182`
 const cacheKey = parameterByName('c') || (new Date()).getTime()
 
+const chat = new Chat().withGui().withSettings()
 $.when(
-    new Promise(res => $.getJSON(`${argUrl}/api/chat/me`).done(res).fail(() => res(null))),
-    new Promise(res => $.getJSON(`${argUrl}/api/chat/history`).done(res).fail(() => res(null))),
-    new Promise(res => $.getJSON(`${argCdn}/flairs/flairs.json?_=${cacheKey}`).done(res).fail(() => res(null))),
-    new Promise(res => $.getJSON(`${argCdn}/emotes/emotes.json?_=${cacheKey}`).done(res).fail(() => res(null))),
-    new Promise(res => res(loadCss(`${argCdn}/flairs/flairs.css?_=${cacheKey}`))),
-    new Promise(res => res(loadCss(`${argCdn}/emotes/emotes.css?_=${cacheKey}`))),
-).then((settings, history, flairs, emotes) => {
-    return new Chat()
-        .withUserAndSettings(settings)
-        .withEmotes(emotes)
-        .withFlairs(flairs)
-        .withGui()
-        .withHistory(history)
-        .withWhispers()
-        .connect(argWs)
-})
+        new Promise(res => $.getJSON(`${argUrl}/api/chat/me`).done(res).fail(() => res(null))),
+        new Promise(res => $.getJSON(`${argUrl}/api/chat/history`).done(res).fail(() => res(null))),
+        new Promise(res => $.getJSON(`${argCdn}/flairs/flairs.json?_=${cacheKey}`).done(res).fail(() => res(null))),
+        new Promise(res => $.getJSON(`${argCdn}/emotes/emotes.json?_=${cacheKey}`).done(res).fail(() => res(null))),
+        new Promise(res => res(Chat.loadCss(`${argCdn}/flairs/flairs.css?_=${cacheKey}`))),
+        new Promise(res => res(Chat.loadCss(`${argCdn}/emotes/emotes.css?_=${cacheKey}`))),
+    )
+    .then((settings, history, flairs, emotes) =>
+        chat.withUserAndSettings(settings)
+            .withEmotes(emotes)
+            .withFlairs(flairs)
+            .withHistory(history)
+    )
+    .then(chat => chat.connect(argWs))
+    .then(chat => chat.withWhispers())
+
+
