@@ -629,6 +629,7 @@ hr {
 
 /* Auto complete */
 #chat-auto-complete {
+    display: none;
     pointer-events: none;
     transition: opacity 750ms;
     transition-timing-function: cubic-bezier(0, 0.74, 0.1, 0.99);
@@ -1028,7 +1029,7 @@ hr {
     display: none;
 }
 .pref-autocompletehelper #chat-auto-complete.active {
-    opacity: 1;
+    display: block;
 }
 
 /* Nano */
