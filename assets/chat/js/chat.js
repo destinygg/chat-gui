@@ -85,7 +85,8 @@ const settingsdefault = new Map([
     ['ignorementions', false],
     ['autocompletehelper', true],
     ['taggedvisibility', false],
-    ['hidensfw', false]
+    ['hidensfw', false],
+    ['fontscale', 'auto']
 ])
 const commandsinfo = new Map([
     ['help',            {desc: 'Helpful information.'}],
@@ -526,6 +527,12 @@ class Chat {
 
         // Update maxlines
         [...this.windows].forEach(w => w.maxlines = this.settings.get('maxlines'));
+
+        // Font scaling
+        // TODO document.body :(
+        const fontscale = this.settings.get('fontscale') || 'auto'
+        $(document.body).toggleClass(`pref-fontscale`, fontscale !== 'auto')
+        $(document.body).attr('data-fontscale', fontscale)
     }
 
     addUser(data){

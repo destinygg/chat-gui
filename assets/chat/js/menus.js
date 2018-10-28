@@ -277,7 +277,7 @@ class ChatUserMenu extends ChatMenu {
         const user = this.chat.users.get(username.toLowerCase()),
              label = !user.username || user.username === '' ? 'Anonymous' : user.username,
           features = user.features.length === 0 ? 'nofeature' : user.features.join(' '),
-               usr = $(`<a data-username="${user.username}" class="user ${features}">${label} <i class="fa fa-share-square whisper-nick"></i></a>`)
+               usr = $(`<a data-username="${user.username}" class="user ${features}"><i class="fa fa-share-square whisper-nick"></i> ${label}</a>`)
         if(sort && this.totalcount > 0) {
             // Insert item in the correct order (instead of resorting the entire list)
             const items = this.container.children('.user').get()

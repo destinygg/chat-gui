@@ -43,3 +43,6 @@ You can then test it by going to something like this....
 ```
 http://localhost:8282/index.htm?u=wss://www.destiny.gg/ws
 ```
+```
+http://localhost:8282/stream.htm?u=wss://www.destiny.gg/ws
+```

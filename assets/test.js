@@ -7,6 +7,7 @@ require('normalize.css')
 require('font-awesome/scss/font-awesome.scss')
 require('./chat/js/notification')
 require('./chat/css/style.scss')
+// require('./chat/css/onstream.scss') to test onscreen you need to uncomment this line :(
 
 const parameterByName = name => {
     name = name.replace(/[\[\]]/g, "\\$&");
