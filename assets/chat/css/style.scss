@@ -201,7 +201,7 @@ hr {
     color: $color-chat-disabled;
     position: relative;
     text-decoration: none;
-    padding: 0 $gutter-sm;
+    padding: $gutter-xs $gutter-sm;
 }
 .chat-tool-btn.ping {
     animation: whisper-pulse 2s 1;
@@ -214,10 +214,9 @@ hr {
 #chat-whisper-unread-indicator {
     left: 100%;
     color: $color-light;
-    font-size: 0.9em;
+    font-size: 0.5em;
     position: absolute;
     vertical-align: text-bottom;
-    margin-left: $gutter-lg;
 }
 
 /* Base ChatMessage */
