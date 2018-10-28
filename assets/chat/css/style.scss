@@ -513,14 +513,12 @@ hr {
     100% { filter: grayscale(100%) }
 }
 .emote {
+    z-index: 1;
     display: inline-block;
     position: relative;
-    z-index: 1;
-    top: 0.6em;
-    margin: 0 $gutter-xs;
     overflow: hidden;
     text-indent: -999em;
-    padding-left: $gutter-sm;
+    vertical-align: bottom;
 }
 .chat-combo {
     color: $color-chat-text1;
