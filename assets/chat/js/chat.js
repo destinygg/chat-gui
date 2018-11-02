@@ -61,7 +61,7 @@ const hintstrings = new Map([
     ['ignoreuser', 'Use /ignore <username> to hide messages from pesky chatters'],
     ['mutespermanent', 'Mutes are never persistent, don\'t worry it will pass!'],
     ['stalkmentionshint', 'Use the /stalk <nick> or /mentions <nick> to keep up to date'],
-    ['tagshint', `Use the /tag <nick> <color> to highlight users you like. There are preset colors to choose from ${tagcolors.join(', ')}`],
+    ['tagshint', `Use the /tag <nick> [<color> <note>] to tag users you like. There are preset colors to choose from ${tagcolors.join(', ')}`],
     ['bigscreen', `Bigscreen! Did you know you can have the chat on the left or right side of the stream by clicking the swap icon in the top left?`]
 ])
 const settingsdefault = new Map([
@@ -77,6 +77,7 @@ const settingsdefault = new Map([
     ['customhighlight', []],
     ['highlightnicks', []],
     ['taggednicks', []],
+    ['taggednotes', []],
     ['showremoved', 0], // 0 = false (removes), 1 = true (censor), 2 = do nothing
     ['showhispersinchat', false],
     ['ignorenicks', []],
@@ -165,6 +166,7 @@ class Chat {
         this.autocomplete = new ChatAutoComplete();
         this.menus = new Map();
         this.taggednicks = new Map();
+        this.taggednotes = new Map();
         this.ignoring = new Set();
         this.mainwindow = null;
         this.regexhighlightcustom = null;
@@ -277,6 +279,7 @@ class Chat {
         }
 
         this.taggednicks = new Map(this.settings.get('taggednicks'))
+        this.taggednotes = new Map(this.settings.get('taggednotes'))
         this.ignoring = new Set(this.settings.get('ignorenicks'))
         this.applySettings(false)
         return this;
@@ -574,6 +577,8 @@ class Chat {
             message.mentioned = Chat.extractNicks(message.message).filter(a => this.users.has(a.toLowerCase()))
             // set tagged state
             message.tag = this.taggednicks.get(message.user.nick.toLowerCase());
+            // set tagged note
+            message.title = this.taggednotes.get(message.user.nick.toLowerCase()) || '';
             // set highlighted state
             message.highlighted = this.authenticated && !message.isown && (
                 // Check current user nick against msg.message (if highlight setting is on)
@@ -1224,14 +1229,20 @@ class Chat {
     cmdTAG(parts){
         if (parts.length === 0){
             if(this.taggednicks.size > 0) {
-                MessageBuilder.info(`Tagged nicks: ${[...this.taggednicks.keys()].join(',')}. Available colors: ${tagcolors.join(',')}`).into(this);
+                let tags = 'Tagged nicks\n\n'
+                this.taggednicks.forEach((color, nick) => {
+                    let note = this.taggednotes.has(nick) ? this.taggednotes.get(nick) : '';
+                    tags += `    ${nick} (${color}) ${note}` + '\n'
+                });
+                MessageBuilder.info(tags + '\n').into(this);
             } else {
-                MessageBuilder.info(`No tagged nicks. Available colors: ${tagcolors.join(',')}`).into(this);
+                MessageBuilder.info(`No tagged nicks.`).into(this);
             }
+            MessageBuilder.info(`Usage. /tag <nick> [<color>, <note>]\n(Available colors: ${tagcolors.join(', ')})`).into(this);
             return;
         }
         if(!nickregex.test(parts[0])) {
-            MessageBuilder.error('Invalid nick - /tag <nick> <color>').into(this);
+            MessageBuilder.error('Invalid nick - /tag <nick> [<color>, <note>]').into(this);
             return;
         }
         const n = parts[0].toLowerCase();
@@ -1243,38 +1254,69 @@ class Chat {
             MessageBuilder.error('User must be present in chat to tag.').into(this);
             return;
         }
-        const color = parts[1] && tagcolors.indexOf(parts[1]) !== -1 ? parts[1] : tagcolors[Math.floor(Math.random()*tagcolors.length)];
+
+        let color = ''
+        let note = ''
+        if (parts[1]) {
+            if (tagcolors.indexOf(parts[1]) !== -1) {
+                color = parts[1]
+                note = parts[2] ? parts.slice(2, parts.length).join(' ') : ''
+            } else {
+                color = tagcolors[Math.floor(Math.random()*tagcolors.length)]
+                note = parts[1] ? parts.slice(1, parts.length).join(' ') : ''
+            }
+            if (note.length > 100) {
+                note = note.substr(0, 100)
+            }
+        } else {
+            color = tagcolors[Math.floor(Math.random()*tagcolors.length)]
+        }
+
+
         this.mainwindow.getlines(`.msg-user[data-username="${n}"]`)
             .removeClass(Chat.removeClasses('msg-tagged'))
-            .addClass(`msg-tagged msg-tagged-${color}`);
-        this.taggednicks.set(n, color);
-        MessageBuilder.info(`Tagged ${parts[0]} as ${color}`).into(this);
+            .addClass(`msg-tagged msg-tagged-${color}`)
+            .find('.user').attr('title', note);
 
+        this.taggednicks.set(n, color);
+        this.taggednotes.set(n, note);
         this.settings.set('taggednicks', [...this.taggednicks]);
+        this.settings.set('taggednotes', [...this.taggednotes]);
         this.applySettings();
+        MessageBuilder.info(`Tagged ${parts[0]} as ${color}`).into(this);
     }
 
     cmdUNTAG(parts){
         if (parts.length === 0){
             if(this.taggednicks.size > 0) {
-                MessageBuilder.info(`Tagged nicks: ${[...this.taggednicks.keys()].join(',')}. Available colors: ${tagcolors.join(',')}`).into(this);
+                let tags = 'Tagged nicks\n\n'
+                this.taggednicks.forEach((color, nick) => {
+                    let note = this.taggednotes.has(nick) ? this.taggednotes.get(nick) : '';
+                    tags += `    ${nick} (${color}) ${note}` + '\n'
+                });
+                MessageBuilder.info(tags + '\n').into(this);
             } else {
-                MessageBuilder.info(`No tagged nicks. Available colors: ${tagcolors.join(',')}`).into(this);
+                MessageBuilder.info(`No tagged nicks.`).into(this);
             }
+            MessageBuilder.info(`Usage. /untag <nick>`).into(this);
             return;
         }
         if(!nickregex.test(parts[0])) {
-            MessageBuilder.error('Invalid nick - /untag <nick> <color>').into(this);
+            MessageBuilder.error('Invalid nick - /untag <nick> [<color>, <note>]').into(this);
             return;
         }
         const n = parts[0].toLowerCase();
+
+        this.mainwindow.getlines(`.msg-chat[data-username="${n}"]`)
+            .removeClass(Chat.removeClasses('msg-tagged'))
+            .find('.user').removeAttr('title');
+
         this.taggednicks.delete(n);
-        this.mainwindow
-            .getlines(`.msg-chat[data-username="${n}"]`)
-            .removeClass(Chat.removeClasses('msg-tagged'));
-        MessageBuilder.info(`Un-tagged ${n}`).into(this);
+        this.taggednotes.delete(n);
         this.settings.set('taggednicks', [...this.taggednicks]);
+        this.settings.set('taggednotes', [...this.taggednotes]);
         this.applySettings();
+        MessageBuilder.info(`Un-tagged ${n}`).into(this);
     }
 
     cmdBANINFO(){
