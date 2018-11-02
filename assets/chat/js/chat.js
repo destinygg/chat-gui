@@ -417,9 +417,6 @@ class Chat {
             return false
         })
 
-        // Keep the website session alive.
-        setInterval(() => $.ajax({url: '/ping'}), 10*60*1000)
-
         this.loadingscrn.fadeOut(250, () => this.loadingscrn.remove())
         this.mainwindow.updateAndPin()
 

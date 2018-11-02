@@ -73,7 +73,7 @@ class ChatMenu extends EventEmitter {
         this.ui.find('.scrollable').each((i, e) => {
             this.scrollplugin = new ChatScrollPlugin(chat, e)
         })
-        this.ui.on('click', '.close,.menu-close', this.hide.bind(this))
+        this.ui.on('click', '.close,.chat-menu-close', this.hide.bind(this))
         this.btn.on('click', e => {
             if (this.visible)
                 chat.input.focus()
@@ -277,7 +277,7 @@ class ChatUserMenu extends ChatMenu {
         const user = this.chat.users.get(username.toLowerCase()),
              label = !user.username || user.username === '' ? 'Anonymous' : user.username,
           features = user.features.length === 0 ? 'nofeature' : user.features.join(' '),
-               usr = $(`<a data-username="${user.username}" class="user ${features}"><i class="fa fa-share-square whisper-nick"></i> ${label}</a>`)
+               usr = $(`<a data-username="${user.username}" class="user ${features}"><i class="whisper-nick"></i> ${label}</a>`)
         if(sort && this.totalcount > 0) {
             // Insert item in the correct order (instead of resorting the entire list)
             const items = this.container.children('.user').get()
