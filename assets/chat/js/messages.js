@@ -2,7 +2,7 @@
 
 import {EmoteFormatter, GreenTextFormatter, HtmlTextFormatter, MentionedUserFormatter,UrlFormatter} from './formatters'
 import {DATE_FORMATS} from './const'
-import throttle from 'throttle-debounce/throttle'
+import {throttle} from 'throttle-debounce'
 import moment from 'moment'
 
 const MessageTypes = {

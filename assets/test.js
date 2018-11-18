@@ -1,46 +1,30 @@
 /* global $ */
+import 'jquery'
+import 'moment'
+import 'normalize.css'
+import './chat/js/notification'
+import './chat/css/style.scss'
+import Chat from './chat/js/chat'
 
-require('core-js/es6')
-require('jquery')
-require('moment')
-require('normalize.css')
-require('./chat/js/notification')
-require('./chat/css/style.scss')
-// require('./chat/css/onstream.scss') to test onscreen you need to uncomment this line :(
+const chat = new Chat({
+    url: Chat.reqParam('u') || `ws://localhost:9000`,
+    api: {base: Chat.reqParam('a') || `http://localhost:8181`},
+    cdn: {base: Chat.reqParam('s') || `http://localhost:8182`},
+    cacheKey: Chat.reqParam('c') || (new Date()).getTime()
+}).withGui();
 
-const parameterByName = name => {
-    name = name.replace(/[\[\]]/g, "\\$&");
-    const regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
-        results = regex.exec(window.location.href);
-    if (!results || !results[2]) return null;
-    return decodeURIComponent(results[2].replace(/\+/g, " "));
-}
-
-const Chat = require('./chat/js/chat')['default']
-const argWs = parameterByName('u') || `ws://localhost:9000`
-const argUrl = parameterByName('a') || `http://localhost:8181`
-const argCdn = parameterByName('s') || `http://localhost:8182`
-const cacheKey = parameterByName('c') || (new Date()).getTime()
-
-const chat = new Chat().withGui().withSettings()
-$.when(
-        new Promise(res => $.ajax({url: `${argUrl}/api/chat/me`, xhrFields: {withCredentials: true}}).done(res).fail(() => res(null))),
-        new Promise(res => $.getJSON(`${argUrl}/api/chat/history`).done(res).fail(() => res(null))),
-        new Promise(res => $.getJSON(`${argCdn}/flairs/flairs.json?_=${cacheKey}`).done(res).fail(() => res(null))),
-        new Promise(res => $.getJSON(`${argCdn}/emotes/emotes.json?_=${cacheKey}`).done(res).fail(() => res(null))),
-        new Promise(res => res(Chat.loadCss(`${argCdn}/flairs/flairs.css?_=${cacheKey}`))),
-        new Promise(res => res(Chat.loadCss(`${argCdn}/emotes/emotes.css?_=${cacheKey}`))),
-    )
-    .then((settings, history, flairs, emotes) =>
-        chat.withUserAndSettings(settings)
-            .withEmotes(emotes)
-            .withFlairs(flairs)
-            .withHistory(history)
-    )
-    .then(chat => chat.connect(argWs))
-    .then(chat => chat.withWhispers())
+chat.setSettings()
+    .then(() => {
+        chat.settings.set('fontscale', Chat.reqParam('scale') || 1)
+        chat.applySettings(false)
+    })
+    //.loadUserAndSettings()
+    .then(() => chat.loadEmotesAndFlairs())
+    .then(() => chat.loadHistory())
+    //.then(() => chat.loadWhispers())
+    .then(() => chat.connect())
 
 // Keep the website session alive.
-setInterval(() => $.ajax({url: `${argUrl}/ping`}), 10*60*1000)
+setInterval(() => fetch(`${chat.api.base}/ping`).catch(console.warn), 10*60*1000)
 
 

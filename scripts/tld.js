@@ -4,7 +4,7 @@ let fs = require('fs');
 let TLD_FETCH_URL = 'http://data.iana.org/TLD/tlds-alpha-by-domain.txt';
 let TLD_MIN = 271; // Only update if at least this many found (original count)
 
-var targetFile = 'assets/tld.json';
+const targetFile = 'assets/tld.json';
 
 let cb = function(){
   console.log('Done!');
@@ -12,14 +12,14 @@ let cb = function(){
 
 // Asynchronously fetch TLDs, if valid then replace
 http.get(TLD_FETCH_URL, function(res) {
-    var data = '';
+    let data = '';
     res.on('data', function(chunk) {
         // Join response till its complete
         data += chunk;
     });
     res.on('end', function() {
         // When response completes parse and replace
-        var list = parseTLDs(data);
+        const list = parseTLDs(data);
         console.log(`Retrieved ${list.length} tlds!`);
         fs.writeFile(targetFile, JSON.stringify(list), 'utf8', function(err) {
             if (err) {
@@ -44,9 +44,9 @@ function parseTLDs(data) {
         return null;
 
     // Parse response data by line
-    var arr = data.split("\n");
-    for (var idx in arr) {
-        var tld = arr[idx];
+    const arr = data.split("\n");
+    for (let idx in arr) {
+        const tld = arr[idx];
         if ((typeof tld !== "string") ||
             (tld.length < 1) ||
             (tld[0] === '#') ||
@@ -63,7 +63,7 @@ function parseTLDs(data) {
 
     list.sort(function(x,y){
         //Sort by size then alphabetically
-        if (x.length == y.length ){
+        if (x.length === y.length){
             return (x<y?-1:(x>y?1:0));
         } else {
             return y.length - x.length;

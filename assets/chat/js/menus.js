@@ -4,8 +4,8 @@ import ChatUser from './user'
 import ChatScrollPlugin from './scroll'
 import UserFeatures from './features'
 import EventEmitter from './emitter'
-import debounce from 'throttle-debounce/debounce'
-import {isKeyCode, KEYCODES} from "./const"
+import {debounce} from 'throttle-debounce'
+import {isKeyCode, KEYCODES} from './const'
 
 function buildEmote(emote){
     return `<div class="emote-item"><span title="${emote}" class="emote ${emote}">${emote}</span></div>`
@@ -138,15 +138,18 @@ class ChatSettingsMenu extends ChatMenu {
     onSettingsChange(e){
         const val = getSettingValue(e.target)
         const name = e.target.getAttribute('name')
-        if(val !== undefined) {
-            switch(name){
+        if (val !== undefined) {
+            switch (name) {
                 case 'profilesettings':
-                    if(!val && this.chat.authenticated)
-                        $.ajax({url: '/api/chat/me/settings', method:'delete'})
+                    if (!val && this.chat.authenticated)
+                        fetch(`${this.config.api.base}/api/chat/me/settings`, {
+                            credentials: 'include',
+                            method: 'DELETE'
+                        }).catch(console.warn)
                     break;
                 case 'notificationwhisper':
                 case 'notificationhighlight':
-                    if(val)
+                    if (val)
                         this.notificationPermission().then(() => this.updateNotification())
                     break;
             }
@@ -408,8 +411,9 @@ class ChatWhisperUsers extends ChatMenu {
         const user = this.chat.users.get(nick.toLowerCase()) || new ChatUser(nick)
         this.usersEl.append(`
             <li class="conversation unread-${unread}">
-                <a data-username="${user.nick.toLowerCase()}" title="Hide" class="fa fa-times remove"></a>
-                <a data-username="${user.nick.toLowerCase()}" class="user">${user.nick} <span class="badge">${unread}</span></a>
+                <a style="flex: 1;" data-username="${user.nick.toLowerCase()}" class="user">${user.nick}</a>
+                <span class="badge">${unread}</span>
+                <a data-username="${user.nick.toLowerCase()}" title="Hide" class="remove"></a>
             </li>
         `)
     }

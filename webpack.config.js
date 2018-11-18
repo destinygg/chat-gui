@@ -1,74 +1,64 @@
-require('webpack');
-const path = require('path');
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
-const CleanWebpackPlugin = require('clean-webpack-plugin');
+require('webpack')
+const path = require('path')
+const CleanWebpackPlugin = require('clean-webpack-plugin')
 
 module.exports = {
     devServer: {
-        contentBase: path.join(__dirname, "static"),
+        contentBase: path.join(__dirname, 'static'),
         compress: true,
         port: 8282
     },
     entry: {
-        chat       : './assets/chat.js',
-        streamchat : './assets/streamchat.js',
-        test       : './assets/test.js'
+        test: './assets/test.js',
     },
     output: {
-        path     : __dirname + '/static',
-        filename : '[name].js'
+        path: __dirname + '/static',
+        filename: '[name].js'
     },
     plugins: [
-        new CleanWebpackPlugin(['static'], {root: __dirname, verbose: false, exclude: ['cache', 'index.htm', 'stream.htm']}),
-        new ExtractTextPlugin({filename: '[name].css'})
+        new CleanWebpackPlugin(['static'], {
+            root: __dirname,
+            verbose: false,
+            exclude: ['cache', 'index.htm', 'stream.htm']
+        })
     ],
     watchOptions: {
         ignored: /node_modules/
     },
+    optimization: {
+        splitChunks: {
+            chunks: 'all'
+        }
+    },
     module: {
         rules: [
             {
-                test    : /\.(ts|tsx)$/,
-                loader  : 'ts-loader'
+                test: /\.m?js$/,
+                exclude: /(node_modules|)/,
+                use: {
+                    loader: 'babel-loader',
+                    options: {presets: ['@babel/preset-env'],}
+                }
             },
             {
-                test    : /\.json$/,
-                loader  : 'json-loader'
+                test: /\.(scss|css)$/,
+                use: [
+                    'style-loader',
+                    'css-loader',
+                    'sass-loader',
+                    'postcss-loader',
+                ]
             },
             {
-                test    : /\.js$/,
-                exclude : /(node_modules)/,
-                loader  : 'babel-loader',
-                options : {presets: ['es2015']}
-            },
-            {
-                test    : /\.(scss|css)$/,
-                loader  : ExtractTextPlugin.extract({
-                    fallback: 'style-loader',
-                    use: [
-                        {loader: 'css-loader'},
-                        {loader: 'sass-loader'},
-                        {loader: 'postcss-loader'},
-                    ]
-                })
-            },
-            {
-                test    : /(-webfont|glyphicons-halflings-regular)\.(eot|svg|ttf|woff2?)(\?v=[0-9]\.[0-9]\.[0-9])?$/,
-                loader  : 'file-loader',
-                options : {name: 'fonts/[name].[ext]'}
-            },
-            {
-                test    : /\.(png|jpg|gif|svg)$/,
-                loader  : 'file-loader',
-                options : {name: 'img/[name].[ext]'}
+                test: /\.(png|jpg|gif|svg)$/,
+                loader: 'file-loader',
+                options: {name: 'img/[name].[ext]'}
             }
         ]
     },
     resolve: {
-        alias: {
-            jquery: 'jquery/src/jquery'
-        },
-        extensions: ['.ts','.tsx','.js']
+        alias: {jquery: 'jquery/src/jquery'},
+        extensions: ['.js']
     },
     context: __dirname,
     devtool: false

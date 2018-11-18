@@ -1,6 +1,6 @@
 /* global $ */
 
-require('nanoscroller');
+import 'nanoscroller';
 
 const is_touch_device =  'ontouchstart' in window        // works on most browsers
                       || navigator['maxTouchPoints']     // works on IE10/11 and Surface
