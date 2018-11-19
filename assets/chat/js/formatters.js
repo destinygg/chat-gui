@@ -1,4 +1,5 @@
-import UserFeatures from './features';
+import $ from 'jquery'
+import UserFeatures from './features'
 
 /** @var Array tlds */
 const tlds = require('../../tld.json');

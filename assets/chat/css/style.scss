@@ -1249,7 +1249,8 @@ button.btn {
         letter-spacing: 0.03em;
     }
 
-    .msg-user {
+    .msg-user,
+    .msg-status {
         animation: msg-slide-in 0.15s cubic-bezier(0.72, 0.03, 0.45, 1);
     }
 

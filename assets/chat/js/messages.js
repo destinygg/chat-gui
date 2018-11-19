@@ -1,5 +1,4 @@
-/* global $ */
-
+import $ from 'jquery'
 import {EmoteFormatter, GreenTextFormatter, HtmlTextFormatter, MentionedUserFormatter,UrlFormatter} from './formatters'
 import {DATE_FORMATS} from './const'
 import {throttle} from 'throttle-debounce'

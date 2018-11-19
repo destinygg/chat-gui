@@ -6,7 +6,7 @@
   "scripts": {
     "tld": "node scripts/tld.js",
     "glue": "node scripts/glue.js",
-    "start": "webpack-dev-server"
+    "start": "webpack-dev-server --mode=development"
   },
   "repository": {
     "type": "git",
@@ -23,11 +23,9 @@
   "license": "SEE LICENSE IN <LICENSE.md>",
   "bugs": "https://github.com/destinygg/website/issues",
   "directories": {
-    "assets": "./assets",
-    "static": "./static"
+    "assets": "./assets"
   },
   "dependencies": {
-    "css-loader": "^1.0.1",
     "jquery": "~3.3.1",
     "moment": "~2.22.2",
     "nanoscroller": "~0.8.7",
@@ -37,16 +35,17 @@
   "devDependencies": {
     "@babel/core": "^7.1.6",
     "@babel/preset-env": "^7.1.6",
-    "babel-loader": "~8.0.4",
     "autoprefixer": "~9.3.1",
+    "babel-loader": "~8.0.4",
+    "css-loader": "^1.0.1",
     "file-loader": "~2.0.0",
-    "clean-webpack-plugin": "~1.0.0",
+    "html-loader": "^0.5.5",
     "node-sass": "~4.10.0",
     "postcss-loader": "^3.0.0",
     "sass-loader": "^7.1.0",
     "spritesmith": "~3.3.1",
     "style-loader": "~0.23.1",
-    "webpack": "~4.25.1",
+    "webpack": "^4.26.0",
     "webpack-cli": "^3.1.2",
     "webpack-dev-server": "~3.1.10"
   },

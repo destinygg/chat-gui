@@ -9,40 +9,37 @@ See [LICENSE.md](LICENSE.md)
 
 #### Install the node dependencies
 
-```shell
+```
 npm install
 ```
 
-#### You can now build the project.
+#### Developing
 
-```shell
-npm run build
 ```
-or
-```shell
-webpack -p
+npm run start
 ```
 
-#### Building while developing
+### Get params
+`u`: socket url
+default `ws://localhost:9000`
 
-```shell
-webpack -w
-```
-or
-```shell
-npm run watch
-```
+`a`: api url
+default `http://localhost:8181`
 
-#### Implementation & Testing
+`s`: cdn url
+default `http://localhost:8182`
 
-```shell
-npm run server
-```
+`c`: cache key
+default `empty`
 
-You can then test it by going to something like this....
-```
-http://localhost:8282/index.htm?u=wss://www.destiny.gg/ws
-```
-```
-http://localhost:8282/stream.htm?u=wss://www.destiny.gg/ws
-```
+`t`: template
+[EMBED | STREAM] default `embed`
+
+`f`: font scale
+only works on STREAM. [1 ... 10] default `1`
+
+e.g. Connect to destiny.gg, with defaults
+`http://localhost:8282/index.htm?u=wss://www.destiny.gg/ws`
+
+e.g. Connect to destiny.gg with the stream template
+`http://localhost:8282/index.htm?u=wss://destiny.gg/ws&t=stream`

@@ -1,7 +1,6 @@
-/* global $ */
-
+import $ from 'jquery'
 import ChatScrollPlugin from './scroll'
-import EventEmitter from "./emitter";
+import EventEmitter from './emitter'
 const tagcolors = [
     "green",
     "yellow",

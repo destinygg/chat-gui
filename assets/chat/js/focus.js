@@ -1,4 +1,4 @@
-/* global $ */
+import $ from 'jquery'
 
 /**
  * Handles the dimming of the chat when you click on a username

@@ -1,5 +1,6 @@
-/* global $, window, document */
+/* global window, document */
 
+import $ from 'jquery'
 import {KEYCODES,DATE_FORMATS,isKeyCode} from './const'
 import {debounce} from 'throttle-debounce'
 import moment from 'moment'
@@ -155,17 +156,15 @@ const banstruct = {
     endtimestamp: ''
 }
 
-const chatConfigDefaults = {
-    url: '',
-    api: { base: '' },
-    cdn: { base: '' },
-    cacheKey: ''
-};
-
 class Chat {
 
     constructor(config){
-        this.config = Object.assign({}, chatConfigDefaults, config)
+        this.config = Object.assign({}, {
+            url: '',
+            api: {base: ''},
+            cdn: {base: ''},
+            cacheKey: ''
+        }, config)
         this.ui = null;
         this.css = null;
         this.output = null;
@@ -189,7 +188,7 @@ class Chat {
         this.users = new Map();
         this.whispers = new Map();
         this.windows = new Map();
-        this.settings = new Map([...settingsdefault]);
+        this.settings = new Map(settingsdefault);
         this.autocomplete = new ChatAutoComplete();
         this.menus = new Map();
         this.taggednicks = new Map();
@@ -303,9 +302,10 @@ class Chat {
         return this.applySettings(false)
     }
 
-    withGui(){
+    withGui(template, appendTo = null){
 
-        this.ui = $('#chat')
+        this.ui = $(template)
+        this.ui.prependTo(appendTo || 'body')
 
         // We use this style sheet to apply GUI updates via css (e.g. user focus)
         this.css = (() => {
@@ -449,7 +449,7 @@ class Chat {
 
         this.input.focus().attr('placeholder', `Write something ...`)
         MessageBuilder.status(`Welcome to DGG chat`).into(this)
-        return this
+        return Promise.resolve(this)
     }
 
     connect() {
@@ -463,7 +463,10 @@ class Chat {
                 this.setUser(data)
                 this.setSettings(new Map(data.settings))
             })
-            .catch(() => this.setUser(null))
+            .catch(() => {
+                this.setUser(null)
+                this.setSettings()
+            })
     }
 
     async loadEmotesAndFlairs(){

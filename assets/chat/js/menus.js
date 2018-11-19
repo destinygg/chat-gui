@@ -1,5 +1,6 @@
-/* global $, Notification */
+/* global Notification */
 
+import $ from 'jquery'
 import ChatUser from './user'
 import ChatScrollPlugin from './scroll'
 import UserFeatures from './features'

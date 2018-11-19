@@ -1,7 +1,6 @@
-/* global $, destiny */
-
-import Chat from "./chat";
-import {KEYCODES,getKeyCode} from "./const";
+import $ from 'jquery'
+import Chat from './chat'
+import {KEYCODES,getKeyCode} from './const'
 
 let suggestTimeoutId
 let minWordLength = 1
