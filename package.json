@@ -6,7 +6,7 @@
   "scripts": {
     "tld": "node scripts/tld.js",
     "glue": "node scripts/glue.js",
-    "start": "webpack-dev-server --mode=development"
+    "start": "webpack-dev-server --verbose --debug --mode=development"
   },
   "repository": {
     "type": "git",
@@ -30,10 +30,12 @@
     "moment": "~2.22.2",
     "nanoscroller": "~0.8.7",
     "normalize.css": "~8.0.1",
-    "throttle-debounce": "~2.0.1"
+    "throttle-debounce": "~2.0.1",
+    "whatwg-fetch": "^3.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.1.6",
+    "@babel/polyfill": "^7.0.0",
     "@babel/preset-env": "^7.1.6",
     "autoprefixer": "~9.3.1",
     "babel-loader": "~8.0.4",

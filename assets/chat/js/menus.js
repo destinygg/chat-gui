@@ -1,5 +1,7 @@
 /* global Notification */
 
+import {fetch} from 'whatwg-fetch'
+import {Notification} from './notification'
 import $ from 'jquery'
 import ChatUser from './user'
 import ChatScrollPlugin from './scroll'

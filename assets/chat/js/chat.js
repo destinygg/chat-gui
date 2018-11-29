@@ -1,5 +1,7 @@
 /* global window, document */
 
+import {fetch} from 'whatwg-fetch'
+import {Notification} from './notification'
 import $ from 'jquery'
 import {KEYCODES,DATE_FORMATS,isKeyCode} from './const'
 import {debounce} from 'throttle-debounce'

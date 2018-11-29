@@ -16,27 +16,31 @@ THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-;(function(win, doc, nav) {
+const Notification = (function (win, doc, nav) {
     if ( /* Safari 6, Firefox 22 */ !('Notification' in win && 'permission' in win.Notification && 'requestPermission' in win.Notification)) {
-      const localStorage = window.localStorage || {setItem:() =>{}, getItem:() =>{}};
-      const PERMISSION_DEFAULT = 'default',
+        const PERMISSION_DEFAULT = 'default',
             PERMISSION_GRANTED = 'granted',
             PERMISSION_DENIED = 'denied',
             PERMISSION = [PERMISSION_GRANTED, PERMISSION_DEFAULT, PERMISSION_DENIED],
-            isString = function(value) {
+            isString = function (value) {
                 return (value && (value).constructor === String);
             },
-            isFunction = function(value) {
+            isFunction = function (value) {
                 return (value && (value).constructor === Function);
             },
-            isObject = function(value) {
+            isObject = function (value) {
                 return (value && (value).constructor === Object);
             },
-            noop = function() {};
+            noop = function () {
+            };
+        const localStorage = window.localStorage || {
+            setItem: noop,
+            getItem: noop
+        };
 
-        function checkPermission() {
+        const checkPermission = function () {
             let permission;
-            if ( /* Chrome, Firefox < 22 && ff-html5notifications */ !! ('webkitNotifications' in win && 'checkPermission' in win.webkitNotifications)) {
+            if ( /* Chrome, Firefox < 22 && ff-html5notifications */ !!('webkitNotifications' in win && 'checkPermission' in win.webkitNotifications)) {
                 permission = PERMISSION[win.webkitNotifications.checkPermission()];
             } else if ( /* Firefox Mobile */ 'mozNotification' in nav) {
                 permission = PERMISSION_GRANTED;
@@ -46,9 +50,9 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             return permission;
         }
 
-        function requestPermission(callback) {
+        const requestPermission = function (callback) {
             let callbackFunction = isFunction(callback) ? callback : noop;
-            if ( /* Chrome, Firefox < 22 && ff-html5notifications */ !! ('webkitNotifications' in win && 'requestPermission' in win.webkitNotifications)) {
+            if ( /* Chrome, Firefox < 22 && ff-html5notifications */ !!('webkitNotifications' in win && 'requestPermission' in win.webkitNotifications)) {
                 win.webkitNotifications.requestPermission(callbackFunction);
             } else {
                 if (checkPermission() === PERMISSION_DEFAULT) {
@@ -64,11 +68,9 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             }
         }
 
-        function Notification(title, params) {
+        const Notification = function (title, params) {
             let notification;
-            if (isString(title) &&
-                isObject(params) &&
-                checkPermission() === PERMISSION_GRANTED) {
+            if (isString(title) && isObject(params) && checkPermission() === PERMISSION_GRANTED) {
                 if ( /* Firefox Mobile */ 'mozNotification' in nav) {
                     notification = nav.mozNotification.createNotification(title, params.body, params.icon);
                     if (isFunction(params.onclick)) {
@@ -105,9 +107,9 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             win.Notification = Notification;
         }
 
-        if ( !! ('webkitNotifications' in win && 'checkPermission' in win.webkitNotifications)) {
+        if (!!('webkitNotifications' in win && 'checkPermission' in win.webkitNotifications)) {
             Object.defineProperty(win.Notification, 'permission', {
-                get: function() {
+                get: function () {
                     return PERMISSION[win.webkitNotifications.checkPermission()];
                 }
             });
@@ -119,4 +121,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             win.Notification.requestPermission = requestPermission;
         }
     }
+    return win.Notification
 }(window, document, navigator));
+
+export {Notification}
