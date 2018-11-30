@@ -1,6 +1,5 @@
 import {fetch} from 'whatwg-fetch'
 import $ from 'jquery'
-import 'normalize.css'
 import './chat/css/style.scss'
 import Chat from './chat/js/chat'
 
