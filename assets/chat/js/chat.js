@@ -144,7 +144,15 @@ const commandsinfo = new Map([
     ['reply', {
         desc: 'Reply to the last private message.',
         alias: ['r']
-    }]
+    }],
+    ['stalk', {
+        desc: 'Return a list of messages from <nick>',
+        alias: ['s']
+    }],
+    ['mentions', {
+        desc: 'Return a list of messages where <nick> is mentioned',
+        alias: ['m']
+    }],
 ])
 const banstruct = {
     id: 0,
@@ -260,6 +268,10 @@ class Chat {
         this.control.on('NOTIFY', data => this.cmdWHISPER(data));
         this.control.on('R', data => this.cmdREPLY(data));
         this.control.on('REPLY', data => this.cmdREPLY(data));
+        this.control.on('MENTIONS', data => this.cmdMENTIONS(data));
+        this.control.on('M', data => this.cmdMENTIONS(data));
+        this.control.on('STALK', data => this.cmdSTALK(data));
+        this.control.on('S', data => this.cmdSTALK(data));
         return this;
     }
 
@@ -1373,6 +1385,86 @@ class Chat {
             this.input.val(`/w ${username} `)
         }
         this.input.focus()
+    }
+
+    cmdSTALK(parts){
+        if (parts[0] && /^\d+$/.test(parts[0])){
+            parts[1] = parts[0];
+            parts[0] = this.user.username;
+        }
+        if (!parts[0] || !nickregex.test(parts[0].toLowerCase())) {
+            MessageBuilder.error('Invalid nick - /stalk <nick> <limit>').into(this);
+            return;
+        }
+        if(this.busystalk){
+            MessageBuilder.error('Still busy stalking').into(this);
+            return;
+        }
+        if(this.nextallowedstalk && this.nextallowedstalk.isAfter(new Date())){
+            MessageBuilder.error(`Next allowed stalk ${this.nextallowedstalk.fromNow()}`).into(this);
+            return;
+        }
+        this.busystalk = true;
+        const limit = parts[1] ? parseInt(parts[1]) : 3;
+        MessageBuilder.info(`Getting messages for ${[parts[0]]} ...`).into(this);
+
+        fetch(`${this.config.api.base}/api/chat/stalk?username=${encodeURIComponent(parts[0])}&limit=${limit}`, {credentials: 'include'})
+            .then(res => res.json())
+            .then(d => {
+                if(!d || !d.lines || d.lines.length === 0) {
+                    MessageBuilder.info(`No messages for ${parts[0]}`).into(this);
+                } else {
+                    const date = moment.utc(d.lines[d.lines.length-1]['timestamp']*1000).local().format(DATE_FORMATS.FULL);
+                    MessageBuilder.info(`Stalked ${parts[0]} last seen ${date}`).into(this);
+                    d.lines.forEach(a => MessageBuilder.historical(a.text, new ChatUser(d.nick), a.timestamp*1000).into(this))
+                    MessageBuilder.info(`End (https://dgg.overrustlelogs.net/${parts[0]})`).into(this);
+                }
+            })
+            .catch(() => MessageBuilder.error(`No messages for ${parts[0]} received. Try again later`).into(this))
+            .then(() => {
+                this.nextallowedstalk = moment().add(10, 'seconds');
+                this.busystalk = false;
+            });
+    }
+
+    cmdMENTIONS(parts){
+        if (parts[0] && /^\d+$/.test(parts[0])){
+            parts[1] = parts[0];
+            parts[0] = this.user.username;
+        }
+        if (!parts[0]) parts[0] = this.user.username;
+        if (!parts[0] || !nickregex.test(parts[0].toLowerCase())) {
+            MessageBuilder.error('Invalid nick - /mentions <nick> <limit>').into(this);
+            return;
+        }
+        if(this.busymentions){
+            MessageBuilder.error('Still busy getting mentions').into(this);
+            return;
+        }
+        if(this.nextallowedmentions && this.nextallowedmentions.isAfter(new Date())){
+            MessageBuilder.error(`Next allowed mentions ${this.nextallowedmentions.fromNow()}`).into(this);
+            return;
+        }
+        this.busymentions = true;
+        const limit = parts[1] ? parseInt(parts[1]) : 3;
+        MessageBuilder.info(`Getting mentions for ${[parts[0]]} ...`).into(this);
+        fetch(`${this.config.api.base}/api/chat/mentions?username=${encodeURIComponent(parts[0])}&limit=${limit}`, {credentials: 'include'})
+            .then(res => res.json())
+            .then(d => {
+                if(!d || d.length === 0) {
+                    MessageBuilder.info(`No mentions for ${parts[0]}`).into(this);
+                } else {
+                    const date = moment.utc(d[d.length-1].date*1000).local().format(DATE_FORMATS.FULL);
+                    MessageBuilder.info(`Mentions for ${parts[0]} last seen ${date}`).into(this);
+                    d.forEach(a => MessageBuilder.historical(a.text, new ChatUser(a.nick), a.date*1000).into(this))
+                    MessageBuilder.info(`End (https://dgg.overrustlelogs.net/mentions/${parts[0]})`).into(this);
+                }
+            })
+            .catch(() => MessageBuilder.error(`No mentions for ${parts[0]} received. Try again later`).into(this))
+            .then(() => {
+                this.nextallowedmentions = moment().add(10, 'seconds');
+                this.busymentions = false;
+            });
     }
 
     openConversation(nick){
