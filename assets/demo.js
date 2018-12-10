@@ -1,4 +1,3 @@
-import {fetch} from 'whatwg-fetch'
 import $ from 'jquery'
 import './chat/css/style.scss'
 import Chat from './chat/js/chat'
@@ -44,9 +43,5 @@ switch ((Chat.reqParam('t') || 'embed').toUpperCase()) {
             .then(() => chat.connect())
         break;
 }
-
-
-// Keep the website session alive.
-setInterval(() => fetch(`${chat.config.api.base}/ping`).catch(console.warn), 10*60*1000)
 
 

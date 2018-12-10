@@ -17,6 +17,7 @@ import ChatUserFocus from './focus'
 import ChatStore from './store'
 import Settings from './settings'
 import ChatWindow from './window'
+import ChatVote from './vote'
 
 const regextime = /(\d+(?:\.\d*)?)([a-z]+)?/ig
 const regexsafe = /[\-\[\]\/{}()*+?.\\^$|]/g
@@ -153,6 +154,14 @@ const commandsinfo = new Map([
         desc: 'Return a list of messages where <nick> is mentioned',
         alias: ['m']
     }],
+    ['vote', {
+        desc: 'Start a vote.',
+        alias: ['v']
+    }],
+    ['votestop', {
+        desc: 'Stop a vote you started.',
+        alias: ['vs']
+    }],
 ])
 const banstruct = {
     id: 0,
@@ -272,6 +281,10 @@ class Chat {
         this.control.on('M', data => this.cmdMENTIONS(data));
         this.control.on('STALK', data => this.cmdSTALK(data));
         this.control.on('S', data => this.cmdSTALK(data));
+        this.control.on('VOTE', data => this.cmdVOTE(data));
+        this.control.on('V', data => this.cmdVOTE(data));
+        this.control.on('VOTESTOP', data => this.cmdVOTESTOP(data));
+        this.control.on('VS', data => this.cmdVOTESTOP(data));
         return this;
     }
 
@@ -339,6 +352,10 @@ class Chat {
         this.inputhistory = new ChatInputHistory(this)
         this.userfocus = new ChatUserFocus(this, this.css)
         this.mainwindow = new ChatWindow('main').into(this)
+
+        this.ui.find('#chat-vote-frame:first').each((i, e) => {
+            this.chatvote = new ChatVote(this, $(e))
+        });
 
         this.windowToFront('main')
 
@@ -876,10 +893,36 @@ class Chat {
     }
 
     onMSG(data){
-        let textonly = Chat.extractTextOnly(data.data)
-        const isemote = this.emotePrefixes.has(textonly)
+        const textonly = Chat.remoteSlashCmdFromText(data.data)
+        const usr = this.users.get(data.nick.toLowerCase())
+
+        // VOTE START
+        if (this.chatvote) {
+            if (this.chatvote.isVoteStarted()) {
+                if (this.chatvote.isMsgVoteStopFmt(data.data)) {
+                    if (this.chatvote.vote.user === usr.username) {
+                        this.chatvote.endVote()
+                    }
+                    return;
+                } else if (this.chatvote.isMsgVoteCastFmt(textonly)) {
+                    if (this.chatvote.castVote(textonly, usr.username)) {
+                        // TODO method returns false, if the GUI is hidden
+                        // TODO we are absorbing the message here, but not doing anything with it
+                    }
+                    return;
+                }
+            } else if (this.chatvote.isMsgVoteStartFmt(data.data) && this.chatvote.canUserStartVote(usr)) {
+                if (this.chatvote.startVote(textonly, usr.username)) {
+                    // TODO what if vote state failed
+                }
+                return;
+            }
+        }
+        // VOTE END
+
         const win = this.mainwindow
-        if(isemote && win.lastmessage !== null && Chat.extractTextOnly(win.lastmessage.message) === textonly){
+        const isemote = this.emotePrefixes.has(textonly)
+        if(isemote && win.lastmessage !== null && Chat.remoteSlashCmdFromText(win.lastmessage.message) === textonly){
             if(win.lastmessage.type === MessageTypes.EMOTE) {
                 this.mainwindow.lock()
                 win.lastmessage.incEmoteCount()
@@ -889,7 +932,7 @@ class Chat {
                 MessageBuilder.emote(textonly, data.timestamp, 2).into(this)
             }
         } else if(!this.resolveMessage(data.nick, data.data)){
-            MessageBuilder.message(data.data, this.users.get(data.nick.toLowerCase()), data.timestamp).into(this)
+            MessageBuilder.message(data.data, usr, data.timestamp).into(this)
         }
     }
 
@@ -972,24 +1015,24 @@ class Chat {
 
     onPRIVMSG(data) {
         const normalized = data.nick.toLowerCase()
-        if (!this.ignored(normalized, data.data)){
+        if (!this.ignored(normalized, data.data)) {
 
-            if(!this.whispers.has(normalized))
-                this.whispers.set(normalized, {nick:data.nick, unread:0, open: false})
+            if (!this.whispers.has(normalized))
+                this.whispers.set(normalized, {nick: data.nick, unread: 0, open: false})
 
             const conv = this.whispers.get(normalized),
-                  user = this.users.get(normalized) || new ChatUser(data.nick),
-             messageid = data.hasOwnProperty('messageid') ? data['messageid'] : null
+                user = this.users.get(normalized) || new ChatUser(data.nick),
+                messageid = data.hasOwnProperty('messageid') ? data['messageid'] : null
 
-            if(this.settings.get('showhispersinchat'))
+            if (this.settings.get('showhispersinchat'))
                 MessageBuilder.whisper(data.data, user, this.user.username, data.timestamp, messageid).into(this)
-            if(this.settings.get('notificationwhisper') && this.ishidden)
+            if (this.settings.get('notificationwhisper') && this.ishidden)
                 Chat.showNotification(`${data.nick} whispered ...`, data.data, data.timestamp, this.settings.get('notificationtimeout'))
 
             const win = this.getWindow(normalized)
-            if(win)
+            if (win)
                 MessageBuilder.historical(data.data, user, data.timestamp).into(this, win)
-            if(win === this.getActiveWindow()) {
+            if (win === this.getActiveWindow()) {
                 fetch(`${this.config.api.base}/api/messages/msg/${messageid}/open`, {
                     credentials: 'include',
                     method: 'POST',
@@ -1058,6 +1101,38 @@ class Chat {
                 this.inputhistory.add(str)
                 this.input.val('')
             }
+        }
+    }
+
+    // TODO cmdSend instead?
+    cmdVOTE(parts) {
+        if (!this.chatvote.isVoteStarted()) {
+            if (this.chatvote.canUserStartVote(this.user)) {
+                const str = '/vote ' + parts.join(' ')
+                this.unresolved.unshift(MessageBuilder.message(str, this.user))
+                this.source.send('MSG', {data: str})
+                MessageBuilder.info('Vote started.').into(this)
+            } else {
+                MessageBuilder.error('You do not have permission to start a vote.').into(this)
+            }
+        } else {
+            MessageBuilder.error('Vote already started.').into(this)
+        }
+    }
+
+    // TODO cmdSend instead?
+    cmdVOTESTOP() {
+        if (this.chatvote.isVoteStarted()) {
+            if (this.chatvote.canUserStartVote(this.user) && this.chatvote.vote.user === this.user.nick) {
+                const str = '/votestop'
+                this.unresolved.unshift(MessageBuilder.message(str, this.user))
+                this.source.send('MSG', {data: str})
+                MessageBuilder.info('Vote stopped.').into(this)
+            } else {
+                MessageBuilder.error('You do not have permission to stop this vote.').into(this)
+            }
+        } else {
+            MessageBuilder.error('No vote started.').into(this)
         }
     }
 
@@ -1507,8 +1582,11 @@ class Chat {
         win.on('hide', () => conv.open = false)
     }
 
-    static extractTextOnly(msg){
-        return (msg.substring(0, 4).toLowerCase() === '/me ' ? msg.substring(4) : msg).trim();
+    static remoteSlashCmdFromText(msg){
+        if (msg[0] === '/') {
+            return msg.replace(/^\/[A-z]+ /, '')
+        }
+        return msg;
     }
 
     static extractNicks(text){

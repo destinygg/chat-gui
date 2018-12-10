@@ -1290,3 +1290,105 @@ body.pref-fontscale[data-fontscale="9"] {
 body.pref-fontscale[data-fontscale="10"] {
     .onstreamchat { font-size: 52px; }
 }
+
+
+#chat-vote-frame {
+    .vote-frame {
+        padding: .5em .75em;
+        background: #2f2f2f;
+        border-radius: 4px;
+        margin: 4px;
+        color: $text-color;
+    }
+    .vote-label {
+        color: $text-color2;
+        margin: 0.75em 0 0 0;
+        font-size: 0.9em;
+        display: block;
+    }
+    .vote-question {
+        display: block;
+        margin: 0 0 0.5em 0;
+        strong {
+            margin-left: 0.5em;
+            background: $color-surface-dark3;
+            padding:0 0.3em;
+            border-radius: 4px;
+        }
+    }
+    .opt {
+        display: flex;
+        align-items: center;
+    }
+    .opt-info {
+        margin-right: 0.25em;
+    }
+    .opt-bar {
+        background-color: $color-surface-dark3;
+        overflow: hidden;
+        padding: 4px 4px 0 4px;
+        flex: 1;
+    }
+    .opt:first-child .opt-bar {
+        border-radius: 6px 6px 0 0;
+    }
+    .opt:last-child .opt-bar {
+        border-radius: 0 0 6px 6px;
+        padding: 4px;
+    }
+    .opt-bar-inner {
+        min-height: 1em;
+        box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+        transition: all 750ms;
+        background-color: $color-darkred;
+        border-radius: 4px;
+        font-size: 0.85em;
+        color: $text-color;
+        padding: 0 0.25em;
+        text-align: end;
+    }
+    .vote-completed {
+        .opt {
+            .opt-info {
+                color: $text-color2;
+            }
+            .opt-bar-inner {
+                background-color: $color-surface-dark4;
+                color: $text-color2;
+            }
+        }
+        .opt.opt-winner {
+            opacity: 1;
+            .opt-info {
+                color: $text-color1;
+            }
+            .opt-bar-inner {
+                transition: background-color 750ms;
+                background-color: $color-accent-light;
+                color: $text-color;
+            }
+        }
+        .opt-choice {
+            opacity: 0.25;
+        }
+        .opt-choice.opt-winner {
+            opacity: 1;
+            strong {
+                background-color: $color-accent;
+            }
+        }
+    }
+    .vote-close {
+        width: 1em;
+        height: 1em;
+        opacity: 0.5;
+        font-size: 1.2em;
+        display: inline-block;
+        background: transparent url('../img/icon-close.svg') no-repeat center center;
+        background-size: contain;
+        cursor: pointer;
+        &:hover {
+            opacity: 1;
+        }
+    }
+}

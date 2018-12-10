@@ -1,5 +1,7 @@
 
 export default {
+    MODERATOR: 'moderator',
+    PROTECTED: 'protected',
     SUBSCRIBER: 'subscriber',
     TWITCHSUB: 'flair9',
     ADMIN: 'admin',

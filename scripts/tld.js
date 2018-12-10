@@ -37,7 +37,7 @@ http.get(TLD_FETCH_URL, function(res) {
 
 function parseTLDs(data) {
     // List of pseudo TLD-s we want to support
-    var list = ['bit', 'exit', 'gnu', 'i2p', 'local', 'onion', 'zkey'];
+    const list = ['bit', 'exit', 'gnu', 'i2p', 'local', 'onion', 'zkey'];
 
     // Make sure data is string
     if (typeof data !== "string")

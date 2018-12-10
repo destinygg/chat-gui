@@ -1,16 +1,22 @@
+const HtmlWebpackPlugin = require('html-webpack-plugin')
 require('webpack')
 
 module.exports = {
     devServer: {
-        contentBase: './demo',
         port: 8282
     },
     entry: {
-        demo: './assets/demo.js',
+        demo: './assets/demo.js'
     },
     watchOptions: {
         ignored: /node_modules/
     },
+    plugins: [
+        new HtmlWebpackPlugin({
+            title: 'Destiny GG',
+            filename: 'index.html'
+        })
+    ],
     module: {
         rules: [
             {
