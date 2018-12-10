@@ -1111,7 +1111,7 @@ class Chat {
                 const str = '/vote ' + parts.join(' ')
                 this.unresolved.unshift(MessageBuilder.message(str, this.user))
                 this.source.send('MSG', {data: str})
-                MessageBuilder.info('Vote started.').into(this)
+                //MessageBuilder.info('Vote started.').into(this)
             } else {
                 MessageBuilder.error('You do not have permission to start a vote.').into(this)
             }
@@ -1127,7 +1127,7 @@ class Chat {
                 const str = '/votestop'
                 this.unresolved.unshift(MessageBuilder.message(str, this.user))
                 this.source.send('MSG', {data: str})
-                MessageBuilder.info('Vote stopped.').into(this)
+                //MessageBuilder.info('Vote stopped.').into(this)
             } else {
                 MessageBuilder.error('You do not have permission to stop this vote.').into(this)
             }

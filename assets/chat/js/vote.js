@@ -1,6 +1,7 @@
 import $ from 'jquery'
 import {throttle} from 'throttle-debounce'
 import UserFeatures from './features'
+import {MessageBuilder} from './messages'
 
 const VOTE_START = /^\/vote /i;
 const VOTE_STOP = /^\/votestop/i;
@@ -8,7 +9,7 @@ const VOTE_CONJUNCTION = /\bor\b/i;
 const VOTE_INTERROGATIVE = /^(how|why|when|what|where)\b/i;
 const VOTE_TIME = /\b([0-9]+(?:m|s)?)$/i;
 const VOTE_MAX_TIME = 10*60*1000;
-const VOTE_MIN_TIME = 5000;
+const VOTE_MIN_TIME = 30000;
 
 function parseQuestionAndTime(rawQuestion) {
     let time
@@ -23,11 +24,11 @@ function parseQuestionAndTime(rawQuestion) {
                 time = parseInt(match[0]) * 60 * 1000
                 break;
             default:
-                time = 5000
+                time = VOTE_MIN_TIME
                 break;
         }
     } else {
-        time = 5000
+        time = VOTE_MIN_TIME
     }
     const question = parseQuestion(rawQuestion.trim())
     question.time = Math.max(VOTE_MIN_TIME, Math.min(time, VOTE_MAX_TIME));
@@ -48,19 +49,6 @@ function parseQuestion(msg) {
     }
     return {question, options: ['Yes', 'No']}
 }
-function indexOfMax(arr) {
-    if (arr.length === 0) {
-        return -1;
-    }
-    let max = arr[0], maxIndex = 0;
-    for (let i = 1; i < arr.length; i++) {
-        if (arr[i] > max) {
-            maxIndex = i;
-            max = arr[i];
-        }
-    }
-    return maxIndex;
-}
 
 class ChatVote {
 
@@ -69,7 +57,7 @@ class ChatVote {
         this.ui = ui
         this.vote = null
         this.voting = false
-        this.hidden = false
+        this.hidden = true
         this.timerHeartBeat = -1;
         this.timerEndVote = -1;
         this.timerHideVote = -1;
@@ -81,6 +69,7 @@ class ChatVote {
         if (!this.hidden) {
             this.hidden = true
             this.chat.mainwindow.lock()
+            this.ui.removeClass('active')
             this.ui.hide()
             this.chat.mainwindow.unlock()
         }
@@ -90,6 +79,7 @@ class ChatVote {
         if (this.hidden) {
             this.hidden = false
             this.chat.mainwindow.lock()
+            this.ui.addClass('active')
             this.ui.show()
             this.chat.mainwindow.unlock()
         }
@@ -166,6 +156,7 @@ class ChatVote {
             this.timerHeartBeat = setInterval(() => this.updateTimers(), 1000)
             this.timerEndVote = setTimeout(() => this.endVote(), this.vote.time)
 
+            MessageBuilder.info(`A vote has been started. Type ${this.vote.totals.map((a, i) => i+1).join(' or ')} in chat to participate.`).into(this.chat)
             return true
         } catch (e) {
             console.error(e)
@@ -190,15 +181,15 @@ class ChatVote {
 
     updateTimers() {
         const remaining = Math.floor(Math.min(((this.vote.time-(new Date() - this.vote.start))/1000)+1, this.vote.time/1000))
-        this.ui.label.html(`Vote started by ${this.vote.user} ending in ${remaining} ${remaining>1?'seconds':'second'}!`)
+        this.ui.label.html(`(Type in chat to participate) Started by ${this.vote.user} ending in ${remaining} ${remaining>1?'seconds':'second'}!`)
     }
 
     updateBars() {
         if (this.vote && this.vote.question) {
             this.vote.question.options.forEach((opt, i) => {
-                const percent = (this.vote.totals[i] / this.vote.votes.size * 100)
+                const percent = this.vote.votes.size > 0 ? (this.vote.totals[i] / this.vote.votes.size * 100) : 0
                 this.ui.bars[i].barInner.css('width', percent + '%')
-                this.ui.bars[i].barValue.text(Math.round(percent) + '%')
+                this.ui.bars[i].barValue.text(percent > 0 ? Math.round(percent) + '%' : '')
             });
         }
     }
