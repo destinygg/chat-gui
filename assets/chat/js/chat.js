@@ -897,7 +897,7 @@ class Chat {
         const usr = this.users.get(data.nick.toLowerCase())
 
         // VOTE START
-        if (this.chatvote) {
+        if (this.chatvote && !this.backlogloading) {
             if (this.chatvote.isVoteStarted()) {
                 if (this.chatvote.isMsgVoteStopFmt(data.data)) {
                     if (this.chatvote.vote.user === usr.username) {
