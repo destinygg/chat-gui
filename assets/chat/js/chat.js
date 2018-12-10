@@ -999,7 +999,7 @@ class Chat {
         if (data.data === 'reload') {
             if (!this.backlogloading) {
                 const retryMilli = Math.floor(Math.random() * 4000) + 4000
-                setTimeout(() => window.location.reload(false), retryMilli)
+                setTimeout(() => window.location.reload(true), retryMilli)
                 MessageBuilder.broadcast(`Restart incoming in ${Math.round(retryMilli/1000)} seconds ...`).into(this)
             }
         } else {
