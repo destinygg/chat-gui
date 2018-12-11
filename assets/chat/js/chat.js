@@ -33,7 +33,7 @@ const errorstrings = new Map([
     ['invalidmsg', 'The message was invalid'],
     ['throttled', 'Throttled! You were trying to send messages too fast'],
     ['duplicate', 'The message is identical to the last one you sent'],
-    ['muted', 'You are muted (subscribing removes mutes). Check your profile for more information.'],
+    ['muted', 'You are muted (mutes are always temporary). Subscribing removes mutes: Check your profile for more information.'],
     ['submode', 'The channel is currently in subscriber only mode'],
     ['needbanreason', 'Providing a reason for the ban is mandatory'],
     ['banned', 'You have been banned (subscribing removes non-permanent bans). Check your profile for more information.'],
