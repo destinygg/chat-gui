@@ -155,12 +155,10 @@ const commandsinfo = new Map([
         alias: ['m']
     }],
     ['vote', {
-        desc: 'Start a vote.',
-        alias: ['v']
+        desc: 'Start a vote.'
     }],
     ['votestop', {
-        desc: 'Stop a vote you started.',
-        alias: ['vs']
+        desc: 'Stop a vote you started.'
     }],
 ])
 const banstruct = {

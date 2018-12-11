@@ -1305,6 +1305,9 @@ body.pref-fontscale[data-fontscale="10"] {
         margin: 4px;
         color: $text-color;
     }
+    .vote-header {
+        display: flex;
+    }
     .vote-label {
         color: $text-color2;
         margin: 0.75em 0 0 0;
@@ -1314,6 +1317,7 @@ body.pref-fontscale[data-fontscale="10"] {
     .vote-question {
         display: block;
         margin: 0 0 0.5em 0;
+        flex: 1;
         strong {
             margin-left: 0.5em;
             background: $color-surface-dark3;
@@ -1342,7 +1346,7 @@ body.pref-fontscale[data-fontscale="10"] {
         padding: 4px;
     }
     .opt-bar-inner {
-        min-height: 1.3em;
+        min-height: 1.4em;
         box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
         transition: all 750ms;
         background-color: $color-darkred;

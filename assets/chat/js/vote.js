@@ -8,8 +8,9 @@ const VOTE_STOP = /^\/votestop/i;
 const VOTE_CONJUNCTION = /\bor\b/i;
 const VOTE_INTERROGATIVE = /^(how|why|when|what|where)\b/i;
 const VOTE_TIME = /\b([0-9]+(?:m|s)?)$/i;
+const VOTE_DEFAULT_TIME = 30000;
 const VOTE_MAX_TIME = 10*60*1000;
-const VOTE_MIN_TIME = 30000;
+const VOTE_MIN_TIME = 5000;
 
 function parseQuestionAndTime(rawQuestion) {
     let time
@@ -24,11 +25,11 @@ function parseQuestionAndTime(rawQuestion) {
                 time = parseInt(match[0]) * 60 * 1000
                 break;
             default:
-                time = VOTE_MIN_TIME
+                time = VOTE_DEFAULT_TIME
                 break;
         }
     } else {
-        time = VOTE_MIN_TIME
+        time = VOTE_DEFAULT_TIME
     }
     const question = parseQuestion(rawQuestion.trim())
     question.time = Math.max(VOTE_MIN_TIME, Math.min(time, VOTE_MAX_TIME));
@@ -170,9 +171,13 @@ class ChatVote {
         clearTimeout(this.timerEndVote)
         clearTimeout(this.timerHideVote)
         clearInterval(this.timerHeartBeat)
+
         const firstIndex = this.vote.totals.reduce((max, x, i, arr) => x > arr[max] ? i : max, 0)
-        this.ui.vote.find(`.opt:nth-child(${firstIndex+1})`).addClass('opt-winner')
-        this.ui.vote.find(`.opt-choice:nth-child(${firstIndex+1})`).addClass('opt-winner')
+        const options = this.ui.vote.find('.opt-options')
+        const choices = this.ui.vote.find('.opt-choices')
+        options.find(`.opt:nth-child(${firstIndex+1})`).addClass('opt-winner')
+        choices.find(`.opt-choice:nth-child(${firstIndex+1})`).addClass('opt-winner')
+
         this.ui.label.html(`Vote ended! ${this.vote.votes.size} votes cast.`)
         this.ui.vote.addClass('vote-completed')
         this.timerHideVote = setTimeout(() => this.hide(), Math.min(this.vote.time, new Date() - this.vote.start))
@@ -196,16 +201,21 @@ class ChatVote {
 
     buildVoteFrame() {
         const question = this.vote.question
+        const tagQuestion = $(`<span />`).text(question.question)[0]
+        const tagOptions = (question.options.map((v, i) => {
+            const tagVal = $(`<span/>`).text(v)[0]
+            return `<span class="opt-choice"><strong>${i+1}</strong> ${tagVal.outerHTML}</span>`
+        }).join(' '))
         return $(``
             +`<div class="vote-frame">`
-                +`<div style="display: flex;">`
-                    +`<label style="flex:1;" class="vote-question">`
-                        + `<span>${question.question}</span>`
-                        + `<span>`+ (question.options.map((v, i) => `<span class="opt-choice"><strong>${i+1}</strong> ${v}</span>`).join(' ')) +`</span>`
+                +`<div class="vote-header">`
+                    +`<label class="vote-question">`
+                        + tagQuestion.outerHTML
+                        + `<span class="opt-choices">${tagOptions}</span>`
                     +`</label>`
                     +`<label class="vote-close" title="Close"></label>`
                 +`</div>`
-                +`<div>`
+                +`<div class="opt-options">`
                     + question.options.reduce((a, v, i) => {
                         a += `<div class="opt">`
                         a +=    `<div class="opt-info"><strong>${i+1}</strong></div>`
