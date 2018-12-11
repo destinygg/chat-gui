@@ -1330,13 +1330,21 @@ body.pref-fontscale[data-fontscale="10"] {
         align-items: center;
     }
     .opt-info {
+        border-radius: 4px;
         margin-right: 0.25em;
+        padding: 0 0.25em;
     }
     .opt-bar {
         background-color: $color-surface-dark3;
         overflow: hidden;
         padding: 4px 4px 0 4px;
         flex: 1;
+    }
+    .opt:hover, .opt:active {
+        cursor: pointer;
+    }
+    .opt:hover .opt-bar, .opt:active .opt-bar {
+        background-color: $color-surface-dark2;
     }
     .opt:first-child .opt-bar {
         border-radius: 6px 6px 0 0;
@@ -1356,6 +1364,10 @@ body.pref-fontscale[data-fontscale="10"] {
         padding: 0 0.25em;
         text-align: end;
     }
+    .opt-marked .opt-info {
+        background-color: $color-darkred;
+        color: $text-color;
+    }
     .vote-completed {
         .opt {
             .opt-info {
@@ -1367,7 +1379,6 @@ body.pref-fontscale[data-fontscale="10"] {
             }
         }
         .opt.opt-winner {
-            opacity: 1;
             .opt-info {
                 color: $text-color1;
             }
@@ -1376,6 +1387,10 @@ body.pref-fontscale[data-fontscale="10"] {
                 background-color: $color-accent-light;
                 color: $text-color;
             }
+        }
+        .opt.opt-marked .opt-info {
+            background-color: $color-darkred;
+            color: $text-color;
         }
         .opt-choice {
             opacity: 0.25;

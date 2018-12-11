@@ -19,6 +19,7 @@ import Settings from './settings'
 import ChatWindow from './window'
 import ChatVote from './vote'
 
+const regexslashcmd = /^\/([a-z0-9]+)[\s]?/i
 const regextime = /(\d+(?:\.\d*)?)([a-z]+)?/ig
 const regexsafe = /[\-\[\]\/{}()*+?.\\^$|]/g
 const nickmessageregex = /(?:(?:^|\s)@?)([a-zA-Z0-9_]{3,20})(?=$|\s|[.?!,])/g
@@ -903,15 +904,21 @@ class Chat {
                     }
                     return;
                 } else if (this.chatvote.isMsgVoteCastFmt(textonly)) {
+                    // NOTE method returns false, if the GUI is hidden
                     if (this.chatvote.castVote(textonly, usr.username)) {
-                        // TODO method returns false, if the GUI is hidden
-                        // TODO we are absorbing the message here, but not doing anything with it
+                        if (usr.username === this.user.username) {
+                            this.chatvote.markVote(textonly, usr.username)
+                        }
                     }
                     return;
                 }
             } else if (this.chatvote.isMsgVoteStartFmt(data.data) && this.chatvote.canUserStartVote(usr)) {
-                if (this.chatvote.startVote(textonly, usr.username)) {
-                    // TODO what if vote state failed
+                if (!this.chatvote.startVote(textonly, usr.username)) {
+                    if (this.user.username === usr.username) {
+                        MessageBuilder.error('Your vote failed to start. See console for logs.')
+                    }
+                } else {
+                    MessageBuilder.info(`A vote has been started. Type ${this.chatvote.vote.totals.map((a, i) => i+1).join(' or ')} in chat to participate.`).into(this)
                 }
                 return;
             }
@@ -919,8 +926,7 @@ class Chat {
         // VOTE END
 
         const win = this.mainwindow
-        const isemote = this.emotePrefixes.has(textonly)
-        if(isemote && win.lastmessage !== null && Chat.remoteSlashCmdFromText(win.lastmessage.message) === textonly){
+        if(win.lastmessage !== null && this.emotePrefixes.has(textonly) && Chat.remoteSlashCmdFromText(win.lastmessage.message) === textonly){
             if(win.lastmessage.type === MessageTypes.EMOTE) {
                 this.mainwindow.lock()
                 win.lastmessage.incEmoteCount()
@@ -1048,26 +1054,28 @@ class Chat {
      * COMMANDS
      */
 
-    cmdSEND(str) {
-        if(str !== ''){
+    cmdSEND(raw) {
+        if(raw !== ''){
             const win = this.getActiveWindow(),
-                isme = str.substring(0, 4).toLowerCase() === '/me ',
-                iscommand = !isme && str.substring(0, 1) === '/' && str.substring(0, 2) !== '//';
+                matches = raw.match(regexslashcmd),
+                iscommand = matches && matches.length > 1,
+                ismecmd = iscommand && matches[1].toLowerCase() === 'me',
+                textonly = Chat.remoteSlashCmdFromText(raw);
 
             // COMMAND
-            if (iscommand) {
-                const command = iscommand ? str.split(' ', 1)[0] : '',
-                    normalized = command.substring(1).toUpperCase();
+            if (iscommand && !ismecmd) {
+                const command = matches[1].toUpperCase(),
+                    normalized = command.toUpperCase();
 
                 // Clear the input and add to history, before we do the emit
                 // This makes it possible for commands to change the input.value, else it would be cleared after the command is run.
-                this.inputhistory.add(str)
+                this.inputhistory.add(raw)
                 this.input.val('')
 
                 if (win !== this.mainwindow && normalized !== 'EXIT') {
                     MessageBuilder.error(`No commands in private windows. Try /exit`).into(this, win)
                 } else if (this.control.listeners.has(normalized)) {
-                    const parts = (str.substring(command.length + 1) || '').match(/([^ ]+)/g)
+                    const parts = (raw.substring(command.length + 1) || '').match(/([^ ]+)/g)
                     this.control.emit(normalized, parts || [])
                 } else {
                     MessageBuilder.error(`Unknown command. Try /help`).into(this, win)
@@ -1079,24 +1087,39 @@ class Chat {
             }
             // WHISPER
             else if (win !== this.mainwindow) {
-                MessageBuilder.message(str, this.user).into(this, win)
-                this.source.send('PRIVMSG', {nick: win.name, data: str})
+                MessageBuilder.message(raw, this.user).into(this, win)
+                this.source.send('PRIVMSG', {nick: win.name, data: raw})
+                this.input.val('')
+            }
+            // VOTE
+            else if (this.chatvote.isVoteStarted() && this.chatvote.isMsgVoteCastFmt(textonly)) {
+                if (this.chatvote.canVote(this.user.username)) {
+                    MessageBuilder.info(`Your vote has been cast!`).into(this)
+                    this.source.send('MSG', {data: raw})
+                    this.input.val('')
+                } else {
+                    MessageBuilder.error(`You have already voted!`).into(this)
+                    this.input.val('')
+                }
+            }
+            // EMOTE SPAM
+            else if (this.source.isConnected() && this.emotePrefixes.has(textonly)) {
+                // Its easier to deal with combos with the this.unresolved flow
+                this.source.send('MSG', {data: raw})
+                this.inputhistory.add(raw)
                 this.input.val('')
             }
             // MESSAGE
             else {
-                const textonly = (isme ? str.substring(4) : str).trim()
-                if (this.source.isConnected() && !this.emotePrefixes.has(textonly)) {
-                    // We add the message to the gui immediately
-                    // But we will also get the MSG event, so we need to make sure we dont add the message to the gui again.
-                    // We do this by storing the message in the unresolved array
-                    // The onMSG then looks in the unresolved array for the message using the nick + message
-                    // If found, the message is not added to the gui, its removed from the unresolved array and the message.resolve method is run on the message
-                    const message = MessageBuilder.message(str, this.user).into(this)
-                    this.unresolved.unshift(message)
-                }
-                this.source.send('MSG', {data: str})
-                this.inputhistory.add(str)
+                // We add the message to the gui immediately
+                // But we will also get the MSG event, so we need to make sure we dont add the message to the gui again.
+                // We do this by storing the message in the unresolved array
+                // The onMSG then looks in the unresolved array for the message using the nick + message
+                // If found, the message is not added to the gui, its removed from the unresolved array and the message.resolve method is run on the message
+                const message = MessageBuilder.message(raw, this.user).into(this)
+                this.unresolved.unshift(message)
+                this.source.send('MSG', {data: raw})
+                this.inputhistory.add(raw)
                 this.input.val('')
             }
         }
@@ -1109,7 +1132,7 @@ class Chat {
                 const str = '/vote ' + parts.join(' ')
                 this.unresolved.unshift(MessageBuilder.message(str, this.user))
                 this.source.send('MSG', {data: str})
-                //MessageBuilder.info('Vote started.').into(this)
+                // TODO if the chat isn't connected, the user has no warning of this action failing
             } else {
                 MessageBuilder.error('You do not have permission to start a vote.').into(this)
             }
@@ -1125,7 +1148,7 @@ class Chat {
                 const str = '/votestop'
                 this.unresolved.unshift(MessageBuilder.message(str, this.user))
                 this.source.send('MSG', {data: str})
-                //MessageBuilder.info('Vote stopped.').into(this)
+                // TODO if the chat isn't connected, the user has no warning of this action failing
             } else {
                 MessageBuilder.error('You do not have permission to stop this vote.').into(this)
             }
@@ -1581,10 +1604,7 @@ class Chat {
     }
 
     static remoteSlashCmdFromText(msg){
-        if (msg[0] === '/') {
-            return msg.replace(/^\/[A-z]+ /, '')
-        }
-        return msg;
+        return msg.replace(regexslashcmd, '').trim();
     }
 
     static extractNicks(text){

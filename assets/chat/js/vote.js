@@ -1,7 +1,6 @@
 import $ from 'jquery'
 import {throttle} from 'throttle-debounce'
 import UserFeatures from './features'
-import {MessageBuilder} from './messages'
 
 const VOTE_START = /^\/vote /i;
 const VOTE_STOP = /^\/votestop/i;
@@ -63,6 +62,11 @@ class ChatVote {
         this.timerEndVote = -1;
         this.timerHideVote = -1;
         this.ui.on('click touch', '.vote-close', () => this.hide())
+        this.ui.on('click touch', '.opt', e => {
+            if (this.voting) {
+                this.chat.cmdSEND($(e.currentTarget).index() + 1 + '')
+            }
+        })
         this.throttleVoteCast = throttle(250, false, () => { this.updateBars() })
     }
 
@@ -110,8 +114,12 @@ class ChatVote {
         return false
     }
 
+    canVote(username) {
+        return !this.vote.votes.has(username)
+    }
+
     castVote(opt, username) {
-        if (this.voting && !this.hidden && !this.vote.votes.has(username)) {
+        if (this.voting && !this.hidden && this.canVote(username)) {
             this.vote.votes.set(username, opt);
             this.vote.totals[opt-1]++;
             this.throttleVoteCast(opt)
@@ -156,8 +164,6 @@ class ChatVote {
 
             this.timerHeartBeat = setInterval(() => this.updateTimers(), 1000)
             this.timerEndVote = setTimeout(() => this.endVote(), this.vote.time)
-
-            MessageBuilder.info(`A vote has been started. Type ${this.vote.totals.map((a, i) => i+1).join(' or ')} in chat to participate.`).into(this.chat)
             return true
         } catch (e) {
             console.error(e)
@@ -182,6 +188,10 @@ class ChatVote {
         this.ui.vote.addClass('vote-completed')
         this.timerHideVote = setTimeout(() => this.hide(), Math.min(this.vote.time, new Date() - this.vote.start))
         this.vote = null
+    }
+
+    markVote(opt, username) {
+        this.ui.vote.find(`.opt-options .opt:nth-child(${opt})`).addClass('opt-marked')
     }
 
     updateTimers() {
@@ -217,7 +227,7 @@ class ChatVote {
                 +`</div>`
                 +`<div class="opt-options">`
                     + question.options.reduce((a, v, i) => {
-                        a += `<div class="opt">`
+                        a += `<div class="opt" title="Vote">`
                         a +=    `<div class="opt-info"><strong>${i+1}</strong></div>`
                         a +=    `<div class="opt-bar"><div class="opt-bar-inner" style="width: 0;"><span class="opt-bar-value">0</span></div></div>`
                         a += `</div>`
