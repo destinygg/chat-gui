@@ -20,6 +20,8 @@ const chat = new Chat({
     cacheKey: Chat.reqParam('c') || (new Date()).getTime()
 });
 
+const html = $('body,html');
+
 switch ((Chat.reqParam('t') || 'embed').toUpperCase()) {
 
     case 'EMBED':
@@ -32,7 +34,7 @@ switch ((Chat.reqParam('t') || 'embed').toUpperCase()) {
         break;
 
     case 'STREAM':
-        $('body,html').css('background', 'transparent')
+        html.css('background', 'transparent')
         chat.withGui(require('./views/stream.html'))
             .then(() => {
                 chat.settings.set('fontscale', Chat.reqParam('f') || 1)
@@ -40,6 +42,17 @@ switch ((Chat.reqParam('t') || 'embed').toUpperCase()) {
             })
             .then(() => chat.loadEmotesAndFlairs())
             .then(() => chat.loadHistory())
+            .then(() => chat.connect())
+        break;
+
+    case 'VOTE':
+        html.css('background', 'transparent')
+        chat.withGui(`
+                <div id="chat" class="chat votechat">
+                    <div id="chat-vote-frame"></div>
+                    <div id="chat-output-frame" style="display: none;"></div>
+                </div>
+            `)
             .then(() => chat.connect())
         break;
 }
