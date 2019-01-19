@@ -59,8 +59,10 @@ function userComparator(a, b){
     if (v1 > v2) return -1
     if (v1 < v2) return 1
 
-    if (u1.nick < u2.nick) return -1
-    if (u1.nick > u2.nick) return 1
+    let u1Nick = u1.nick.toLowerCase(), u2Nick = u2.nick.toLowerCase()
+
+    if (u1Nick < u2Nick) return -1
+    if (u1Nick > u2Nick) return 1
     return 0
 }
 
