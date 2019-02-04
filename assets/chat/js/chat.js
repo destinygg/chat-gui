@@ -887,7 +887,9 @@ class Chat {
         const normalized = data.nick.toLowerCase();
         if (this.users.has(normalized)){
             this.users.delete(normalized);
-            this.autocomplete.remove(data.nick);
+            if (!this.emotes.has(data.nick)) {
+                this.autocomplete.remove(data.nick);
+            }
         }
     }
 
