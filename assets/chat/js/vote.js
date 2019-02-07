@@ -186,7 +186,7 @@ class ChatVote {
 
         this.ui.label.html(`Vote ended! ${this.vote.votes.size} votes cast.`)
         this.ui.vote.addClass('vote-completed')
-        this.timerHideVote = setTimeout(() => this.hide(), Math.min(this.vote.time, new Date() - this.vote.start))
+        this.timerHideVote = setTimeout(() => this.hide(), 7000)
         this.vote = null
     }
 
