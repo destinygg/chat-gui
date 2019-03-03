@@ -254,11 +254,5 @@ class ChatEmoteMessage extends ChatMessage {
 
 export {
     MessageBuilder,
-    MessageTypes,
-    /*
-    ChatUIMessage,
-    ChatMessage,
-    ChatUserMessage,
-    ChatEmoteMessage
-    */
+    MessageTypes
 };

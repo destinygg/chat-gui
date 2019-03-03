@@ -663,8 +663,6 @@ class Chat {
 
         // Populate the tag, mentioned users and highlight for this $message.
         if(message.type === MessageTypes.USER){
-            // strip off `/` if message starts with `//`
-            message.message = message.message.substring(0, 2) === '//' ? message.message.substring(1) : message.message
             // check if message is `/me `
             message.slashme = message.message.substring(0, 4).toLowerCase() === '/me '
             // check if this is the current users message
@@ -892,7 +890,7 @@ class Chat {
     }
 
     onMSG(data){
-        const textonly = Chat.remoteSlashCmdFromText(data.data)
+        const textonly = Chat.removeSlashCmdFromText(data.data)
         const usr = this.users.get(data.nick.toLowerCase())
 
         // VOTE START
@@ -926,7 +924,7 @@ class Chat {
         // VOTE END
 
         const win = this.mainwindow
-        if(win.lastmessage !== null && this.emotePrefixes.has(textonly) && Chat.remoteSlashCmdFromText(win.lastmessage.message) === textonly){
+        if(win.lastmessage !== null && this.emotePrefixes.has(textonly) && Chat.removeSlashCmdFromText(win.lastmessage.message) === textonly){
             if(win.lastmessage.type === MessageTypes.EMOTE) {
                 this.mainwindow.lock()
                 win.lastmessage.incEmoteCount()
@@ -1060,7 +1058,7 @@ class Chat {
                 matches = raw.match(regexslashcmd),
                 iscommand = matches && matches.length > 1,
                 ismecmd = iscommand && matches[1].toLowerCase() === 'me',
-                textonly = Chat.remoteSlashCmdFromText(raw);
+                textonly = Chat.removeSlashCmdFromText(raw);
 
             // COMMAND
             if (iscommand && !ismecmd) {
@@ -1603,7 +1601,7 @@ class Chat {
         win.on('hide', () => conv.open = false)
     }
 
-    static remoteSlashCmdFromText(msg){
+    static removeSlashCmdFromText(msg){
         return msg.replace(regexslashcmd, '').trim();
     }
 
