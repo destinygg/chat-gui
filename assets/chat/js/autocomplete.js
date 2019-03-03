@@ -237,10 +237,14 @@ class ChatAutoComplete {
         return data
     }
 
-    remove(str){
+    remove(str, userOnly=false){
         const bucket = this.buckets.get(getBucketId(str))
-        if(bucket && bucket.has(str))
-            bucket.delete(str)
+        if (bucket && bucket.has(str)) {
+            const a = bucket.get(str)
+            if ((userOnly && !a.isemote) || !userOnly) {
+                bucket.delete(str)
+            }
+        }
     }
 
     select(index){
