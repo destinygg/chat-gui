@@ -8,7 +8,7 @@ const el = document.createElement('div');
 
 class HtmlTextFormatter {
 
-    format(chat, str, message=null){
+    format(chat, str/*, message=null*/){
         el.textContent = str;
         return el.innerHTML;
     }
@@ -120,7 +120,7 @@ class UrlFormatter {
                 url = self.encodeUrl(m[0]);
                 const extra = self.encodeUrl(decodedUrl.substring(m[0].length));
                 const href = scheme + url;
-                return `<a target="_blank" class="chat-link externallink ${extraclass}" href="${href}" rel="nofollow">${url}</a>${extra}`;
+                return `<a target="_blank" class="externallink ${extraclass}" href="${href}" rel="nofollow">${url}</a>${extra}`;
             }
             return url;
         });
@@ -137,11 +137,11 @@ class EmbedUrlFormatter {
         } catch (e) {
             console.error(e)
         }
-        this.bigscreenregex = new RegExp(/(^|[^\/?=]\b)(bigscreen(#twitch\/([A-z0-9_]{3,24})))\b/, "g")
+        this.bigscreenregex = new RegExp(/(^|[^\/?=]\b)(bigscreen((#twitch|#youtube)\/([A-z0-9_]{3,24})))\b/, "g")
     }
 
     format(chat, str/*, message=null*/) {
-        return str.replace(this.bigscreenregex, '$1<a class="chat-link bookmarklink" href="' + this.url + '$3" target="_top">$2</a>')
+        return str.replace(this.bigscreenregex, '$1<a class="externallink bookmarklink" href="' + this.url + '$3" target="_top">$2</a>')
     }
 
 }
