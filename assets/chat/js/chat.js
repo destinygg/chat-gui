@@ -24,7 +24,9 @@ const regextime = /(\d+(?:\.\d*)?)([a-z]+)?/ig
 const regexsafe = /[\-\[\]\/{}()*+?.\\^$|]/g
 const nickmessageregex = /(?:(?:^|\s)@?)([a-zA-Z0-9_]{3,20})(?=$|\s|[.?!,])/g
 const nickregex = /^[a-zA-Z0-9_]{3,20}$/
-const nsfwnsfl = new RegExp(`\\b(?:NSFL|NSFW)\\b`, 'i')
+const nsfwnsflregex = new RegExp(`\\b(?:NSFL|NSFW)\\b`, 'i')
+const nsfwregex = new RegExp(`\\b(?:NSFW)\\b`, 'i')
+const nsflregex = new RegExp(`\\b(?:NSFL)\\b`, 'i')
 const tagcolors = ['green', 'yellow', 'orange', 'red', 'purple', 'blue', 'sky', 'lime', 'pink', 'black']
 const errorstrings = new Map([
     ['unknown', 'Unknown error, this usually indicates an internal problem :('],
@@ -80,6 +82,7 @@ const settingsdefault = new Map([
     ['autocompletehelper', true],
     ['taggedvisibility', false],
     ['hidensfw', false],
+    ['hidensfl', false],
     ['fontscale', 'auto']
 ])
 const commandsinfo = new Map([
@@ -623,7 +626,7 @@ class Chat {
             .forEach(key => this.ui.toggleClass(`pref-${key}`, this.settings.get(key)));
 
         // Update maxlines
-        [...this.windows].forEach(w => w.maxlines = this.settings.get('maxlines'));
+        [...this.windows.values()].forEach(w => w.maxlines = this.settings.get('maxlines'));
 
         // Font scaling
         // TODO document.body :(
@@ -686,6 +689,7 @@ class Chat {
             );
         }
 
+        // This looks odd, although it would be a correct implementation
         /* else if(win.lastmessage && win.lastmessage.type === message.type && [MessageTypes.ERROR,MessageTypes.INFO,MessageTypes.COMMAND,MessageTypes.STATUS].indexOf(message.type)){
             message.continued = true
         }*/
@@ -810,9 +814,14 @@ class Chat {
     }
 
     ignored(nick, text=null){
-        return this.ignoring.has(nick.toLowerCase()) ||
-            (text !== null && this.settings.get('ignorementions') && this.ignoreregex && this.ignoreregex.test(text)) ||
-            (text !== null && this.settings.get('hidensfw') && nsfwnsfl.test(text));
+        let ignore = this.ignoring.has(nick.toLowerCase());
+        if (!ignore && text !== null) {
+            return (this.settings.get('ignorementions') && this.ignoreregex && this.ignoreregex.test(text))
+                || (this.settings.get('hidensfw') && this.settings.get('hidensfl') && nsfwnsflregex.test(text))
+                || (this.settings.get('hidensfl') && nsflregex.test(text))
+                || (this.settings.get('hidensfw') && nsfwregex.test(text))
+        }
+        return ignore
     }
 
     ignore(nick, ignore=true){
@@ -1272,8 +1281,8 @@ class Chat {
             MessageBuilder.info(`Invalid argument - /${command} is expecting a number`).into(this);
         } else {
             this.settings.set('maxlines', newmaxlines);
-            MessageBuilder.info(`Current maximum lines: ${this.settings.get('maxlines')}`).into(this);
             this.applySettings();
+            MessageBuilder.info(`Set maximum lines to ${newmaxlines}`).into(this);
         }
     }
 

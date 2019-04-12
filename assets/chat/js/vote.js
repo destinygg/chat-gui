@@ -67,7 +67,7 @@ class ChatVote {
                 this.chat.cmdSEND($(e.currentTarget).index() + 1 + '')
             }
         })
-        this.throttleVoteCast = throttle(250, false, () => { this.updateBars() })
+        this.throttleVoteCast = throttle(100, false, () => { this.updateBars() })
     }
 
     hide() {
@@ -75,7 +75,6 @@ class ChatVote {
             this.hidden = true
             this.chat.mainwindow.lock()
             this.ui.removeClass('active')
-            this.ui.hide()
             this.chat.mainwindow.unlock()
         }
     }
@@ -85,7 +84,6 @@ class ChatVote {
             this.hidden = false
             this.chat.mainwindow.lock()
             this.ui.addClass('active')
-            this.ui.show()
             this.chat.mainwindow.unlock()
         }
     }
@@ -145,7 +143,7 @@ class ChatVote {
                 user: username,
             }
 
-            let html = this.buildVoteFrame()
+            const html = this.buildVoteFrame()
             this.ui.vote = html
             this.ui.label = html.find('.vote-label')
             this.ui.bars = html.find('.opt').toArray().map(e => {
