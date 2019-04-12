@@ -131,11 +131,17 @@ class UrlFormatter {
 class EmbedUrlFormatter {
 
     constructor(){
+        try {
+            const location = (window.top || window.parent || window).location
+            this.url = (location.protocol + '//' + location.host + location.pathname + (location.search ? location.search : "")).replace(/\/$/, '')
+        } catch (e) {
+            console.error(e)
+        }
         this.bigscreenregex = new RegExp(/\b(bigscreen(#twitch\/([A-z0-9_]{3,24})))\b/, "g")
     }
 
-    format(chat, str/*, message=null*/){
-        return str.replace(this.bigscreenregex, '<a class="chat-link bookmarklink" href="$2" target="_top">$1</a>')
+    format(chat, str/*, message=null*/) {
+        return str.replace(this.bigscreenregex, '<a class="chat-link bookmarklink" href="' + this.url + '$2" target="_top">$1</a>')
     }
 
 }
