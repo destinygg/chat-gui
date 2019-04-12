@@ -120,10 +120,22 @@ class UrlFormatter {
                 url = self.encodeUrl(m[0]);
                 const extra = self.encodeUrl(decodedUrl.substring(m[0].length));
                 const href = scheme + url;
-                return `<a target="_blank" class="externallink ${extraclass}" href="${href}" rel="nofollow">${url}</a>${extra}`;
+                return `<a target="_blank" class="chat-link externallink ${extraclass}" href="${href}" rel="nofollow">${url}</a>${extra}`;
             }
             return url;
         });
+    }
+
+}
+
+class EmbedUrlFormatter {
+
+    constructor(){
+        this.bigscreenregex = new RegExp(/\b(bigscreen(#twitch\/([A-z0-9_]{3,24})))\b/, "g")
+    }
+
+    format(chat, str/*, message=null*/){
+        return str.replace(this.bigscreenregex, '<a class="chat-link bookmarklink" href="$2" target="_top">$1</a>')
     }
 
 }
@@ -133,5 +145,6 @@ export {
     GreenTextFormatter,
     HtmlTextFormatter,
     MentionedUserFormatter,
-    UrlFormatter
+    UrlFormatter,
+    EmbedUrlFormatter
 }

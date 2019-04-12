@@ -272,21 +272,21 @@ hr {
     .greentext {
         color: $color-green-text;
     }
-    .externallink {
+    .chat-link {
         border-style: solid;
         border-color: transparent;
         border-width: 1px 0 1px 0;
     }
-    .externallink {
+    .chat-link {
         color: $color-link;
         position: relative;
         z-index: 120;
     }
-    .externallink:visited {
+    .chat-link:visited {
         color: $color-link-visited;
     }
-    .externallink:hover,
-    .externallink:focus {
+    .chat-link:hover,
+    .chat-link:focus {
         color: $color-link-hover;
     }
     .nsfw-link {
@@ -1316,8 +1316,8 @@ button.btn {
         animation: msg-slide-in 0.15s cubic-bezier(0.72, 0.03, 0.45, 1);
     }
 
-    a.externallink,
-    a.externallink:hover {
+    a.chat-link,
+    a.chat-link:hover {
         color: $color-accent-light;
     }
 }
