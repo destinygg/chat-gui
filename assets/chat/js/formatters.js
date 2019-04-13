@@ -137,11 +137,11 @@ class EmbedUrlFormatter {
         } catch (e) {
             console.error(e)
         }
-        this.bigscreenregex = new RegExp(/([\s|^])((#twitch|#youtube)\/(?:[A-z0-9_]{3,24}))\b/, "g")
+        this.bigscreenregex = new RegExp(/(^|\s)((#twitch|#youtube)\/(?:[A-z0-9_]{3,24}))\b/, "g")
     }
 
     format(chat, str/*, message=null*/) {
-        return str.replace(this.bigscreenregex, '$1<a class="externallink bookmarklink" href="' + this.url + '$2" target="_top">$2</a>')
+        return str.replace(this.bigscreenregex, ' $1<a class="externallink bookmarklink" href="' + this.url + '$2" target="_top">$2</a>')
     }
 
 }
