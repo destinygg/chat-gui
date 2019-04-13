@@ -137,7 +137,7 @@ class EmbedUrlFormatter {
         } catch (e) {
             console.error(e)
         }
-        this.bigscreenregex = new RegExp(/(^|\s)((#twitch|#twitch-vod|#youtube)\/(?:[A-z0-9_\-]{3,64}))\b/, "g")
+        this.bigscreenregex = new RegExp(/(^|\s)((#twitch|#twitch-vod|#twitch-clip|#youtube)\/(?:[A-z0-9_\-]{3,64}))\b/, "g")
     }
 
     format(chat, str/*, message=null*/) {
