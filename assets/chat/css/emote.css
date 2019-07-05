@@ -1,0 +1,27 @@
+/* Instead of having multiple emotes
+with the same background, make it one CSS 
+http://jsfiddle.net/qbs438rh/ */
+
+.emote.FREEDOM, .emote.FREEDOM2, .emote.BecauseOneIsNotEnough, .emote.FREEDOM3, .emote.TRUMPED {
+        text-align: center;
+        width: 40px;
+        max-height: 28px;
+        display: block;
+        background-image: url('data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAICAgICAgICAgIDAgICAwQDAgIDBAUEBAQEBAUGBQUFBQUFBgYHBwgHBwYJCQoKCQkMDAwMDAwMDAwMDAwMDAz/2wBDAQMDAwUEBQkGBgkNCgkKDQ8ODg4ODw8MDAwMDA8PDAwMDAwMDwwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAz/wAARCAAcADUDAREAAhEBAxEB/8QAGwABAAICAwAAAAAAAAAAAAAAAAEIAgcDBAX/xAA2EAAABQEDBwsDBQAAAAAAAAABAgMEBQAGBxEWFyhYaJWjCBITISQxWZLR0tMUFSUiIzVRk//EABwBAQACAgMBAAAAAAAAAAAAAAABBwIGAwUIBP/EADwRAAADAQoKCQMFAAAAAAAAAAABAhEDBAUSEyEiMZLRFBUlMlNVYmWR4kFCUVJUVmGhogZj4XOBsbLj/9oADAMBAAIRAxEAPwDSj2OijkmRcxyJzO5tWTlTvGiLUVLSpKSH07x+RMOwWpKGHQ2bT7IuAfqDHvsVK1TMOomFO2jRaztcvu5xfxrppI2zdp/vSqnr2ahzrx0Wo+WUUii9MpNfdnPStm6a42pBRXmPVUgDmp2uDqAtlg7GbqEQ76xJSiKvoZX1Jpv0vvZw5IqeztOrpnmrr2R71gYuMVvCsW0Nda7vYjXto5J9OXcRjVFNCWmTw7z6h1JPgL0kbOJh+47hkuztiF5xAxGuthw4zwdYyY9FJEls5pjkyKRzKQVZOhzmNi+jnRTlDL2ND4wQ6Zyxk0kNQppHP1s1nq0XNyXsl4aU9vAfbVbRUeH9k3i+sPfPmJFkMl7JeGlPbwH20io8P/W8MPfPmJFkMl7JeGlPbwH20io8P7JvDD3z5iRZDJeyXhpT28B9tIqPD+ybww98+YkWRQ13IxaRJYgO0G52zhaz3NTIV6LQ6qkgJYMpzF/JJLYlHKse0NxEvNDDm424lBtKY6m1nPm0vRmhqPiPL5rKecvbam/P4Gbh9DlduSkeM0UyLDZoqZEwWImoJ1sIAi2GKyJgEBywHtJAHAA7sYSlTCaR1N6fSl/hUM4yW1lX2J9Zq/cd6zb2zQWzsg/mrST1mYmHlnMVJ2usgqolORAoRrsCRbVoiXCURKcSlPPnwWdgPRnDCuthw4jwdYxmRGSTmIzPOTSLut0ZTJrG2/QaHV0h57E4OTk7OjVsQ6skjKTU2PP1a07QshlPcjrOco3yu/Sq3lEd5dk7h6OwOF9Wwd8QynuR1nOUb5XfpSUR3l2TuDA4X1bB3xDKe5HWc5Rvld+lJRHeXZO4MDhfVsHfEMp7kdZzlG+V36UlEd5dk7gwOF9Wwd8RvXOve51aedz3UGAfjWHd/nXLKOulRw5hquIYM1E+7S7wzr3ua+lz/wDX8aw+Oko66VHDmDEMGaifdpd4Z173NfS5/drD46SjrpUcOYMQwZqJ92l3hnYvd19Ln92sPjqJR10qOHMJxFBmon3aXeGdi93X0uf3aw+Oko66VHDmDEUGaifdpd4Z2L3dfS5/drD46SjrpUcOYMRQZqJ92l3hnYvd19Ln92sPjpKOulRw5gxFBmon3aXeM9HvZa4tfRR2ROXd6Bo97LXFpR2Qy7vQRo97LXFpR2Qy7vQNHvZa4tKOyGXd6CdHvZa4tKOyGXd6Bo97LXFpR2Qy7vQNHzZa4tKOyGXd6D//2Q==');
+}
+
+/* Make an emote 'lag' into appearance 
+https://jsfiddle.net/519ajf4z/ */
+
+@keyframes LAG-anim {
+    0% {-webkit-mask-image: linear-gradient(to top, transparent 100%, black 0%);}
+    20% {-webkit-mask-image: linear-gradient(to top, transparent 80%, black 0%);}
+    40% {-webkit-mask-image: linear-gradient(to top, transparent 60%, black 0%);}
+    60% {-webkit-mask-image: linear-gradient(to top, transparent 40%, black 0%);}
+    80% {-webkit-mask-image: linear-gradient(to top, transparent 20%, black 0%);}
+    100% {-webkit-mask-image: linear-gradient(to top, transparent 0%, black 0%);}
+}
+
+.emote.LIES, .emote.LAG {
+    animation: LAG-anim 2.5s 2;
+}
