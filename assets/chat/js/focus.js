@@ -18,7 +18,11 @@ class ChatUserFocus {
         if(t.hasClass('chat-user')){
             if(!this.chat.settings.get('focusmentioned'))
                 this.toggleFocus(t.closest('.msg-user').data('username'), true);
-            this.toggleFocus(t.text());
+
+	    // Don't toggle focux again if user typed their own name.
+	    if(t.closes('.msg-user').data('username') != t.text()) {
+            	this.toggleFocus(t.text());
+	    }
         } else if(t.hasClass('user')){
             this.toggleFocus(t.text());
         } else if(this.focused.length > 0) {
