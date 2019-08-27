@@ -20,7 +20,7 @@ class ChatUserFocus {
                 this.toggleFocus(t.closest('.msg-user').data('username'), true);
 
 	    // Don't toggle focus again if user typed their own name.
-	    if(t.closes('.msg-user').data('username') != t.text()) {
+	    if(t.closest('.msg-user').data('username') != t.text()) {
             	this.toggleFocus(t.text());
 	    }
         } else if(t.hasClass('user')){
