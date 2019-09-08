@@ -1009,7 +1009,7 @@ class Chat {
         // TODO kind of ... hackey
         if (data.data === 'reload') {
             if (!this.backlogloading) {
-                const retryMilli = Math.floor(Math.random() * 4000) + 4000
+                const retryMilli = Math.floor(Math.random() * 30000) + 4000
                 setTimeout(() => window.location.reload(true), retryMilli)
                 MessageBuilder.broadcast(`Restart incoming in ${Math.round(retryMilli/1000)} seconds ...`).into(this)
             }
