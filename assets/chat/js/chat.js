@@ -480,7 +480,10 @@ class Chat {
         this.loadingscrn.fadeOut(250, () => this.loadingscrn.remove())
         this.mainwindow.updateAndPin()
 
+        window.addEventListener('beforeunload', (event) => ChatStore.write('chat.unsentMessage', this.input.val()))
+
         this.input.focus().attr('placeholder', `Write something ...`)
+        this.input.val(ChatStore.read('chat.unsentMessage') ? ChatStore.read('chat.unsentMessage') : null)
         MessageBuilder.status(`Welcome to DGG chat`).into(this)
         return Promise.resolve(this)
     }
@@ -1128,6 +1131,7 @@ class Chat {
                 this.source.send('MSG', {data: raw})
                 this.inputhistory.add(raw)
                 this.input.val('')
+                if(ChatStore.read('chat.unsentMessage') !== null) ChatStore.write('chat.unsentMessage', null)
             }
         }
     }
