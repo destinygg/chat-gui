@@ -1245,10 +1245,13 @@ class Chat {
                 nick   : parts[0],
                 reason : parts.slice(2, parts.length).join(' ')
             };
-            if(command === 'IPBAN' || /^perm/i.test(parts[1]))
-                payload.ispermanent = (command === 'IPBAN' || /^perm/i.test(parts[1]));
+            if(/^perm/i.test(parts[1]))
+                payload.ispermanent = true;
             else
                 payload.duration = Chat.parseTimeInterval(parts[1]);
+
+            payload.banip = command === 'IPBAN';
+
             this.source.send('BAN', payload);
         }
     }
