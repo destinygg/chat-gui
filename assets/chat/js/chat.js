@@ -184,7 +184,8 @@ class Chat {
             url: '',
             api: {base: ''},
             cdn: {base: ''},
-            cacheKey: ''
+            cacheKey: '',
+            banAppealUrl: null
         }, config)
         this.ui = null;
         this.css = null;
