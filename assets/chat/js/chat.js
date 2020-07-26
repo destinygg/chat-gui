@@ -991,7 +991,15 @@ class Chat {
         if(data === 'toomanyconnections' || data === 'banned') {
             this.source.retryOnDisconnect = false
         }
-        MessageBuilder.error(errorstrings.get(data) || data).into(this, this.getActiveWindow())
+
+        let messageText = errorstrings.get(data) || data
+
+        // Append ban appeal hint if a URL was provided.
+        if (data === 'banned' && this.config.banAppealUrl) {
+            messageText += ` Visit ${this.config.banAppealUrl} to appeal.`
+        }
+
+        MessageBuilder.error(messageText).into(this, this.getActiveWindow())
     }
 
     onSOCKETERROR(e){
