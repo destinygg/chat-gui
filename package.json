@@ -58,8 +58,8 @@
     "ws": "^6.2.1"
   },
   "engines": {
-    "node": "~5.0.2",
-    "npm": "~3.3.12"
+    "node": ">=5.0.2",
+    "npm": ">=3.3.12"
   },
   "optionalDependencies": {
     "bufferutil": "^4.0.0",
