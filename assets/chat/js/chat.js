@@ -985,17 +985,17 @@ class Chat {
         }
     }
 
-    // NOTE this is an event that the chat server sends `ERR "$error"`
     // not to be confused with an error the chat.source may send onSOCKETERROR.
     onERR(data){
-        if(data === 'toomanyconnections' || data === 'banned') {
+        const desc = data.description
+        if(desc === 'toomanyconnections' || desc === 'banned') {
             this.source.retryOnDisconnect = false
         }
 
-        let messageText = errorstrings.get(data) || data
+        let messageText = errorstrings.get(desc) || desc
 
         // Append ban appeal hint if a URL was provided.
-        if (data === 'banned' && this.config.banAppealUrl) {
+        if (desc === 'banned' && this.config.banAppealUrl) {
             messageText += ` Visit ${this.config.banAppealUrl} to appeal.`
         }
 
