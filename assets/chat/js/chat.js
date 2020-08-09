@@ -37,10 +37,8 @@ const errorstrings = new Map([
     ['invalidmsg', 'The message was invalid'],
     ['throttled', 'Throttled! You were trying to send messages too fast'],
     ['duplicate', 'The message is identical to the last one you sent'],
-    ['muted', 'You are muted (mutes are always temporary). Subscribing removes mutes: Check your profile for more information.'],
     ['submode', 'The channel is currently in subscriber only mode'],
     ['needbanreason', 'Providing a reason for the ban is mandatory'],
-    ['banned', 'You have been banned (subscribing removes non-permanent bans). Check your profile for more information.'],
     ['privmsgbanned', 'Cannot send private messages while banned'],
     ['requiresocket', 'This chat requires WebSockets'],
     ['toomanyconnections', 'Only 5 concurrent connections allowed'],
@@ -999,14 +997,25 @@ class Chat {
             this.source.retryOnDisconnect = false
         }
 
-        let messageText = errorstrings.get(desc) || desc
+        let messageText = ''
 
-        // Append ban appeal hint if a URL was provided.
-        if (desc === 'banned' && this.config.banAppealUrl) {
-            messageText += ` Visit ${this.config.banAppealUrl} to appeal.`
-        } else if (desc === 'muted') {
-            this.mutedtimer.setTimer(data.muteTimeLeft)
-            this.mutedtimer.startTimer()
+        switch (desc) {
+            case 'banned':
+                messageText = 'You have been banned (subscribing removes non-permanent bans). Check your profile for more information.'
+
+                // Append ban appeal hint if a URL was provided.
+                if (this.config.banAppealUrl) {
+                    messageText += ` Visit ${this.config.banAppealUrl} to appeal.`
+                }
+                break;
+            case 'muted':
+                messageText = `You are temporarily muted! You can chat again in ${this.mutedtimer.duration.humanize()}. Subscribe to remove the mute immediately.`
+
+                this.mutedtimer.setTimer(data.muteTimeLeft)
+                this.mutedtimer.startTimer()
+                break;
+            default:
+                messageText = errorstrings.get(desc) || desc    
         }
 
         MessageBuilder.error(messageText).into(this, this.getActiveWindow())
