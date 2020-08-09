@@ -18,6 +18,7 @@ import ChatStore from './store'
 import Settings from './settings'
 import ChatWindow from './window'
 import ChatVote from './vote'
+import MutedTimer from './mutedtimer'
 
 const regexslashcmd = /^\/([a-z0-9]+)[\s]?/i
 const regextime = /(\d+(?:\.\d*)?)([a-z]+)?/ig
@@ -355,6 +356,7 @@ class Chat {
         this.inputhistory = new ChatInputHistory(this)
         this.userfocus = new ChatUserFocus(this, this.css)
         this.mainwindow = new ChatWindow('main').into(this)
+        this.mutedtimer = new MutedTimer(this)
 
         this.ui.find('#chat-vote-frame:first').each((i, e) => {
             this.chatvote = new ChatVote(this, $(e))
@@ -949,9 +951,12 @@ class Chat {
     }
 
     onMUTE(data){
-        // data.data is the nick which has been banned, no info about duration
+        // data.data is the nick which has been banned
         if(this.user.username.toLowerCase() === data.data.toLowerCase()) {
             MessageBuilder.command(`You have been muted by ${data.nick}.`, data.timestamp).into(this)
+
+            this.mutedtimer.setTimer(data.duration)
+            this.mutedtimer.startTimer()
         } else {
             MessageBuilder.command(`${data.data} muted by ${data.nick}.`, data.timestamp).into(this)
         }
@@ -961,6 +966,8 @@ class Chat {
     onUNMUTE(data){
         if(this.user.username.toLowerCase() === data.data.toLowerCase()) {
             MessageBuilder.command(`You have been unmuted by ${data.nick}.`, data.timestamp).into(this)
+
+            this.mutedtimer.stopTimer()
         } else {
             MessageBuilder.command(`${data.data} unmuted by ${data.nick}.`, data.timestamp).into(this)
         }
@@ -997,6 +1004,9 @@ class Chat {
         // Append ban appeal hint if a URL was provided.
         if (desc === 'banned' && this.config.banAppealUrl) {
             messageText += ` Visit ${this.config.banAppealUrl} to appeal.`
+        } else if (desc === 'muted') {
+            this.mutedtimer.setTimer(data.muteTimeLeft)
+            this.mutedtimer.startTimer()
         }
 
         MessageBuilder.error(messageText).into(this, this.getActiveWindow())
