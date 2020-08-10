@@ -18,7 +18,7 @@ import ChatStore from './store'
 import Settings from './settings'
 import ChatWindow from './window'
 import ChatVote from './vote'
-import MutedTimer from './mutedtimer'
+import {isMuteActive, MutedTimer} from './mutedtimer'
 
 const regexslashcmd = /^\/([a-z0-9]+)[\s]?/i
 const regextime = /(\d+(?:\.\d*)?)([a-z]+)?/ig
@@ -953,8 +953,12 @@ class Chat {
         if(this.user.username.toLowerCase() === data.data.toLowerCase()) {
             MessageBuilder.command(`You have been muted by ${data.nick}.`, data.timestamp).into(this)
 
-            this.mutedtimer.setTimer(data.duration)
-            this.mutedtimer.startTimer()
+            // Every cached mute message calls `onMUTE()`. We perform this check
+            // to avoid setting the timer for mutes that have already expired.
+            if (isMuteActive(data)) {
+                this.mutedtimer.setTimer(data.duration)
+                this.mutedtimer.startTimer()
+            }
         } else {
             MessageBuilder.command(`${data.data} muted by ${data.nick}.`, data.timestamp).into(this)
         }

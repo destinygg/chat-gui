@@ -1,5 +1,20 @@
 import moment from 'moment'
 
+function isMuteActive(mute) {
+    // If either field is `undefined`, we don't have enough information to
+    // determine if the mute is expired.
+    if (mute.timestamp == undefined || mute.duration == undefined) {
+        return null
+    }
+
+    const now = moment()
+
+    // Note that `timestamp` is in milliseconds, but `duration` is in seconds.
+    let muteExpirationTime = moment(mute.timestamp)
+    muteExpirationTime.add(mute.duration, 'seconds')
+    return muteExpirationTime.isSameOrAfter(now)
+}
+
 class MutedTimer {
     constructor(chat) {
         this.chat = chat
@@ -67,4 +82,7 @@ class MutedTimer {
     }
 }
 
-export default MutedTimer
+export {
+    isMuteActive,
+    MutedTimer
+}
