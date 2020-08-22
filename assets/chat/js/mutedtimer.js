@@ -12,7 +12,7 @@ function isMuteActive(mute) {
     // Note that `timestamp` is in milliseconds, but `duration` is in seconds.
     let muteExpirationTime = moment(mute.timestamp)
     muteExpirationTime.add(mute.duration, 'seconds')
-    return muteExpirationTime.isSameOrAfter(now)
+    return muteExpirationTime.isAfter(now)
 }
 
 class MutedTimer {
