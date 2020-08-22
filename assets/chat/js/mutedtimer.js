@@ -30,7 +30,7 @@ class MutedTimer {
         this.ticking = true
 
         // Save old input placeholder text to restore when the timer stops.
-        this.oldInputPlaceholder = this.chat.input.focus().attr('placeholder')
+        this.oldInputPlaceholder = this.chat.input.attr('placeholder')
 
         // Update placeholder text immediately to account for delay when using
         // `setInterval()`.
@@ -59,7 +59,7 @@ class MutedTimer {
         clearTimeout(this.timerTimeout)
 
         this.duration = null
-        this.chat.input.focus().attr('placeholder', this.oldInputPlaceholder)
+        this.chat.input.attr('placeholder', this.oldInputPlaceholder)
     }
 
     setTimer(secondsLeft = 0) {
@@ -74,7 +74,7 @@ class MutedTimer {
     }
 
     updatePlaceholderText() {
-        this.chat.input.focus().attr('placeholder', this.getPlaceholderText())
+        this.chat.input.attr('placeholder', this.getPlaceholderText())
     }
 
     getPlaceholderText() {
