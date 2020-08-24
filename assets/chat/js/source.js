@@ -107,7 +107,7 @@ class ChatSource extends EventEmitter {
         if(this.isConnected()){
             this.socket.send(`${eventname} ${payload}`)
         } else {
-            this.emit('ERR', 'notconnected')
+            this.emit('ERR', {description: 'notconnected'})
         }
     }
 

@@ -18,6 +18,7 @@ import ChatStore from './store'
 import Settings from './settings'
 import ChatWindow from './window'
 import ChatVote from './vote'
+import {isMuteActive, MutedTimer} from './mutedtimer'
 
 const regexslashcmd = /^\/([a-z0-9]+)[\s]?/i
 const regextime = /(\d+(?:\.\d*)?)([a-z]+)?/ig
@@ -36,10 +37,8 @@ const errorstrings = new Map([
     ['invalidmsg', 'The message was invalid'],
     ['throttled', 'Throttled! You were trying to send messages too fast'],
     ['duplicate', 'The message is identical to the last one you sent'],
-    ['muted', 'You are muted (mutes are always temporary). Subscribing removes mutes: Check your profile for more information.'],
     ['submode', 'The channel is currently in subscriber only mode'],
     ['needbanreason', 'Providing a reason for the ban is mandatory'],
-    ['banned', 'You have been banned (subscribing removes non-permanent bans). Check your profile for more information.'],
     ['privmsgbanned', 'Cannot send private messages while banned'],
     ['requiresocket', 'This chat requires WebSockets'],
     ['toomanyconnections', 'Only 5 concurrent connections allowed'],
@@ -355,6 +354,7 @@ class Chat {
         this.inputhistory = new ChatInputHistory(this)
         this.userfocus = new ChatUserFocus(this, this.css)
         this.mainwindow = new ChatWindow('main').into(this)
+        this.mutedtimer = new MutedTimer(this)
 
         this.ui.find('#chat-vote-frame:first').each((i, e) => {
             this.chatvote = new ChatVote(this, $(e))
@@ -949,9 +949,16 @@ class Chat {
     }
 
     onMUTE(data){
-        // data.data is the nick which has been banned, no info about duration
+        // data.data is the nick which has been banned
         if(this.user.username.toLowerCase() === data.data.toLowerCase()) {
             MessageBuilder.command(`You have been muted by ${data.nick}.`, data.timestamp).into(this)
+
+            // Every cached mute message calls `onMUTE()`. We perform this check
+            // to avoid setting the timer for mutes that have already expired.
+            if (isMuteActive(data)) {
+                this.mutedtimer.setTimer(data.duration)
+                this.mutedtimer.startTimer()
+            }
         } else {
             MessageBuilder.command(`${data.data} muted by ${data.nick}.`, data.timestamp).into(this)
         }
@@ -961,6 +968,8 @@ class Chat {
     onUNMUTE(data){
         if(this.user.username.toLowerCase() === data.data.toLowerCase()) {
             MessageBuilder.command(`You have been unmuted by ${data.nick}.`, data.timestamp).into(this)
+
+            this.mutedtimer.stopTimer()
         } else {
             MessageBuilder.command(`${data.data} unmuted by ${data.nick}.`, data.timestamp).into(this)
         }
@@ -985,18 +994,32 @@ class Chat {
         }
     }
 
-    // NOTE this is an event that the chat server sends `ERR "$error"`
     // not to be confused with an error the chat.source may send onSOCKETERROR.
     onERR(data){
-        if(data === 'toomanyconnections' || data === 'banned') {
+        const desc = data.description
+        if(desc === 'toomanyconnections' || desc === 'banned') {
             this.source.retryOnDisconnect = false
         }
 
-        let messageText = errorstrings.get(data) || data
+        let messageText = ''
 
-        // Append ban appeal hint if a URL was provided.
-        if (data === 'banned' && this.config.banAppealUrl) {
-            messageText += ` Visit ${this.config.banAppealUrl} to appeal.`
+        switch (desc) {
+            case 'banned':
+                messageText = 'You have been banned (subscribing removes non-permanent bans). Check your profile for more information.'
+
+                // Append ban appeal hint if a URL was provided.
+                if (this.config.banAppealUrl) {
+                    messageText += ` Visit ${this.config.banAppealUrl} to appeal.`
+                }
+                break;
+            case 'muted':
+                messageText = `You are temporarily muted! You can chat again in ${this.mutedtimer.duration.humanize()}. Subscribe to remove the mute immediately.`
+
+                this.mutedtimer.setTimer(data.muteTimeLeft)
+                this.mutedtimer.startTimer()
+                break;
+            default:
+                messageText = errorstrings.get(desc) || desc    
         }
 
         MessageBuilder.error(messageText).into(this, this.getActiveWindow())
