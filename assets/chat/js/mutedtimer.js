@@ -29,9 +29,6 @@ class MutedTimer {
 
         this.ticking = true
 
-        // Save old input placeholder text to restore when the timer stops.
-        this.oldInputPlaceholder = this.chat.input.attr('placeholder')
-
         // Update placeholder text immediately to account for delay when using
         // `setInterval()`.
         this.updatePlaceholderText()
@@ -59,7 +56,7 @@ class MutedTimer {
         clearTimeout(this.timerTimeout)
 
         this.duration = null
-        this.chat.input.attr('placeholder', this.oldInputPlaceholder)
+        this.chat.setDefaultPlaceholderText()
     }
 
     setTimer(secondsLeft = 0) {
@@ -74,11 +71,19 @@ class MutedTimer {
     }
 
     updatePlaceholderText() {
-        this.chat.input.attr('placeholder', this.getPlaceholderText())
+        // Only update the placeholder text when the main chat window is active.
+        // A muted user can still send messages in direct message windows.
+        if (this.chat.getActiveWindow().name === 'main') {
+            this.chat.input.attr('placeholder', this.getPlaceholderText())
+        }
     }
 
     getPlaceholderText() {
-        return `Sorry, ${this.chat.user.username}, you are muted. You can chat again in ${this.duration.humanize()}.`
+        return `Sorry, ${this.chat.user.username}, you are muted. You can chat again ${this.getReadableDuration()}.`
+    }
+
+    getReadableDuration() {
+        return this.duration.humanize(true, {s: 60, ss: 2})
     }
 }
 

@@ -298,10 +298,7 @@ class Chat {
             this.user = this.addUser(user)
             this.authenticated = true
         }
-        // TODO move this
-        if (this.authenticated) {
-            this.input.focus().attr('placeholder', `Write something ${this.user.username} ...`)
-        }
+        this.setDefaultPlaceholderText()
         return this
     }
 
@@ -481,7 +478,7 @@ class Chat {
         this.loadingscrn.fadeOut(250, () => this.loadingscrn.remove())
         this.mainwindow.updateAndPin()
 
-        this.input.focus().attr('placeholder', `Write something ...`)
+        this.setDefaultPlaceholderText()
         MessageBuilder.status(`Welcome to DGG chat`).into(this)
         return Promise.resolve(this)
     }
@@ -742,6 +739,13 @@ class Chat {
             if(win.locked()) win.unlock()
             this.redrawWindowIndicators()
         }
+
+        if (win.name === 'main' && this.mutedtimer.ticking) {
+            this.mutedtimer.updatePlaceholderText()
+        } else {
+            this.setDefaultPlaceholderText()
+        }
+
         return win
     }
 
@@ -844,6 +848,11 @@ class Chat {
         if(window.getSelection().isCollapsed && !this.input.is(':focus')) {
             this['debounceFocus'](this);
         }
+    }
+
+    setDefaultPlaceholderText() {
+        const placeholderText = this.authenticated ? `Write something ${this.user.username} ...` : `Write something ...`
+        this.input.attr('placeholder', placeholderText)
     }
 
     /**
@@ -1013,10 +1022,10 @@ class Chat {
                 }
                 break;
             case 'muted':
-                messageText = `You are temporarily muted! You can chat again in ${this.mutedtimer.duration.humanize()}. Subscribe to remove the mute immediately.`
-
                 this.mutedtimer.setTimer(data.muteTimeLeft)
                 this.mutedtimer.startTimer()
+
+                messageText = `You are temporarily muted! You can chat again ${this.mutedtimer.getReadableDuration()}. Subscribe to remove the mute immediately.`
                 break;
             default:
                 messageText = errorstrings.get(desc) || desc    
