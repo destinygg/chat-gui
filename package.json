@@ -31,7 +31,7 @@
   },
   "dependencies": {
     "jquery": "^3.4.1",
-    "moment": "~2.24.0",
+    "moment": "~2.25.0",
     "nanoscroller": "~0.8.7",
     "normalize.css": "~8.0.1",
     "throttle-debounce": "~2.1.0",
