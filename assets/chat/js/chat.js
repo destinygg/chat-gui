@@ -1013,10 +1013,10 @@ class Chat {
                 }
                 break;
             case 'muted':
-                messageText = `You are temporarily muted! You can chat again in ${this.mutedtimer.duration.humanize()}. Subscribe to remove the mute immediately.`
-
                 this.mutedtimer.setTimer(data.muteTimeLeft)
                 this.mutedtimer.startTimer()
+
+                messageText = `You are temporarily muted! You can chat again in ${this.mutedtimer.duration.humanize()}. Subscribe to remove the mute immediately.`
                 break;
             default:
                 messageText = errorstrings.get(desc) || desc    
