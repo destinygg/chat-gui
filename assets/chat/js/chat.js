@@ -1025,7 +1025,7 @@ class Chat {
                 this.mutedtimer.setTimer(data.muteTimeLeft)
                 this.mutedtimer.startTimer()
 
-                messageText = `You are temporarily muted! You can chat again in ${this.mutedtimer.duration.humanize()}. Subscribe to remove the mute immediately.`
+                messageText = `You are temporarily muted! You can chat again ${this.mutedtimer.getReadableDuration()}. Subscribe to remove the mute immediately.`
                 break;
             default:
                 messageText = errorstrings.get(desc) || desc    
