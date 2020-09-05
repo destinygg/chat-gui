@@ -998,6 +998,9 @@ class Chat {
     onUNBAN(data){
         if(this.user.username.toLowerCase() === data.data.toLowerCase()) {
             MessageBuilder.command(`You have been unbanned by ${data.nick}.`, data.timestamp).into(this)
+
+            // Unbanning a user unmutes them, too.
+            this.mutedtimer.stopTimer()
         } else {
             MessageBuilder.command(`${data.data} unbanned by ${data.nick}.`, data.timestamp).into(this)
         }
