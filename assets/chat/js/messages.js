@@ -108,12 +108,13 @@ class ChatUIMessage {
 
 class ChatMessage extends ChatUIMessage {
 
-    constructor(message, timestamp=null, type=MessageTypes.CHAT){
+    constructor(message, timestamp=null, type=MessageTypes.CHAT, unformatted=false){
         super(message);
         this.user = null;
         this.type = type;
         this.continued = false;
         this.timestamp = timestamp ? moment.utc(timestamp).local() : moment();
+        this.unformatted = unformatted;
     }
 
     html(chat=null){
@@ -126,7 +127,7 @@ class ChatMessage extends ChatUIMessage {
     buildMessageTxt(chat){
         // TODO we strip off the `/me ` of every message -- must be a better way to do this
         let msg = this.message.substring(0, 4).toLowerCase() === '/me ' ? this.message.substring(4) : this.message
-        formatters.forEach(f => msg = f.format(chat, msg, this))
+        if (!this.unformatted) formatters.forEach(f => msg = f.format(chat, msg, this))
         return `<span class="text">${msg}</span>`
     }
 
