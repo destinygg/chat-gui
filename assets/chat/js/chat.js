@@ -1017,7 +1017,7 @@ class Chat {
 
         switch (desc) {
             case 'banned':
-                let messageText = 'You have been banned (<a target="_blank" class="externallink" href="/subscribe" rel="nofollow">subscribing</a> removes non-permanent bans). Check your profile for more information.'
+                let messageText = 'You have been banned! Check your profile for more information. <a target="_blank" class="externallink" href="/subscribe" rel="nofollow">Subscribing</a> or <a target="_blank" class="externallink" href="/donate" rel="nofollow">donating</a> removes non-permanent bans.'
 
                 // Append ban appeal hint if a URL was provided.
                 if (this.config.banAppealUrl) {
