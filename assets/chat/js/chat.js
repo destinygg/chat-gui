@@ -9,7 +9,7 @@ import moment from 'moment'
 import EventEmitter from './emitter'
 import ChatSource from './source'
 import ChatUser from './user'
-import {MessageBuilder, MessageTypes} from './messages'
+import {MessageBuilder, MessageTypes, ChatMessage} from './messages'
 import {ChatMenu, ChatUserMenu, ChatWhisperUsers, ChatEmoteMenu, ChatSettingsMenu} from './menus'
 import ChatAutoComplete from './autocomplete'
 import ChatInputHistory from './history'
@@ -1013,28 +1013,31 @@ class Chat {
             this.source.retryOnDisconnect = false
         }
 
-        let messageText = ''
+        let message;
 
         switch (desc) {
             case 'banned':
-                messageText = 'You have been banned (subscribing removes non-permanent bans). Check your profile for more information.'
+                let messageText = 'You have been banned (<a target="_blank" class="externallink" href="/subscribe" rel="nofollow">subscribing</a> removes non-permanent bans). Check your profile for more information.'
 
                 // Append ban appeal hint if a URL was provided.
                 if (this.config.banAppealUrl) {
-                    messageText += ` Visit ${this.config.banAppealUrl} to appeal.`
+                    messageText += ` Visit <a target="_blank" class="externallink" href="${this.config.banAppealUrl}" rel="nofollow">this page</a> to appeal.`
                 }
+
+                // Use an unformatted `ChatMessage` to preserve the message's embedded HTML.
+                message = new ChatMessage(messageText, null, MessageTypes.ERROR, true);
                 break;
             case 'muted':
                 this.mutedtimer.setTimer(data.muteTimeLeft)
                 this.mutedtimer.startTimer()
 
-                messageText = `You are temporarily muted! You can chat again ${this.mutedtimer.getReadableDuration()}. Subscribe to remove the mute immediately.`
+                message = MessageBuilder.error(`You are temporarily muted! You can chat again ${this.mutedtimer.getReadableDuration()}. Subscribe to remove the mute immediately.`)
                 break;
             default:
-                messageText = errorstrings.get(desc) || desc    
+                message = MessageBuilder.error(errorstrings.get(desc) || desc)
         }
 
-        MessageBuilder.error(messageText).into(this, this.getActiveWindow())
+        message.into(this, this.getActiveWindow())
     }
 
     onSOCKETERROR(e){

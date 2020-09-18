@@ -259,5 +259,6 @@ class ChatEmoteMessage extends ChatMessage {
 
 export {
     MessageBuilder,
-    MessageTypes
+    MessageTypes,
+    ChatMessage
 };
