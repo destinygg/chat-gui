@@ -286,8 +286,8 @@ class Chat {
         this.control.on('M', data => this.cmdMENTIONS(data));
         this.control.on('STALK', data => this.cmdSTALK(data));
         this.control.on('S', data => this.cmdSTALK(data));
-        this.control.on('VOTE', data => this.cmdVOTE(data));
-        this.control.on('V', data => this.cmdVOTE(data));
+        this.control.on('VOTE', data => this.cmdVOTE(data, 'VOTE'));
+        this.control.on('V', data => this.cmdVOTE(data, 'VOTE'));
         this.control.on('VOTESTOP', data => this.cmdVOTESTOP(data));
         this.control.on('VS', data => this.cmdVOTESTOP(data));
         return this;
@@ -1209,7 +1209,7 @@ class Chat {
         }
     }
 
-    cmdVOTE(parts) {
+    cmdVOTE(parts, command) {
         if (this.chatvote.isVoteStarted()) {
             MessageBuilder.error('Vote already started.').into(this)
             return
@@ -1218,7 +1218,7 @@ class Chat {
             return
         }
 
-        const str = '/vote ' + parts.join(' ')
+        const str = `/${command.toLowerCase()} ${parts.join(' ')}`
         this.unresolved.unshift(MessageBuilder.message(str, this.user))
         this.source.send('MSG', {data: str})
         // TODO if the chat isn't connected, the user has no warning of this action failing
