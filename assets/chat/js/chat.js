@@ -932,7 +932,7 @@ class Chat {
             } else if (this.chatvote.isMsgVoteStartFmt(data.data) && this.chatvote.canUserStartVote(usr)) {
                 if (!this.chatvote.startVote(textonly, usr.username)) {
                     if (this.user.username === usr.username) {
-                        MessageBuilder.error('Your vote failed to start. See console for logs.')
+                        MessageBuilder.error('Your vote failed to start. See console for logs.').into(this)
                     }
                 } else {
                     MessageBuilder.info(`A vote has been started. Type ${this.chatvote.vote.totals.map((a, i) => i+1).join(' or ')} in chat to participate.`).into(this)
