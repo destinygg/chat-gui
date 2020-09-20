@@ -247,6 +247,9 @@ class Chat {
         this.source.on('BROADCAST', data => this.onBROADCAST(data));
         this.source.on('PRIVMSGSENT', data => this.onPRIVMSGSENT(data));
         this.source.on('PRIVMSG', data => this.onPRIVMSG(data));
+        this.source.on('VOTE', data => this.onVOTE(data));
+        this.source.on('VOTESTOP', data => this.onVOTESTOP(data));
+        this.source.on('VOTECAST', data => this.onVOTECAST(data));
 
         this.control.on('SEND', data => this.cmdSEND(data));
         this.control.on('HINT', data => this.cmdHINT(data));
@@ -912,35 +915,23 @@ class Chat {
         const textonly = Chat.removeSlashCmdFromText(data.data)
         const usr = this.users.get(data.nick.toLowerCase())
 
-        // VOTE START
-        if (this.chatvote && !this.backlogloading) {
-            if (this.chatvote.isVoteStarted()) {
-                if (this.chatvote.isMsgVoteStopFmt(data.data)) {
-                    if (this.chatvote.vote.user === usr.username) {
-                        this.chatvote.endVote()
-                    }
-                    return;
-                } else if (this.chatvote.isMsgVoteCastFmt(textonly)) {
-                    // NOTE method returns false, if the GUI is hidden
-                    if (this.chatvote.castVote(textonly, usr.username)) {
-                        if (usr.username === this.user.username) {
-                            this.chatvote.markVote(textonly, usr.username)
-                        }
-                    }
-                    return;
-                }
-            } else if (this.chatvote.isMsgVoteStartFmt(data.data) && this.chatvote.canUserStartVote(usr)) {
-                if (!this.chatvote.startVote(textonly, usr.username)) {
-                    if (this.user.username === usr.username) {
-                        MessageBuilder.error('Your vote failed to start. See console for logs.').into(this)
-                    }
-                } else {
-                    MessageBuilder.info(`A vote has been started. Type ${this.chatvote.vote.totals.map((a, i) => i+1).join(' or ')} in chat to participate.`).into(this)
-                }
-                return;
+        // Checking if old messages are loading avoids starting votes for cached
+        // `/vote` commands.
+        if (!this.backlogloading) {
+            // Voting is processed entirely in clients through messages with
+            // type `MSG`, but we emit `VOTE`, `VOTESTOP`, and `VOTECAST`
+            // events to mimic server involvement.
+            if (this.chatvote.isMsgVoteStartFmt(data.data)) {
+                this.source.emit('VOTE', data)
+                return
+            } else if (this.chatvote.isMsgVoteStopFmt(data.data)) {
+                this.source.emit('VOTESTOP', data)
+                return
+            } else if (this.chatvote.isVoteStarted() && this.chatvote.isMsgVoteCastFmt(data.data)) {
+                this.source.emit(`VOTECAST`, data)
+                return
             }
         }
-        // VOTE END
 
         const win = this.mainwindow
         if(win.lastmessage !== null && this.emotePrefixes.has(textonly) && Chat.removeSlashCmdFromText(win.lastmessage.message) === textonly){
@@ -954,6 +945,45 @@ class Chat {
             }
         } else if(!this.resolveMessage(data.nick, data.data)){
             MessageBuilder.message(data.data, usr, data.timestamp).into(this)
+        }
+    }
+
+    onVOTE(data) {
+        const textonly = Chat.removeSlashCmdFromText(data.data)
+        const usr = this.users.get(data.nick.toLowerCase())
+
+        if (this.chatvote.isVoteStarted() || !this.chatvote.canUserStartVote(usr)) {
+            return
+        }
+
+        if (!this.chatvote.startVote(textonly, usr.username)) {
+            if (this.user.username === username) {
+                MessageBuilder.error('Your vote failed to start. See console for logs.').into(this)
+            }
+        } else {
+            MessageBuilder.info(`A vote has been started. Type ${this.chatvote.vote.totals.map((a, i) => i+1).join(' or ')} in chat to participate.`).into(this)
+        }
+    }
+
+    onVOTESTOP(data) {
+        const usr = this.users.get(data.nick.toLowerCase())
+        if (!this.chatvote.isVoteStarted() || !this.chatvote.canUserStopVote(usr)) {
+            return
+        }
+
+        this.chatvote.endVote()
+    }
+
+    onVOTECAST(data) {
+        if (!this.chatvote.canVote(data.nick)) {
+            return
+        }
+
+        // NOTE method returns false, if the GUI is hidden
+        if (this.chatvote.castVote(data.data, data.nick)) {
+            if (data.nick === this.user.username) {
+                this.chatvote.markVote(data.data, data.nick)
+            }
         }
     }
 
