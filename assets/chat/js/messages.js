@@ -23,25 +23,6 @@ formatters.set('mentioned', new MentionedUserFormatter())
 formatters.set('green', new GreenTextFormatter())
 formatters.set('embed', new EmbedUrlFormatter())
 
-function buildMessageTxt(chat, message){
-    // TODO we strip off the `/me ` of every message -- must be a better way to do this
-    let msg = message.message.substring(0, 4).toLowerCase() === '/me ' ? message.message.substring(4) : message.message
-    formatters.forEach(f => msg = f.format(chat, msg, message))
-    return `<span class="text">${msg}</span>`
-}
-function buildFeatures(user, chat){
-    const features = (user.features || [])
-        .filter(e => chat.flairsMap.has(e))
-        .map(e => chat.flairsMap.get(e))
-        .reduce((str, e) => str + `<i class="flair ${e['name']}" title="${e['label']}"></i> `, '');
-    return features !== '' ? `<span class="features">${features}</span>` : '';
-}
-function buildTime(message){
-    const datetime = message.timestamp.format(DATE_FORMATS.FULL);
-    const label = message.timestamp.format(DATE_FORMATS.TIME);
-    return `<time class="time" title="${datetime}">${label}</time>`;
-}
-
 class MessageBuilder {
 
     static element(message, classes=[]){
@@ -127,20 +108,35 @@ class ChatUIMessage {
 
 class ChatMessage extends ChatUIMessage {
 
-    constructor(message, timestamp=null, type=MessageTypes.CHAT){
+    constructor(message, timestamp=null, type=MessageTypes.CHAT, unformatted=false){
         super(message);
         this.user = null;
         this.type = type;
         this.continued = false;
         this.timestamp = timestamp ? moment.utc(timestamp).local() : moment();
+        this.unformatted = unformatted;
     }
 
     html(chat=null){
         const classes = [], attr = {};
         if(this.continued)
             classes.push('msg-continue');
-        return this.wrap(`${buildTime(this)} ${buildMessageTxt(chat, this)}`, classes, attr);
+        return this.wrap(`${this.buildTime()} ${this.buildMessageTxt(chat)}`, classes, attr);
     }
+
+    buildMessageTxt(chat){
+        // TODO we strip off the `/me ` of every message -- must be a better way to do this
+        let msg = this.message.substring(0, 4).toLowerCase() === '/me ' ? this.message.substring(4) : this.message
+        if (!this.unformatted) formatters.forEach(f => msg = f.format(chat, msg, this))
+        return `<span class="text">${msg}</span>`
+    }
+
+    buildTime(){
+        const datetime = this.timestamp.format(DATE_FORMATS.FULL);
+        const label = this.timestamp.format(DATE_FORMATS.TIME);
+        return `<time class="time" title="${datetime}">${label}</time>`;
+    }
+
 }
 
 class ChatUserMessage extends ChatMessage {
@@ -190,8 +186,16 @@ class ChatUserMessage extends ChatMessage {
         else if(this.slashme || this.continued)
             ctrl = '';
 
-        const user = buildFeatures(this.user, chat) + ` <a title="${this.title}" class="user ${this.user.features.join(' ')}">${this.user.username}</a>`;
-        return this.wrap(buildTime(this) + ` ${user}<span class="ctrl">${ctrl}</span> ` + buildMessageTxt(chat, this), classes, attr);
+        const user = this.buildFeatures(this.user, chat) + ` <a title="${this.title}" class="user ${this.user.features.join(' ')}">${this.user.username}</a>`;
+        return this.wrap(this.buildTime() + ` ${user}<span class="ctrl">${ctrl}</span> ` + this.buildMessageTxt(chat), classes, attr);
+    }
+
+    buildFeatures(user, chat){
+        const features = (user.features || [])
+            .filter(e => chat.flairsMap.has(e))
+            .map(e => chat.flairsMap.get(e))
+            .reduce((str, e) => str + `<i class="flair ${e['name']}" title="${e['label']}"></i> `, '');
+        return features !== '' ? `<span class="features">${features}</span>` : '';
     }
 
 }
@@ -232,7 +236,7 @@ class ChatEmoteMessage extends ChatMessage {
         this._combo_x       = $(`<i class="x">X</i>`)
         this._combo_hits    = $(`<i class="hit">Hits</i>`)
         this._combo_txt     = $(`<i class="combo">C-C-C-COMBO</i>`)
-        return this.wrap(buildTime(this))
+        return this.wrap(this.buildTime())
     }
 
     afterRender(chat=null){
@@ -255,5 +259,6 @@ class ChatEmoteMessage extends ChatMessage {
 
 export {
     MessageBuilder,
-    MessageTypes
+    MessageTypes,
+    ChatMessage
 };
