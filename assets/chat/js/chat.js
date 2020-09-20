@@ -1179,36 +1179,34 @@ class Chat {
         }
     }
 
-    // TODO cmdSend instead?
     cmdVOTE(parts) {
-        if (!this.chatvote.isVoteStarted()) {
-            if (this.chatvote.canUserStartVote(this.user)) {
-                const str = '/vote ' + parts.join(' ')
-                this.unresolved.unshift(MessageBuilder.message(str, this.user))
-                this.source.send('MSG', {data: str})
-                // TODO if the chat isn't connected, the user has no warning of this action failing
-            } else {
-                MessageBuilder.error('You do not have permission to start a vote.').into(this)
-            }
-        } else {
+        if (this.chatvote.isVoteStarted()) {
             MessageBuilder.error('Vote already started.').into(this)
+            return
+        } else if (!this.chatvote.canUserStartVote(this.user)) {
+            MessageBuilder.error('You do not have permission to start a vote.').into(this)
+            return
         }
+
+        const str = '/vote ' + parts.join(' ')
+        this.unresolved.unshift(MessageBuilder.message(str, this.user))
+        this.source.send('MSG', {data: str})
+        // TODO if the chat isn't connected, the user has no warning of this action failing
     }
 
-    // TODO cmdSend instead?
     cmdVOTESTOP() {
-        if (this.chatvote.isVoteStarted()) {
-            if (this.chatvote.canUserStartVote(this.user) && this.chatvote.vote.user === this.user.nick) {
-                const str = '/votestop'
-                this.unresolved.unshift(MessageBuilder.message(str, this.user))
-                this.source.send('MSG', {data: str})
-                // TODO if the chat isn't connected, the user has no warning of this action failing
-            } else {
-                MessageBuilder.error('You do not have permission to stop this vote.').into(this)
-            }
-        } else {
+        if (!this.chatvote.isVoteStarted()) {
             MessageBuilder.error('No vote started.').into(this)
+            return
+        } else if (!this.chatvote.canUserStopVote(this.user)) {
+            MessageBuilder.error('You do not have permission to stop this vote.').into(this)
+            return
         }
+
+        const str = '/votestop'
+        this.unresolved.unshift(MessageBuilder.message(str, this.user))
+        this.source.send('MSG', {data: str})
+        // TODO if the chat isn't connected, the user has no warning of this action failing
     }
 
     cmdEMOTES(){
