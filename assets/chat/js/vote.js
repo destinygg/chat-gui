@@ -96,6 +96,11 @@ class ChatVote {
         return user.hasAnyFeatures(UserFeatures.ADMIN, UserFeatures.BOT, UserFeatures.PROTECTED, UserFeatures.MODERATOR)
     }
 
+    canUserStopVote(user) {
+        // A user can only stop their own vote.
+        return this.canUserStartVote(user) && this.vote.user === user.nick;
+    }
+
     isMsgVoteStopFmt(txt) {
         return txt.match(VOTE_STOP)
     }
