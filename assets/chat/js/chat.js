@@ -956,8 +956,8 @@ class Chat {
             return
         }
 
-        if (!this.chatvote.startVote(textonly, usr.username)) {
-            if (this.user.username === username) {
+        if (!this.chatvote.startVote(textonly, usr)) {
+            if (this.user.username === usr.username) {
                 MessageBuilder.error('Your vote failed to start. See console for logs.').into(this)
             }
         } else {
@@ -975,14 +975,15 @@ class Chat {
     }
 
     onVOTECAST(data) {
-        if (!this.chatvote.canVote(data.nick)) {
+        const usr = this.users.get(data.nick.toLowerCase())
+        if (!this.chatvote.canVote(usr)) {
             return
         }
 
         // NOTE method returns false, if the GUI is hidden
-        if (this.chatvote.castVote(data.data, data.nick)) {
+        if (this.chatvote.castVote(data.data, usr)) {
             if (data.nick === this.user.username) {
-                this.chatvote.markVote(data.data, data.nick)
+                this.chatvote.markVote(data.data)
             }
         }
     }
@@ -1177,7 +1178,7 @@ class Chat {
             }
             // VOTE
             else if (this.chatvote.isVoteStarted() && this.chatvote.isMsgVoteCastFmt(textonly)) {
-                if (this.chatvote.canVote(this.user.username)) {
+                if (this.chatvote.canVote(this.user)) {
                     MessageBuilder.info(`Your vote has been cast!`).into(this)
                     this.source.send('MSG', {data: raw})
                     this.input.val('')

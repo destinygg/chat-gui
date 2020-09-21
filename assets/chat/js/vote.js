@@ -117,13 +117,13 @@ class ChatVote {
         return false
     }
 
-    canVote(username) {
-        return !this.vote.votes.has(username)
+    canVote(user) {
+        return !this.vote.votes.has(user.username)
     }
 
-    castVote(opt, username) {
-        if (this.voting && !this.hidden && this.canVote(username)) {
-            this.vote.votes.set(username, opt);
+    castVote(opt, user) {
+        if (this.voting && !this.hidden && this.canVote(user.username)) {
+            this.vote.votes.set(user.username, opt);
             this.vote.totals[opt-1]++;
             this.throttleVoteCast(opt)
             return true
@@ -131,7 +131,7 @@ class ChatVote {
         return false
     }
 
-    startVote(rawQuestion, username) {
+    startVote(rawQuestion, user) {
         try {
             this.voting = true
             clearTimeout(this.timerEndVote)
@@ -145,7 +145,7 @@ class ChatVote {
                 question: question,
                 totals: question.options.map(() => 0),
                 votes: new Map(),
-                user: username,
+                user: user.username,
             }
 
             const html = this.buildVoteFrame()
@@ -193,7 +193,7 @@ class ChatVote {
         this.vote = null
     }
 
-    markVote(opt, username) {
+    markVote(opt) {
         this.ui.vote.find(`.opt-options .opt:nth-child(${opt})`).addClass('opt-marked')
     }
 
