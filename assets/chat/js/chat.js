@@ -163,6 +163,9 @@ const commandsinfo = new Map([
     ['votestop', {
         desc: 'Stop a vote you started.'
     }],
+    ['svote', {
+        desc: 'Start a sub-weighted vote.'
+    }],
 ])
 const banstruct = {
     id: 0,
@@ -287,6 +290,7 @@ class Chat {
         this.control.on('STALK', data => this.cmdSTALK(data));
         this.control.on('S', data => this.cmdSTALK(data));
         this.control.on('VOTE', data => this.cmdVOTE(data, 'VOTE'));
+        this.control.on('SVOTE', data => this.cmdVOTE(data, 'SVOTE'));
         this.control.on('V', data => this.cmdVOTE(data, 'VOTE'));
         this.control.on('VOTESTOP', data => this.cmdVOTESTOP(data));
         this.control.on('VS', data => this.cmdVOTESTOP(data));
