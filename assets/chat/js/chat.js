@@ -949,14 +949,12 @@ class Chat {
     }
 
     onVOTE(data) {
-        const textonly = Chat.removeSlashCmdFromText(data.data)
         const usr = this.users.get(data.nick.toLowerCase())
-
         if (this.chatvote.isVoteStarted() || !this.chatvote.canUserStartVote(usr)) {
             return
         }
 
-        if (!this.chatvote.startVote(textonly, usr)) {
+        if (!this.chatvote.startVote(data.data, usr)) {
             if (this.user.username === usr.username) {
                 MessageBuilder.error('Your vote failed to start. See console for logs.').into(this)
             }
