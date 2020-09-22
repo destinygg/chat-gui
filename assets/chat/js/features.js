@@ -9,4 +9,8 @@ export default {
     VIP: 'vip',
     BOT: 'bot',
     BOT2: 'flair11',
+    SUB_TIER_1: 'flair13',
+    SUB_TIER_2: 'flair1',
+    SUB_TIER_3: 'flair3',
+    SUB_TIER_4: 'flair8',
 }

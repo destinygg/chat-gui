@@ -2,7 +2,7 @@ import $ from 'jquery'
 import {throttle} from 'throttle-debounce'
 import UserFeatures from './features'
 
-const VOTE_START = /^\/vote /i;
+const VOTE_START = /^\/(vote|svote) /i;
 const VOTE_STOP = /^\/votestop/i;
 const VOTE_CONJUNCTION = /\bor\b/i;
 const VOTE_INTERROGATIVE = /^(how|why|when|what|where)\b/i;
@@ -10,6 +10,11 @@ const VOTE_TIME = /\b([0-9]+(?:m|s)?)$/i;
 const VOTE_DEFAULT_TIME = 30000;
 const VOTE_MAX_TIME = 10*60*1000;
 const VOTE_MIN_TIME = 5000;
+
+const PollType = {
+    Normal: 0,
+    Weighted: 1
+}
 
 function parseQuestionAndTime(rawQuestion) {
     let time
@@ -96,6 +101,11 @@ class ChatVote {
         return user.hasAnyFeatures(UserFeatures.ADMIN, UserFeatures.BOT, UserFeatures.PROTECTED, UserFeatures.MODERATOR)
     }
 
+    canUserStopVote(user) {
+        // A user can only stop their own vote.
+        return this.canUserStartVote(user) && this.vote.user === user.nick;
+    }
+
     isMsgVoteStopFmt(txt) {
         return txt.match(VOTE_STOP)
     }
@@ -112,35 +122,61 @@ class ChatVote {
         return false
     }
 
-    canVote(username) {
-        return !this.vote.votes.has(username)
+    canVote(user) {
+        return !this.vote.votes.has(user.username)
     }
 
-    castVote(opt, username) {
-        if (this.voting && !this.hidden && this.canVote(username)) {
-            this.vote.votes.set(username, opt);
-            this.vote.totals[opt-1]++;
+    castVote(opt, user) {
+        if (this.voting && !this.hidden && this.canVote(user.username)) {
+            this.vote.votes.set(user.username, opt);
+
+            const votes = this.votesForUser(user)
+            this.vote.totals[opt-1] += votes
+            this.vote.votesCast += votes
+
             this.throttleVoteCast(opt)
             return true
         }
         return false
     }
 
-    startVote(rawQuestion, username) {
+    votesForUser(user) {
+        switch(this.vote.type) {
+            case PollType.Normal:
+                return 1
+            case PollType.Weighted:
+                if (user.hasFeature(UserFeatures.SUB_TIER_4)) {
+                    return 16
+                } else if (user.hasFeature(UserFeatures.SUB_TIER_3)) {
+                    return 8
+                } else if (user.hasFeature(UserFeatures.SUB_TIER_2)) {
+                    return 4
+                } else if (user.hasFeature(UserFeatures.SUB_TIER_1)) {
+                    return 2
+                } else {
+                    return 1
+                }
+        }
+    }
+
+    startVote(rawCommand, user) {
         try {
             this.voting = true
             clearTimeout(this.timerEndVote)
             clearTimeout(this.timerHideVote)
             clearInterval(this.timerHeartBeat)
 
+            const [type, rawQuestion] = rawCommand.split(/\s+(.*)/)
             const question = parseQuestionAndTime(rawQuestion);
             this.vote = {
+                type: type === '/svote' ? PollType.Weighted : PollType.Normal,
                 start: new Date(),
                 time: question.time,
                 question: question,
                 totals: question.options.map(() => 0),
                 votes: new Map(),
-                user: username,
+                user: user.username,
+                votesCast: 0,
             }
 
             const html = this.buildVoteFrame()
@@ -182,13 +218,13 @@ class ChatVote {
         options.find(`.opt:nth-child(${firstIndex+1})`).addClass('opt-winner')
         choices.find(`.opt-choice:nth-child(${firstIndex+1})`).addClass('opt-winner')
 
-        this.ui.label.html(`Vote ended! ${this.vote.votes.size} votes cast.`)
+        this.ui.label.html(`Vote ended! ${this.vote.votesCast} votes cast.`)
         this.ui.vote.addClass('vote-completed')
         this.timerHideVote = setTimeout(() => this.hide(), 7000)
         this.vote = null
     }
 
-    markVote(opt, username) {
+    markVote(opt) {
         this.ui.vote.find(`.opt-options .opt:nth-child(${opt})`).addClass('opt-marked')
     }
 
@@ -200,7 +236,7 @@ class ChatVote {
     updateBars() {
         if (this.vote && this.vote.question) {
             this.vote.question.options.forEach((opt, i) => {
-                const percent = this.vote.votes.size > 0 ? (this.vote.totals[i] / this.vote.votes.size * 100) : 0
+                const percent = this.vote.votesCast > 0 ? (this.vote.totals[i] / this.vote.votesCast * 100) : 0
                 this.ui.bars[i].barInner.css('width', percent + '%')
                 this.ui.bars[i].barValue.text(percent > 0 ? Math.round(percent) + '%' : '')
             });
@@ -237,6 +273,18 @@ class ChatVote {
         );
     }
 
+    voteStartMessage() {
+        switch(this.vote.type) {
+            case PollType.Normal:
+                return `A vote has been started. Type ${this.vote.totals.map((a, i) => i+1).join(' or ')} in chat to participate.`
+            case PollType.Weighted:
+                return `A sub-weighted vote has been started. <strong>The value of your vote depends on your subscription tier.</strong> Type ${this.vote.totals.map((a, i) => i+1).join(' or ')} in chat to participate.`
+        }
+    }
+
 }
 
-export default ChatVote
+export {
+    ChatVote,
+    parseQuestionAndTime
+}
