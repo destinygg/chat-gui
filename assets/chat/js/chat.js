@@ -1220,9 +1220,7 @@ class Chat {
             return
         }
 
-        const str = `/${command.toLowerCase()} ${parts.join(' ')}`
-        this.unresolved.unshift(MessageBuilder.message(str, this.user))
-        this.source.send('MSG', {data: str})
+        this.source.send('MSG', {data: `/${command.toLowerCase()} ${parts.join(' ')}`})
         // TODO if the chat isn't connected, the user has no warning of this action failing
     }
 
@@ -1235,9 +1233,7 @@ class Chat {
             return
         }
 
-        const str = '/votestop'
-        this.unresolved.unshift(MessageBuilder.message(str, this.user))
-        this.source.send('MSG', {data: str})
+        this.source.send('MSG', {data: '/votestop'})
         // TODO if the chat isn't connected, the user has no warning of this action failing
     }
 
