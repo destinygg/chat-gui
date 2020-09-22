@@ -17,7 +17,7 @@ import ChatUserFocus from './focus'
 import ChatStore from './store'
 import Settings from './settings'
 import ChatWindow from './window'
-import ChatVote from './vote'
+import {ChatVote, parseQuestionAndTime} from './vote'
 import {isMuteActive, MutedTimer} from './mutedtimer'
 
 const regexslashcmd = /^\/([a-z0-9]+)[\s]?/i
@@ -958,11 +958,8 @@ class Chat {
             return
         }
 
-        const success = this.chatvote.startVote(data.data, usr)
-        if (success) {
+        if (this.chatvote.startVote(data.data, usr)) {
             (new ChatMessage(this.chatvote.voteStartMessage(), null, MessageTypes.INFO, true)).into(this)
-        } else if (!success && this.user.username === usr.username) {
-            MessageBuilder.error('Your vote failed to start. See console for logs.').into(this)
         }
     }
 
@@ -1212,6 +1209,17 @@ class Chat {
     }
 
     cmdVOTE(parts, command) {
+        const slashCommand = `/${command.toLowerCase()}`
+        const textOnly = parts.join(' ')
+
+        try {
+            // Assume the command's format is invalid if an exception is thrown.
+            parseQuestionAndTime(textOnly)
+        } catch {
+            MessageBuilder.info(`Usage: ${slashCommand} <question>? <option 1> or <option 2>[ or <option 3>[ or <option 4> ... [ or <option n>]]][ <time>]`).into(this);
+            return
+        }
+
         if (this.chatvote.isVoteStarted()) {
             MessageBuilder.error('Vote already started.').into(this)
             return
@@ -1220,7 +1228,7 @@ class Chat {
             return
         }
 
-        this.source.send('MSG', {data: `/${command.toLowerCase()} ${parts.join(' ')}`})
+        this.source.send('MSG', {data: `${slashCommand} ${textOnly}`})
         // TODO if the chat isn't connected, the user has no warning of this action failing
     }
 

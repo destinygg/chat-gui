@@ -284,4 +284,7 @@ class ChatVote {
 
 }
 
-export default ChatVote
+export {
+    ChatVote,
+    parseQuestionAndTime
+}
