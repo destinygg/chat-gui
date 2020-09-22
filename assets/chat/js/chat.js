@@ -958,12 +958,11 @@ class Chat {
             return
         }
 
-        if (!this.chatvote.startVote(data.data, usr)) {
-            if (this.user.username === usr.username) {
-                MessageBuilder.error('Your vote failed to start. See console for logs.').into(this)
-            }
-        } else {
-            MessageBuilder.info(`A vote has been started. Type ${this.chatvote.vote.totals.map((a, i) => i+1).join(' or ')} in chat to participate.`).into(this)
+        const success = this.chatvote.startVote(data.data, usr)
+        if (success) {
+            (new ChatMessage(this.chatvote.voteStartMessage(), null, MessageTypes.INFO, true)).into(this)
+        } else if (!success && this.user.username === usr.username) {
+            MessageBuilder.error('Your vote failed to start. See console for logs.').into(this)
         }
     }
 

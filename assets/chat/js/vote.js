@@ -273,6 +273,15 @@ class ChatVote {
         );
     }
 
+    voteStartMessage() {
+        switch(this.vote.type) {
+            case PollType.Normal:
+                return `A vote has been started. Type ${this.vote.totals.map((a, i) => i+1).join(' or ')} in chat to participate.`
+            case PollType.Weighted:
+                return `A sub-weighted vote has been started. <strong>The value of your vote depends on your subscription tier.</strong> Type ${this.vote.totals.map((a, i) => i+1).join(' or ')} in chat to participate.`
+        }
+    }
+
 }
 
 export default ChatVote
