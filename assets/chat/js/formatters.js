@@ -131,17 +131,22 @@ class UrlFormatter {
 class EmbedUrlFormatter {
 
     constructor(){
+        this.bigscreenPath = '/bigscreen'
+        this.bigscreenregex = new RegExp(/(^|\s)((#twitch|#twitch-vod|#twitch-clip|#youtube)\/(?:[A-z0-9_\-]{3,64}))\b/, "g")
+
         try {
             const location = (window.top || window.parent || window).location
-            this.url = (location.protocol + '//' + location.host + location.pathname + (location.search ? location.search : "")).replace(/\/$/, '')
+            this.currentPath = location.pathname
+            this.url = (location.protocol + '//' + location.host + this.bigscreenPath + (location.search ? location.search : "")).replace(/\/$/, '')
         } catch (e) {
             console.error(e)
         }
-        this.bigscreenregex = new RegExp(/(^|\s)((#twitch|#twitch-vod|#twitch-clip|#youtube)\/(?:[A-z0-9_\-]{3,64}))\b/, "g")
     }
 
     format(chat, str/*, message=null*/) {
-        return str.replace(this.bigscreenregex, '$1<a class="externallink bookmarklink" href="' + this.url + '$2" target="_top">$2</a>')
+        // Open embed links in a new tab when in embedded/popout chat.
+        const target = this.currentPath === this.bigscreenPath ? '_top' : '_blank'
+        return str.replace(this.bigscreenregex, '$1<a class="externallink bookmarklink" href="' + this.url + '$2" target="' + target + '">$2</a>')
     }
 
 }
