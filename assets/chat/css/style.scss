@@ -917,7 +917,8 @@ hr {
     }
     .emote-item {
         user-select: none;
-        padding: $gutter-md;
+        padding: $gutter-sm;
+        margin: auto;
     }
 }
 
