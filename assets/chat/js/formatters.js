@@ -32,8 +32,7 @@ class GreenTextFormatter {
 
     format(chat, str, message=null){
         if(message.user && str.indexOf('&gt;') === 0){
-            if(message.user.hasAnyFeatures(UserFeatures.SUBSCRIBER))
-                str = `<span class="greentext">${str}</span>`;``
+            str = `<span class="greentext">${str}</span>`;``
         }
         return str;
     }
