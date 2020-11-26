@@ -1,6 +1,6 @@
 {
   "name": "dgg-chat-gui",
-  "version": "2.7.2",
+  "version": "2.8.0",
   "description": "Destiny.gg chat client front-end",
   "main": "destiny",
   "scripts": {
@@ -30,11 +30,13 @@
     "assets": "./assets"
   },
   "dependencies": {
+    "bufferutil": "^4.0.0",
     "jquery": "^3.4.1",
     "moment": "~2.25.0",
     "nanoscroller": "~0.8.7",
     "normalize.css": "~8.0.1",
     "throttle-debounce": "~2.1.0",
+    "utf-8-validate": "^5.0.1",
     "whatwg-fetch": "^3.0.0"
   },
   "devDependencies": {
