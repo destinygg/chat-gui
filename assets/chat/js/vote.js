@@ -98,7 +98,7 @@ class ChatVote {
     }
 
     canUserStartVote(user) {
-        return user.hasAnyFeatures(UserFeatures.ADMIN, UserFeatures.BOT, UserFeatures.PROTECTED, UserFeatures.MODERATOR)
+        return user.hasAnyFeatures(UserFeatures.ADMIN, UserFeatures.BOT, UserFeatures.MODERATOR)
     }
 
     canUserStopVote(user) {
