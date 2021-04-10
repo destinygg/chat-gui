@@ -514,17 +514,17 @@ class Chat {
 
     async loadEmotes(){
         Chat.loadCss(`${this.config.cdn.base}/emotes/emotes.css?_=${this.config.cacheKey}`)
-        return fetch(`${this.config.cdn.base}/flairs/flairs.json?_=${this.config.cacheKey}`)
+        return fetch(`${this.config.cdn.base}/emotes/emotes.json?_=${this.config.cacheKey}`)
             .then(res => res.json())
-            .then(json => { this.setFlairs(json) })
+            .then(json => { this.setEmotes(json) })
             .catch(() => {})
     }
 
     async loadFlairs(){
         Chat.loadCss(`${this.config.cdn.base}/flairs/flairs.css?_=${this.config.cacheKey}`)
-        return fetch(`${this.config.cdn.base}/emotes/emotes.json?_=${this.config.cacheKey}`)
+        return fetch(`${this.config.cdn.base}/flairs/flairs.json?_=${this.config.cacheKey}`)
             .then(res => res.json())
-            .then(json => { this.setEmotes(json) })
+            .then(json => { this.setFlairs(json) })
             .catch(() => {})
     }
 
@@ -1393,7 +1393,7 @@ class Chat {
                 if(i === -1) highlights.push(nick);
                 break;
         }
-        MessageBuilder.info(command.toUpperCase() === 'HIGHLIGHT' ? `Highlighting ${nick}` : `No longer highlighting ${nick}}`).into(this);
+        MessageBuilder.info(command.toUpperCase() === 'HIGHLIGHT' ? `Highlighting ${nick}` : `No longer highlighting ${nick}`).into(this);
         this.settings.set('highlightnicks', highlights);
         this.applySettings();
     }
