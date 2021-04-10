@@ -1,6 +1,6 @@
 {
   "name": "dgg-chat-gui",
-  "version": "2.8.1",
+  "version": "2.8.2",
   "description": "Destiny.gg chat client front-end",
   "main": "destiny",
   "scripts": {
