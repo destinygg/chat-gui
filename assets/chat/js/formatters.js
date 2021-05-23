@@ -150,11 +150,28 @@ class EmbedUrlFormatter {
 
 }
 
+class BadWordsCensorshipFormatter {
+
+    constructor(){
+        this.badWordsRegex = /\b(fuck|shit|bitch|pepe)\b/;
+    }
+
+    format(chat, str/*, message=null*/) {
+        if (chat.settings.get('censorbadwords')) {
+            str = str.replace(this.badWordsRegex, match => '*'.repeat(match.length));
+        }
+
+        return str;
+    }
+
+}
+
 export {
     EmoteFormatter,
     GreenTextFormatter,
     HtmlTextFormatter,
     MentionedUserFormatter,
     UrlFormatter,
-    EmbedUrlFormatter
+    EmbedUrlFormatter,
+    BadWordsCensorshipFormatter 
 }
