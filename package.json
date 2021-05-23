@@ -6,21 +6,14 @@
   "scripts": {
     "tld": "node scripts/tld.js",
     "glue": "node scripts/glue.js",
-    "start": "webpack-dev-server --verbose --debug --mode=development"
+    "start": "webpack serve --mode=development"
   },
   "repository": {
     "type": "git",
     "url": "git://github.com/destinygg/chat-gui.git"
   },
-  "browserslist": [
-    "> 0.25%",
-    "not dead"
-  ],
-  "keywords": [
-    "destiny.gg",
-    "destinygg",
-    "dgg"
-  ],
+  "browserslist": ["> 0.25%", "not dead"],
+  "keywords": ["destiny.gg", "destinygg", "dgg"],
   "author": "Destiny.gg Foundation",
   "contributors": [],
   "homepage": "http://www.destiny.gg/",
