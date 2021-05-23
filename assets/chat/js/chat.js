@@ -82,7 +82,8 @@ const settingsdefault = new Map([
     ['taggedvisibility', false],
     ['hidensfw', false],
     ['hidensfl', false],
-    ['fontscale', 'auto']
+    ['fontscale', 'auto'],
+    ['censorbadwords', false],
 ])
 const commandsinfo = new Map([
     ['help', {

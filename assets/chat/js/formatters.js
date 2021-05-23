@@ -1,4 +1,5 @@
 import $ from 'jquery'
+import Filter from 'bad-words'
 import UserFeatures from './features'
 
 /** @var Array tlds */
@@ -150,11 +151,28 @@ class EmbedUrlFormatter {
 
 }
 
+class BadWordsCensorshipFormatter {
+
+    constructor(){
+        this.filter = new Filter();
+    }
+
+    format(chat, str/*, message=null*/) {
+        if (chat.settings.get('censorbadwords')) {
+            str = this.filter.clean(str);
+        }
+
+        return str;
+    }
+
+}
+
 export {
     EmoteFormatter,
     GreenTextFormatter,
     HtmlTextFormatter,
     MentionedUserFormatter,
     UrlFormatter,
-    EmbedUrlFormatter
+    EmbedUrlFormatter,
+    BadWordsCensorshipFormatter 
 }
