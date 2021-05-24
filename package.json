@@ -30,7 +30,6 @@
     "assets": "./assets"
   },
   "dependencies": {
-    "bad-words": "^3.0.4",
     "jquery": "^3.6.0",
     "moment": "~2.29.1",
     "nanoscroller": "~0.8.7",
