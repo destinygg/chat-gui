@@ -1,6 +1,6 @@
 {
   "name": "dgg-chat-gui",
-  "version": "2.10.0",
+  "version": "2.10.1",
   "description": "Destiny.gg chat client front-end",
   "main": "destiny",
   "scripts": {
@@ -30,7 +30,7 @@
     "assets": "./assets"
   },
   "dependencies": {
-    "bad-words": "^3.0.4",
+    "badwords-list": "^1.0.0",
     "jquery": "^3.6.0",
     "moment": "~2.29.1",
     "nanoscroller": "~0.8.7",

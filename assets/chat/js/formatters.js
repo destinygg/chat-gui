@@ -1,5 +1,5 @@
 import $ from 'jquery'
-import Filter from 'bad-words'
+import { regex as badWordsRegex } from 'badwords-list'
 import UserFeatures from './features'
 
 /** @var Array tlds */
@@ -153,13 +153,9 @@ class EmbedUrlFormatter {
 
 class BadWordsCensorshipFormatter {
 
-    constructor(){
-        this.filter = new Filter();
-    }
-
     format(chat, str/*, message=null*/) {
         if (chat.settings.get('censorbadwords')) {
-            str = this.filter.clean(str);
+            str = str.replace(badWordsRegex, match => '*'.repeat(match.length));
         }
 
         return str;
