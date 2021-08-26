@@ -147,6 +147,10 @@ const commandsinfo = new Map([
         desc: 'Embeds a video to bigscreen',
         alias: ['e']
     }],
+    ['postembed', {
+        desc: 'Posts embedded content in chat or generates and posts an embeddable link',
+        alias: ['pe']
+    }],
     ['exit', {
         desc: 'Exit the conversation you are in.'
     }],
@@ -281,6 +285,8 @@ class Chat {
         this.control.on('UNTAG', data => this.cmdUNTAG(data));
         this.control.on('EMBED', data => this.cmdEMBED(data));
         this.control.on('E', data => this.cmdEMBED(data));
+        this.control.on('POSTEMBED', data => this.cmdPOSTEMBED(data));
+        this.control.on('PE', data => this.cmdPOSTEMBED(data));
         this.control.on('BANINFO', data => this.cmdBANINFO(data));
         this.control.on('EXIT', data => this.cmdEXIT(data));
         this.control.on('MESSAGE', data => this.cmdWHISPER(data));
@@ -1577,6 +1583,70 @@ class Chat {
                 }
             } else {
                 MessageBuilder.error('Invalid link - /embed <link> OR /e <link>').into(this);
+                MessageBuilder.info('Valid links: Twitch Streams, Twitch VODs, Twitch Clips, Youtube Videos.').into(this);
+            }
+        }
+    }
+
+    cmdPOSTEMBED(parts) {
+        const location = (window.top || window.parent || window).location;
+        const EmbedSplit = location.href.split('#');
+        const urlCheck = /^((http[s]?|ftp):\/)?\/?([^:\/\s]+)((\/\w+)*\/)([\w\-\.]+[^#?\s]+)(.*)?(#[\w\-]+)?$/gm;
+        if (!parts[0] && EmbedSplit[1]) {
+            this.source.send('MSG', {data: '#' + EmbedSplit[1]});
+        } else if (!parts[0] && !EmbedSplit[1]) {
+            MessageBuilder.error('Nothing embedded - /postembed OR /pe OR /postembed <link> <message (optional)> OR /pe <link> <message (optional)>').into(this);
+            MessageBuilder.info('Valid links: Twitch Streams, Twitch VODs, Twitch Clips, Youtube Videos.').into(this);
+        } else {
+            let matchedHost = parts[0].matchAll(urlCheck);
+            let match = [...matchedHost][0];
+            let msg = '';
+            let moreMsg = '';
+            if (match) {
+                if (parts[1]) {
+                    parts.shift();
+                    moreMsg = parts.join(' ');
+                }
+                switch (match[3]) {
+                    case "www.twitch.tv":
+                    case "twitch.tv":
+                        if (match[5] === "/videos") {
+                            msg = "#twitch-vod/" + match[6];
+                        } else if (match[5] === "/clip") {
+                            msg = "#twitch-clip/" + match[6];
+                        } else {
+                            msg = "#twitch/" + match[6];
+                        }
+
+                        this.source.send('MSG', {data: `${msg} ${moreMsg}`});
+                        break;
+                    case "clips.twitch.tv":
+                        msg = "#twitch-clip/" + match[6];
+                        this.source.send('MSG', {data: `${msg} ${moreMsg}`});
+                        break;
+                    case "www.youtube.com":
+                    case "youtube.com":
+                        let params = new URLSearchParams(match[7]);
+                        msg = "#youtube/" + params.get('v');
+                        this.source.send('MSG', {data: `${msg} ${moreMsg}`});
+                        break;
+                    case "www.youtu.be":
+                    case "youtu.be":
+                        msg = "#youtube/" + match[6];
+                        this.source.send('MSG', {data: `${msg} ${moreMsg}`});
+                        break;
+                    default:
+                        MessageBuilder.error('Invalid link - /postembed OR /pe OR /postembed <link> <message (optional)> OR /pe <link> <message (optional)>').into(this);
+                        MessageBuilder.info('Valid links: Twitch Streams, Twitch VODs, Twitch Clips, Youtube Videos.').into(this);
+                        break;
+                }
+            } else if (!match && EmbedSplit[1]) {
+                if (parts[0]) {
+                    moreMsg = parts.join(' ');
+                }
+                this.source.send('MSG', {data: `#${EmbedSplit[1]} ${moreMsg}`});
+            } else {
+                MessageBuilder.error('Invalid link - /postembed OR /pe OR /postembed <link> <message (optional)> OR /pe <link> <message (optional)>').into(this);
                 MessageBuilder.info('Valid links: Twitch Streams, Twitch VODs, Twitch Clips, Youtube Videos.').into(this);
             }
         }
