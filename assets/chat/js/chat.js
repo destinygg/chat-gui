@@ -143,6 +143,10 @@ const commandsinfo = new Map([
     ['untag', {
         desc: 'No longer mark the users messages'
     }],
+    ['embed', {
+        desc: 'Embeds a video to bigscreen',
+        alias: ['e']
+    }],
     ['exit', {
         desc: 'Exit the conversation you are in.'
     }],
@@ -275,6 +279,8 @@ class Chat {
         this.control.on('CONNECT', data => this.cmdCONNECT(data));
         this.control.on('TAG', data => this.cmdTAG(data));
         this.control.on('UNTAG', data => this.cmdUNTAG(data));
+        this.control.on('EMBED', data => this.cmdEMBED(data));
+        this.control.on('E', data => this.cmdEMBED(data));
         this.control.on('BANINFO', data => this.cmdBANINFO(data));
         this.control.on('EXIT', data => this.cmdEXIT(data));
         this.control.on('MESSAGE', data => this.cmdWHISPER(data));
@@ -1525,6 +1531,55 @@ class Chat {
         this.settings.set('taggednotes', [...this.taggednotes]);
         this.applySettings();
         MessageBuilder.info(`Un-tagged ${n}`).into(this);
+    }
+
+    cmdEMBED(parts){
+        const location = (window.top || window.parent || window).location;
+        const noEmbedUrl = location.href.split('#')[0];
+        const urlCheck = /^((http[s]?|ftp):\/)?\/?([^:\/\s]+)((\/\w+)*\/)([\w\-\.]+[^#?\s]+)(.*)?(#[\w\-]+)?$/gm;
+        if (!parts[0]) {
+            MessageBuilder.error('No argument provided - /embed <link> OR /e <link>').into(this);
+            MessageBuilder.info('Valid links: Twitch Streams, Twitch VODs, Twitch Clips, Youtube Videos.').into(this);
+        } else if (parts.length > 1) {
+            MessageBuilder.error('More than one argument provided - /embed <link> OR /e <link>').into(this);
+            MessageBuilder.info('Valid links: Twitch Streams, Twitch VODs, Twitch Clips, Youtube Videos.').into(this);
+        } else {
+            let matchedHost = parts[0].matchAll(urlCheck);
+            let match = [...matchedHost][0];
+            if (match) {
+                switch (match[3]) {
+                    case "www.twitch.tv":
+                    case "twitch.tv":
+                        if (match[5] === "/videos") {
+                            location.href = noEmbedUrl + "#twitch-vod/" + match[6];
+                        } else if (match[5] === "/clip") {
+                            location.href = noEmbedUrl + "#twitch-clip/" + match[6];
+                        } else {
+                            location.href = noEmbedUrl + "#twitch/" + match[6];
+                        }
+                        break;
+                    case "clips.twitch.tv":
+                        location.href = noEmbedUrl + "#twitch-clip/" + match[6];
+                        break;
+                    case "www.youtube.com":
+                    case "youtube.com":
+                        let params = new URLSearchParams(match[7]);
+                        location.href = noEmbedUrl + "#youtube/" + params.get('v');
+                        break;
+                    case "www.youtu.be":
+                    case "youtu.be":
+                        location.href = noEmbedUrl + "#youtube/" + match[6];
+                        break;
+                    default:
+                        MessageBuilder.error('Invalid link - /embed <link> OR /e <link>').into(this);
+                        MessageBuilder.info('Valid links: Twitch Streams, Twitch VODs, Twitch Clips, Youtube Videos.').into(this);
+                        break;
+                }
+            } else {
+                MessageBuilder.error('Invalid link - /embed <link> OR /e <link>').into(this);
+                MessageBuilder.info('Valid links: Twitch Streams, Twitch VODs, Twitch Clips, Youtube Videos.').into(this);
+            }
+        }
     }
 
     cmdBANINFO(){
