@@ -572,7 +572,7 @@ class Chat {
         const emoticons = emotes.filter(v => !v['twitch']).map(v => v['prefix']).join('|'),
             twitchemotes = emotes.filter(v => v['twitch']).map(v => v['prefix']).join('|')
         this.emoteRegexNormal = new RegExp(`(^|\\s)(${emoticons})(?=$|\\s)`, 'gm')
-        this.emoteRegexTwitch = new RegExp(`(^|\\s)(${emoticons}|${twitchemotes})(?=$|\\s)`, 'gm')
+        this.emoteRegexTwitch = (twitchemotes.length > 0) ? new RegExp(`(^|\\s)(${emoticons}|${twitchemotes})(?=$|\\s)`, 'gm') : this.emoteRegexNormal
         this.emotePrefixes = new Set([...emotes.map(v => v['prefix'])])
         this.emotePrefixes.forEach(e => this.autocomplete.add(e, true))
         return this;
