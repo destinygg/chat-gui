@@ -457,6 +457,7 @@ class Chat {
         this.windowselect.on('click', '.tab', e => {
             ChatMenu.closeMenus(this)
             this.windowToFront($(e.currentTarget).data('name').toLowerCase())
+            this.menus.get('whisper-users').redraw()
             this.input.focus()
             return false
         })
@@ -1813,6 +1814,11 @@ class Chat {
                         }
                     })
                     .catch(() => MessageBuilder.error(`Failed to load messages :(`).into(this, win))
+            } else {
+                if (conv.unread > 0) {
+                    fetch(`${this.config.api.base}/api/messages/usr/${encodeURIComponent(normalized)}/inbox`, {credentials: 'include'})
+                        .catch(() => MessageBuilder.error(`Failed to mark messages as read :(`).into(this, win))
+                }
             }
             conv.unread = 0
             conv.open = true
