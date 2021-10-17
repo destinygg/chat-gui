@@ -80,9 +80,6 @@ function timeoutHelpers(ac){
 function updateHelpers(ac){
     ac.chat.ui.toggleClass('chat-autocomplete-in', ac.results.length > 0)
     ac.ui.toggleClass('active', ac.results.length > 0)
-    if (ac.results.length === 0) {
-        ac.container.css('left', 0)
-    }
 }
 function selectHelper(ac) {
     // Positioning
