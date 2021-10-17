@@ -109,7 +109,7 @@ class UrlFormatter {
 
         if(/\b(?:NSFL)\b/i.test(str))
             extraclass = 'nsfl-link';
-        else if(/\b(?:NSFW|SPOILER)\b/i.test(str))
+        else if(/\b(?:NSFW|SPOILERS?)\b/i.test(str))
             extraclass = 'nsfw-link';
 
         return str.replace(self.linkregex, function(url, scheme) {
@@ -150,7 +150,7 @@ class EmbedUrlFormatter {
 
         if(/\b(?:NSFL)\b/i.test(str))
             extraclass = 'nsfl-link';
-        else if(/\b(?:NSFW|SPOILER)\b/i.test(str))
+        else if(/\b(?:NSFW|SPOILERS?)\b/i.test(str))
             extraclass = 'nsfw-link';
 
         return str.replace(this.bigscreenregex, `$1<a class="externallink bookmarklink ${extraclass}" href="${this.url}$2" target="${target}">$2</a>`)

@@ -95,7 +95,7 @@ function selectHelper(ac) {
         $(list[Math.max(0, ac.selected - 2)]).each((i, e) => {
             const left = $(e).position().left + offset
             if(left < 0)
-                ac.container.css('left', $(e).position().left)
+                ac.container.css('left', -$(e).position().left)
         })
         list.forEach((e, i) => $(e).toggleClass('active', i === ac.selected))
     }
