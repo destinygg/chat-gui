@@ -151,6 +151,10 @@ const commandsinfo = new Map([
         desc: 'Posts embedded content in chat or generates and posts an embeddable link',
         alias: ['pe']
     }],
+    ['open', {
+        desc: 'Opens a conversation',
+        alias: ['o']
+    }],
     ['exit', {
         desc: 'Exit the conversation you are in.'
     }],
@@ -288,6 +292,8 @@ class Chat {
         this.control.on('POSTEMBED', data => this.cmdPOSTEMBED(data));
         this.control.on('PE', data => this.cmdPOSTEMBED(data));
         this.control.on('BANINFO', data => this.cmdBANINFO(data));
+        this.control.on('OPEN', data => this.cmdOPEN(data));
+        this.control.on('O', data => this.cmdOPEN(data));
         this.control.on('EXIT', data => this.cmdEXIT(data));
         this.control.on('MESSAGE', data => this.cmdWHISPER(data));
         this.control.on('MSG', data => this.cmdWHISPER(data));
@@ -457,6 +463,7 @@ class Chat {
         this.windowselect.on('click', '.tab', e => {
             ChatMenu.closeMenus(this)
             this.windowToFront($(e.currentTarget).data('name').toLowerCase())
+            this.menus.get('whisper-users').redraw()
             this.input.focus()
             return false
         })
@@ -1680,6 +1687,28 @@ class Chat {
             .catch(() => MessageBuilder.error('Error loading ban info. Check your profile.').into(this));
     }
 
+    cmdOPEN(parts){
+        if (!parts[0]) {
+            MessageBuilder.error('No username specified - /open <username> OR /o <username>').into(this);
+        } else if (parts.length > 1) {
+            MessageBuilder.error('Too many arguments provided - /open <username> OR /o <username>').into(this);
+        } else {
+            if (parts[0] !== this.user.username) {
+                const normalized = parts[0].toLowerCase()
+                const win = this.getWindow(normalized)
+                if (win !== (null || undefined)) {
+                    this.windowToFront(normalized)
+                } else {
+                    if (!this.whispers.has(normalized))
+                        this.whispers.set(normalized, {nick: normalized, unread: 0, open: false})
+                    this.openConversation(normalized)
+                }
+            } else {
+                MessageBuilder.error("Can't open a convo with yourself - /open <username> OR /o <username>").into(this);
+            }
+        }
+    }
+
     cmdEXIT(){
         const win = this.getActiveWindow()
         if(win !== this.mainwindow) {
@@ -1813,6 +1842,11 @@ class Chat {
                         }
                     })
                     .catch(() => MessageBuilder.error(`Failed to load messages :(`).into(this, win))
+            } else {
+                if (conv.unread > 0) {
+                    fetch(`${this.config.api.base}/api/messages/usr/${encodeURIComponent(normalized)}/inbox`, {credentials: 'include'})
+                        .catch(() => MessageBuilder.error(`Failed to mark messages as read :(`).into(this, win))
+                }
             }
             conv.unread = 0
             conv.open = true
