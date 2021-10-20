@@ -398,6 +398,25 @@ class Chat {
         this.autocomplete.bind(this)
 
         // Chat input
+        // Dynamically adjust input's height.
+        const maxHeightPixels = this.input.css('maxHeight')
+        const maxHeight = parseInt(maxHeightPixels.slice(0, -2))
+        this.input.on('keydown input', () => {
+            this.input.css('height', '')
+            let calculatedHeight = this.input.prop('scrollHeight')
+
+            if (calculatedHeight >= maxHeight) {
+                this.input.css('overflow', 'auto')
+            } else {
+                this.input.css('overflow', 'hidden')
+            }
+
+            this.input.css('height', calculatedHeight)
+        })
+
+        // Set initial height.
+        this.input.trigger('keydown')
+
         this.input.on('keypress', e => {
             if(isKeyCode(e, KEYCODES.ENTER) && !e.shiftKey && !e.ctrlKey) {
                 e.preventDefault()

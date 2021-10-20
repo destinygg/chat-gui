@@ -207,7 +207,7 @@ hr {
 }
 
 #chat-input-control {
-    height: 4em;
+    max-height: 140px;
     position: relative;
     color: $color-chat-text2;
     background: $color-surface-dark2;
