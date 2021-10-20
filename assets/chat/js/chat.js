@@ -402,6 +402,8 @@ class Chat {
         const maxHeightPixels = this.input.css('maxHeight')
         const maxHeight = parseInt(maxHeightPixels.slice(0, -2))
         this.input.on('keydown input', () => {
+            const pinned = this.getActiveWindow().scrollplugin.isPinned()
+
             this.input.css('height', '')
             let calculatedHeight = this.input.prop('scrollHeight')
 
@@ -412,6 +414,7 @@ class Chat {
             }
 
             this.input.css('height', calculatedHeight)
+            this.getActiveWindow().updateAndPin(pinned)
         })
 
         // Set initial height.
