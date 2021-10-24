@@ -207,7 +207,7 @@ hr {
 }
 
 #chat-input-control {
-    height: 4em;
+    max-height: 140px;
     position: relative;
     color: $color-chat-text2;
     background: $color-surface-dark2;
@@ -221,6 +221,7 @@ hr {
     box-shadow: none;
     box-sizing: border-box;
     display: block;
+    overflow: hidden;
 }
 #chat-input-control::placeholder {
     color: $color-chat-place;

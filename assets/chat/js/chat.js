@@ -398,11 +398,18 @@ class Chat {
         this.autocomplete.bind(this)
 
         // Chat input
+        // Dynamically adjust input's height.
+        this.input.on('keydown input', this.adjustInputHeight.bind(this))
+
+        // Set initial height.
+        this.adjustInputHeight()
+
         this.input.on('keypress', e => {
             if(isKeyCode(e, KEYCODES.ENTER) && !e.shiftKey && !e.ctrlKey) {
                 e.preventDefault()
                 e.stopPropagation()
                 this.control.emit('SEND', this.input.val().toString().trim())
+                this.adjustInputHeight()
                 this.input.focus()
             }
         })
@@ -880,6 +887,21 @@ class Chat {
     setDefaultPlaceholderText() {
         const placeholderText = this.authenticated ? `Write something ${this.user.username} ...` : `Write something ...`
         this.input.attr('placeholder', placeholderText)
+    }
+
+    adjustInputHeight() {
+        const maxHeightPixels = this.input.css('maxHeight')
+        const maxHeight = parseInt(maxHeightPixels.slice(0, -2))
+        const pinned = this.getActiveWindow().scrollplugin.isPinned()
+
+        this.input.css('height', '')
+        let calculatedHeight = this.input.prop('scrollHeight')
+
+        // Show scrollbars if the input's height exceeds the max.
+        this.input.css('overflow-y', calculatedHeight >= maxHeight ? 'scroll' : 'hidden')
+
+        this.input.css('height', calculatedHeight)
+        this.getActiveWindow().updateAndPin(pinned)
     }
 
     /**
