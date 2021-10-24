@@ -399,26 +399,10 @@ class Chat {
 
         // Chat input
         // Dynamically adjust input's height.
-        const maxHeightPixels = this.input.css('maxHeight')
-        const maxHeight = parseInt(maxHeightPixels.slice(0, -2))
-        this.input.on('keydown input', () => {
-            const pinned = this.getActiveWindow().scrollplugin.isPinned()
-
-            this.input.css('height', '')
-            let calculatedHeight = this.input.prop('scrollHeight')
-
-            if (calculatedHeight >= maxHeight) {
-                this.input.css('overflow', 'auto')
-            } else {
-                this.input.css('overflow', 'hidden')
-            }
-
-            this.input.css('height', calculatedHeight)
-            this.getActiveWindow().updateAndPin(pinned)
-        })
+        this.input.on('keydown input', this.adjustInputHeight.bind(this))
 
         // Set initial height.
-        this.input.trigger('keydown')
+        this.adjustInputHeight()
 
         this.input.on('keypress', e => {
             if(isKeyCode(e, KEYCODES.ENTER) && !e.shiftKey && !e.ctrlKey) {
@@ -902,6 +886,24 @@ class Chat {
     setDefaultPlaceholderText() {
         const placeholderText = this.authenticated ? `Write something ${this.user.username} ...` : `Write something ...`
         this.input.attr('placeholder', placeholderText)
+    }
+
+    adjustInputHeight() {
+        const maxHeightPixels = this.input.css('maxHeight')
+        const maxHeight = parseInt(maxHeightPixels.slice(0, -2))
+        const pinned = this.getActiveWindow().scrollplugin.isPinned()
+
+        this.input.css('height', '')
+        let calculatedHeight = this.input.prop('scrollHeight')
+
+        if (calculatedHeight >= maxHeight) {
+            this.input.css('overflow', 'auto')
+        } else {
+            this.input.css('overflow', 'hidden')
+        }
+
+        this.input.css('height', calculatedHeight)
+        this.getActiveWindow().updateAndPin(pinned)
     }
 
     /**
