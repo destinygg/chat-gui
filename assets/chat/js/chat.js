@@ -897,11 +897,8 @@ class Chat {
         this.input.css('height', '')
         let calculatedHeight = this.input.prop('scrollHeight')
 
-        if (calculatedHeight >= maxHeight) {
-            this.input.css('overflow', 'auto')
-        } else {
-            this.input.css('overflow', 'hidden')
-        }
+        // Show scrollbars if the input's height exceeds the max.
+        this.input.css('overflow-y', calculatedHeight >= maxHeight ? 'scroll' : 'hidden')
 
         this.input.css('height', calculatedHeight)
         this.getActiveWindow().updateAndPin(pinned)

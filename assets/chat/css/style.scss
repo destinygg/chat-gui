@@ -221,6 +221,7 @@ hr {
     box-shadow: none;
     box-sizing: border-box;
     display: block;
+    overflow: hidden;
 }
 #chat-input-control::placeholder {
     color: $color-chat-place;
