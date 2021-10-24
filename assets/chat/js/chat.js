@@ -409,6 +409,7 @@ class Chat {
                 e.preventDefault()
                 e.stopPropagation()
                 this.control.emit('SEND', this.input.val().toString().trim())
+                this.adjustInputHeight()
                 this.input.focus()
             }
         })
