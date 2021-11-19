@@ -178,7 +178,7 @@ class AmazonAssociatesTagInjector {
 
     format(chat, str) {
         const injectedStr = str.replace(this.amazonLinkRegex, amazonLink => {
-            const parsedAmazonLink = URL(amazonLink)
+            const parsedAmazonLink = new URL(amazonLink)
             parsedAmazonLink.searchParams.set('tag', chat.config.amazonTag)
             return parsedAmazonLink.toString()
         })
@@ -188,6 +188,8 @@ class AmazonAssociatesTagInjector {
         if (this.maxMessageSize && injectedStr.length > this.maxMessageSize) {
             return str
         }
+
+        return injectedStr
     }
 }
 
