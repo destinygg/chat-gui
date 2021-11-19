@@ -1,6 +1,7 @@
 import $ from 'jquery'
 import { regex as badWordsRegex } from 'badwords-list'
 import UserFeatures from './features'
+import { MAX_MESSAGE_SIZE } from './const'
 
 /** @var Array tlds */
 const tlds = require('../../tld.json');
@@ -176,11 +177,17 @@ class AmazonAssociatesTagInjector {
     }
 
     format(chat, str) {
-        return str.replace(this.amazonLinkRegex, amazonLink => {
+        const injectedStr = str.replace(this.amazonLinkRegex, amazonLink => {
             const parsedAmazonLink = URL(amazonLink)
             parsedAmazonLink.searchParams.set('tag', chat.config.amazonTag)
             return parsedAmazonLink.toString()
         })
+
+        // If the modified message exceeds the max size, return the original so 
+        // the message still goes through.
+        if (injectedStr.length > MAX_MESSAGE_SIZE) {
+            return str
+        }
     }
 }
 
