@@ -1,7 +1,6 @@
 import $ from 'jquery'
 import { regex as badWordsRegex } from 'badwords-list'
 import UserFeatures from './features'
-import { MAX_MESSAGE_SIZE } from './const'
 
 /** @var Array tlds */
 const tlds = require('../../tld.json');
@@ -172,8 +171,9 @@ class BadWordsCensorshipFormatter {
 }
 
 class AmazonAssociatesTagInjector {
-    constructor() {
+    constructor(maxMessageSize) {
         this.amazonLinkRegex = /\bhttps:\/\/www\.amazon\..*\b/gi
+        this.maxMessageSize = maxMessageSize
     }
 
     format(chat, str) {
@@ -185,7 +185,7 @@ class AmazonAssociatesTagInjector {
 
         // If the modified message exceeds the max size, return the original so 
         // the message still goes through.
-        if (injectedStr.length > MAX_MESSAGE_SIZE) {
+        if (this.maxMessageSize && injectedStr.length > this.maxMessageSize) {
             return str
         }
     }
