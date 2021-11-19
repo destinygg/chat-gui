@@ -170,6 +170,20 @@ class BadWordsCensorshipFormatter {
 
 }
 
+class AmazonAssociatesTagInjector {
+    constructor() {
+        this.amazonLinkRegex = /\bhttps:\/\/www\.amazon\..*\b/gi
+    }
+
+    format(chat, str) {
+        return str.replace(this.amazonLinkRegex, amazonLink => {
+            const parsedAmazonLink = URL(amazonLink)
+            parsedAmazonLink.searchParams.set('tag', chat.config.amazonTag)
+            return parsedAmazonLink.toString()
+        })
+    }
+}
+
 export {
     EmoteFormatter,
     GreenTextFormatter,
