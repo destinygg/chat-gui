@@ -177,6 +177,10 @@ class AmazonAssociatesTagInjector {
     }
 
     format(chat, str) {
+        if (!chat.config.amazonTag) {
+            return str
+        }
+
         const injectedStr = str.replace(this.amazonLinkRegex, amazonLink => {
             const parsedAmazonLink = new URL(amazonLink)
             parsedAmazonLink.searchParams.set('tag', chat.config.amazonTag)
