@@ -198,5 +198,6 @@ export {
     MentionedUserFormatter,
     UrlFormatter,
     EmbedUrlFormatter,
-    BadWordsCensorshipFormatter 
+    BadWordsCensorshipFormatter,
+    AmazonAssociatesTagInjector
 }
