@@ -6,7 +6,8 @@
   "scripts": {
     "tld": "node scripts/tld.js",
     "glue": "node scripts/glue.js",
-    "start": "webpack serve --mode=development"
+    "start": "webpack serve --mode=development",
+    "test": "jest"
   },
   "repository": {
     "type": "git",
