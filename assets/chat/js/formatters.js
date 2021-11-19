@@ -172,7 +172,7 @@ class BadWordsCensorshipFormatter {
 
 class AmazonAssociatesTagInjector {
     constructor(maxMessageSize) {
-        this.amazonLinkRegex = /\bhttps:\/\/www\.amazon\..*\b/gi
+        this.amazonLinkRegex = /\bhttps:\/\/www\.amazon\.[\S]*/gi
         this.maxMessageSize = maxMessageSize
     }
 
