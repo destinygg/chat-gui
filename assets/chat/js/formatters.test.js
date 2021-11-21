@@ -2,7 +2,12 @@ import { AmazonAssociatesTagInjector } from './formatters'
 
 const chatStub = {
     config: {
-        amazonTag: 'cakesh-20'
+        amazonTags: {
+            'www.amazon.com': 'cakesh-20',
+            'www.amazon.ca': 'leafsh-20',
+            'www.amazon.co.uk': 'bongsh-20',
+            'www.amazon.de': 'beersh-20'
+        }
     }
 }
 
@@ -11,6 +16,12 @@ test.each([
         'Inject tags into message with two links',
         'hey check these out https://www.amazon.com/dp/B08LMBJFGD?psc=1&ref=ppx_yo2_dt_b_product_details and this too https://www.amazon.com/dp/B07VP5WG78?psc=1&ref=ppx_yo2_dt_b_product_details',
         'hey check these out https://www.amazon.com/dp/B08LMBJFGD?psc=1&ref=ppx_yo2_dt_b_product_details&tag=cakesh-20 and this too https://www.amazon.com/dp/B07VP5WG78?psc=1&ref=ppx_yo2_dt_b_product_details&tag=cakesh-20',
+        null
+    ],
+    [
+        'Inject tags into message with international links',
+        'for the canadians https://www.amazon.ca/dp/B08LMBJFGD?psc=1&ref=ppx_yo2_dt_b_product_details the british https://www.amazon.co.uk/dp/B08LMBJFGD?psc=1&ref=ppx_yo2_dt_b_product_details and the germans https://www.amazon.de/dp/B08LMBJFGD?psc=1&ref=ppx_yo2_dt_b_product_details',
+        'for the canadians https://www.amazon.ca/dp/B08LMBJFGD?psc=1&ref=ppx_yo2_dt_b_product_details&tag=leafsh-20 the british https://www.amazon.co.uk/dp/B08LMBJFGD?psc=1&ref=ppx_yo2_dt_b_product_details&tag=bongsh-20 and the germans https://www.amazon.de/dp/B08LMBJFGD?psc=1&ref=ppx_yo2_dt_b_product_details&tag=beersh-20',
         null
     ],
     [

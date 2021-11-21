@@ -177,21 +177,27 @@ class AmazonAssociatesTagInjector {
     }
 
     format(chat, str) {
-        if (!chat.config.amazonTag) {
+        if (!chat.config.amazonTags) {
             return str
         }
 
         const injectedStr = str.replace(this.amazonLinkRegex, amazonLink => {
             try {
                 const parsedAmazonLink = new URL(amazonLink)
-                parsedAmazonLink.searchParams.set('tag', chat.config.amazonTag)
+
+                const tag = chat.config.amazonTags[parsedAmazonLink.host]
+                if (!tag) {
+                    return amazonLink
+                }
+
+                parsedAmazonLink.searchParams.set('tag', tag)
                 return parsedAmazonLink.toString()
             } catch (_) {
                 return amazonLink
             }
         })
 
-        // If the modified message exceeds the max size, return the original so 
+        // If the modified message exceeds the max size, return the original so
         // the message still goes through.
         if (this.maxMessageSize && injectedStr.length > this.maxMessageSize) {
             return str

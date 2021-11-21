@@ -201,7 +201,7 @@ class Chat {
             cdn: {base: ''},
             cacheKey: '',
             banAppealUrl: null,
-            amazonTag: null
+            amazonTags: null
         }, config)
         this.ui = null;
         this.css = null;
