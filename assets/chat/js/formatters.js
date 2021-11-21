@@ -170,6 +170,43 @@ class BadWordsCensorshipFormatter {
 
 }
 
+class AmazonAssociatesTagInjector {
+    constructor(maxMessageSize) {
+        this.amazonLinkRegex = /\bhttps:\/\/www\.amazon\.[\S]*/gi
+        this.maxMessageSize = maxMessageSize
+    }
+
+    format(chat, str) {
+        if (!chat.config.amazonTags) {
+            return str
+        }
+
+        const injectedStr = str.replace(this.amazonLinkRegex, amazonLink => {
+            try {
+                const parsedAmazonLink = new URL(amazonLink)
+
+                const tag = chat.config.amazonTags[parsedAmazonLink.host]
+                if (!tag) {
+                    return amazonLink
+                }
+
+                parsedAmazonLink.searchParams.set('tag', tag)
+                return parsedAmazonLink.toString()
+            } catch (_) {
+                return amazonLink
+            }
+        })
+
+        // If the modified message exceeds the max size, return the original so
+        // the message still goes through.
+        if (this.maxMessageSize && injectedStr.length > this.maxMessageSize) {
+            return str
+        }
+
+        return injectedStr
+    }
+}
+
 export {
     EmoteFormatter,
     GreenTextFormatter,
@@ -177,5 +214,6 @@ export {
     MentionedUserFormatter,
     UrlFormatter,
     EmbedUrlFormatter,
-    BadWordsCensorshipFormatter 
+    BadWordsCensorshipFormatter,
+    AmazonAssociatesTagInjector
 }
