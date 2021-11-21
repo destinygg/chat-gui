@@ -182,9 +182,13 @@ class AmazonAssociatesTagInjector {
         }
 
         const injectedStr = str.replace(this.amazonLinkRegex, amazonLink => {
-            const parsedAmazonLink = new URL(amazonLink)
-            parsedAmazonLink.searchParams.set('tag', chat.config.amazonTag)
-            return parsedAmazonLink.toString()
+            try {
+                const parsedAmazonLink = new URL(amazonLink)
+                parsedAmazonLink.searchParams.set('tag', chat.config.amazonTag)
+                return parsedAmazonLink.toString()
+            } catch (_) {
+                return amazonLink
+            }
         })
 
         // If the modified message exceeds the max size, return the original so 
