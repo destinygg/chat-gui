@@ -56,7 +56,8 @@ const hintstrings = new Map([
     ['ignoreuser', 'Use /ignore <username> to hide messages from pesky chatters'],
     ['mutespermanent', 'Mutes are never persistent, don\'t worry it will pass!'],
     ['tagshint', `Use the /tag <nick> [<color> <note>] to tag users you like. There are preset colors to choose from ${tagcolors.join(', ')}`],
-    ['bigscreen', `Bigscreen! Did you know you can have the chat on the left or right side of the stream by clicking the swap icon in the top left?`]
+    ['bigscreen', `Bigscreen! Did you know you can have the chat on the left or right side of the stream by clicking the swap icon in the top left?`],
+    ['danisold', 'Destiny is an Amazon Associate. He earns a commission on qualifying purchases of any product on Amazon linked in Destiny.gg chat.']
 ])
 const settingsdefault = new Map([
     ['schemaversion', 2],
