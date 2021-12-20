@@ -3,10 +3,6 @@ const DATE_FORMATS = {
     TIME: 'HH:mm'
 }
 
-// Hardcoded in `main.go` in the chat backend.
-// https://github.com/destinygg/chat/blob/df26c113dce83af6a6d902d229d7e9f8823e45ea/main.go#L43
-const MAX_MESSAGE_SIZE = 512;
-
 const KEYCODES = {
     TAB: 9,
     STRG: 17,
@@ -55,7 +51,6 @@ function isKeyCode(e, code){
 export {
     KEYCODES,
     DATE_FORMATS,
-    MAX_MESSAGE_SIZE,
     isKeyCode,
     getKeyCode
 }
