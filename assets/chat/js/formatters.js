@@ -172,7 +172,7 @@ class BadWordsCensorshipFormatter {
 
 class AmazonAssociatesTagInjector {
     constructor() {
-        this.amazonLinkRegex = /\bhttps:\/\/www\.amazon\.[\S]*/gi
+        this.amazonLinkRegex = /\bhttps:\/\/www\.amazon\.(com|ca|co\.uk|de)\??(&?[^=&]*=[^=&]*)*/gi
     }
 
     format(chat, str) {

@@ -37,6 +37,12 @@ describe('Inject tag', () => {
             'hey check these out https://www.amazon.com/dp/B08LMBJFGD?psc=1&tag=cakesh-20&ref=ppx_yo2_dt_b_product_details pretty cool eh?',
             chatStub
         ],
+        [
+            'Into message with parentheses',
+            'hey ShawarmaFury, check out these cool earphones (https://www.amazon.com/dp/B08LMBJFGD?psc=1&ref=ppx_yo2_dt_b_product_details)',
+            'hey ShawarmaFury, check out these cool earphones (https://www.amazon.com/dp/B08LMBJFGD?psc=1&ref=ppx_yo2_dt_b_product_details&tag=cakesh-20)',
+            chatStub
+        ],
     ])('%s', (_, message, expectedMessage, chatStub) => {
         const injector = new AmazonAssociatesTagInjector()
         expect(injector.format(chatStub, message)).toBe(expectedMessage)
