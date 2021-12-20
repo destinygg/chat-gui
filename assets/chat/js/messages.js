@@ -1,6 +1,6 @@
 import $ from 'jquery'
 import {EmoteFormatter, GreenTextFormatter, HtmlTextFormatter, MentionedUserFormatter, UrlFormatter, EmbedUrlFormatter, BadWordsCensorshipFormatter, AmazonAssociatesTagInjector} from './formatters'
-import {DATE_FORMATS, MAX_MESSAGE_SIZE} from './const'
+import {DATE_FORMATS} from './const'
 import {throttle} from 'throttle-debounce'
 import moment from 'moment'
 
@@ -17,7 +17,7 @@ const MessageTypes = {
 }
 const formatters = new Map()
 formatters.set('html', new HtmlTextFormatter())
-formatters.set('amazon', new AmazonAssociatesTagInjector(MAX_MESSAGE_SIZE))
+formatters.set('amazon', new AmazonAssociatesTagInjector())
 formatters.set('url', new UrlFormatter())
 formatters.set('emote', new EmoteFormatter())
 formatters.set('mentioned', new MentionedUserFormatter())

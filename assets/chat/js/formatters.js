@@ -171,9 +171,8 @@ class BadWordsCensorshipFormatter {
 }
 
 class AmazonAssociatesTagInjector {
-    constructor(maxMessageSize) {
+    constructor() {
         this.amazonLinkRegex = /\bhttps:\/\/www\.amazon\.[\S]*/gi
-        this.maxMessageSize = maxMessageSize
     }
 
     format(chat, str) {
@@ -196,12 +195,6 @@ class AmazonAssociatesTagInjector {
                 return amazonLink
             }
         })
-
-        // If the modified message exceeds the max size, return the original so
-        // the message still goes through.
-        if (this.maxMessageSize && injectedStr.length > this.maxMessageSize) {
-            return str
-        }
 
         return injectedStr
     }
