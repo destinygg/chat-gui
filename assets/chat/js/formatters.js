@@ -1,5 +1,4 @@
 import $ from 'jquery'
-import { regex as badWordsRegex } from 'badwords-list'
 import UserFeatures from './features'
 
 /** @var Array tlds */
