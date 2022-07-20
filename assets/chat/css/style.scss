@@ -12,8 +12,8 @@ html {
     box-sizing: border-box;
 }
 
-$chat-chrome-font: 'Comic Sans MS', 'Comic Sans', monospace;
-$chat-lines-font: 'Comic Sans MS', 'Comic Sans', monospace;
+$chat-chrome-font: 'Roboto', Helvetica, 'Trebuchet MS', Verdana, sans-serif;
+$chat-lines-font: 'Roboto', Helvetica, 'Trebuchet MS', Verdana, sans-serif;
 $chat-min-width: 300px;
 
 $gutter-xs: 0.2em;
@@ -41,7 +41,7 @@ button {
     line-height: 1.42857143;
     text-rendering: optimizeLegibility;
     font-feature-settings: 'kern';
-    font-family: 'Comic Sans MS', 'Comic Sans', monospace;
+    font-family: inherit;
 }
 
 html,
