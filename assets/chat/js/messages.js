@@ -1,5 +1,5 @@
 import $ from 'jquery'
-import {EmoteFormatter, GreenTextFormatter, HtmlTextFormatter, MentionedUserFormatter, UrlFormatter, EmbedUrlFormatter, BadWordsCensorshipFormatter, AmazonAssociatesTagInjector} from './formatters'
+import {EmoteFormatter, GreenTextFormatter, HtmlTextFormatter, MentionedUserFormatter, UrlFormatter, EmbedUrlFormatter, BadWordsCensorshipFormatter, AmazonAssociatesTagInjector, SuspostFormatter} from './formatters'
 import {DATE_FORMATS} from './const'
 import {throttle} from 'throttle-debounce'
 import moment from 'moment'
@@ -22,6 +22,7 @@ formatters.set('url', new UrlFormatter())
 formatters.set('emote', new EmoteFormatter())
 formatters.set('mentioned', new MentionedUserFormatter())
 formatters.set('green', new GreenTextFormatter())
+formatters.set('sus', new SuspostFormatter())
 formatters.set('embed', new EmbedUrlFormatter())
 formatters.set('badwordscensor', new BadWordsCensorshipFormatter())
 

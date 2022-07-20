@@ -275,6 +275,10 @@ hr {
     .greentext {
         color: $color-green-text;
     }
+    .sus {
+        text-transform: uppercase;
+        font-family: 'Among Us', $chat-lines-font;
+    }
     .externallink {
         border-style: solid;
         border-color: transparent;

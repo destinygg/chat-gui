@@ -202,6 +202,16 @@ class AmazonAssociatesTagInjector {
     }
 }
 
+class SuspostFormatter {
+    format(chat, str, message = null) {
+        if (message.user && str.indexOf('ඞ') === 0) {
+            str = `<span class="sus">${str}</span>`;
+        }
+
+        return str;
+    }
+}
+
 export {
     EmoteFormatter,
     GreenTextFormatter,
@@ -210,5 +220,6 @@ export {
     UrlFormatter,
     EmbedUrlFormatter,
     BadWordsCensorshipFormatter,
-    AmazonAssociatesTagInjector
+    AmazonAssociatesTagInjector,
+    SuspostFormatter,
 }
