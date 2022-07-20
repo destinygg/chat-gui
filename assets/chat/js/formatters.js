@@ -159,7 +159,7 @@ class EmbedUrlFormatter {
 
 class BadWordsCensorshipFormatter {
     constructor() {
-        this.badWordsRegex = /(fuck|(?<!sma)shit|cunt|whore|bitch|faggot|fag|nigger|nigga|gusano|cracker|rape)/gi
+        this.badWordsRegex = /(fuck|shit|cunt|whore|bitch|faggot|fag|nigger|nigga|gusano|cracker|rape)/gi
     }
 
     format(chat, str/*, message=null*/) {
