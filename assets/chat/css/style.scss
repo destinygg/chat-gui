@@ -1509,3 +1509,8 @@ body.pref-fontscale[data-fontscale='10'] {
 #chat.onstreamchat #chat-vote-frame {
     display: none !important;
 }
+
+@font-face {
+    font-family: 'Among Us';
+    src: url('../../../fonts/AmongUs-Regular.ttf') format('truetype');
+}
