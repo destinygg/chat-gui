@@ -1,3 +1,5 @@
+import UserFeature from './features'
+
 class ChatUser {
 
     constructor(args={}){
@@ -22,6 +24,20 @@ class ChatUser {
 
     hasFeature(feature){
         return this.hasAnyFeatures(feature)
+    }
+
+    isPrivileged() {
+        return this.hasAnyFeatures(
+            UserFeature.MODERATOR,
+            UserFeature.PROTECTED,
+            UserFeature.ADMIN,
+            UserFeature.BROADCASTER,
+            UserFeature.VIP
+        );
+    }
+
+    isSubscriber() {
+        return this.hasFeature(UserFeature.SUBSCRIBER);
     }
 }
 

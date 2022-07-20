@@ -275,6 +275,10 @@ hr {
     .greentext {
         color: $color-green-text;
     }
+    .sus {
+        text-transform: uppercase;
+        font-family: 'Among Us', $chat-lines-font;
+    }
     .externallink {
         border-style: solid;
         border-color: transparent;
@@ -1508,4 +1512,9 @@ body.pref-fontscale[data-fontscale='10'] {
 
 #chat.onstreamchat #chat-vote-frame {
     display: none !important;
+}
+
+@font-face {
+    font-family: 'Among Us';
+    src: url('../../../fonts/AmongUs-Regular.ttf') format('truetype');
 }
