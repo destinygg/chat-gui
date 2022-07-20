@@ -204,7 +204,11 @@ class AmazonAssociatesTagInjector {
 
 class SuspostFormatter {
     format(chat, str, message = null) {
-        if (message.user && str.indexOf('ඞ') === 0) {
+        const u = message?.user;
+        if (
+            (u?.isPrivileged() || u?.isSubscriber())
+            && str.indexOf('ඞ') === 0
+        ) {
             str = `<span class="sus">${str}</span>`;
         }
 
