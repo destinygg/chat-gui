@@ -619,6 +619,7 @@ class Chat {
                     body: JSON.stringify([...this.settings]),
                     credentials: 'include',
                     method: 'POST',
+                    headers: { 'X-CSRF-Guard': 'YEE' },
                 }).catch(console.warn)
             } else {
                 ChatStore.write('chat.settings', this.settings);
@@ -1172,6 +1173,7 @@ class Chat {
                 fetch(`${this.config.api.base}/api/messages/msg/${messageid}/open`, {
                     credentials: 'include',
                     method: 'POST',
+                    headers: { 'X-CSRF-Guard': 'YEE' },
                 }).catch(console.warn)
             } else {
                 conv.unread++
