@@ -202,7 +202,8 @@ class Chat {
             cdn: {base: ''},
             cacheKey: '',
             banAppealUrl: null,
-            amazonTags: null
+            amazonTags: null,
+            welcomeMessage: 'Welcome to chat!',
         }, config)
         this.ui = null;
         this.css = null;
@@ -515,7 +516,7 @@ class Chat {
         this.mainwindow.updateAndPin()
 
         this.setDefaultPlaceholderText()
-        MessageBuilder.status(`Welcome to DGG chat`).into(this)
+        MessageBuilder.status(this.config.welcomeMessage).into(this)
         return Promise.resolve(this)
     }
 
