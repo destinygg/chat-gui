@@ -204,6 +204,8 @@ class Chat {
             banAppealUrl: null,
             amazonTags: null,
             welcomeMessage: 'Welcome to chat!',
+            stalkEnabled: true,
+            mentionedEnabled: true,
         }, config)
         this.ui = null;
         this.css = null;
@@ -1762,6 +1764,11 @@ class Chat {
     }
 
     cmdSTALK(parts){
+        if (!this.config.stalkEnabled) {
+            MessageBuilder.error('The `/stalk` command is disabled.').into(this);
+            return;
+        }
+
         if (parts[0] && /^\d+$/.test(parts[0])){
             parts[1] = parts[0];
             parts[0] = this.user.username;
@@ -1802,6 +1809,11 @@ class Chat {
     }
 
     cmdMENTIONS(parts){
+        if (!this.config.mentionsEnabled) {
+            MessageBuilder.error('The `/mentions` command is disabled.').into(this);
+            return;
+        }
+
         if (parts[0] && /^\d+$/.test(parts[0])){
             parts[1] = parts[0];
             parts[0] = this.user.username;
