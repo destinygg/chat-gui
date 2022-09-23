@@ -39,6 +39,10 @@ class ChatUser {
     isSubscriber() {
         return this.hasFeature(UserFeature.SUBSCRIBER);
     }
+
+    isTwitchSub() {
+        return this.hasFeature(UserFeature.TWITCHSUB);
+    }
 }
 
 export default ChatUser

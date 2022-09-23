@@ -346,8 +346,12 @@ class ChatEmoteMenu extends ChatMenu {
             this.chat.input.focus();
         }
         super.show();
-        this.demotes.empty().append(this.chat.emotes.filter(v => !v['twitch']).map(v => v['prefix']).map(buildEmote).join(''));
-        this.temotes.empty().append(this.chat.emotes.filter(v => v['twitch']).map(v => v['prefix']).map(buildEmote).join(''));
+        this.demotes.append(
+            this.chat.emoteService.destinyEmotePrefixes.map(buildEmote).join('')
+        );
+        this.temotes.append(
+            this.chat.emoteService.twitchEmotePrefixes.map(buildEmote).join('')
+        );
     }
 
     selectEmote(emote){

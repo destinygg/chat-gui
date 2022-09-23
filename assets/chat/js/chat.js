@@ -19,6 +19,7 @@ import Settings from './settings'
 import ChatWindow from './window'
 import {ChatVote, parseQuestionAndTime} from './vote'
 import {isMuteActive, MutedTimer} from './mutedtimer'
+import EmoteService from './emotes'
 
 const regexslashcmd = /^\/([a-z0-9]+)[\s]?/i
 const regextime = /(\d+(?:\.\d*)?)([a-z]+)?/ig
@@ -216,12 +217,8 @@ class Chat {
         this.unresolved = [];
 
         this.flairs = new Set();
-        this.emotes = new Set();
         this.flairsMap = new Map();
-        this.emotesMap = new Map();
-        this.emotePrefixes = new Set();
-        this.emoteRegexNormal = null;
-        this.emoteRegexTwitch = null;
+        this.emoteService = new EmoteService();
 
         this.user = new ChatUser();
         this.users = new Map();
@@ -582,15 +579,8 @@ class Chat {
     }
 
     setEmotes(emotes) {
-        this.emotes = emotes;
-        this.emotesMap = new Map()
-        emotes.forEach(v => this.emotesMap.set(v.prefix, v))
-        const emoticons = emotes.filter(v => !v['twitch']).map(v => v['prefix']).join('|'),
-            twitchemotes = emotes.filter(v => v['twitch']).map(v => v['prefix']).join('|')
-        this.emoteRegexNormal = new RegExp(`(^|\\s)(${emoticons})(?=$|\\s)`, 'gm')
-        this.emoteRegexTwitch = (twitchemotes.length > 0) ? new RegExp(`(^|\\s)(${emoticons}|${twitchemotes})(?=$|\\s)`, 'gm') : this.emoteRegexNormal
-        this.emotePrefixes = new Set([...emotes.map(v => v['prefix'])])
-        this.emotePrefixes.forEach(e => this.autocomplete.add(e, true))
+        this.emoteService.buildRegex(emotes);
+        this.emoteService.prefixes.forEach(e => this.autocomplete.add(e, true));
         return this;
     }
 
@@ -988,7 +978,7 @@ class Chat {
         }
 
         const win = this.mainwindow
-        if(win.lastmessage !== null && this.emotePrefixes.has(textonly) && Chat.removeSlashCmdFromText(win.lastmessage.message) === textonly){
+        if(win.lastmessage !== null && this.emoteService.prefixes.includes(textonly) && Chat.removeSlashCmdFromText(win.lastmessage.message) === textonly){
             if(win.lastmessage.type === MessageTypes.EMOTE) {
                 this.mainwindow.lock()
                 win.lastmessage.incEmoteCount()
@@ -1237,7 +1227,7 @@ class Chat {
                 }
             }
             // EMOTE SPAM
-            else if (this.source.isConnected() && this.emotePrefixes.has(textonly)) {
+            else if (this.source.isConnected() && this.emoteService.prefixes.includes(textonly)) {
                 // Its easier to deal with combos with the this.unresolved flow
                 this.source.send('MSG', {data: raw})
                 this.inputhistory.add(raw)
@@ -1297,7 +1287,9 @@ class Chat {
     }
 
     cmdEMOTES(){
-        MessageBuilder.info(`Available emoticons: ${[...this.emotes.map(v => v['prefix'])].join(', ')}`).into(this);
+        MessageBuilder.info(
+            `Available emoticons: ${this.emoteService.prefixes.join(', ')}`
+        ).into(this);
     }
 
     cmdHELP(){
