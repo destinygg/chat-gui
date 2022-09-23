@@ -579,7 +579,7 @@ class Chat {
     }
 
     setEmotes(emotes) {
-        this.emoteService.buildRegex(emotes);
+        this.emoteService.emotes = emotes;
         this.emoteService.prefixes.forEach(e => this.autocomplete.add(e, true));
         return this;
     }
