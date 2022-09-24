@@ -39,6 +39,24 @@ class ChatUser {
     isSubscriber() {
         return this.hasFeature(UserFeature.SUBSCRIBER);
     }
+
+    isTwitchSub() {
+        return this.hasFeature(UserFeature.TWITCHSUB);
+    }
+
+    get subTier() {
+        if (this.hasFeature(UserFeature.SUB_TIER_4)) {
+            return 4;
+        } else if (this.hasFeature(UserFeature.SUB_TIER_3)) {
+            return 3;
+        } else if (this.hasFeature(UserFeature.SUB_TIER_2)) {
+            return 2;
+        } else if (this.hasFeature(UserFeature.SUB_TIER_1)) {
+            return 1;
+        } else {
+            return 0;
+        }
+    }
 }
 
 export default ChatUser
