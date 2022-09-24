@@ -10,9 +10,6 @@ import EventEmitter from './emitter'
 import {debounce} from 'throttle-debounce'
 import {isKeyCode, KEYCODES} from './const'
 
-function buildEmote(emote){
-    return `<div class="emote-item"><span title="${emote}" class="emote ${emote}">${emote}</span></div>`
-}
 function getSettingValue(e){
     if(e.getAttribute('type') === 'checkbox') {
         const val = $(e).is(':checked');
@@ -333,12 +330,11 @@ class ChatEmoteMenu extends ChatMenu {
 
     constructor(ui, btn, chat) {
         super(ui, btn, chat);
-        this.temotes = this.ui.find('#twitch-emotes');
-        this.demotes = this.ui.find('#destiny-emotes');
         this.ui.on('click', '.emote', e => {
             ChatMenu.closeMenus(chat);
             this.selectEmote(e.currentTarget.innerText);
         });
+        this.emoteMenuContent = this.ui.find('.content');
     }
 
     show() {
@@ -346,12 +342,39 @@ class ChatEmoteMenu extends ChatMenu {
             this.chat.input.focus();
         }
         super.show();
-        this.demotes.append(
-            this.chat.emoteService.destinyEmotePrefixes.map(buildEmote).join('')
-        );
-        this.temotes.append(
-            this.chat.emoteService.twitchEmotePrefixes.map(buildEmote).join('')
-        );
+        this.buildEmoteMenu();
+    }
+
+    buildEmoteMenu() {
+        this.emoteMenuContent.empty();
+
+        for (const tier of [0, 1, 2, 3, 4]) {
+            const emotes = this.chat.emoteService.emotePrefixesForTier(tier);
+            if (!emotes.length) continue;
+
+            let title = tier === 0 ? 'All Users' : `Tier ${tier} Subscribers`;
+            this.emoteMenuContent.append(
+                this.buildEmoteMenuSection(title, emotes)
+            )
+        }
+
+        const twitchEmotes = this.chat.emoteService.twitchEmotePrefixes;
+        if (twitchEmotes.length) {
+            this.emoteMenuContent.append(
+                this.buildEmoteMenuSection('Twitch Subscribers', twitchEmotes)
+            );
+        }
+    }
+
+    buildEmoteMenuSection(title, emotes) {
+        return `<div>
+            <div id="emote-subscribe-note">${title}</div>
+            <div class="emote-group">${emotes.map(this.buildEmoteItem).join('')}</div>
+        </div>`;
+    }
+
+    buildEmoteItem(emote) {
+        return `<div class="emote-item"><span title="${emote}" class="emote ${emote}">${emote}</span></div>`;
     }
 
     selectEmote(emote){
