@@ -206,7 +206,7 @@ class Chat {
             amazonTags: null,
             welcomeMessage: 'Welcome to chat!',
             stalkEnabled: true,
-            mentionedEnabled: true,
+            mentionsEnabled: true,
         }, config)
         this.ui = null;
         this.css = null;
