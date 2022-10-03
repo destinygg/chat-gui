@@ -994,33 +994,58 @@ hr {
 }
 
 #chat-user-list {
-    .user {
-        margin: 0;
-        cursor: pointer;
-        padding: 0 $gutter-lg;
-        text-decoration: none;
-        visibility: visible;
-        align-items: center;
-        display: flex;
-        .whisper-nick {
-            visibility: hidden;
-            margin-right: $gutter-xs;
-            display: inline-block;
-            opacity: 0.25;
-            background: transparent url('../img/icon-share.svg') no-repeat center center;
-            background-size: contain;
-            width: 1em;
-            height: 1em;
+    .section {
+        margin: 1.5em 0em 0.5em;
+        .title {
+            padding: 0em 0em 0.2em 1em;
+            font-weight: 600;
+            border-bottom: 1px solid; 
         }
-        .whisper-nick:hover {
-            opacity: 1;
-        }
-        &:hover .whisper-nick {
+        .user {
+            margin: 0;
+            cursor: pointer;
+            padding: 0 $gutter-lg;
+            text-decoration: none;
             visibility: visible;
+            align-items: center;
+            display: flex;
+            .user-actions {
+                position: absolute;
+                right: $gutter-md;
+                .mention-nick {
+                    background: transparent url('../img/icon-share.svg') no-repeat center center;
+                    background-size: contain;
+                }
+                .whisper-nick {
+                    background: transparent url('../img/icon-whisper.svg') no-repeat center center;
+                    background-size: contain;
+                }
+                .mention-nick,
+                .whisper-nick {
+                    visibility: hidden;
+                    margin-right: $gutter-xs;
+                    margin-top: 0.45em;
+                    display: inline-block;
+                    opacity: 0.25;
+                    width: 1em;
+                    height: 1em;
+                    &:hover {
+                        opacity: 1;
+                    }
+                }
+            }
+            &:hover .mention-nick,
+            &:hover .whisper-nick {
+                visibility: visible;
+            }
+            &:hover {
+                background: #282828;
+            }
         }
     }
     .content {
-        padding: $gutter-lg 0;
+        margin-top: -$gutter-md;
+        padding-bottom: $gutter-lg;
     }
     .scrollable {
         max-height: calc(100% - 3em);
@@ -1029,7 +1054,7 @@ hr {
         display: none;
     }
     &.search-in .user.found {
-        display: block;
+        display: flex;
     }
     input {
         padding: $gutter-lg $gutter-lg;

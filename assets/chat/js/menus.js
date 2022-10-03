@@ -30,34 +30,8 @@ function userComparator(a, b){
     const u1 = this.chat.users.get(a.getAttribute('data-username').toLowerCase())
     const u2 = this.chat.users.get(b.getAttribute('data-username').toLowerCase())
     if(!u1 || !u2) return 0
-    let v1, v2
-
-    v1 = u1.hasFeature(UserFeatures.ADMIN) || u1.hasFeature(UserFeatures.VIP)
-    v2 = u2.hasFeature(UserFeatures.ADMIN) || u2.hasFeature(UserFeatures.VIP)
-    if (v1 > v2) return -1
-    if (v1 < v2) return 1
-
-    v1 = u1.hasFeature(UserFeatures.BOT2)
-    v2 = u2.hasFeature(UserFeatures.BOT2)
-    if (v1 > v2) return 1
-    if (v1 < v2) return -1
-    v1 = u1.hasFeature(UserFeatures.BOT)
-    v2 = u2.hasFeature(UserFeatures.BOT)
-    if (v1 > v2) return 1
-    if (v1 < v2) return -1
-
-    v1 = u1.hasFeature(UserFeatures.BROADCASTER) || u1.hasFeature(UserFeatures.BROADCASTER)
-    v2 = u2.hasFeature(UserFeatures.BROADCASTER) || u2.hasFeature(UserFeatures.BROADCASTER)
-    if (v1 > v2) return -1
-    if (v1 < v2) return 1
-
-    v1 = u1.hasFeature(UserFeatures.SUBSCRIBER) || u1.hasFeature(UserFeatures.SUBSCRIBER)
-    v2 = u2.hasFeature(UserFeatures.SUBSCRIBER) || u2.hasFeature(UserFeatures.SUBSCRIBER)
-    if (v1 > v2) return -1
-    if (v1 < v2) return 1
-
+    
     let u1Nick = u1.nick.toLowerCase(), u2Nick = u2.nick.toLowerCase()
-
     if (u1Nick < u2Nick) return -1
     if (u1Nick > u2Nick) return 1
     return 0
@@ -210,15 +184,24 @@ class ChatUserMenu extends ChatMenu {
         this.searchterm = '';
         this.searchcount = 0;
         this.totalcount = 0;
+        this.hasFlairs = false;
+        this.sections = new Map();
         this.header = this.ui.find('h5 span');
         this.container = this.ui.find('.content:first');
         this.searchinput = this.ui.find('#chat-user-list-search .form-control:first');
         this.container.on('click', '.user', e => this.chat.userfocus.toggleFocus(e.target.getAttribute('data-username')));
+        this.container.on('click', '.mention-nick', e => {
+            ChatMenu.closeMenus(this.chat);
+            const value = this.chat.input.val().toString().trim();
+            const username = $(e.target).parent().parent().data('username');
+            this.chat.input.val(value + (value === '' ? '':' ') +  username + ' ').focus();
+            return false;
+        });
         this.container.on('click', '.whisper-nick', e => {
             ChatMenu.closeMenus(this.chat);
             const value = this.chat.input.val().toString().trim();
-            const username = $(e.target).parent().data('username');
-            this.chat.input.val(value + (value === '' ? '':' ') +  username + ' ').focus();
+            const username = $(e.target).parent().parent().data('username');
+            this.chat.input.val('/whisper ' + username + ' ' + value).focus();
             return false;
         });
         this.chat.source.on('JOIN', data => this.addAndRedraw(data.nick));
@@ -229,6 +212,7 @@ class ChatUserMenu extends ChatMenu {
             this.filter();
             this.redraw();
         }));
+
     }
 
     show(){
@@ -241,8 +225,18 @@ class ChatUserMenu extends ChatMenu {
             const searching = this.searchterm.length > 0;
             if(searching && this.totalcount !== this.searchcount) {
                 this.header.text(`Users (${this.searchcount} out of ${this.totalcount})`);
+                [...this.sections.values()].forEach((section) => {
+                    $(section.title).text(`${section.searchcount} out of ${section.users.children.length} ${section.label}${section.users.children.length === 1 ? '' : 's'}`);
+                    if (section.searchcount === 0) $(section.container).hide();
+                    else $(section.container).show();
+                });
             } else {
                 this.header.text(`Users (${this.totalcount})`);
+                [...this.sections.values()].forEach((section) => {
+                    $(section.title).text(`${section.users.children.length} ${section.label}${section.users.children.length === 1 ? '' : 's'}`);
+                    if (section.users.children.length === 0) $(section.container).hide();
+                    else $(section.container).show();
+                });
             }
             this.ui.toggleClass('search-in', searching);
         }
@@ -250,12 +244,19 @@ class ChatUserMenu extends ChatMenu {
     }
 
     addAll(){
-        this.totalcount = 0;
-        this.container.empty();
-        [...this.chat.users.keys()].forEach(username => this.addElement(username));
-        this.sort();
-        this.filter();
-        this.redraw();
+        if (this.hasFlairs) {
+            this.totalcount = 0;
+            this.container.empty();
+            this.sections = new Map();
+            [...this.chat.flairsMap.values(), {label: 'User', name: 'user', priority: 9, color: '#4A8ECC'}]
+            .sort((a, b) => a.priority - b.priority)
+            .filter((a) => a.priority <= 10 && a.name !== 'flair20') // 10 or lower and not Verified.
+            .forEach(flair => this.addSection(flair));
+            [...this.chat.users.keys()].forEach(username => this.addElement(username));
+            this.sort();
+            this.filter();
+            this.redraw();
+        }
     }
 
     addAndRedraw(username){
@@ -273,6 +274,33 @@ class ChatUserMenu extends ChatMenu {
         }
     }
 
+    highestFlair(user) {
+        let lowestIndex = 999;
+        for (let j = 0; j < [...this.sections.keys()].length; j++) {
+            const index = [...this.sections.keys()].indexOf(user.features[j]);
+            if (index >= 0 && lowestIndex >= index) lowestIndex = index;
+        }
+        if (user.features.includes('flair11')) return 'bot'; // Community bots in same section as bot
+        return lowestIndex === 999 ? 'user' : [...this.sections.keys()][lowestIndex];
+    }
+
+    loadSections() {
+        this.hasFlairs = true;
+        this.addAll();
+    }
+
+    addSection(flair) {
+        const section = $(`<div class="section"><p class="title" style="color: ${flair.color};">${flair.label}</p><div class="users"></div></div>`);
+        this.sections.set(flair.name, {
+            ...flair,
+            searchcount: 0,
+            container: section[0],
+            title: section[0].children[0],
+            users: section[0].children[1]
+        });
+        this.container.append(section);
+    }
+
     removeElement(username){
         this.container.find(`.user[data-username="${username}"]`).remove();
         this.totalcount--;
@@ -282,21 +310,22 @@ class ChatUserMenu extends ChatMenu {
         const user = this.chat.users.get(username.toLowerCase()),
              label = !user.username || user.username === '' ? 'Anonymous' : user.username,
           features = user.features.length === 0 ? 'nofeature' : user.features.join(' '),
-               usr = $(`<a data-username="${user.username}" class="user ${features}"><i class="whisper-nick"></i> ${label}</a>`)
-        if(sort && this.totalcount > 0) {
+               usr = $(`<a data-username="${user.username}" class="user ${features}">${label}<div class="user-actions"><i class="mention-nick"></i><i class="whisper-nick"></i></div></a>`),
+           section = this.sections.get(this.highestFlair(user));
+
+        if(sort && section.users.children.length > 0) {
             // Insert item in the correct order (instead of resorting the entire list)
-            const items = this.container.children('.user').get()
+            const items = section.users.children;
             let min = 0, max = items.length, index = Math.floor((min + max) / 2)
             while (max > min) {
-                if (userComparator.apply(this, [usr[0], items[index]]) < 0)
-                    max = index
-                else
-                    min = index + 1
+                if (userComparator.apply(this, [usr[0], items[index]]) < 0) max = index
+                else min = index + 1
                 index = Math.floor((min + max) / 2)
             }
-            usr.insertAfter(items[index])
+            if ((index - 1) < 0) usr.insertBefore(items[0]);
+            else usr.insertAfter(items[index - 1]);
         } else {
-            this.container.append(usr)
+            section.users.append(usr[0]);
         }
         this.totalcount++
     }
@@ -308,10 +337,17 @@ class ChatUserMenu extends ChatMenu {
     filter(){
         this.searchcount = 0;
         if(this.searchterm && this.searchterm.length > 0) {
-            this.container.children('.user').get().forEach(a => {
-                const f = a.getAttribute('data-username').toLowerCase().indexOf(this.searchterm.toLowerCase()) >= 0;
-                $(a).toggleClass('found', f);
-                if(f) this.searchcount++;
+            console.log([...this.sections.values()]);
+            [...this.sections.values()].forEach((section) => {
+                section.searchcount = 0;
+                [...$(section.users.children)].forEach((user) => {
+                    const found = user.getAttribute('data-username').toLowerCase().indexOf(this.searchterm.toLowerCase()) >= 0;
+                    $(user).toggleClass('found', found);
+                    if (found) {
+                        section.searchcount++;
+                        this.searchcount++;
+                    }
+                });
             });
         } else {
             this.container.children('.user').removeClass('found');
@@ -319,9 +355,9 @@ class ChatUserMenu extends ChatMenu {
     }
 
     sort(){
-        this.container.children('.user').get()
-            .sort(userComparator.bind(this))
-            .forEach(a => a.parentNode.appendChild(a));
+        [...this.sections.values()].forEach((section) => {
+            [...$(section.users.children).sort(userComparator.bind(this))].forEach(a => a.parentNode.appendChild(a));
+        });
     }
 
 }
