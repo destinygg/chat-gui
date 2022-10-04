@@ -135,7 +135,7 @@ class EmbedUrlFormatter {
 
     constructor(){
         this.bigscreenPath = '/bigscreen'
-        this.bigscreenregex = new RegExp(/(^|\s)((#twitch|#twitch-vod|#twitch-clip|#youtube)\/(?:[A-z0-9_\-]{3,64}))\b/, "g")
+        this.bigscreenregex = /(^|\s)((#twitch(-vod|-clip)?|#youtube)\/[\w\-]{3,64}|#facebook\/\d{10,20}\/videos\/\d{10,20})\b/g;
 
         try {
             const location = (window.top || window.parent || window).location
