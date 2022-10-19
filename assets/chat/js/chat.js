@@ -1790,7 +1790,6 @@ class Chat {
                     const date = moment.utc(d.lines[d.lines.length-1]['timestamp']*1000).local().format(DATE_FORMATS.FULL);
                     MessageBuilder.info(`Stalked ${parts[0]} last seen ${date}`).into(this);
                     d.lines.forEach(a => MessageBuilder.historical(a.text, new ChatUser(d.nick), a.timestamp*1000).into(this))
-                    MessageBuilder.info(`End (https://dgg.overrustlelogs.net/${parts[0]})`).into(this);
                 }
             })
             .catch(() => MessageBuilder.error(`No messages for ${parts[0]} received. Try again later`).into(this))
@@ -1835,7 +1834,6 @@ class Chat {
                     const date = moment.utc(d[d.length-1].date*1000).local().format(DATE_FORMATS.FULL);
                     MessageBuilder.info(`Mentions for ${parts[0]} last seen ${date}`).into(this);
                     d.forEach(a => MessageBuilder.historical(a.text, new ChatUser(a.nick), a.date*1000).into(this))
-                    MessageBuilder.info(`End (https://dgg.overrustlelogs.net/mentions/${parts[0]})`).into(this);
                 }
             })
             .catch(() => MessageBuilder.error(`No mentions for ${parts[0]} received. Try again later`).into(this))
