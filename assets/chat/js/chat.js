@@ -1360,12 +1360,27 @@ class Chat {
     }
 
     cmdUNIGNORE(parts){
-        const username = parts[0] || null;
-        if (!username || !nickregex.test(username)) {
-            MessageBuilder.error('Invalid nick - /ignore <nick>').into(this);
+        if (parts.length > 0) {
+            // see comment in cmdIGNORE for explanation
+            let validUsernames = new Set();
+            const failure = parts.some(username => {
+                if (!nickregex.test(username)) {
+                    MessageBuilder.info(`${username} is not a valid nick - /unignore <nick> OR /unignore <nick_1> <nick_2> ... <nick_n>`).into(this);
+                    return true;
+                } else {
+                    validUsernames.add(username);
+                    return false;
+                }
+            });
+            if (!failure) {
+                validUsernames.forEach(username => {
+                    this.ignore(username, false);
+                });
+                const have_or_has = (parts.length === 1) ? "has" : "have"; 
+                MessageBuilder.status(`${Array.from(validUsernames.values()).join(', ')} ${have_or_has} been removed from your ignore list`).into(this);
+            }
         } else {
-            this.ignore(username, false);
-            MessageBuilder.status(`${username} has been removed from your ignore list`).into(this);
+            MessageBuilder.error('Invalid nick - /unignore <nick> OR /unignore <nick_1> <nick_2> ... <nick_n>').into(this);
         }
     }
 
