@@ -107,6 +107,9 @@ const commandsinfo = new Map([
     ['unignore', {
         desc: 'Remove a user from your ignore list'
     }],
+    ['unignoreall', {
+        desc: 'Clear your ignore list'
+    }],
     ['highlight', {
         desc: 'Highlights target nicks messages for easier visibility'
     }],
@@ -275,6 +278,7 @@ class Chat {
         this.control.on('HELP', data => this.cmdHELP(data));
         this.control.on('IGNORE', data => this.cmdIGNORE(data));
         this.control.on('UNIGNORE', data => this.cmdUNIGNORE(data));
+        this.control.on('UNIGNOREALL', data => this.cmdUNIGNOREALL(data));
         this.control.on('MUTE', data => this.cmdMUTE(data));
         this.control.on('BAN', data => this.cmdBAN(data, 'BAN'));
         this.control.on('IPBAN', data => this.cmdBAN(data, 'IPBAN'));
@@ -871,6 +875,12 @@ class Chat {
         this.applySettings();
     }
 
+    unignoreall() {
+        this.ignoring.clear();
+        this.settings.set('ignorenicks', [...this.ignoring]);
+        this.applySettings();
+    }
+
     focusIfNothingSelected() {
         if (this['debounceFocus'] === undefined) {
             this['debounceFocus'] = debounce(10, false, c => c.input.focus())
@@ -1381,6 +1391,16 @@ class Chat {
             }
         } else {
             MessageBuilder.error('Invalid nick - /unignore <nick> OR /unignore <nick_1> <nick_2> ... <nick_n>').into(this);
+        }
+    }
+
+    cmdUNIGNOREALL(parts) {
+        const confirmation = parts[0] || null;
+        if (!confirmation || (confirmation.toLowerCase() !== "yes" && confirmation.toLowerCase() !== "y")) {
+            MessageBuilder.error('This command requires confirmation - /unignoreall yes OR /unignoreall y').into(this);
+        } else {
+            this.unignoreall();
+            MessageBuilder.status(`Your ignore list has been cleared`).into(this);
         }
     }
 
