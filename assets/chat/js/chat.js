@@ -54,7 +54,7 @@ const hintstrings = new Map([
     ['hoveremotes', 'Hovering your mouse over an emote will show you the emote code'],
     ['highlight', 'Chat messages containing your username will be highlighted'],
     ['notify', 'Use /msg <username> to send a private message to someone'],
-    ['ignoreuser', 'Use /ignore <username> to hide messages from pesky chatters'],
+    ['ignoreuser', 'Use /ignore <nick> to hide messages from pesky chatters. You can even ignore multiple users at once - /ignore <nick_1> ... <nick_n>!'],
     ['mutespermanent', 'Mutes are never persistent, don\'t worry it will pass!'],
     ['tagshint', `Use the /tag <nick> [<color> <note>] to tag users you like. There are preset colors to choose from ${tagcolors.join(', ')}`],
     ['bigscreen', `Bigscreen! Did you know you can have the chat on the left or right side of the stream by clicking the swap icon in the top left?`],
@@ -1319,19 +1319,43 @@ class Chat {
     }
 
     cmdIGNORE(parts){
-        const username = parts[0] || null;
-        if (!username) {
+        if (!parts[0]) {
             if (this.ignoring.size <= 0) {
                 MessageBuilder.info('Your ignore list is empty').into(this);
             } else {
                 MessageBuilder.info(`Ignoring the following people: ${Array.from(this.ignoring.values()).join(', ')}`).into(this);
             }
-        } else if (!nickregex.test(username)) {
-            MessageBuilder.info('Invalid nick - /ignore <nick>').into(this);
+        } else if (parts.length > 1) {
+            // this is a little ugly, but it allows us to not ignore anything if there's an invalid nick in there
+            // think that's less confusing/nicer compared to partially ignoring 
+            let validUsernames = new Set();
+            // .some() stops iterating over the array if the inner function returns true
+            // which is perfect for our use case
+            const failure = parts.some(username => {
+                if (!nickregex.test(username)) {
+                    MessageBuilder.info(`${username} is not a valid nick - /ignore <nick> OR /ignore <nick_1> <nick_2> ... <nick_n>`).into(this);
+                    return true;
+                } else {
+                    validUsernames.add(username);
+                    return false;
+                }
+            });
+            if (!failure) {
+                validUsernames.forEach(username => {
+                    this.ignore(username, true);
+                    this.removeMessageByNick(username);
+                });
+                MessageBuilder.status(`Added the following people to your ignore list: ${Array.from(validUsernames.values()).join(', ')}`).into(this);
+            }
         } else {
-            this.ignore(username, true);
-            this.removeMessageByNick(username);
-            MessageBuilder.status(`Ignoring ${username}`).into(this);
+            const username = parts[0];
+            if (!nickregex.test(username)) {
+                MessageBuilder.info('Invalid nick - /ignore <nick> OR /ignore <nick_1> <nick_2> ... <nick_n>').into(this);
+            } else {
+                this.ignore(username, true);
+                this.removeMessageByNick(username);
+                MessageBuilder.status(`Ignoring ${username}`).into(this);
+            }
         }
     }
 
