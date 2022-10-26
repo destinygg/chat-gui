@@ -1,45 +1,57 @@
-# Destiny.gg Chat GUI
+# Destinygg Chat GUI
+## Requirements
+- Node.js
 
-Source code for the chat gui [www.destiny.gg](http://www.destiny.gg/)
-This is a work in progress!
-
-## License
-
-See [LICENSE.md](LICENSE.md)
-
-#### Install the node dependencies
-
+## Development
+1. Install Node.js dependencies
 ```
-npm install
+npm ci
 ```
 
-#### Developing
-
+2. Run the Webpack development server
 ```
 npm run start
 ```
 
-### Get params
-`u`: socket url
-default `ws://localhost:9000`
+## Development server
+Navigate to `http://localhost:8282` in your web browser of choice to access a local instance of Dgg Chat GUI.
 
-`a`: api url
-default `http://localhost:8181`
+### Query string parameters
+- `u`
+  - Chat WebSocket URL
+  - Default: `ws://localhost:9000`
 
-`s`: cdn url
-default `http://localhost:8182`
+- `a`
+  - Website API URL
+  - Default: `http://localhost:8181`
 
-`c`: cache key
-default `empty`
+- `s`
+  - Website CDN URL
+  - Default: `http://localhost:8182`
 
-`t`: template
-[EMBED | STREAM] default `embed`
+- `c`
+  - Flairs and emotes cache key
+  - Example: `1665865293752.1778`
+  - Default: `null`
+  - Note: This value changes every time a flair or emote is updated
 
-`f`: font scale
-only works on STREAM. [1 ... 10] default `1`
+- `t`
+  - Embed type
+  - Possible values: `embed` for Bigscreen chat, `stream` for on-stream chat
+  - Default: `embed`
 
-e.g. Connect to destiny.gg, with defaults
-`http://localhost:8282/index.htm?u=wss://www.destiny.gg/ws`
+- `f`
+  - Chat font scale
+  - Possible values: An integer from `1` to `10`
+  - Note: Only works for the `stream` embed type
 
-e.g. Connect to destiny.gg with the stream template
-`http://localhost:8282/index.htm?u=wss://destiny.gg/ws&t=stream`
+### Examples
+- Connect to `www.destiny.gg` (production)
+```
+http://localhost:8282/index.html?t=embed&u=wss://chat.destiny.gg/ws&s=https://cdn.destiny.gg&a=https://www.destiny.gg&c=1665865293752.1778
+```
+
+- Connect to `www.omniliberal.dev` (staging)
+```
+http://localhost:8282/index.html?t=embed&u=wss://chat.omniliberal.dev/ws&s=https://cdn.omniliberal.dev&a=https://www.omniliberal.dev&c=1664498644366.7973
+```
