@@ -40,6 +40,11 @@ module.exports = {
                 options: {name: 'img/[name].[ext]'}
             },
             {
+                test: /\.(ttf)$/,
+                loader: 'file-loader',
+                options: {name: 'font/[name].[ext]'}
+            },
+            {
                 test: /\.(html)$/,
                 loader: 'html-loader',
                 options: {minimize: true}
