@@ -9,6 +9,7 @@ import UserFeatures from './features'
 import EventEmitter from './emitter'
 import {debounce} from 'throttle-debounce'
 import {isKeyCode, KEYCODES} from './const'
+import { MessageBuilder } from './messages'
 
 function getSettingValue(e){
     if(e.getAttribute('type') === 'checkbox') {
@@ -452,10 +453,289 @@ class ChatWhisperUsers extends ChatMenu {
 
 }
 
+class ChatUserInfoMenu extends ChatMenu {
+
+	constructor(ui, btn, chat){
+        super(ui, btn, chat)
+
+        this.clickedNick = ""
+        this.messageArray = []
+
+        this.header = this.ui.find('.toolbar span')
+
+        this.flairList = this.ui.find('.user-info .flairs')
+        this.flairSubheader = this.ui.find('.user-info h5')[0]
+
+        this.messagesContainer = this.ui.find('.content')
+        this.messagesSubheader = this.ui.find('.user-info h5')[1]
+
+        this.muteUserBtn = this.ui.find('#mute-user-btn')
+        this.banUserBtn = this.ui.find('#ban-user-btn')
+        this.logsUserBtn = this.ui.find('#logs-user-btn')
+        this.whisperUserBtn = this.ui.find('#whisper-user-btn')
+        this.ignoreUserBtn = this.ui.find('#ignore-user-btn')
+
+        this.actionInputs = this.ui.find('#action-inputs')
+        this.banTypeSelector = this.ui.find('#action-ban-type')
+        this.durationInput = this.ui.find('#action-input-duration')
+        this.reasonInput = this.ui.find('#action-input-reason')
+
+        this.configureButtons()
+
+        this.chat.output.on('contextmenu', '.msg-user .user', e => {
+            const user = $(e.currentTarget).closest('.msg-user')
+            this.clickedNick = user.data('username')
+
+            this.setActionsVisibility()
+            this.addContent(user)
+
+            const rect = this.chat.output[0].getBoundingClientRect()
+            // calculating floating window location (if it doesn't fit on screen, adjusting it a bit so it does)
+            const x = (this.ui.width() + e.clientX > rect.width) ? e.clientX - rect.left + (rect.width - (this.ui.width() + e.clientX)) : e.clientX - rect.left
+            const y = (this.ui.height() + e.clientY > rect.height) ? e.clientY - rect.top + (rect.height - (this.ui.height() + e.clientY)) - 12 : e.clientY - rect.top - 12
+
+            this.ui[0].style.left = `${x}px`
+            this.ui[0].style.top = `${y}px`
+
+            super.show()
+
+            //gotta return false so that the actual context menu doesn't show up
+            return false
+        })
+
+        // preventing the window from closing instantly
+        this.chat.output.on('mouseup', '.msg-user .user', e => {
+            e.stopPropagation()
+        })
+    }
+
+    configureButtons(){
+        this.muteUserBtn.on('click', _ => {
+            if (this.hasModPowers(this.chat.user)) {
+                if (this.muteUserBtn.hasClass('active')) {
+                    this.setInputVisibility()
+                } else {
+                    this.setInputVisibility('mute')
+                }
+            }
+        })
+
+        this.banUserBtn.on('click', _ => {
+            if (this.hasModPowers(this.chat.user)) {
+                if (this.banUserBtn.hasClass('active')) {
+                    this.setInputVisibility()
+                } else {
+                    this.setInputVisibility('ban')
+                }
+            }
+        })
+
+        this.durationInput.on('keypress', e => this.processMuteOrBan(e))
+
+        this.reasonInput.on('keypress', e => this.processMuteOrBan(e))
+
+        this.whisperUserBtn.on('click', _ => {
+            const win = this.chat.getWindow(this.clickedNick)
+            if (win !== (null || undefined)) {
+                this.chat.windowToFront(this.clickedNick)
+            } else {
+                if (!this.chat.whispers.has(this.clickedNick))
+                    this.chat.whispers.set(this.clickedNick, {nick: this.clickedNick, unread: 0, open: false})
+                this.chat.openConversation(this.clickedNick)
+            }
+            super.hide()
+        })
+
+        this.logsUserBtn.on('click', _ => {
+            window.open(`https://rustlesearch.dev/?username=${this.clickedNick}&channel=Destinygg`)
+            super.hide()
+        })
+
+        this.ignoreUserBtn.on('click', _ => {
+            this.chat.ignore(this.clickedNick, true)
+            this.chat.removeMessageByNick(this.clickedNick)
+            MessageBuilder.status(`Ignoring ${this.clickedNick}`).into(this.chat)
+            super.hide()
+        })
+    }
+
+    setActionsVisibility(){
+        if (this.hasModPowers(this.chat.user)) {
+            this.muteUserBtn.show()
+            this.banUserBtn.show()
+        } else {
+            this.muteUserBtn.hide()
+            this.banUserBtn.hide()
+        }
+
+        this.actionInputs.addClass('hidden')
+        this.banUserBtn.removeClass('active')
+        this.muteUserBtn.removeClass('active')
+
+        this.banTypeSelector.removeClass('hidden')
+        this.durationInput.removeClass('hidden')
+        this.reasonInput.removeClass('hidden')
+
+        this.durationInput.val('')
+        this.reasonInput.val('')
+    }
+
+    setInputVisibility(button){
+        this.actionInputs.removeClass('hidden')
+        this.banUserBtn.removeClass('active')
+        this.muteUserBtn.removeClass('active')
+        switch (button) {
+            case "ban":
+                this.banUserBtn.addClass('active')
+
+                this.banTypeSelector.removeClass('hidden')
+                this.durationInput.removeClass('hidden')
+                this.reasonInput.removeClass('hidden')
+                
+                this.actionInputs.data('type', button)
+                break
+            case "mute":
+                this.muteUserBtn.addClass('active')
+
+                this.banTypeSelector.addClass('hidden')
+                this.durationInput.removeClass('hidden')
+                this.reasonInput.addClass('hidden')
+
+                this.actionInputs.data('type', button)
+                break
+            default:
+                this.actionInputs.addClass('hidden')
+                break
+        }
+    }
+
+    processMuteOrBan(e){
+        if(isKeyCode(e, KEYCODES.ENTER) && !e.shiftKey && !e.ctrlKey) {
+            const durationValue = this.durationInput.val()
+            const reasonValue = this.reasonInput.val()
+            switch (this.actionInputs.data('type')) {
+                case 'ban':
+                    if (reasonValue !== '') {
+                        const banType = this.banTypeSelector.val()
+                        let payload = {
+                            nick   : this.clickedNick,
+                            reason : reasonValue
+                        };
+                        if(/^perm/i.test(durationValue))
+                            payload.ispermanent = true
+                        else
+                            payload.duration = this.chat.parseTimeInterval(durationValue)
+            
+                        payload.banip = banType === 'IPBAN'
+            
+                        this.chat.source.send('BAN', payload)
+                    } else {
+                        MessageBuilder.error('Providing a reason is mandatory').into(this.chat)
+                    }
+                    break;
+                case 'mute':
+                    const duration = (durationValue) ? this.chat.parseTimeInterval(durationValue) : null
+                    if (duration && duration > 0) {
+                        this.chat.source.send('MUTE', {data: this.clickedNick, duration: duration})
+                    } else {
+                        this.chat.source.send('MUTE', {data: this.clickedNick})
+                    }
+                    break
+                default:
+                    break
+            }
+            super.hide()
+        }
+    }
+
+    addContent(message){
+        this.messageArray = [message]
+
+        const prettyNick = message.find('.user')[0].text
+        const nick = message.data('username')
+        const usernameFeatures = message.find('.user')[0].attributes.class.value
+
+        const featuresList = this.buildFeatures(nick, usernameFeatures)
+        if (featuresList === '') {
+            this.flairList.hide()
+            this.flairSubheader.style.display = 'none'
+        } else {
+            this.flairList.show()
+            this.flairSubheader.style.display = ''
+        }
+
+        const messageList = this.createMessages()
+        if (messageList.length === 1) {
+            this.messagesSubheader.innerText = 'Selected message:'
+        } else {
+            this.messagesSubheader.innerText = 'Selected messages:'
+        }
+
+        this.header.text("")
+        this.header.attr('class', 'username')
+        this.messagesContainer.empty()
+        this.flairList.empty()
+
+        this.header.text(prettyNick)
+        this.header.addClass(usernameFeatures)
+        this.flairList.append(featuresList)
+        messageList.forEach(element => {
+            this.messagesContainer.append(element)
+        })
+
+        super.redraw()
+    }
+
+    buildFeatures(nick, messageFeatures){
+        const user = this.chat.users.get(nick)
+        const messageFeaturesArray = messageFeatures.split(' ').filter(e => e !== 'user' && e !== 'subscriber')
+        const features = (user !== undefined) ? this.buildFeatureHTML((user.features.filter(e => e !== 'subscriber') || [])) : this.buildFeatureHTML(messageFeaturesArray)
+        return features !== '' ? `<span class="features">${features}</span>` : ''
+    }
+
+    hasModPowers(user) {
+        return user.hasAnyFeatures(UserFeatures.ADMIN, UserFeatures.MODERATOR)
+    }
+
+    createMessages(){
+        let displayedMessages = []
+        if (this.messageArray.length > 0) {
+            let nextMsg = this.messageArray[0].next('.msg-continue')
+            while (nextMsg.length > 0) {
+                this.messageArray.push(nextMsg)
+                nextMsg = nextMsg.next('.msg-continue')
+            }
+            this.messageArray.forEach(element => {
+                const text = element.find('.text')[0].innerText
+                const nick = element.data('username')
+                const msg = MessageBuilder.message(text, new ChatUser(nick))
+                displayedMessages.push(msg.html(this.chat))
+            })
+        } else {
+            const msg = MessageBuilder.error("Wasn't able to grab the clicked message")
+            displayedMessages.push(msg.html(this.chat))
+        }
+        return displayedMessages
+    }
+
+    buildFeatureHTML(featureArray){
+        return featureArray.filter(e => this.chat.flairsMap.has(e))
+            .map(e => this.chat.flairsMap.get(e))
+            .reduce((str, e) => {
+                if (e['hidden'] !== true) {
+                    return str + `<i class="flair ${e['name']}" title="${e['label']}"></i> `
+                } else {
+                    return str + `<div class="flair" title="${e['label']}">${e['label']}</div> `
+                }
+            }, '')
+    }
+}
+
 export {
     ChatMenu,
     ChatSettingsMenu,
     ChatUserMenu,
     ChatEmoteMenu,
-    ChatWhisperUsers
+    ChatWhisperUsers,
+    ChatUserInfoMenu
 };

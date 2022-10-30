@@ -171,6 +171,52 @@
         </div>
     </div>
 
+    <div id="chat-user-info" class="chat-menu">
+        <div class="chat-menu-inner floating-window">
+            <div class="toolbar">
+                <h5><span>User Info</span> <i class="chat-menu-close"></i></h5>
+            </div>
+            <div class="user-info">
+                <h5>Flairs:</h5>
+                <div class="flairs"></div>
+                <h5>Selected messages:</h5>
+                <div class="stalk">
+                    <div class="scrollable nano">
+                        <div class="content nano-content"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="actions">
+                <div class="action-buttons">
+                    <a id="mute-user-btn" class="chat-tool-btn privileged" title="Mute User">
+                        <i class="btn-icon"></i>
+                    </a>
+                    <a id="ban-user-btn" class="chat-tool-btn privileged" title="Ban User">
+                        <i class="btn-icon"></i>
+                    </a>
+                    <a id="logs-user-btn" class="chat-tool-btn" title="Check User Logs">
+                        <i class="btn-icon"></i>
+                    </a>
+                    <a id="whisper-user-btn" class="chat-tool-btn" title="Whisper">
+                        <i class="btn-icon"></i>
+                    </a>
+                    <a id="ignore-user-btn" class="chat-tool-btn" title="Ignore">
+                        <i class="btn-icon"></i>
+                    </a>
+                </div>
+                <div id="action-inputs" class="hidden">
+                    <select class="action-input action-input-selector" name="action-ban-type" id="action-ban-type">
+                        <option value="BAN">Ban</option>
+                        <option value="IPBAN">IP Ban</option>
+                    </select>
+                    <input id="action-input-duration" class="action-input" type="text" placeholder="Duration">
+                    <input id="action-input-reason" class="action-input" type="text" placeholder="Reason">
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
     <div id="chat-emote-list" class="chat-menu left">
         <div class="chat-menu-inner">
             <div class="toolbar">

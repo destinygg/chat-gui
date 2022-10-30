@@ -10,7 +10,7 @@ import EventEmitter from './emitter'
 import ChatSource from './source'
 import ChatUser from './user'
 import {MessageBuilder, MessageTypes, ChatMessage} from './messages'
-import {ChatMenu, ChatUserMenu, ChatWhisperUsers, ChatEmoteMenu, ChatSettingsMenu} from './menus'
+import {ChatMenu, ChatUserMenu, ChatWhisperUsers, ChatEmoteMenu, ChatSettingsMenu, ChatUserInfoMenu} from './menus'
 import ChatAutoComplete from './autocomplete'
 import ChatInputHistory from './history'
 import ChatUserFocus from './focus'
@@ -391,6 +391,8 @@ class Chat {
         this.menus.set('emotes', new ChatEmoteMenu(this.ui.find('#chat-emote-list'), this.ui.find('#chat-emoticon-btn'), this))
         this.menus.set('users', new ChatUserMenu(this.ui.find('#chat-user-list'), this.ui.find('#chat-users-btn'), this))
         this.menus.set('whisper-users', new ChatWhisperUsers(this.ui.find('#chat-whisper-users'), this.ui.find('#chat-whisper-btn'), this))
+
+        this.menus.set('user-info', new ChatUserInfoMenu(this.ui.find('#chat-user-info'), this.output.find('.msg-user .user'), this))
 
         commandsinfo.forEach((a, k) => {
             this.autocomplete.add(`/${k}`);
@@ -1926,7 +1928,7 @@ class Chat {
         return str.trim().replace(regexsafe, "\\$&");
     }
 
-    static parseTimeInterval(str){
+    parseTimeInterval(str){
         let nanoseconds = 0,
             units = {
                 s: 1000000000,
