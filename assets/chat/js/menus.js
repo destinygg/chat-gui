@@ -337,7 +337,6 @@ class ChatUserMenu extends ChatMenu {
     filter(){
         this.searchcount = 0;
         if(this.searchterm && this.searchterm.length > 0) {
-            console.log([...this.sections.values()]);
             [...this.sections.values()].forEach((section) => {
                 section.searchcount = 0;
                 [...$(section.users.children)].forEach((user) => {
