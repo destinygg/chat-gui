@@ -130,11 +130,12 @@ class ChatSettingsMenu extends ChatMenu {
     }
 
     onCustomHighlightChange(e){
-        if (!isKeyCode(e, KEYCODES.ENTER)) return; // not Enter
-        let data = $(e.target).val().toString().split(',').map(s => s.trim())
-        this.chat.settings.set('customhighlight', [...new Set(data)])
-        this.chat.applySettings(false)
-        this.chat.commitSettings()
+        if (e.type === 'focusout' || isKeyCode(e, KEYCODES.ENTER)) {
+            let data = $(e.target).val().toString().split(',').map(s => s.trim())
+            this.chat.settings.set('customhighlight', [...new Set(data)])
+            this.chat.applySettings(false)
+            this.chat.commitSettings()
+        }
     }
 
     onSettingsChange(e){
