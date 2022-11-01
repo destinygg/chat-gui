@@ -1,0 +1,40 @@
+name: Bump version and publish
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump-type:
+        type: choice
+        description: Bump type
+        default: patch
+        options:
+        - patch
+        - minor
+        - major
+        required: true
+
+jobs:
+  bump-and-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 14
+
+      - name: Bump version
+        env:
+           GH_ACTIONS_BOT_NAME: github-actions[bot]
+           GH_ACTIONS_BOT_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
+        run: |
+          git config --local user.name $GH_ACTIONS_BOT_NAME
+          git config --local user.email $GH_ACTIONS_BOT_EMAIL
+          new_version_tag=$(npm version ${{ github.event.inputs.bump-type }})
+          git push origin master
+          git push origin $new_version_tag
+
+      - name: Publish to npm public registry
+        env:
+           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish
