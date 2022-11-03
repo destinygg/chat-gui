@@ -54,7 +54,7 @@ const hintstrings = new Map([
     ['hoveremotes', 'Hovering your mouse over an emote will show you the emote code'],
     ['highlight', 'Chat messages containing your username will be highlighted'],
     ['notify', 'Use /msg <username> to send a private message to someone'],
-    ['ignoreuser', 'Use /ignore <username> to hide messages from pesky chatters'],
+    ['ignoreuser', 'Use /ignore <nick> to hide messages from pesky chatters. You can even ignore multiple users at once - /ignore <nick_1> ... <nick_n>!'],
     ['mutespermanent', 'Mutes are never persistent, don\'t worry it will pass!'],
     ['tagshint', `Use the /tag <nick> [<color> <note>] to tag users you like. There are preset colors to choose from ${tagcolors.join(', ')}`],
     ['bigscreen', `Bigscreen! Did you know you can have the chat on the left or right side of the stream by clicking the swap icon in the top left?`],
@@ -106,6 +106,9 @@ const commandsinfo = new Map([
     }],
     ['unignore', {
         desc: 'Remove a user from your ignore list'
+    }],
+    ['unignoreall', {
+        desc: 'Clear your ignore list'
     }],
     ['highlight', {
         desc: 'Highlights target nicks messages for easier visibility'
@@ -275,6 +278,7 @@ class Chat {
         this.control.on('HELP', data => this.cmdHELP(data));
         this.control.on('IGNORE', data => this.cmdIGNORE(data));
         this.control.on('UNIGNORE', data => this.cmdUNIGNORE(data));
+        this.control.on('UNIGNOREALL', data => this.cmdUNIGNOREALL(data));
         this.control.on('MUTE', data => this.cmdMUTE(data));
         this.control.on('BAN', data => this.cmdBAN(data, 'BAN'));
         this.control.on('IPBAN', data => this.cmdBAN(data, 'IPBAN'));
@@ -871,6 +875,12 @@ class Chat {
         this.applySettings();
     }
 
+    unignoreall() {
+        this.ignoring.clear();
+        this.settings.set('ignorenicks', [...this.ignoring]);
+        this.applySettings();
+    }
+
     focusIfNothingSelected() {
         if (this['debounceFocus'] === undefined) {
             this['debounceFocus'] = debounce(10, false, c => c.input.focus())
@@ -1319,29 +1329,71 @@ class Chat {
     }
 
     cmdIGNORE(parts){
-        const username = parts[0] || null;
-        if (!username) {
+        if (!parts[0]) {
             if (this.ignoring.size <= 0) {
                 MessageBuilder.info('Your ignore list is empty').into(this);
             } else {
                 MessageBuilder.info(`Ignoring the following people: ${Array.from(this.ignoring.values()).join(', ')}`).into(this);
             }
-        } else if (!nickregex.test(username)) {
-            MessageBuilder.info('Invalid nick - /ignore <nick>').into(this);
         } else {
-            this.ignore(username, true);
-            this.removeMessageByNick(username);
-            MessageBuilder.status(`Ignoring ${username}`).into(this);
+            // this is a little ugly, but it allows us to not ignore anything if there's an invalid nick in there
+            // think that's less confusing/nicer compared to partially ignoring 
+            let validUsernames = new Set();
+            // .some() stops iterating over the array if the inner function returns true
+            // which is perfect for our use case
+            const failure = parts.some(username => {
+                if (!nickregex.test(username)) {
+                    MessageBuilder.info(`${username} is not a valid nick - /ignore <nick> OR /ignore <nick_1> <nick_2> ... <nick_n>`).into(this);
+                    return true;
+                } else {
+                    validUsernames.add(username);
+                    return false;
+                }
+            });
+            if (!failure) {
+                validUsernames.forEach(username => {
+                    this.ignore(username, true);
+                    this.removeMessageByNick(username);
+                });
+                const resultArray = Array.from(validUsernames.values())
+                const resultMessage = (validUsernames.size === 1) ? `Ignoring ${resultArray[0]}` : `Added the following people to your ignore list: ${resultArray.join(', ')}`;
+                MessageBuilder.status(resultMessage).into(this);
+            }
         }
     }
 
     cmdUNIGNORE(parts){
-        const username = parts[0] || null;
-        if (!username || !nickregex.test(username)) {
-            MessageBuilder.error('Invalid nick - /ignore <nick>').into(this);
+        if (parts.length > 0) {
+            // see comment in cmdIGNORE for explanation
+            let validUsernames = new Set();
+            const failure = parts.some(username => {
+                if (!nickregex.test(username)) {
+                    MessageBuilder.info(`${username} is not a valid nick - /unignore <nick> OR /unignore <nick_1> <nick_2> ... <nick_n>`).into(this);
+                    return true;
+                } else {
+                    validUsernames.add(username);
+                    return false;
+                }
+            });
+            if (!failure) {
+                validUsernames.forEach(username => {
+                    this.ignore(username, false);
+                });
+                const have_or_has = (parts.length === 1) ? "has" : "have"; 
+                MessageBuilder.status(`${Array.from(validUsernames.values()).join(', ')} ${have_or_has} been removed from your ignore list`).into(this);
+            }
         } else {
-            this.ignore(username, false);
-            MessageBuilder.status(`${username} has been removed from your ignore list`).into(this);
+            MessageBuilder.error('Invalid nick - /unignore <nick> OR /unignore <nick_1> <nick_2> ... <nick_n>').into(this);
+        }
+    }
+
+    cmdUNIGNOREALL(parts) {
+        const confirmation = parts[0] || null;
+        if (!confirmation || (confirmation.toLowerCase() !== "yes" && confirmation.toLowerCase() !== "y")) {
+            MessageBuilder.error('This command requires confirmation - /unignoreall yes OR /unignoreall y').into(this);
+        } else {
+            this.unignoreall();
+            MessageBuilder.status(`Your ignore list has been cleared`).into(this);
         }
     }
 
