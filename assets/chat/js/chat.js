@@ -1335,7 +1335,7 @@ class Chat {
             } else {
                 MessageBuilder.info(`Ignoring the following people: ${Array.from(this.ignoring.values()).join(', ')}`).into(this);
             }
-        } else if (parts.length > 1) {
+        } else {
             // this is a little ugly, but it allows us to not ignore anything if there's an invalid nick in there
             // think that's less confusing/nicer compared to partially ignoring 
             let validUsernames = new Set();
@@ -1355,16 +1355,9 @@ class Chat {
                     this.ignore(username, true);
                     this.removeMessageByNick(username);
                 });
-                MessageBuilder.status(`Added the following people to your ignore list: ${Array.from(validUsernames.values()).join(', ')}`).into(this);
-            }
-        } else {
-            const username = parts[0];
-            if (!nickregex.test(username)) {
-                MessageBuilder.info('Invalid nick - /ignore <nick> OR /ignore <nick_1> <nick_2> ... <nick_n>').into(this);
-            } else {
-                this.ignore(username, true);
-                this.removeMessageByNick(username);
-                MessageBuilder.status(`Ignoring ${username}`).into(this);
+                const resultArray = Array.from(validUsernames.values())
+                const resultMessage = (validUsernames.size === 1) ? `Ignoring ${resultArray[0]}` : `Added the following people to your ignore list: ${resultArray.join(', ')}`;
+                MessageBuilder.status(resultMessage).into(this);
             }
         }
     }
