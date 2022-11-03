@@ -511,7 +511,7 @@ class ChatUserInfoMenu extends ChatMenu {
 
     configureButtons(){
         this.muteUserBtn.on('click', _ => {
-            if (this.hasModPowers(this.chat.user)) {
+            if (this.chat.user.hasModPowers()) {
                 if (this.muteUserBtn.hasClass('active')) {
                     this.setInputVisibility()
                 } else {
@@ -521,7 +521,7 @@ class ChatUserInfoMenu extends ChatMenu {
         })
 
         this.banUserBtn.on('click', _ => {
-            if (this.hasModPowers(this.chat.user)) {
+            if (this.chat.user.hasModPowers()) {
                 if (this.banUserBtn.hasClass('active')) {
                     this.setInputVisibility()
                 } else {
@@ -560,7 +560,7 @@ class ChatUserInfoMenu extends ChatMenu {
     }
 
     setActionsVisibility(){
-        if (this.hasModPowers(this.chat.user)) {
+        if (this.chat.user.hasModPowers()) {
             this.muteUserBtn.show()
             this.banUserBtn.show()
         } else {
@@ -691,10 +691,6 @@ class ChatUserInfoMenu extends ChatMenu {
         const messageFeaturesArray = messageFeatures.split(' ').filter(e => e !== 'user' && e !== 'subscriber')
         const features = (user !== undefined) ? this.buildFeatureHTML((user.features.filter(e => e !== 'subscriber') || [])) : this.buildFeatureHTML(messageFeaturesArray)
         return features !== '' ? `<span class="features">${features}</span>` : ''
-    }
-
-    hasModPowers(user) {
-        return user.hasAnyFeatures(UserFeatures.ADMIN, UserFeatures.MODERATOR)
     }
 
     createMessages(){

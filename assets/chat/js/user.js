@@ -26,6 +26,10 @@ class ChatUser {
         return this.hasAnyFeatures(feature)
     }
 
+    hasModPowers() {
+        return this.hasAnyFeatures(UserFeature.ADMIN, UserFeature.MODERATOR)
+    }
+
     isPrivileged() {
         return this.hasAnyFeatures(
             UserFeature.MODERATOR,
