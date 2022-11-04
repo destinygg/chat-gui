@@ -557,7 +557,9 @@ class Chat {
         Chat.loadCss(`${this.config.cdn.base}/flairs/flairs.css?_=${this.config.cacheKey}`)
         return fetch(`${this.config.cdn.base}/flairs/flairs.json?_=${this.config.cacheKey}`)
             .then(res => res.json())
-            .then(json => { this.setFlairs(json) })
+            .then(json => { 
+                this.setFlairs(json);
+             })
             .catch(() => {})
     }
 
