@@ -1928,7 +1928,7 @@ class Chat {
         return str.trim().replace(regexsafe, "\\$&");
     }
 
-    parseTimeInterval(str){
+    static parseTimeInterval(str){
         let nanoseconds = 0,
             units = {
                 s: 1000000000,

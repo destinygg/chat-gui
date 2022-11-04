@@ -618,25 +618,10 @@ class ChatUserInfoMenu extends ChatMenu {
     processMuteOrBan(providedDuration){
         switch (this.actionInputs.data('type')) {
             case 'ban':
-                let payload = {
-                    nick   : this.clickedNick,
-                    reason : `${this.clickedNick} banned by ${this.chat.user.nick}.`,
-                    banip  : true
-                }
-                if(/^perm/i.test(providedDuration))
-                    payload.ispermanent = true
-                else
-                    payload.duration = this.chat.parseTimeInterval(providedDuration)
-    
-                this.chat.source.send('BAN', payload)
+                this.chat.cmdBAN([this.clickedNick, providedDuration, `${this.clickedNick} banned by ${this.chat.user.nick}.`], 'IPBAN')
                 break
             case 'mute':
-                const duration = this.chat.parseTimeInterval(providedDuration)
-                if (duration && duration > 0) {
-                    this.chat.source.send('MUTE', {data: this.clickedNick, duration: duration})
-                } else {
-                    this.chat.source.send('MUTE', {data: this.clickedNick})
-                }
+                this.chat.cmdMUTE([this.clickedNick, providedDuration])
                 break
         }
         super.hide()
