@@ -546,7 +546,7 @@ class ChatUserInfoMenu extends ChatMenu {
         })
 
         this.logsUserBtn.on('click', () => {
-            window.open(`https://rustlesearch.dev/?username=${this.clickedNick}&channel=Destinygg`)
+            this.chat.cmdSTALK([this.clickedNick])
             super.hide()
         })
 
