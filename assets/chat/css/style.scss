@@ -1119,30 +1119,21 @@ hr {
         background: transparent url('../img/icon-ignore.svg') no-repeat center center;
         background-size: contain;
     }
-    #action-inputs {
+    #action-durations {
         height: calc(20px + 2*$gutter-md);
         display: flex;
+        justify-content: space-around;
+        text-align: center;
+        font-size: 1.2em;
     }
-    #action-input-duration {
-        flex: 1 2 5%;
-        min-width: 72px;
+    .ban-duration-button,.mute-duration-button {
+        opacity: 0.25;
+        transition: opacity 150ms;
+        color: white;
+        width: 100%;
     }
-    #action-input-reason {
-        flex: 1 1 auto;
-        min-width: 0px;
-    }
-    .action-input {
-        color: #b9b9b9;
-        background: #111;
-        border: 1px solid #222;
-        padding: $gutter-md;
-        border-radius: .25em;
-    }
-    .action-input-selector {
-        padding: unset;
-    }
-    .privileged {
-        display: none;
+    .ban-duration-button:hover,.mute-duration-button:hover {
+        opacity: 1;
     }
     .hidden {
         display: none !important

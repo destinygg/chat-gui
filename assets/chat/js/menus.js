@@ -475,10 +475,9 @@ class ChatUserInfoMenu extends ChatMenu {
         this.whisperUserBtn = this.ui.find('#whisper-user-btn')
         this.ignoreUserBtn = this.ui.find('#ignore-user-btn')
 
-        this.actionInputs = this.ui.find('#action-inputs')
-        this.banTypeSelector = this.ui.find('#action-ban-type')
-        this.durationInput = this.ui.find('#action-input-duration')
-        this.reasonInput = this.ui.find('#action-input-reason')
+        this.actionInputs = this.ui.find('#action-durations')
+        this.muteDurations = ['1m', '10m', '1h', '1d']
+        this.banDurations = ['1d', '7d', '30d', 'Perm']
 
         this.configureButtons()
 
@@ -530,9 +529,9 @@ class ChatUserInfoMenu extends ChatMenu {
             }
         })
 
-        this.durationInput.on('keypress', e => this.processMuteOrBan(e))
+        this.muteDurations.forEach(duration => this.createDurationButtons(duration, 'mute'))
 
-        this.reasonInput.on('keypress', e => this.processMuteOrBan(e))
+        this.banDurations.forEach(duration => this.createDurationButtons(duration, 'ban'))
 
         this.whisperUserBtn.on('click', () => {
             const win = this.chat.getWindow(this.clickedNick)
@@ -561,23 +560,16 @@ class ChatUserInfoMenu extends ChatMenu {
 
     setActionsVisibility(){
         if (this.chat.user.hasModPowers()) {
-            this.muteUserBtn.show()
-            this.banUserBtn.show()
+            this.muteUserBtn.toggleClass('hidden', false)
+            this.banUserBtn.toggleClass('hidden', false)
         } else {
-            this.muteUserBtn.hide()
-            this.banUserBtn.hide()
+            this.muteUserBtn.toggleClass('hidden', true)
+            this.banUserBtn.toggleClass('hidden', true)
         }
 
         this.actionInputs.addClass('hidden')
         this.banUserBtn.removeClass('active')
         this.muteUserBtn.removeClass('active')
-
-        this.banTypeSelector.removeClass('hidden')
-        this.durationInput.removeClass('hidden')
-        this.reasonInput.removeClass('hidden')
-
-        this.durationInput.val('')
-        this.reasonInput.val('')
     }
 
     setInputVisibility(button){
@@ -587,19 +579,15 @@ class ChatUserInfoMenu extends ChatMenu {
         switch (button) {
             case "ban":
                 this.banUserBtn.addClass('active')
+                $('.ban-duration-button').toggleClass('hidden', false)
+                $('.mute-duration-button').toggleClass('hidden', true)
 
-                this.banTypeSelector.removeClass('hidden')
-                this.durationInput.removeClass('hidden')
-                this.reasonInput.removeClass('hidden')
-                
                 this.actionInputs.data('type', button)
                 break
             case "mute":
                 this.muteUserBtn.addClass('active')
-
-                this.banTypeSelector.addClass('hidden')
-                this.durationInput.removeClass('hidden')
-                this.reasonInput.addClass('hidden')
+                $('.mute-duration-button').toggleClass('hidden', false)
+                $('.ban-duration-button').toggleClass('hidden', true)
 
                 this.actionInputs.data('type', button)
                 break
@@ -609,43 +597,49 @@ class ChatUserInfoMenu extends ChatMenu {
         }
     }
 
-    processMuteOrBan(e){
-        if(isKeyCode(e, KEYCODES.ENTER) && !e.shiftKey && !e.ctrlKey) {
-            const durationValue = this.durationInput.val()
-            const reasonValue = this.reasonInput.val()
-            switch (this.actionInputs.data('type')) {
-                case 'ban':
-                    if (reasonValue !== '') {
-                        const banType = this.banTypeSelector.val()
-                        let payload = {
-                            nick   : this.clickedNick,
-                            reason : reasonValue
-                        };
-                        if(/^perm/i.test(durationValue))
-                            payload.ispermanent = true
-                        else
-                            payload.duration = this.chat.parseTimeInterval(durationValue)
-            
-                        payload.banip = banType === 'IPBAN'
-            
-                        this.chat.source.send('BAN', payload)
-                    } else {
-                        MessageBuilder.error('Providing a reason is mandatory').into(this.chat)
-                    }
-                    break;
-                case 'mute':
-                    const duration = (durationValue) ? this.chat.parseTimeInterval(durationValue) : null
-                    if (duration && duration > 0) {
-                        this.chat.source.send('MUTE', {data: this.clickedNick, duration: duration})
-                    } else {
-                        this.chat.source.send('MUTE', {data: this.clickedNick})
-                    }
-                    break
-                default:
-                    break
-            }
-            super.hide()
+    createDurationButtons(duration, button){
+        const durationButton = document.createElement('a')
+        durationButton.classList.add('chat-tool-btn')
+        switch (button) {
+            case "ban":
+                durationButton.classList.add('ban-duration-button')
+                break
+            case "mute":
+                durationButton.classList.add('mute-duration-button')
+                break
         }
+        durationButton.textContent = duration
+
+        durationButton.addEventListener('click', () => this.processMuteOrBan(duration))
+
+        this.actionInputs.append(durationButton)
+    }
+
+    processMuteOrBan(providedDuration){
+        switch (this.actionInputs.data('type')) {
+            case 'ban':
+                let payload = {
+                    nick   : this.clickedNick,
+                    reason : `${this.clickedNick} banned by ${this.chat.user.nick}.`,
+                    banip  : true
+                }
+                if(/^perm/i.test(providedDuration))
+                    payload.ispermanent = true
+                else
+                    payload.duration = this.chat.parseTimeInterval(providedDuration)
+    
+                this.chat.source.send('BAN', payload)
+                break
+            case 'mute':
+                const duration = this.chat.parseTimeInterval(providedDuration)
+                if (duration && duration > 0) {
+                    this.chat.source.send('MUTE', {data: this.clickedNick, duration: duration})
+                } else {
+                    this.chat.source.send('MUTE', {data: this.clickedNick})
+                }
+                break
+        }
+        super.hide()
     }
 
     addContent(message){
@@ -657,10 +651,10 @@ class ChatUserInfoMenu extends ChatMenu {
 
         const featuresList = this.buildFeatures(nick, usernameFeatures)
         if (featuresList === '') {
-            this.flairList.hide()
+            this.flairList.toggleClass('hidden', true)
             this.flairSubheader.style.display = 'none'
         } else {
-            this.flairList.show()
+            this.flairList.toggleClass('hidden', false)
             this.flairSubheader.style.display = ''
         }
 
