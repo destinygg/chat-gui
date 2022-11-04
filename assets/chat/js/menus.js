@@ -242,7 +242,6 @@ class ChatUserMenu extends ChatMenu {
                 this.header.text(`Users (${this.searchcount} out of ${this.totalcount})`);
                 [...this.sections.values()].forEach((section) => {
                     $(section.title).html(`${section.searchcount} out of ${section.users.children.length} ${section.data.name}${section.users.children.length === 1 ? '' : 's'}${this.buildFeatures(section.data.flairs)}`);
-                    $(section.title).css('color', this.sectionColor(section.data.flairs));
                     if (section.searchcount === 0) $(section.container).hide();
                     else $(section.container).show();
                 });
@@ -250,7 +249,6 @@ class ChatUserMenu extends ChatMenu {
                 this.header.text(`Users (${this.totalcount})`);
                 [...this.sections.values()].forEach((section) => {
                     $(section.title).html(`${section.users.children.length} ${section.data.name}${section.users.children.length === 1 ? '' : 's'}${this.buildFeatures(section.data.flairs)}`);
-                    $(section.title).css('color', this.sectionColor(section.data.flairs));
                     if (section.users.children.length === 0) $(section.container).hide();
                     else $(section.container).show();
                 });
@@ -258,17 +256,6 @@ class ChatUserMenu extends ChatMenu {
             this.ui.toggleClass('search-in', searching);
         }
         super.redraw();
-    }
-
-    sectionColor(flairs) {
-        const features = flairs
-            .filter(e => this.chat.flairsMap.has(e))
-            .map(e => this.chat.flairsMap.get(e))
-            .sort((a, b) => a.priority - b.priority);
-        if (features.length > 0) {
-            if (features[0].color !== '') return features[0].color;
-        }
-        return '#4A8ECC';
     }
 
     buildFeatures(flairs) {
