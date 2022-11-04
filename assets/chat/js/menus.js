@@ -510,7 +510,7 @@ class ChatUserInfoMenu extends ChatMenu {
     }
 
     configureButtons(){
-        this.muteUserBtn.on('click', _ => {
+        this.muteUserBtn.on('click', () => {
             if (this.chat.user.hasModPowers()) {
                 if (this.muteUserBtn.hasClass('active')) {
                     this.setInputVisibility()
@@ -520,7 +520,7 @@ class ChatUserInfoMenu extends ChatMenu {
             }
         })
 
-        this.banUserBtn.on('click', _ => {
+        this.banUserBtn.on('click', () => {
             if (this.chat.user.hasModPowers()) {
                 if (this.banUserBtn.hasClass('active')) {
                     this.setInputVisibility()
@@ -534,7 +534,7 @@ class ChatUserInfoMenu extends ChatMenu {
 
         this.reasonInput.on('keypress', e => this.processMuteOrBan(e))
 
-        this.whisperUserBtn.on('click', _ => {
+        this.whisperUserBtn.on('click', () => {
             const win = this.chat.getWindow(this.clickedNick)
             if (win !== (null || undefined)) {
                 this.chat.windowToFront(this.clickedNick)
@@ -546,12 +546,12 @@ class ChatUserInfoMenu extends ChatMenu {
             super.hide()
         })
 
-        this.logsUserBtn.on('click', _ => {
+        this.logsUserBtn.on('click', () => {
             window.open(`https://rustlesearch.dev/?username=${this.clickedNick}&channel=Destinygg`)
             super.hide()
         })
 
-        this.ignoreUserBtn.on('click', _ => {
+        this.ignoreUserBtn.on('click', () => {
             this.chat.ignore(this.clickedNick, true)
             this.chat.removeMessageByNick(this.clickedNick)
             MessageBuilder.status(`Ignoring ${this.clickedNick}`).into(this.chat)
