@@ -555,7 +555,6 @@ class Chat {
             .then(res => res.json())
             .then(json => { 
                 this.setFlairs(json);
-                this.menus.get('users').loadSections();
              })
             .catch(() => {})
     }

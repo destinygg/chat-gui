@@ -1000,6 +1000,16 @@ hr {
             padding: 0em 0em 0.2em 1em;
             font-weight: 600;
             border-bottom: 1px solid; 
+            .features {
+                float: right;
+                display: inline-flex;
+                vertical-align: text-top;
+                align-items: center;
+                margin-right: $gutter-md;
+                .flair {
+                    margin-right: $gutter-xs;
+                }
+            }
         }
         .user {
             margin: 0;
