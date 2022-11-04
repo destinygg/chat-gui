@@ -20,6 +20,7 @@ import ChatWindow from './window'
 import {ChatVote, parseQuestionAndTime} from './vote'
 import {isMuteActive, MutedTimer} from './mutedtimer'
 import EmoteService from './emotes'
+import UserFeatures from './features'
 
 const regexslashcmd = /^\/([a-z0-9]+)[\s]?/i
 const regextime = /(\d+(?:\.\d*)?)([a-z]+)?/ig
@@ -181,6 +182,10 @@ const commandsinfo = new Map([
     ['svote', {
         desc: 'Start a sub-weighted vote.'
     }],
+    ['host', {
+        desc: 'Hosts a livestream, video, or vod to bigscreen.',
+        admin: true
+    }],
 ])
 const banstruct = {
     id: 0,
@@ -315,6 +320,7 @@ class Chat {
         this.control.on('V', data => this.cmdVOTE(data, 'VOTE'));
         this.control.on('VOTESTOP', data => this.cmdVOTESTOP(data));
         this.control.on('VS', data => this.cmdVOTESTOP(data));
+        this.control.on('HOST', data => this.cmdHOST(data));
         return this;
     }
 
@@ -1850,6 +1856,40 @@ class Chat {
                 this.nextallowedmentions = moment().add(10, 'seconds');
                 this.busymentions = false;
             });
+    }
+
+    cmdHOST(parts) {
+        const [url, displayName] = parts;
+
+        if (!this.user.hasAnyFeatures(UserFeatures.ADMIN, UserFeatures.MODERATOR)) {
+            MessageBuilder.error(errorstrings.get('nopermission')).into(this);
+            return;
+        }
+
+        if (!url) {
+            MessageBuilder.error('No argument provided - /host <url> <displayName optional>').into(this);
+            return;
+        }
+
+        try {
+            // new URL() will throw an invalid error if the provided url
+            // does not start with http(s)//.
+            if (!url.startsWith("http://") && !url.startsWith("https://")) {
+                url = `https://${url}`;
+            }
+
+            new URL(url);
+        } catch (e) {
+            MessageBuilder.error('Invalid url - /host <url> <displayName optional>').into(this);
+            return;
+        }
+
+        fetch(`${this.config.api.base}/api/stream/host`, {
+            body: JSON.stringify({ url, displayName }),
+            credentials: 'include',
+            method: 'POST',
+            headers: { 'X-CSRF-Guard': 'YEE' },
+        }).catch(console.warn);
     }
 
     openConversation(nick){
