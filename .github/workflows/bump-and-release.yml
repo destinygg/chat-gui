@@ -37,8 +37,13 @@ jobs:
           echo "tag=$new_version_tag" >> $GITHUB_OUTPUT
 
       - name: Release
-        uses: softprops/action-gh-release@v1
+        uses: octokit/request-action@v2.x
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
+          route: POST /repos/{owner}/{repo}/releases
+          owner: destinygg
+          repo: chat-gui
           tag_name: ${{ steps.bump.outputs.tag }}
           generate_release_notes: true
 
