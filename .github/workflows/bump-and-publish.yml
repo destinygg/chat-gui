@@ -34,6 +34,11 @@ jobs:
           git push origin master
           git push origin $new_version_tag
 
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          generate_release_notes: true
+
       - name: Publish to npm public registry
         env:
            NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
