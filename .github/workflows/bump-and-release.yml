@@ -1,4 +1,4 @@
-name: Bump version and publish
+name: Bump version and release
 
 on:
   workflow_dispatch:
@@ -14,7 +14,7 @@ on:
         required: true
 
 jobs:
-  bump-and-publish:
+  bump-and-release:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
