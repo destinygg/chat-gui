@@ -24,6 +24,7 @@ jobs:
           node-version: 14
 
       - name: Bump version
+        id: bump
         env:
            GH_ACTIONS_BOT_NAME: github-actions[bot]
            GH_ACTIONS_BOT_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
@@ -33,10 +34,12 @@ jobs:
           new_version_tag=$(npm version ${{ github.event.inputs.bump-type }})
           git push origin master
           git push origin $new_version_tag
+          echo "tag=$new_version_tag" >> $GITHUB_OUTPUT
 
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
+          tag_name: ${{ steps.bump.outputs.tag }}
           generate_release_notes: true
 
       - name: Publish to npm public registry
