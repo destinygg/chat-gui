@@ -42,8 +42,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           route: POST /repos/{owner}/{repo}/releases
-          owner: destinygg
-          repo: chat-gui
+          owner: ${{ github.repository_owner }}
+          repo: ${{ github.event.repository.name }}
           tag_name: ${{ steps.bump.outputs.tag }}
           generate_release_notes: true
 
