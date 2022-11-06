@@ -1,6 +1,8 @@
 import $ from 'jquery'
 import './chat/css/style.scss'
 import Chat from './chat/js/chat'
+import embedHtml from './views/embed.html'
+import streamHtml from './views/stream.html'
 
 /**
  * GET Params
@@ -25,7 +27,7 @@ const html = $('body,html');
 switch ((Chat.reqParam('t') || 'embed').toUpperCase()) {
 
     case 'EMBED':
-        chat.withGui(require('./views/embed.html'))
+        chat.withGui(embedHtml)
             .then(() => chat.loadUserAndSettings())
             .then(() => chat.loadEmotesAndFlairs())
             .then(() => chat.loadHistory())
@@ -35,7 +37,7 @@ switch ((Chat.reqParam('t') || 'embed').toUpperCase()) {
 
     case 'STREAM':
         html.css('background', 'transparent')
-        chat.withGui(require('./views/stream.html'))
+        chat.withGui(streamHtml)
             .then(() => {
                 chat.settings.set('fontscale', Chat.reqParam('f') || 1)
                 chat.applySettings(false)
