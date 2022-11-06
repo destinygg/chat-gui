@@ -8,9 +8,9 @@ on:
         description: Bump type
         default: patch
         options:
-        - patch
-        - minor
-        - major
+          - patch
+          - minor
+          - major
         required: true
 
 jobs:
@@ -26,8 +26,8 @@ jobs:
       - name: Bump version
         id: bump
         env:
-           GH_ACTIONS_BOT_NAME: github-actions[bot]
-           GH_ACTIONS_BOT_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
+          GH_ACTIONS_BOT_NAME: github-actions[bot]
+          GH_ACTIONS_BOT_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
         run: |
           git config --local user.name $GH_ACTIONS_BOT_NAME
           git config --local user.email $GH_ACTIONS_BOT_EMAIL
@@ -49,5 +49,5 @@ jobs:
 
       - name: Publish to npm public registry
         env:
-           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npm publish
