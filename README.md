@@ -8,7 +8,12 @@
 npm ci
 ```
 
-2. Run the Webpack development server
+2. Install Git hooks
+```
+cp .githooks/* .git/hooks/
+```
+
+3. Run the Webpack development server
 ```
 npm run start
 ```
