@@ -16,6 +16,8 @@ npm run start
 ## Development server
 Navigate to `http://localhost:8282` in your web browser of choice to access a local instance of Dgg Chat GUI.
 
+>Note: Due to recent security improvements, you can no longer connect to production or staging Dgg chat from `localhost` (or any other origin). A workaround is coming soon™, so stay tuned.
+
 ### Query string parameters
 - `u`
   - Chat WebSocket URL
