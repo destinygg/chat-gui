@@ -43,8 +43,8 @@ function parseQuestion(msg) {
   if (msg.indexOf('?') === -1) {
     throw 'Must contain a ?';
   }
-  const parts = msg.split('?'),
-    question = parts[0] + '?';
+  const parts = msg.split('?');
+  const question = `${parts[0]}?`;
   if (parts[1].trim() !== '') {
     const options = parts[1].split(VOTE_CONJUNCTION).map((a) => a.trim());
     if (options.length < 2 && question.match(VOTE_INTERROGATIVE)) {
@@ -68,7 +68,7 @@ class ChatVote {
     this.ui.on('click touch', '.vote-close', () => this.hide());
     this.ui.on('click touch', '.opt', (e) => {
       if (this.voting) {
-        this.chat.cmdSEND($(e.currentTarget).index() + 1 + '');
+        this.chat.cmdSEND(`${$(e.currentTarget).index() + 1}`);
       }
     });
     this.throttleVoteCast = throttle(100, false, () => {
@@ -152,15 +152,17 @@ class ChatVote {
       case PollType.Weighted:
         if (user.hasFeature(UserFeatures.SUB_TIER_4)) {
           return 16;
-        } else if (user.hasFeature(UserFeatures.SUB_TIER_3)) {
-          return 8;
-        } else if (user.hasFeature(UserFeatures.SUB_TIER_2)) {
-          return 4;
-        } else if (user.hasFeature(UserFeatures.SUB_TIER_1)) {
-          return 2;
-        } else {
-          return 1;
         }
+        if (user.hasFeature(UserFeatures.SUB_TIER_3)) {
+          return 8;
+        }
+        if (user.hasFeature(UserFeatures.SUB_TIER_2)) {
+          return 4;
+        }
+        if (user.hasFeature(UserFeatures.SUB_TIER_1)) {
+          return 2;
+        }
+        return 1;
     }
   }
 
@@ -177,7 +179,7 @@ class ChatVote {
         type: type === '/svote' ? PollType.Weighted : PollType.Normal,
         start: new Date(),
         time: question.time,
-        question: question,
+        question,
         totals: question.options.map(() => 0),
         votes: new Map(),
         user: user.username,
@@ -191,9 +193,9 @@ class ChatVote {
         .find('.opt')
         .toArray()
         .map((e) => {
-          const opt = $(e),
-            barValue = opt.find('.opt-bar-value'),
-            barInner = opt.find('.opt-bar-inner');
+          const opt = $(e);
+          const barValue = opt.find('.opt-bar-value');
+          const barInner = opt.find('.opt-bar-inner');
           return { opt, barInner, barValue };
         });
 
@@ -264,16 +266,16 @@ class ChatVote {
           this.vote.votesCast > 0
             ? (this.vote.totals[i] / this.vote.votesCast) * 100
             : 0;
-        this.ui.bars[i].barInner.css('width', percent + '%');
+        this.ui.bars[i].barInner.css('width', `${percent}%`);
         this.ui.bars[i].barValue.text(
-          percent > 0 ? Math.round(percent) + '%' : ''
+          percent > 0 ? `${Math.round(percent)}%` : ''
         );
       });
     }
   }
 
   buildVoteFrame() {
-    const question = this.vote.question;
+    const { question } = this.vote;
     const tagQuestion = $(`<span />`).text(question.question)[0];
     const tagOptions = question.options
       .map((v, i) => {
@@ -287,21 +289,17 @@ class ChatVote {
       `` +
         `<div class="vote-frame">` +
         `<div class="vote-header">` +
-        `<label class="vote-question">` +
-        tagQuestion.outerHTML +
-        `<span class="opt-choices">${tagOptions}</span>` +
+        `<label class="vote-question">${tagQuestion.outerHTML}<span class="opt-choices">${tagOptions}</span>` +
         `</label>` +
         `<label class="vote-close" title="Close"></label>` +
         `</div>` +
-        `<div class="opt-options">` +
-        question.options.reduce((a, v, i) => {
+        `<div class="opt-options">${question.options.reduce((a, v, i) => {
           a += `<div class="opt" title="Vote">`;
           a += `<div class="opt-info"><strong>${i + 1}</strong></div>`;
           a += `<div class="opt-bar"><div class="opt-bar-inner" style="width: 0;"><span class="opt-bar-value">0</span></div></div>`;
           a += `</div>`;
           return a;
-        }, '') +
-        `</div>` +
+        }, '')}</div>` +
         `<label class="vote-label"></label>` +
         `</div>`
     );

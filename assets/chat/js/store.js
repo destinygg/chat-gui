@@ -4,7 +4,7 @@ const localStorage = window.localStorage || {
   setItem: () => {},
   getItem: () => {},
 };
-const JSON = window.JSON;
+const { JSON } = window;
 
 class ChatStore {
   static write(name, obj) {

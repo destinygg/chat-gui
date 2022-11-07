@@ -3,8 +3,8 @@ import Chat from './chat';
 import { KEYCODES, getKeyCode } from './const';
 
 let suggestTimeoutId;
-let minWordLength = 1;
-let maxResults = 20;
+const minWordLength = 1;
+const maxResults = 20;
 
 function getBucketId(id) {
   return (id.match(/[\S]/)[0] || '_').toLowerCase();
@@ -33,11 +33,11 @@ function sortResults(a, b) {
   return a > b ? 1 : -1;
 }
 function buildSearchCriteria(str, offset) {
-  let pre = str.substring(0, offset),
-    post = str.substring(offset),
-    startCaret = pre.lastIndexOf(' ') + 1,
-    endCaret = post.indexOf(' '),
-    useronly = false;
+  let pre = str.substring(0, offset);
+  let post = str.substring(offset);
+  let startCaret = pre.lastIndexOf(' ') + 1;
+  const endCaret = post.indexOf(' ');
+  let useronly = false;
 
   if (startCaret > 0) pre = pre.substring(startCaret);
 
@@ -52,10 +52,10 @@ function buildSearchCriteria(str, offset) {
 
   return {
     word: pre + post,
-    pre: pre,
-    post: post,
-    startCaret: startCaret,
-    useronly: useronly,
+    pre,
+    post,
+    startCaret,
+    useronly,
     orig: str,
   };
 }
@@ -78,8 +78,8 @@ function selectHelper(ac) {
   // Positioning
   if (ac.selected !== -1 && ac.results.length > 0) {
     const list = ac.ui.find(`li`).get();
-    const offset = ac.container.position().left,
-      maxwidth = ac.ui.width();
+    const offset = ac.container.position().left;
+    const maxwidth = ac.ui.width();
     $(list[ac.selected + 3]).each((i, e) => {
       const right = $(e).position().left + offset + $(e).outerWidth();
       if (right > maxwidth) ac.container.css('left', offset + maxwidth - right);
@@ -111,9 +111,9 @@ class ChatAutoComplete {
     this.chat = chat;
     this.input = chat.input;
     this.ui.insertBefore(chat.input);
-    let originval = '',
-      shiftdown = false,
-      keypressed = false;
+    let originval = '';
+    let shiftdown = false;
+    let keypressed = false;
 
     // The reason why this has a bind method, is that the chat relies autocomplete objecting being around
     // Key down for any key, but we cannot get the charCode from it (like keypress).
@@ -134,18 +134,18 @@ class ChatAutoComplete {
     });
     // Key press of characters that actually input into the field
     this.input.on('keypress', (e) => {
-      const keycode = getKeyCode(e),
-        char = String.fromCharCode(keycode) || '';
+      const keycode = getKeyCode(e);
+      const char = String.fromCharCode(keycode) || '';
       if (keycode === KEYCODES.ENTER) {
         promoteIfSelected(this);
         this.reset();
       } else if (char.length > 0) {
         promoteIfSelected(this);
-        const str = this.input.val().toString(),
-          offset = this.input[0].selectionStart + 1,
-          pre = str.substring(0, offset),
-          post = str.substring(offset),
-          criteria = buildSearchCriteria(pre + char + post, offset);
+        const str = this.input.val().toString();
+        const offset = this.input[0].selectionStart + 1;
+        const pre = str.substring(0, offset);
+        const post = str.substring(offset);
+        const criteria = buildSearchCriteria(pre + char + post, offset);
         this.search(criteria);
         // If the first result is exact, highlight it.
         if (this.results.length > 0 && this.results[0].data === criteria.word) {
@@ -194,10 +194,10 @@ class ChatAutoComplete {
     this.criteria = criteria;
     if (criteria.word.length >= minWordLength) {
       const bucket = this.buckets.get(getBucketId(criteria.word)) || new Map();
-      const regex = new RegExp('^' + Chat.makeSafeForRegex(criteria.pre), 'i');
+      const regex = new RegExp(`^${Chat.makeSafeForRegex(criteria.pre)}`, 'i');
       this.results = [...bucket.values()]
         // filter exact matches
-        //.filter(a => a.data !== criteria.word)
+        // .filter(a => a.data !== criteria.word)
         // filter users if user search
         .filter(
           (a) =>
@@ -225,8 +225,8 @@ class ChatAutoComplete {
       this.buckets.get(id) || this.buckets.set(id, new Map()).get(id);
     const data = Object.assign(bucket.get(str) || {}, {
       data: str,
-      weight: weight,
-      isemote: isemote,
+      weight,
+      isemote,
     });
     bucket.set(str, data);
     return data;
@@ -247,14 +247,14 @@ class ChatAutoComplete {
     const result = this.results[this.selected];
     if (!result) return;
 
-    let pre = this.criteria.orig.substr(0, this.criteria.startCaret),
-      post = this.criteria.orig.substr(
-        this.criteria.startCaret + this.criteria.word.length
-      );
+    const pre = this.criteria.orig.substr(0, this.criteria.startCaret);
+    let post = this.criteria.orig.substr(
+      this.criteria.startCaret + this.criteria.word.length
+    );
 
     // always add a space after our completion if there isn't one since people
     // would usually add one anyway
-    if (post[0] !== ' ' || post.length === 0) post = ' ' + post;
+    if (post[0] !== ' ' || post.length === 0) post = ` ${post}`;
     this.input.focus().val(pre + result.data + post);
 
     // Move the caret to the end of the replacement string + 1 for the space

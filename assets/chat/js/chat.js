@@ -1,11 +1,11 @@
 /* global window, document */
 
 import { fetch } from 'whatwg-fetch';
-import { Notification } from './notification';
 import $ from 'jquery';
-import { KEYCODES, DATE_FORMATS, isKeyCode } from './const';
 import { debounce } from 'throttle-debounce';
 import moment from 'moment';
+import { KEYCODES, DATE_FORMATS, isKeyCode } from './const';
+import { Notification } from './notification';
 import EventEmitter from './emitter';
 import ChatSource from './source';
 import ChatUser from './user';
@@ -327,21 +327,18 @@ const banstruct = {
 
 class Chat {
   constructor(config) {
-    this.config = Object.assign(
-      {},
-      {
-        url: '',
-        api: { base: '' },
-        cdn: { base: '' },
-        cacheKey: '',
-        banAppealUrl: null,
-        amazonTags: null,
-        welcomeMessage: 'Welcome to chat!',
-        stalkEnabled: true,
-        mentionsEnabled: true,
-      },
-      config
-    );
+    this.config = {
+      url: '',
+      api: { base: '' },
+      cdn: { base: '' },
+      cacheKey: '',
+      banAppealUrl: null,
+      amazonTags: null,
+      welcomeMessage: 'Welcome to chat!',
+      stalkEnabled: true,
+      mentionsEnabled: true,
+      ...config,
+    };
     this.ui = null;
     this.css = null;
     this.output = null;
@@ -460,7 +457,7 @@ class Chat {
   setUser(user) {
     if (!user || user.username === '') {
       this.user = this.addUser({
-        nick: 'User' + Math.floor(Math.random() * (99999 - 10000 + 1)) + 10000,
+        nick: `User${Math.floor(Math.random() * (99999 - 10000 + 1))}${10000}`,
       });
       this.authenticated = false;
     } else {
@@ -474,7 +471,7 @@ class Chat {
   setSettings(settings) {
     // If authed and #settings.profilesettings=true use #settings
     // Else use whats in LocalStorage#chat.settings
-    let stored =
+    const stored =
       settings !== null && this.authenticated && settings.get('profilesettings')
         ? settings
         : new Map(ChatStore.read('chat.settings') || []);
@@ -512,10 +509,10 @@ class Chat {
       link.id = 'chat-styles';
       link.type = 'text/css';
       document.getElementsByTagName('head')[0].appendChild(link);
-      return link['sheet'];
+      return link.sheet;
     })();
 
-    this.ishidden = (document['visibilityState'] || 'visible') !== 'visible';
+    this.ishidden = (document.visibilityState || 'visible') !== 'visible';
     this.output = this.ui.find('#chat-output-frame');
     this.input = this.ui.find('#chat-input-control');
     this.loginscrn = this.ui.find('#chat-login-screen');
@@ -576,7 +573,7 @@ class Chat {
 
     commandsinfo.forEach((a, k) => {
       this.autocomplete.add(`/${k}`);
-      (a['alias'] || []).forEach((k) => this.autocomplete.add(`/${k}`));
+      (a.alias || []).forEach((k) => this.autocomplete.add(`/${k}`));
     });
 
     this.autocomplete.bind(this);
@@ -622,8 +619,7 @@ class Chat {
     document.addEventListener(
       'visibilitychange',
       debounce(100, false, () => {
-        this.ishidden =
-          (document['visibilityState'] || 'visible') !== 'visible';
+        this.ishidden = (document.visibilityState || 'visible') !== 'visible';
         if (!this.ishidden) this.focusIfNothingSelected();
         else ChatMenu.closeMenus(this);
       }),
@@ -675,25 +671,22 @@ class Chat {
     this.loginscrn.on('click', '#chat-btn-login', () => {
       this.loginscrn.hide();
       try {
-        window.top['showLoginModal']();
+        window.top.showLoginModal();
       } catch (e) {
-        const uri =
-          location.protocol +
-          '//' +
-          location.hostname +
-          (location.port ? ':' + location.port : '');
+        const uri = `${location.protocol}//${location.hostname}${
+          location.port ? `:${location.port}` : ''
+        }`;
         try {
           if (window.self === window.top) {
-            window.location.href =
-              uri +
-              '/login?follow=' +
-              encodeURIComponent(window.location.pathname);
+            window.location.href = `${uri}/login?follow=${encodeURIComponent(
+              window.location.pathname
+            )}`;
           } else {
-            window.location.href = uri + '/login';
+            window.location.href = `${uri}/login`;
           }
           return false;
         } catch (ignored) {}
-        window.location.href = uri + '/login';
+        window.location.href = `${uri}/login`;
       }
       return false;
     });
@@ -782,10 +775,10 @@ class Chat {
         .then((res) => res.json())
         .then((d) => {
           d.forEach((e) =>
-            this.whispers.set(e['username'].toLowerCase(), {
-              id: e['messageid'],
-              nick: e['username'],
-              unread: e['unread'],
+            this.whispers.set(e.username.toLowerCase(), {
+              id: e.messageid,
+              nick: e.username,
+              unread: e.unread,
               open: false,
             })
           );
@@ -958,7 +951,7 @@ class Chat {
         this.taggednotes.get(message.user.nick.toLowerCase()) || '';
       // set highlighted state
       message.highlighted =
-        /*this.authenticated && */ !message.isown &&
+        /* this.authenticated && */ !message.isown &&
         // Check current user nick against msg.message (if highlight setting is on)
         ((this.regexhighlightself &&
           this.settings.get('highlight') &&
@@ -969,14 +962,14 @@ class Chat {
           // Check custom highlight against msg.nick and msg.message
           (this.regexhighlightcustom &&
             this.regexhighlightcustom.test(
-              message.user.username + ' ' + message.message
+              `${message.user.username} ${message.message}`
             )));
     }
 
     // This looks odd, although it would be a correct implementation
     /* else if(win.lastmessage && win.lastmessage.type === message.type && [MessageTypes.ERROR,MessageTypes.INFO,MessageTypes.COMMAND,MessageTypes.STATUS].indexOf(message.type)){
             message.continued = true
-        }*/
+        } */
 
     // The point where we actually add the message dom
     win.addMessage(this, message);
@@ -1060,7 +1053,7 @@ class Chat {
   removeWindow(name) {
     const win = this.windows.get(name);
     if (win) {
-      const visible = win.visible;
+      const { visible } = win;
       this.windows.delete(name);
       win.destroy();
       if (visible) {
@@ -1090,7 +1083,7 @@ class Chat {
             w.visible ? 'active' : ''
           } ${conv.unread > 0 ? 'unread' : ''}">
                     <span>${w.label}${
-            conv.unread > 0 ? ' (' + conv.unread + ')' : ''
+            conv.unread > 0 ? ` (${conv.unread})` : ''
           }</span>
                     <i class="tab-close" title="Close" />
                     </span>`);
@@ -1124,7 +1117,7 @@ class Chat {
   }
 
   ignored(nick, text = null) {
-    let ignore = this.ignoring.has(nick.toLowerCase());
+    const ignore = this.ignoring.has(nick.toLowerCase());
     if (!ignore && text !== null) {
       return (
         (this.settings.get('ignorementions') &&
@@ -1159,11 +1152,11 @@ class Chat {
   }
 
   focusIfNothingSelected() {
-    if (this['debounceFocus'] === undefined) {
-      this['debounceFocus'] = debounce(10, false, (c) => c.input.focus());
+    if (this.debounceFocus === undefined) {
+      this.debounceFocus = debounce(10, false, (c) => c.input.focus());
     }
     if (window.getSelection().isCollapsed && !this.input.is(':focus')) {
-      this['debounceFocus'](this);
+      this.debounceFocus(this);
     }
   }
 
@@ -1185,7 +1178,7 @@ class Chat {
     const pinned = this.getActiveWindow().scrollplugin.isPinned();
 
     this.input.css('height', '');
-    let calculatedHeight = this.input.prop('scrollHeight');
+    const calculatedHeight = this.input.prop('scrollHeight');
 
     // Show scrollbars if the input's height exceeds the max.
     this.input.css(
@@ -1239,13 +1232,13 @@ class Chat {
   }
 
   onOPEN() {
-    //MessageBuilder.status(`Connection established.`).into(this)
+    // MessageBuilder.status(`Connection established.`).into(this)
   }
 
   onNAMES(data) {
     MessageBuilder.status(
-      `Connected. serving ${data['connectioncount'] || 0} connections and ${
-        data['users'].length
+      `Connected. serving ${data.connectioncount || 0} connections and ${
+        data.users.length
       } users.`
     ).into(this);
     if (this.showmotd) {
@@ -1275,10 +1268,12 @@ class Chat {
       if (this.chatvote.isMsgVoteStartFmt(data.data)) {
         this.source.emit('VOTE', data);
         return;
-      } else if (this.chatvote.isMsgVoteStopFmt(data.data)) {
+      }
+      if (this.chatvote.isMsgVoteStopFmt(data.data)) {
         this.source.emit('VOTESTOP', data);
         return;
-      } else if (
+      }
+      if (
         this.chatvote.isVoteStarted() &&
         this.chatvote.isMsgVoteCastFmt(data.data)
       ) {
@@ -1501,9 +1496,11 @@ class Chat {
           open: false,
         });
 
-      const conv = this.whispers.get(normalized),
-        user = this.users.get(normalized) || new ChatUser(data.nick),
-        messageid = data.hasOwnProperty('messageid') ? data['messageid'] : null;
+      const conv = this.whispers.get(normalized);
+      const user = this.users.get(normalized) || new ChatUser(data.nick);
+      const messageid = data.hasOwnProperty('messageid')
+        ? data.messageid
+        : null;
 
       if (this.settings.get('showhispersinchat'))
         MessageBuilder.whisper(
@@ -1548,16 +1545,16 @@ class Chat {
 
   cmdSEND(raw) {
     if (raw !== '') {
-      const win = this.getActiveWindow(),
-        matches = raw.match(regexslashcmd),
-        iscommand = matches && matches.length > 1,
-        ismecmd = iscommand && matches[1].toLowerCase() === 'me',
-        textonly = Chat.removeSlashCmdFromText(raw);
+      const win = this.getActiveWindow();
+      const matches = raw.match(regexslashcmd);
+      const iscommand = matches && matches.length > 1;
+      const ismecmd = iscommand && matches[1].toLowerCase() === 'me';
+      const textonly = Chat.removeSlashCmdFromText(raw);
 
       // COMMAND
       if (iscommand && !ismecmd) {
-        const command = matches[1].toUpperCase(),
-          normalized = command.toUpperCase();
+        const command = matches[1].toUpperCase();
+        const normalized = command.toUpperCase();
 
         // Clear the input and add to history, before we do the emit
         // This makes it possible for commands to change the input.value, else it would be cleared after the command is run.
@@ -1644,7 +1641,8 @@ class Chat {
     if (this.chatvote.isVoteStarted()) {
       MessageBuilder.error('Vote already started.').into(this);
       return;
-    } else if (!this.chatvote.canUserStartVote(this.user)) {
+    }
+    if (!this.chatvote.canUserStartVote(this.user)) {
       MessageBuilder.error('You do not have permission to start a vote.').into(
         this
       );
@@ -1659,7 +1657,8 @@ class Chat {
     if (!this.chatvote.isVoteStarted()) {
       MessageBuilder.error('No vote started.').into(this);
       return;
-    } else if (!this.chatvote.canUserStopVote(this.user)) {
+    }
+    if (!this.chatvote.canUserStopVote(this.user)) {
       MessageBuilder.error(
         'You do not have permission to stop this vote.'
       ).into(this);
@@ -1716,7 +1715,7 @@ class Chat {
     } else {
       // this is a little ugly, but it allows us to not ignore anything if there's an invalid nick in there
       // think that's less confusing/nicer compared to partially ignoring
-      let validUsernames = new Set();
+      const validUsernames = new Set();
       // .some() stops iterating over the array if the inner function returns true
       // which is perfect for our use case
       const failure = parts.some((username) => {
@@ -1725,10 +1724,9 @@ class Chat {
             `${username} is not a valid nick - /ignore <nick> OR /ignore <nick_1> <nick_2> ... <nick_n>`
           ).into(this);
           return true;
-        } else {
-          validUsernames.add(username);
-          return false;
         }
+        validUsernames.add(username);
+        return false;
       });
       if (!failure) {
         validUsernames.forEach((username) => {
@@ -1750,17 +1748,16 @@ class Chat {
   cmdUNIGNORE(parts) {
     if (parts.length > 0) {
       // see comment in cmdIGNORE for explanation
-      let validUsernames = new Set();
+      const validUsernames = new Set();
       const failure = parts.some((username) => {
         if (!nickregex.test(username)) {
           MessageBuilder.info(
             `${username} is not a valid nick - /unignore <nick> OR /unignore <nick_1> <nick_2> ... <nick_n>`
           ).into(this);
           return true;
-        } else {
-          validUsernames.add(username);
-          return false;
         }
+        validUsernames.add(username);
+        return false;
       });
       if (!failure) {
         validUsernames.forEach((username) => {
@@ -1804,7 +1801,7 @@ class Chat {
     } else {
       const duration = parts[1] ? Chat.parseTimeInterval(parts[1]) : null;
       if (duration && duration > 0) {
-        this.source.send('MUTE', { data: parts[0], duration: duration });
+        this.source.send('MUTE', { data: parts[0], duration });
       } else {
         this.source.send('MUTE', { data: parts[0] });
       }
@@ -1821,7 +1818,7 @@ class Chat {
     } else if (!parts[2]) {
       MessageBuilder.error('Providing a reason is mandatory').into(this);
     } else {
-      let payload = {
+      const payload = {
         nick: parts[0],
         reason: parts.slice(2, parts.length).join(' '),
       };
@@ -1878,7 +1875,7 @@ class Chat {
     if (parts.length === 0) {
       if (highlights.length > 0)
         MessageBuilder.info(
-          'Currently highlighted users: ' + highlights.join(',')
+          `Currently highlighted users: ${highlights.join(',')}`
         ).into(this);
       else MessageBuilder.info(`No highlighted users`).into(this);
       return;
@@ -1941,7 +1938,7 @@ class Chat {
     } else {
       const data = parts.slice(1, parts.length).join(' ');
       this.replyusername = parts[0];
-      this.source.send('PRIVMSG', { nick: parts[0], data: data });
+      this.source.send('PRIVMSG', { nick: parts[0], data });
     }
   }
 
@@ -1954,12 +1951,12 @@ class Chat {
       if (this.taggednicks.size > 0) {
         let tags = 'Tagged nicks\n\n';
         this.taggednicks.forEach((color, nick) => {
-          let note = this.taggednotes.has(nick)
+          const note = this.taggednotes.has(nick)
             ? this.taggednotes.get(nick)
             : '';
           tags += `    ${nick} (${color}) ${note}` + '\n';
         });
-        MessageBuilder.info(tags + '\n').into(this);
+        MessageBuilder.info(`${tags}\n`).into(this);
       } else {
         MessageBuilder.info(`No tagged nicks.`).into(this);
       }
@@ -2023,12 +2020,12 @@ class Chat {
       if (this.taggednicks.size > 0) {
         let tags = 'Tagged nicks\n\n';
         this.taggednicks.forEach((color, nick) => {
-          let note = this.taggednotes.has(nick)
+          const note = this.taggednotes.has(nick)
             ? this.taggednotes.get(nick)
             : '';
           tags += `    ${nick} (${color}) ${note}` + '\n';
         });
-        MessageBuilder.info(tags + '\n').into(this);
+        MessageBuilder.info(`${tags}\n`).into(this);
       } else {
         MessageBuilder.info(`No tagged nicks.`).into(this);
       }
@@ -2058,7 +2055,7 @@ class Chat {
   }
 
   cmdEMBED(parts) {
-    const location = (window.top || window.parent || window).location;
+    const { location } = window.top || window.parent || window;
     const noEmbedUrl = location.href.split('#')[0];
     const urlCheck =
       /^((http[s]?|ftp):\/)?\/?([^:\/\s]+)((\/\w+)*\/)([\w\-\.]+[^#?\s]+)(.*)?(#[\w\-]+)?$/gm;
@@ -2077,35 +2074,35 @@ class Chat {
         'Valid links: Twitch Streams, Twitch VODs, Twitch Clips, Youtube Videos, Vimeo Videos.'
       ).into(this);
     } else {
-      let matchedHost = parts[0].matchAll(urlCheck);
-      let match = [...matchedHost][0];
+      const matchedHost = parts[0].matchAll(urlCheck);
+      const match = [...matchedHost][0];
       if (match) {
         switch (match[3]) {
           case 'www.twitch.tv':
           case 'twitch.tv':
             if (match[5] === '/videos') {
-              location.href = noEmbedUrl + '#twitch-vod/' + match[6];
+              location.href = `${noEmbedUrl}#twitch-vod/${match[6]}`;
             } else if (match[5] === '/clip') {
-              location.href = noEmbedUrl + '#twitch-clip/' + match[6];
+              location.href = `${noEmbedUrl}#twitch-clip/${match[6]}`;
             } else {
-              location.href = noEmbedUrl + '#twitch/' + match[6];
+              location.href = `${noEmbedUrl}#twitch/${match[6]}`;
             }
             break;
           case 'clips.twitch.tv':
-            location.href = noEmbedUrl + '#twitch-clip/' + match[6];
+            location.href = `${noEmbedUrl}#twitch-clip/${match[6]}`;
             break;
           case 'www.youtube.com':
           case 'youtube.com':
-            let params = new URLSearchParams(match[7]);
-            location.href = noEmbedUrl + '#youtube/' + params.get('v');
+            const params = new URLSearchParams(match[7]);
+            location.href = `${noEmbedUrl}#youtube/${params.get('v')}`;
             break;
           case 'www.youtu.be':
           case 'youtu.be':
-            location.href = noEmbedUrl + '#youtube/' + match[6];
+            location.href = `${noEmbedUrl}#youtube/${match[6]}`;
             break;
           case 'www.vimeo.com':
           case 'vimeo.com':
-            location.href = noEmbedUrl + '#vimeo/' + match[6];
+            location.href = `${noEmbedUrl}#vimeo/${match[6]}`;
             break;
           default:
             MessageBuilder.error(
@@ -2128,12 +2125,12 @@ class Chat {
   }
 
   cmdPOSTEMBED(parts) {
-    const location = (window.top || window.parent || window).location;
+    const { location } = window.top || window.parent || window;
     const EmbedSplit = location.href.split('#');
     const urlCheck =
       /^((http[s]?|ftp):\/)?\/?([^:\/\s]+)((\/\w+)*\/)([\w\-\.]+[^#?\s]+)(.*)?(#[\w\-]+)?$/gm;
     if (!parts[0] && EmbedSplit[1]) {
-      this.source.send('MSG', { data: '#' + EmbedSplit[1] });
+      this.source.send('MSG', { data: `#${EmbedSplit[1]}` });
     } else if (!parts[0] && !EmbedSplit[1]) {
       MessageBuilder.error(
         'Nothing embedded - /postembed OR /pe OR /postembed <link> <message (optional)> OR /pe <link> <message (optional)>'
@@ -2142,8 +2139,8 @@ class Chat {
         'Valid links: Twitch Streams, Twitch VODs, Twitch Clips, Youtube Videos, Vimeo Video.'
       ).into(this);
     } else {
-      let matchedHost = parts[0].matchAll(urlCheck);
-      let match = [...matchedHost][0];
+      const matchedHost = parts[0].matchAll(urlCheck);
+      const match = [...matchedHost][0];
       let msg = '';
       let moreMsg = '';
       if (match) {
@@ -2155,33 +2152,33 @@ class Chat {
           case 'www.twitch.tv':
           case 'twitch.tv':
             if (match[5] === '/videos') {
-              msg = '#twitch-vod/' + match[6];
+              msg = `#twitch-vod/${match[6]}`;
             } else if (match[5] === '/clip') {
-              msg = '#twitch-clip/' + match[6];
+              msg = `#twitch-clip/${match[6]}`;
             } else {
-              msg = '#twitch/' + match[6];
+              msg = `#twitch/${match[6]}`;
             }
 
             this.source.send('MSG', { data: `${msg} ${moreMsg}` });
             break;
           case 'clips.twitch.tv':
-            msg = '#twitch-clip/' + match[6];
+            msg = `#twitch-clip/${match[6]}`;
             this.source.send('MSG', { data: `${msg} ${moreMsg}` });
             break;
           case 'www.youtube.com':
           case 'youtube.com':
-            let params = new URLSearchParams(match[7]);
-            msg = '#youtube/' + params.get('v');
+            const params = new URLSearchParams(match[7]);
+            msg = `#youtube/${params.get('v')}`;
             this.source.send('MSG', { data: `${msg} ${moreMsg}` });
             break;
           case 'www.youtu.be':
           case 'youtu.be':
-            msg = '#youtube/' + match[6];
+            msg = `#youtube/${match[6]}`;
             this.source.send('MSG', { data: `${msg} ${moreMsg}` });
             break;
           case 'www.vimeo.com':
           case 'vimeo.com':
-            msg = '#vimeo/' + match[6];
+            msg = `#vimeo/${match[6]}`;
             this.source.send('MSG', { data: `${msg} ${moreMsg}` });
             break;
           default:
@@ -2218,7 +2215,7 @@ class Chat {
           MessageBuilder.info(`You have no active bans. Thank you.`).into(this);
           return;
         }
-        const b = Object.assign({}, banstruct, data);
+        const b = { ...banstruct, ...data };
         const by = b.username ? b.username : 'Chat';
         const start = moment(b.starttimestamp).format(DATE_FORMATS.FULL);
         if (!b.endtimestamp) {
@@ -2258,26 +2255,24 @@ class Chat {
       MessageBuilder.error(
         'Too many arguments provided - /open <username> OR /o <username>'
       ).into(this);
-    } else {
-      if (parts[0] !== this.user.username) {
-        const normalized = parts[0].toLowerCase();
-        const win = this.getWindow(normalized);
-        if (win !== (null || undefined)) {
-          this.windowToFront(normalized);
-        } else {
-          if (!this.whispers.has(normalized))
-            this.whispers.set(normalized, {
-              nick: normalized,
-              unread: 0,
-              open: false,
-            });
-          this.openConversation(normalized);
-        }
+    } else if (parts[0] !== this.user.username) {
+      const normalized = parts[0].toLowerCase();
+      const win = this.getWindow(normalized);
+      if (win !== (null || undefined)) {
+        this.windowToFront(normalized);
       } else {
-        MessageBuilder.error(
-          "Can't open a convo with yourself - /open <username> OR /o <username>"
-        ).into(this);
+        if (!this.whispers.has(normalized))
+          this.whispers.set(normalized, {
+            nick: normalized,
+            unread: 0,
+            open: false,
+          });
+        this.openConversation(normalized);
       }
+    } else {
+      MessageBuilder.error(
+        "Can't open a convo with yourself - /open <username> OR /o <username>"
+      ).into(this);
     }
   }
 
@@ -2347,7 +2342,7 @@ class Chat {
           MessageBuilder.info(`No messages for ${parts[0]}`).into(this);
         } else {
           const date = moment
-            .utc(d.lines[d.lines.length - 1]['timestamp'] * 1000)
+            .utc(d.lines[d.lines.length - 1].timestamp * 1000)
             .local()
             .format(DATE_FORMATS.FULL);
           MessageBuilder.info(`Stalked ${parts[0]} last seen ${date}`).into(
@@ -2445,8 +2440,8 @@ class Chat {
   }
 
   openConversation(nick) {
-    const normalized = nick.toLowerCase(),
-      conv = this.whispers.get(normalized);
+    const normalized = nick.toLowerCase();
+    const conv = this.whispers.get(normalized);
     if (conv) {
       ChatMenu.closeMenus(this);
       this.windows.has(normalized) ||
@@ -2458,10 +2453,12 @@ class Chat {
   }
 
   createConversation(conv, nick, normalized) {
-    const user = this.users.get(normalized) || new ChatUser(nick),
-      win = new ChatWindow(normalized, 'chat-output-whisper', user.nick).into(
-        this
-      );
+    const user = this.users.get(normalized) || new ChatUser(nick);
+    const win = new ChatWindow(
+      normalized,
+      'chat-output-whisper',
+      user.nick
+    ).into(this);
     let once = true;
     win.on('show', () => {
       if (once) {
@@ -2480,8 +2477,7 @@ class Chat {
               MessageBuilder.info(`Last message ${date}`).into(this, win);
               data.reverse().forEach((e) => {
                 const user =
-                  this.users.get(e['from'].toLowerCase()) ||
-                  new ChatUser(e['from']);
+                  this.users.get(e.from.toLowerCase()) || new ChatUser(e.from);
                 MessageBuilder.historical(e.message, user, e.timestamp).into(
                   this,
                   win
@@ -2492,20 +2488,18 @@ class Chat {
           .catch(() =>
             MessageBuilder.error(`Failed to load messages :(`).into(this, win)
           );
-      } else {
-        if (conv.unread > 0) {
-          fetch(
-            `${this.config.api.base}/api/messages/usr/${encodeURIComponent(
-              normalized
-            )}/inbox`,
-            { credentials: 'include' }
-          ).catch(() =>
-            MessageBuilder.error(`Failed to mark messages as read :(`).into(
-              this,
-              win
-            )
-          );
-        }
+      } else if (conv.unread > 0) {
+        fetch(
+          `${this.config.api.base}/api/messages/usr/${encodeURIComponent(
+            normalized
+          )}/inbox`,
+          { credentials: 'include' }
+        ).catch(() =>
+          MessageBuilder.error(`Failed to mark messages as read :(`).into(
+            this,
+            win
+          )
+        );
       }
       conv.unread = 0;
       conv.open = true;
@@ -2518,8 +2512,8 @@ class Chat {
   }
 
   static extractNicks(text) {
-    let match,
-      nicks = new Set();
+    let match;
+    const nicks = new Set();
     while ((match = nickmessageregex.exec(text))) {
       nicks.add(match[1]);
     }
@@ -2557,31 +2551,31 @@ class Chat {
   }
 
   static parseTimeInterval(str) {
-    let nanoseconds = 0,
-      units = {
-        s: 1000000000,
-        sec: 1000000000,
-        secs: 1000000000,
-        second: 1000000000,
-        seconds: 1000000000,
+    let nanoseconds = 0;
+    const units = {
+      s: 1000000000,
+      sec: 1000000000,
+      secs: 1000000000,
+      second: 1000000000,
+      seconds: 1000000000,
 
-        m: 60000000000,
-        min: 60000000000,
-        mins: 60000000000,
-        minute: 60000000000,
-        minutes: 60000000000,
+      m: 60000000000,
+      min: 60000000000,
+      mins: 60000000000,
+      minute: 60000000000,
+      minutes: 60000000000,
 
-        h: 3600000000000,
-        hr: 3600000000000,
-        hrs: 3600000000000,
-        hour: 3600000000000,
-        hours: 3600000000000,
+      h: 3600000000000,
+      hr: 3600000000000,
+      hrs: 3600000000000,
+      hour: 3600000000000,
+      hours: 3600000000000,
 
-        d: 86400000000000,
-        day: 86400000000000,
-        days: 86400000000000,
-      };
-    str.replace(regextime, function ($0, number, unit) {
+      d: 86400000000000,
+      day: 86400000000000,
+      days: 86400000000000,
+    };
+    str.replace(regextime, ($0, number, unit) => {
       number *= unit ? units[unit.toLowerCase()] || units.s : units.s;
       nanoseconds += +number;
     });
@@ -2601,8 +2595,8 @@ class Chat {
   static reqParam(name, url) {
     name = name.replace(/[\[\]]/g, '\\$&');
     url = location || window.location.href || null;
-    const regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
-      results = regex.exec(url);
+    const regex = new RegExp(`[?&]${name}(=([^&#]*)|&|#|$)`);
+    const results = regex.exec(url);
     if (!results || !results[2]) return null;
     return decodeURIComponent(results[2].replace(/\+/g, ' '));
   }

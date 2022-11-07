@@ -3,11 +3,12 @@ import UserFeatures from './features';
 
 /** @var Array tlds */
 const tlds = require('../../tld.json');
-const gtld = '(?:' + [...tlds].join('|') + ')';
+
+const gtld = `(?:${[...tlds].join('|')})`;
 const el = document.createElement('div');
 
 class HtmlTextFormatter {
-  format(chat, str /*, message=null*/) {
+  format(chat, str /* , message=null */) {
     el.textContent = str;
     return el.innerHTML;
   }
@@ -22,9 +23,8 @@ class EmoteFormatter {
 
     if (regex != null) {
       return str.replace(regex, '$1<div title="$2" class="emote $2">$2 </div>');
-    } else {
-      return str;
     }
+    return str;
   }
 }
 
@@ -67,64 +67,26 @@ class UrlFormatter {
       'p{So}':
         '\\u00A6\\u00A9\\u00AE\\u00B0\\u0482\\u060E\\u060F\\u06DE\\u06E9\\u06FD\\u06FE\\u07F6\\u09FA\\u0B70\\u0BF3-\\u0BF8\\u0BFA\\u0C7F\\u0D79\\u0F01-\\u0F03\\u0F13\\u0F15-\\u0F17\\u0F1A-\\u0F1F\\u0F34\\u0F36\\u0F38\\u0FBE-\\u0FC5\\u0FC7-\\u0FCC\\u0FCE\\u0FCF\\u0FD5-\\u0FD8\\u109E\\u109F\\u1390-\\u1399\\u1940\\u19DE-\\u19FF\\u1B61-\\u1B6A\\u1B74-\\u1B7C\\u2100\\u2101\\u2103-\\u2106\\u2108\\u2109\\u2114\\u2116\\u2117\\u211E-\\u2123\\u2125\\u2127\\u2129\\u212E\\u213A\\u213B\\u214A\\u214C\\u214D\\u214F\\u2195-\\u2199\\u219C-\\u219F\\u21A1\\u21A2\\u21A4\\u21A5\\u21A7-\\u21AD\\u21AF-\\u21CD\\u21D0\\u21D1\\u21D3\\u21D5-\\u21F3\\u2300-\\u2307\\u230C-\\u231F\\u2322-\\u2328\\u232B-\\u237B\\u237D-\\u239A\\u23B4-\\u23DB\\u23E2-\\u23F3\\u2400-\\u2426\\u2440-\\u244A\\u249C-\\u24E9\\u2500-\\u25B6\\u25B8-\\u25C0\\u25C2-\\u25F7\\u2600-\\u266E\\u2670-\\u26FF\\u2701-\\u2767\\u2794-\\u27BF\\u2800-\\u28FF\\u2B00-\\u2B2F\\u2B45\\u2B46\\u2B50-\\u2B59\\u2CE5-\\u2CEA\\u2E80-\\u2E99\\u2E9B-\\u2EF3\\u2F00-\\u2FD5\\u2FF0-\\u2FFB\\u3004\\u3012\\u3013\\u3020\\u3036\\u3037\\u303E\\u303F\\u3190\\u3191\\u3196-\\u319F\\u31C0-\\u31E3\\u3200-\\u321E\\u322A-\\u3247\\u3250\\u3260-\\u327F\\u328A-\\u32B0\\u32C0-\\u32FE\\u3300-\\u33FF\\u4DC0-\\u4DFF\\uA490-\\uA4C6\\uA828-\\uA82B\\uA836\\uA837\\uA839\\uAA77-\\uAA79\\uFDFD\\uFFE4\\uFFE8\\uFFED\\uFFEE\\uFFFC\\uFFFD',
     };
-    const letter = unicodeShortcuts['p{L}'],
-      number = unicodeShortcuts['p{N}'],
-      iriChar = letter + number,
-      pathChar =
-        iriChar +
-        "/\\-+=_&~*%@|#.,:;'?!" +
-        unicodeShortcuts['p{Sc}'] +
-        unicodeShortcuts['p{Sk}'] +
-        unicodeShortcuts['p{So}'],
-      endChar = iriChar + '/\\-+=_&~*%;' + unicodeShortcuts['p{Sc}'],
-      octet = '(?:25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9][0-9]|[0-9])',
-      ipAddr =
-        '(?:\\b' +
-        octet +
-        '\\.' +
-        octet +
-        '\\.' +
-        octet +
-        '\\.' +
-        octet +
-        '\\b)',
-      iri = '[' + iriChar + '](?:[' + iriChar + '\\-]*[' + iriChar + '])?',
-      domain = '(?:' + iri + '\\.)+',
-      hostName = '(?:' + domain + gtld + '|' + ipAddr + ')',
-      wellBrack =
-        '\\[[' +
-        pathChar +
-        ']*(?:\\[[' +
-        pathChar +
-        ']*\\][' +
-        pathChar +
-        ']*)*\\]',
-      wellParen =
-        '\\([' +
-        pathChar +
-        ']*(?:\\([' +
-        pathChar +
-        ']*\\)[' +
-        pathChar +
-        ']*)*\\)',
-      wellAll = wellParen + '|' + wellBrack,
-      pathCont =
-        '(?:[' + pathChar + ']*(?:' + wellAll + '|[' + endChar + '])+)+',
-      path = '(?:' + pathCont + '|/|\\b|$)',
-      port = '(?::[0-9]+)?',
-      webURL =
-        '(?:' +
-        hostName +
-        port +
-        '/' +
-        path +
-        ')|(?:' +
-        hostName +
-        port +
-        '(?:\\b|$))',
-      scheme = '(https?|ftp|wss?)://',
-      strict = '\\b' + scheme + pathCont,
-      relaxed = strict + '|' + webURL;
+    const letter = unicodeShortcuts['p{L}'];
+    const number = unicodeShortcuts['p{N}'];
+    const iriChar = letter + number;
+    const pathChar = `${iriChar}/\\-+=_&~*%@|#.,:;'?!${unicodeShortcuts['p{Sc}']}${unicodeShortcuts['p{Sk}']}${unicodeShortcuts['p{So}']}`;
+    const endChar = `${iriChar}/\\-+=_&~*%;${unicodeShortcuts['p{Sc}']}`;
+    const octet = '(?:25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9][0-9]|[0-9])';
+    const ipAddr = `(?:\\b${octet}\\.${octet}\\.${octet}\\.${octet}\\b)`;
+    const iri = `[${iriChar}](?:[${iriChar}\\-]*[${iriChar}])?`;
+    const domain = `(?:${iri}\\.)+`;
+    const hostName = `(?:${domain}${gtld}|${ipAddr})`;
+    const wellBrack = `\\[[${pathChar}]*(?:\\[[${pathChar}]*\\][${pathChar}]*)*\\]`;
+    const wellParen = `\\([${pathChar}]*(?:\\([${pathChar}]*\\)[${pathChar}]*)*\\)`;
+    const wellAll = `${wellParen}|${wellBrack}`;
+    const pathCont = `(?:[${pathChar}]*(?:${wellAll}|[${endChar}])+)+`;
+    const path = `(?:${pathCont}|/|\\b|$)`;
+    const port = '(?::[0-9]+)?';
+    const webURL = `(?:${hostName}${port}/${path})|(?:${hostName}${port}(?:\\b|$))`;
+    const scheme = '(https?|ftp|wss?)://';
+    const strict = `\\b${scheme}${pathCont}`;
+    const relaxed = `${strict}|${webURL}`;
     this.linkregex = new RegExp(relaxed, 'gi');
     this._elem = $('<div></div>');
   }
@@ -134,14 +96,12 @@ class UrlFormatter {
   encodeUrl(value) {
     return value
       .replace(/&/g, '&amp;')
-      .replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function (value) {
+      .replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, (value) => {
         const hi = value.charCodeAt(0);
         const low = value.charCodeAt(1);
-        return '&#' + ((hi - 0xd800) * 0x400 + (low - 0xdc00) + 0x10000) + ';';
+        return `&#${(hi - 0xd800) * 0x400 + (low - 0xdc00) + 0x10000};`;
       })
-      .replace(/([^\#-~| |!])/g, function (value) {
-        return '&#' + value.charCodeAt(0) + ';';
-      })
+      .replace(/([^\#-~| |!])/g, (value) => `&#${value.charCodeAt(0)};`)
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;');
   }
@@ -154,7 +114,7 @@ class UrlFormatter {
     if (/\b(?:NSFL)\b/i.test(str)) extraclass = 'nsfl-link';
     else if (/\b(?:NSFW|SPOILERS?)\b/i.test(str)) extraclass = 'nsfw-link';
 
-    return str.replace(self.linkregex, function (url, scheme) {
+    return str.replace(self.linkregex, (url, scheme) => {
       scheme = scheme ? '' : 'http://';
       const decodedUrl = self._elem.html(url).text();
       const m = decodedUrl.match(self.linkregex);
@@ -176,21 +136,17 @@ class EmbedUrlFormatter {
       /(^|\s)((#twitch(-vod|-clip)?|#youtube|#vimeo)\/[\w\-]{3,64}|#facebook\/\d{10,20}\/videos\/\d{10,20})\b/g;
 
     try {
-      const location = (window.top || window.parent || window).location;
+      const { location } = window.top || window.parent || window;
       this.currentPath = location.pathname;
-      this.url = (
-        location.protocol +
-        '//' +
-        location.host +
-        this.bigscreenPath +
-        (location.search ? location.search : '')
-      ).replace(/\/$/, '');
+      this.url = `${location.protocol}//${location.host}${this.bigscreenPath}${
+        location.search ? location.search : ''
+      }`.replace(/\/$/, '');
     } catch (e) {
       console.error(e);
     }
   }
 
-  format(chat, str /*, message=null*/) {
+  format(chat, str /* , message=null */) {
     // Open embed links in a new tab when in embedded/popout chat.
     const target = this.currentPath === this.bigscreenPath ? '_top' : '_blank';
     let extraclass = '';
@@ -211,7 +167,7 @@ class BadWordsCensorshipFormatter {
       /(fuck|shit|cunt|whore|bitch|faggot|fag|nigger|nigga|gusano|cracker|rape)/gi;
   }
 
-  format(chat, str /*, message=null*/) {
+  format(chat, str /* , message=null */) {
     if (chat.settings.get('censorbadwords')) {
       str = str.replace(this.badWordsRegex, (match) =>
         '*'.repeat(match.length)

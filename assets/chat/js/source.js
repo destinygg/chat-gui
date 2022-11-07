@@ -1,7 +1,8 @@
 /* global window */
 
 import EventEmitter from './emitter';
-const WebSocket = window['WebSocket'] || window['MozWebSocket'];
+
+const WebSocket = window.WebSocket || window.MozWebSocket;
 
 /**
  * Handles the websocket connection, opening, closing, retrying
@@ -85,7 +86,7 @@ class ChatSource extends EventEmitter {
           : Math.floor(Math.random() * (30000 - 5000 + 1)) + 5000;
       this.retryTimer = setTimeout(() => this.connect(this.url), retryMilli);
     }
-    this.emit('CLOSE', { code: e.code || 1006, retryMilli: retryMilli });
+    this.emit('CLOSE', { code: e.code || 1006, retryMilli });
   }
 
   onMsg(e) {
@@ -93,15 +94,15 @@ class ChatSource extends EventEmitter {
   }
 
   parseAndDispatch(event) {
-    let eventname = event.data.split(' ', 1)[0].toUpperCase(),
-      payload = event.data.substring(eventname.length + 1),
-      data = null;
+    const eventname = event.data.split(' ', 1)[0].toUpperCase();
+    const payload = event.data.substring(eventname.length + 1);
+    let data = null;
     try {
       data = JSON.parse(payload);
     } catch (ignored) {
       data = payload;
     }
-    this.emit('DISPATCH', { data: data, event: eventname }); // Event is used to hook into all dispatched events
+    this.emit('DISPATCH', { data, event: eventname }); // Event is used to hook into all dispatched events
     this.emit(eventname, data);
   }
 

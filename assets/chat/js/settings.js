@@ -46,7 +46,7 @@ function upgradeSettings(chat, oldversion, newversion) {
     ChatStore.remove('chat.ignoring');
   }
   if (oldversion <= 1) {
-    let showremoved = chat.settings.get('showremoved') === true ? 1 : 0;
+    const showremoved = chat.settings.get('showremoved') === true ? 1 : 0;
     chat.settings.set('showremoved', showremoved);
   }
 }

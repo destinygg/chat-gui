@@ -1,4 +1,6 @@
 import $ from 'jquery';
+import { throttle } from 'throttle-debounce';
+import moment from 'moment';
 import {
   EmoteFormatter,
   GreenTextFormatter,
@@ -11,8 +13,6 @@ import {
   SuspostFormatter,
 } from './formatters';
 import { DATE_FORMATS } from './const';
-import { throttle } from 'throttle-debounce';
-import moment from 'moment';
 
 const MessageTypes = {
   STATUS: 'STATUS',
@@ -104,7 +104,7 @@ class ChatUIMessage {
     classes.push(this.classes);
     classes.unshift(`msg-${this.type.toLowerCase()}`);
     classes.unshift(`msg-chat`);
-    attr['class'] = classes.join(' ');
+    attr.class = classes.join(' ');
     return $('<div></div>', attr).html(content)[0].outerHTML;
   }
 
@@ -131,8 +131,8 @@ class ChatMessage extends ChatUIMessage {
   }
 
   html(chat = null) {
-    const classes = [],
-      attr = {};
+    const classes = [];
+    const attr = {};
     if (this.continued) classes.push('msg-continue');
     return this.wrap(
       `${this.buildTime()} ${this.buildMessageTxt(chat)}`,
@@ -175,8 +175,8 @@ class ChatUserMessage extends ChatMessage {
   }
 
   html(chat = null) {
-    const classes = [],
-      attr = {};
+    const classes = [];
+    const attr = {};
 
     if (this.id) attr['data-id'] = this.id;
     if (this.user && this.user.username)
@@ -196,15 +196,13 @@ class ChatUserMessage extends ChatMessage {
     if (this.target) ctrl = ' whispered: ';
     else if (this.slashme || this.continued) ctrl = '';
 
-    const user =
-      this.buildFeatures(this.user, chat) +
-      ` <a title="${this.title}" class="user ${this.user.features.join(' ')}">${
-        this.user.username
-      }</a>`;
+    const user = `${this.buildFeatures(this.user, chat)} <a title="${
+      this.title
+    }" class="user ${this.user.features.join(' ')}">${this.user.username}</a>`;
     return this.wrap(
-      this.buildTime() +
-        ` ${user}<span class="ctrl">${ctrl}</span> ` +
-        this.buildMessageTxt(chat),
+      `${this.buildTime()} ${user}<span class="ctrl">${ctrl}</span> ${this.buildMessageTxt(
+        chat
+      )}`,
       classes,
       attr
     );
@@ -215,8 +213,7 @@ class ChatUserMessage extends ChatMessage {
       .filter((e) => chat.flairsMap.has(e))
       .map((e) => chat.flairsMap.get(e))
       .reduce(
-        (str, e) =>
-          str + `<i class="flair ${e['name']}" title="${e['label']}"></i> `,
+        (str, e) => `${str}<i class="flair ${e.name}" title="${e.label}"></i> `,
         ''
       );
     return features !== '' ? `<span class="features">${features}</span>` : '';
@@ -232,7 +229,7 @@ function ChatEmoteMessageCount(message) {
   else if (message.emotecount >= 10) stepClass = ' x10';
   else if (message.emotecount >= 5) stepClass = ' x5';
   if (!message._combo) console.error('no combo', message._combo);
-  message._combo.attr('class', 'chat-combo' + stepClass);
+  message._combo.attr('class', `chat-combo${stepClass}`);
   message._combo_count.text(`${message.emotecount}`);
   message.ui.append(message._text.detach(), message._combo.detach());
 }
@@ -278,7 +275,7 @@ class ChatEmoteMessage extends ChatMessage {
 
   completeCombo() {
     ChatEmoteMessageCount(this);
-    this._combo.attr('class', this._combo.attr('class') + ' combo-complete');
+    this._combo.attr('class', `${this._combo.attr('class')} combo-complete`);
     this._combo =
       this._combo_count =
       this._combo_x =

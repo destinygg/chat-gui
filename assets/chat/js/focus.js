@@ -27,8 +27,8 @@ class ChatUserFocus {
 
   toggleFocus(username, bool = null) {
     username = (username || '').toLowerCase();
-    const index = this.focused.indexOf(username.toLowerCase()),
-      focused = index !== -1;
+    const index = this.focused.indexOf(username.toLowerCase());
+    const focused = index !== -1;
     if (bool === null) bool = !focused;
     if (bool && !focused) this.addCssRule(username);
     else if (!bool && focused) this.removeCssRule(index);

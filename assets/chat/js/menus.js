@@ -1,13 +1,13 @@
 /* global Notification */
 
 import { fetch } from 'whatwg-fetch';
-import { Notification } from './notification';
 import $ from 'jquery';
+import { debounce } from 'throttle-debounce';
+import { Notification } from './notification';
 import ChatUser from './user';
 import ChatScrollPlugin from './scroll';
 import UserFeatures from './features';
 import EventEmitter from './emitter';
-import { debounce } from 'throttle-debounce';
 import { isKeyCode, KEYCODES } from './const';
 import { MessageBuilder } from './messages';
 
@@ -31,7 +31,8 @@ function getSettingValue(e) {
   if (e.getAttribute('type') === 'checkbox') {
     const val = $(e).is(':checked');
     return Boolean(e.hasAttribute('data-opposite') ? !val : val);
-  } else if (
+  }
+  if (
     e.getAttribute('type') === 'text' ||
     e.nodeName.toLocaleLowerCase() === 'select'
   ) {
@@ -54,8 +55,8 @@ function userComparator(a, b) {
   const u2 = this.chat.users.get(b.getAttribute('data-username').toLowerCase());
   if (!u1 || !u2) return 0;
 
-  let u1Nick = u1.nick.toLowerCase(),
-    u2Nick = u2.nick.toLowerCase();
+  const u1Nick = u1.nick.toLowerCase();
+  const u2Nick = u2.nick.toLowerCase();
   if (u1Nick < u2Nick) return -1;
   if (u1Nick > u2Nick) return 1;
   return 0;
@@ -131,7 +132,7 @@ class ChatSettingsMenu extends ChatMenu {
 
   onCustomHighlightChange(e) {
     if (e.type === 'focusout' || isKeyCode(e, KEYCODES.ENTER)) {
-      let data = $(e.target)
+      const data = $(e.target)
         .val()
         .toString()
         .split(',')
@@ -238,7 +239,7 @@ class ChatUserMenu extends ChatMenu {
       const value = this.chat.input.val().toString().trim();
       const username = $(e.target).parent().parent().data('username');
       this.chat.input
-        .val(value + (value === '' ? '' : ' ') + username + ' ')
+        .val(`${value + (value === '' ? '' : ' ') + username} `)
         .focus();
       return false;
     });
@@ -246,7 +247,7 @@ class ChatUserMenu extends ChatMenu {
       ChatMenu.closeMenus(this.chat);
       const value = this.chat.input.val().toString().trim();
       const username = $(e.target).parent().parent().data('username');
-      this.chat.input.val('/whisper ' + username + ' ' + value).focus();
+      this.chat.input.val(`/whisper ${username} ${value}`).focus();
       return false;
     });
     this.chat.source.on('JOIN', (data) => this.addAndRedraw(data.nick));
@@ -308,8 +309,7 @@ class ChatUserMenu extends ChatMenu {
       .map((e) => this.chat.flairsMap.get(e))
       .sort((a, b) => a.priority - b.priority)
       .reduce(
-        (str, e) =>
-          str + `<i class="flair ${e['name']}" title="${e['label']}"></i> `,
+        (str, e) => `${str}<i class="flair ${e.name}" title="${e.label}"></i> `,
         ''
       );
     return features !== '' ? `<span class="features">${features}</span>` : '';
@@ -370,9 +370,8 @@ class ChatUserMenu extends ChatMenu {
       return lowestIndex > flairs.length
         ? 'User'
         : this.flairSection.get(flairs[lowestIndex]);
-    } else {
-      return 'User';
     }
+    return 'User';
   }
 
   addSection(data) {
@@ -380,7 +379,7 @@ class ChatUserMenu extends ChatMenu {
       `<div class="section" data-section="${data.name}"><p class="title">${data.name}</p><div class="users"></div></div>`
     );
     this.sections.set(data.name, {
-      data: data,
+      data,
       searchcount: 0,
       container: section[0],
       title: section[0].children[0],
@@ -395,22 +394,22 @@ class ChatUserMenu extends ChatMenu {
   }
 
   addElement(username, sort = false) {
-    const user = this.chat.users.get(username.toLowerCase()),
-      label =
-        !user.username || user.username === '' ? 'Anonymous' : user.username,
-      features =
-        user.features.length === 0 ? 'nofeature' : user.features.join(' '),
-      usr = $(
-        `<a data-username="${user.username}" class="user ${features}">${label}<div class="user-actions"><i class="mention-nick"></i><i class="whisper-nick"></i></div></a>`
-      ),
-      section = this.sections.get(this.highestSection(user));
+    const user = this.chat.users.get(username.toLowerCase());
+    const label =
+      !user.username || user.username === '' ? 'Anonymous' : user.username;
+    const features =
+      user.features.length === 0 ? 'nofeature' : user.features.join(' ');
+    const usr = $(
+      `<a data-username="${user.username}" class="user ${features}">${label}<div class="user-actions"><i class="mention-nick"></i><i class="whisper-nick"></i></div></a>`
+    );
+    const section = this.sections.get(this.highestSection(user));
 
     if (sort && section.users.children.length > 0) {
       // Insert item in the correct order (instead of resorting the entire list)
       const items = section.users.children;
-      let min = 0,
-        max = items.length,
-        index = Math.floor((min + max) / 2);
+      let min = 0;
+      let max = items.length;
+      let index = Math.floor((min + max) / 2);
       while (max > min) {
         if (userComparator.apply(this, [usr[0], items[index]]) < 0) max = index;
         else min = index + 1;
@@ -425,9 +424,7 @@ class ChatUserMenu extends ChatMenu {
   }
 
   hasElement(username) {
-    return (
-      this.container.find('.user[data-username="' + username + '"]').length > 0
-    );
+    return this.container.find(`.user[data-username="${username}"]`).length > 0;
   }
 
   filter() {
@@ -487,7 +484,7 @@ class ChatEmoteMenu extends ChatMenu {
       const emotes = this.chat.emoteService.emotePrefixesForTier(tier);
       if (!emotes.length) continue;
 
-      let title = tier === 0 ? 'All Users' : `Tier ${tier} Subscribers`;
+      const title = tier === 0 ? 'All Users' : `Tier ${tier} Subscribers`;
       this.emoteMenuContent.append(this.buildEmoteMenuSection(title, emotes));
     }
 
@@ -513,9 +510,9 @@ class ChatEmoteMenu extends ChatMenu {
   }
 
   selectEmote(emote) {
-    let value = this.chat.input.val().toString().trim();
+    const value = this.chat.input.val().toString().trim();
     this.chat.input
-      .val(value + (value === '' ? '' : ' ') + emote + ' ')
+      .val(`${value + (value === '' ? '' : ' ') + emote} `)
       .focus();
   }
 }
@@ -574,8 +571,8 @@ class ChatWhisperUsers extends ChatMenu {
         [...this.chat.whispers.entries()]
           .sort((a, b) => {
             if (a[1].unread === 0) return 1;
-            else if (b[1].unread === 0) return -1;
-            else if (a[1] === b[1]) return 0;
+            if (b[1].unread === 0) return -1;
+            if (a[1] === b[1]) return 0;
           })
           .forEach((e) => this.addConversation(e[0], e[1].unread));
       }
@@ -650,7 +647,7 @@ class ChatUserInfoMenu extends ChatMenu {
 
       super.show();
 
-      //gotta return false so that the actual context menu doesn't show up
+      // gotta return false so that the actual context menu doesn't show up
       return false;
     });
 
@@ -849,7 +846,7 @@ class ChatUserInfoMenu extends ChatMenu {
   }
 
   createMessages() {
-    let displayedMessages = [];
+    const displayedMessages = [];
     if (this.messageArray.length > 0) {
       let nextMsg = this.messageArray[0].next('.msg-continue');
       while (nextMsg.length > 0) {
@@ -876,16 +873,10 @@ class ChatUserInfoMenu extends ChatMenu {
       .filter((e) => this.chat.flairsMap.has(e))
       .map((e) => this.chat.flairsMap.get(e))
       .reduce((str, e) => {
-        if (e['hidden'] !== true) {
-          return (
-            str + `<i class="flair ${e['name']}" title="${e['label']}"></i> `
-          );
-        } else {
-          return (
-            str +
-            `<div class="flair" title="${e['label']}">${e['label']}</div> `
-          );
+        if (e.hidden !== true) {
+          return `${str}<i class="flair ${e.name}" title="${e.label}"></i> `;
         }
+        return `${str}<div class="flair" title="${e.label}">${e.label}</div> `;
       }, '');
   }
 }

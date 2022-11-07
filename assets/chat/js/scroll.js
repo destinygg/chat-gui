@@ -3,7 +3,7 @@ import 'nanoscroller';
 
 const is_touch_device =
   'ontouchstart' in window || // works on most browsers
-  navigator['maxTouchPoints']; // works on IE10/11 and Surface
+  navigator.maxTouchPoints; // works on IE10/11 and Surface
 
 class ChatScrollPlugin {
   constructor(chat, e) {
@@ -14,7 +14,7 @@ class ChatScrollPlugin {
     if ($el.find('.chat-scroll-notify').length > 0) {
       $el.on('update', () =>
         $el.toggleClass('chat-unpinned', !this.isPinned())
-      ); //debounce
+      ); // debounce
       $el.on('mousedown', '.chat-scroll-notify', () => false);
       $el.on('mouseup', '.chat-scroll-notify', () => {
         this.updateAndPin(true);

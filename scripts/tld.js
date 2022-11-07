@@ -1,28 +1,28 @@
-let http = require('http');
-let fs = require('fs');
+const http = require('http');
+const fs = require('fs');
 
-let TLD_FETCH_URL = 'http://data.iana.org/TLD/tlds-alpha-by-domain.txt';
-let TLD_MIN = 271; // Only update if at least this many found (original count)
+const TLD_FETCH_URL = 'http://data.iana.org/TLD/tlds-alpha-by-domain.txt';
+const TLD_MIN = 271; // Only update if at least this many found (original count)
 
 const targetFile = 'assets/tld.json';
 
-let cb = function () {
+const cb = function () {
   console.log('Done!');
 };
 
 // Asynchronously fetch TLDs, if valid then replace
 http
-  .get(TLD_FETCH_URL, function (res) {
+  .get(TLD_FETCH_URL, (res) => {
     let data = '';
-    res.on('data', function (chunk) {
+    res.on('data', (chunk) => {
       // Join response till its complete
       data += chunk;
     });
-    res.on('end', function () {
+    res.on('end', () => {
       // When response completes parse and replace
       const list = parseTLDs(data);
       console.log(`Retrieved ${list.length} tlds!`);
-      fs.writeFile(targetFile, JSON.stringify(list), 'utf8', function (err) {
+      fs.writeFile(targetFile, JSON.stringify(list), 'utf8', (err) => {
         if (err) {
           console.error(`IO error writing to ${targetFile} skipping write.`);
         } else {
@@ -32,8 +32,8 @@ http
       });
     });
   })
-  .on('error', function (e) {
-    console.log('TLD fetch failed, using defaults: ' + e.message);
+  .on('error', (e) => {
+    console.log(`TLD fetch failed, using defaults: ${e.message}`);
     cb();
   });
 
@@ -46,7 +46,7 @@ function parseTLDs(data) {
 
   // Parse response data by line
   const arr = data.split('\n');
-  for (let idx in arr) {
+  for (const idx in arr) {
     const tld = arr[idx];
     if (
       typeof tld !== 'string' ||
@@ -63,13 +63,12 @@ function parseTLDs(data) {
   // Only return fetched list if its larger than default
   if (list.length <= TLD_MIN) return null;
 
-  list.sort(function (x, y) {
-    //Sort by size then alphabetically
+  list.sort((x, y) => {
+    // Sort by size then alphabetically
     if (x.length === y.length) {
       return x < y ? -1 : x > y ? 1 : 0;
-    } else {
-      return y.length - x.length;
     }
+    return y.length - x.length;
   });
   return list;
 }
