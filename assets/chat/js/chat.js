@@ -1,5 +1,3 @@
-/* global window, document */
-
 import { fetch } from 'whatwg-fetch';
 import $ from 'jquery';
 import { debounce } from 'throttle-debounce';
@@ -27,15 +25,15 @@ import ChatWindow from './window';
 import { ChatVote, parseQuestionAndTime } from './vote';
 import { isMuteActive, MutedTimer } from './mutedtimer';
 import EmoteService from './emotes';
+import makeSafeForRegex from './regex';
 
 const regexslashcmd = /^\/([a-z0-9]+)[\s]?/i;
 const regextime = /(\d+(?:\.\d*)?)([a-z]+)?/gi;
-const regexsafe = /[\-\[\]\/{}()*+?.\\^$|]/g;
 const nickmessageregex = /(?:(?:^|\s)@?)([a-zA-Z0-9_]{3,20})(?=$|\s|[.?!,])/g;
 const nickregex = /^[a-zA-Z0-9_]{3,20}$/;
-const nsfwnsflregex = new RegExp(`\\b(?:NSFL|NSFW)\\b`, 'i');
-const nsfwregex = new RegExp(`\\b(?:NSFW)\\b`, 'i');
-const nsflregex = new RegExp(`\\b(?:NSFL)\\b`, 'i');
+const nsfwnsflregex = /\b(?:NSFL|NSFW)\b/i;
+const nsfwregex = /\b(?:NSFW)\b/i;
+const nsflregex = /\b(?:NSFL)\b/i;
 const tagcolors = [
   'green',
   'yellow',
@@ -451,7 +449,6 @@ class Chat {
     this.control.on('V', (data) => this.cmdVOTE(data, 'VOTE'));
     this.control.on('VOTESTOP', (data) => this.cmdVOTESTOP(data));
     this.control.on('VS', (data) => this.cmdVOTESTOP(data));
-    return this;
   }
 
   setUser(user) {
@@ -484,7 +481,7 @@ class Chat {
     }
     // Upgrade if schema is out of date
     const oldversion = stored.has('schemaversion')
-      ? parseInt(stored.get('schemaversion'))
+      ? parseInt(stored.get('schemaversion'), 10)
       : -1;
     const newversion = settingsdefault.get('schemaversion');
     if (oldversion !== -1 && newversion > oldversion) {
@@ -573,7 +570,7 @@ class Chat {
 
     commandsinfo.forEach((a, k) => {
       this.autocomplete.add(`/${k}`);
-      (a.alias || []).forEach((k) => this.autocomplete.add(`/${k}`));
+      (a.alias || []).forEach((i) => this.autocomplete.add(`/${i}`));
     });
 
     this.autocomplete.bind(this);
@@ -597,7 +594,9 @@ class Chat {
 
     // Chat focus / menu close when clicking on some areas
     let downinoutput = false;
-    this.output.on('mousedown', () => (downinoutput = true));
+    this.output.on('mousedown', () => {
+      downinoutput = true;
+    });
     this.output.on('mouseup', () => {
       if (downinoutput) {
         downinoutput = false;
@@ -673,8 +672,8 @@ class Chat {
       try {
         window.top.showLoginModal();
       } catch (e) {
-        const uri = `${location.protocol}//${location.hostname}${
-          location.port ? `:${location.port}` : ''
+        const uri = `${window.location.protocol}//${window.location.hostname}${
+          window.location.port ? `:${window.location.port}` : ''
         }`;
         try {
           if (window.self === window.top) {
@@ -685,7 +684,7 @@ class Chat {
             window.location.href = `${uri}/login`;
           }
           return false;
-        } catch (ignored) {}
+        } catch (ignored) {} // eslint-disable-line no-empty
         window.location.href = `${uri}/login`;
       }
       return false;
@@ -759,7 +758,7 @@ class Chat {
   }
 
   async loadHistory() {
-    return fetch(`${this.config.api.base}/api/chat/history`)
+    fetch(`${this.config.api.base}/api/chat/history`)
       .then((res) => res.json())
       .then((json) => {
         this.setHistory(json);
@@ -769,7 +768,7 @@ class Chat {
 
   async loadWhispers() {
     if (this.authenticated) {
-      return fetch(`${this.config.api.base}/api/messages/unread`, {
+      fetch(`${this.config.api.base}/api/messages/unread`, {
         credentials: 'include',
       })
         .then((res) => res.json())
@@ -820,7 +819,7 @@ class Chat {
           credentials: 'include',
           method: 'POST',
           headers: { 'X-CSRF-Guard': 'YEE' },
-        }).catch(console.warn);
+        }).catch();
       } else {
         ChatStore.write('chat.settings', this.settings);
       }
@@ -845,9 +844,7 @@ class Chat {
     DATE_FORMATS.TIME = this.settings.get('timestampformat');
 
     // Ignore Regex
-    const ignores = Array.from(this.ignoring.values()).map(
-      Chat.makeSafeForRegex
-    );
+    const ignores = Array.from(this.ignoring.values()).map(makeSafeForRegex);
     this.ignoreregex =
       ignores.length > 0
         ? new RegExp(`\\b(?:${ignores.join('|')})\\b`, 'i')
@@ -876,9 +873,9 @@ class Chat {
       );
 
     // Update maxlines
-    [...this.windows.values()].forEach(
-      (w) => (w.maxlines = this.settings.get('maxlines'))
-    );
+    [...this.windows.values()].forEach((w) => {
+      w.maxlines = this.settings.get('maxlines');
+    });
 
     // Font scaling
     // TODO document.body :(
@@ -896,7 +893,7 @@ class Chat {
       user = new ChatUser(data);
       this.users.set(normalized, user);
     } else if (
-      data.hasOwnProperty('features') &&
+      Object.hasOwn(data, 'features') &&
       !Chat.isArraysEqual(data.features, user.features)
     ) {
       user.features = data.features;
@@ -912,6 +909,7 @@ class Chat {
     )
       return;
 
+    // eslint-disable-next-line no-param-reassign
     if (win === null) win = this.mainwindow;
     win.lock();
 
@@ -990,7 +988,6 @@ class Chat {
     }
 
     win.unlock();
-    return message;
   }
 
   resolveMessage(nick, str) {
@@ -1103,7 +1100,7 @@ class Chat {
     const c = this.mainwindow.getlines(
       `.msg-chat[data-username="${nick.toLowerCase()}"]`
     );
-    switch (parseInt(this.settings.get('showremoved') || 1)) {
+    switch (parseInt(this.settings.get('showremoved') || 1, 10)) {
       case 0: // remove
         c.remove();
         break;
@@ -1111,6 +1108,7 @@ class Chat {
         c.addClass('censored');
         break;
       case 2: // do nothing
+      default:
         break;
     }
     this.mainwindow.unlock();
@@ -1134,12 +1132,12 @@ class Chat {
   }
 
   ignore(nick, ignore = true) {
-    nick = nick.toLowerCase();
-    const exists = this.ignoring.has(nick);
+    const normalizedNick = nick.toLowerCase();
+    const exists = this.ignoring.has(normalizedNick);
     if (ignore && !exists) {
-      this.ignoring.add(nick);
+      this.ignoring.add(normalizedNick);
     } else if (!ignore && exists) {
-      this.ignoring.delete(nick);
+      this.ignoring.delete(normalizedNick);
     }
     this.settings.set('ignorenicks', [...this.ignoring]);
     this.applySettings();
@@ -1174,7 +1172,7 @@ class Chat {
     }
 
     const maxHeightPixels = this.input.css('maxHeight');
-    const maxHeight = parseInt(maxHeightPixels.slice(0, -2));
+    const maxHeight = parseInt(maxHeightPixels.slice(0, -2), 10);
     const pinned = this.getActiveWindow().scrollplugin.isPinned();
 
     this.input.css('height', '');
@@ -1198,8 +1196,8 @@ class Chat {
     if (typeof data === 'object') {
       let users = [];
       const now = Date.now();
-      if (data.hasOwnProperty('nick')) users.push(this.addUser(data));
-      if (data.hasOwnProperty('users'))
+      if (Object.hasOwn(data, 'nick')) users.push(this.addUser(data));
+      if (Object.hasOwn(data, 'users'))
         users = users.concat(
           Array.from(data.users).map((d) => this.addUser(d))
         );
@@ -1423,7 +1421,7 @@ class Chat {
     let message;
 
     switch (desc) {
-      case 'banned':
+      case 'banned': {
         let messageText =
           'You have been banned! Check your profile for more information. <a target="_blank" class="externallink" href="/subscribe" rel="nofollow">Subscribing</a> or <a target="_blank" class="externallink" href="/donate" rel="nofollow">donating</a> removes non-permanent bans.';
 
@@ -1435,6 +1433,7 @@ class Chat {
         // Use an unformatted `ChatMessage` to preserve the message's embedded HTML.
         message = new ChatMessage(messageText, null, MessageTypes.ERROR, true);
         break;
+      }
       case 'muted':
         this.mutedtimer.setTimer(data.muteTimeLeft);
         this.mutedtimer.startTimer();
@@ -1450,7 +1449,7 @@ class Chat {
     message.into(this, this.getActiveWindow());
   }
 
-  onSOCKETERROR(e) {
+  onSOCKETERROR(/* e */) {
     // There is no information on the Error event of the socket.
     // We rely on the socket close event to tell us more about what happened.
     // MessageBuilder.error(errorstrings.get('socketerror')).into(this, this.getActiveWindow())
@@ -1498,7 +1497,7 @@ class Chat {
 
       const conv = this.whispers.get(normalized);
       const user = this.users.get(normalized) || new ChatUser(data.nick);
-      const messageid = data.hasOwnProperty('messageid')
+      const messageid = Object.hasOwn(data, 'messageid')
         ? data.messageid
         : null;
 
@@ -1529,9 +1528,9 @@ class Chat {
           credentials: 'include',
           method: 'POST',
           headers: { 'X-CSRF-Guard': 'YEE' },
-        }).catch(console.warn);
+        }).catch();
       } else {
-        conv.unread++;
+        conv.unread += 1;
       }
       this.replyusername = user.username;
       this.menus.get('whisper-users').redraw();
@@ -1685,7 +1684,7 @@ class Chat {
 
   cmdHINT(parts) {
     const arr = [...hintstrings];
-    const i = parts && parts[0] ? parseInt(parts[0]) - 1 : -1;
+    const i = parts && parts[0] ? parseInt(parts[0], 10) - 1 : -1;
     if (i > 0 && i < hintstrings.size) {
       MessageBuilder.info(arr[i][1]).into(this);
     } else {
@@ -1695,7 +1694,7 @@ class Chat {
       ) {
         this.lasthintindex = 0;
       } else {
-        this.lasthintindex++;
+        this.lasthintindex += 1;
       }
       MessageBuilder.info(arr[this.lasthintindex][1]).into(this);
     }
@@ -1763,11 +1762,11 @@ class Chat {
         validUsernames.forEach((username) => {
           this.ignore(username, false);
         });
-        const have_or_has = parts.length === 1 ? 'has' : 'have';
+        const haveOrHas = parts.length === 1 ? 'has' : 'have';
         MessageBuilder.status(
           `${Array.from(validUsernames.values()).join(
             ', '
-          )} ${have_or_has} been removed from your ignore list`
+          )} ${haveOrHas} been removed from your ignore list`
         ).into(this);
       }
     } else {
@@ -1889,8 +1888,8 @@ class Chat {
       case 'UNHIGHLIGHT':
         if (i !== -1) highlights.splice(i, 1);
         break;
-      default:
       case 'HIGHLIGHT':
+      default:
         if (i === -1) highlights.push(nick);
         break;
     }
@@ -1954,7 +1953,7 @@ class Chat {
           const note = this.taggednotes.has(nick)
             ? this.taggednotes.get(nick)
             : '';
-          tags += `    ${nick} (${color}) ${note}` + '\n';
+          tags += `    ${nick} (${color}) ${note}\n`;
         });
         MessageBuilder.info(`${tags}\n`).into(this);
       } else {
@@ -2023,7 +2022,7 @@ class Chat {
           const note = this.taggednotes.has(nick)
             ? this.taggednotes.get(nick)
             : '';
-          tags += `    ${nick} (${color}) ${note}` + '\n';
+          tags += `    ${nick} (${color}) ${note}\n`;
         });
         MessageBuilder.info(`${tags}\n`).into(this);
       } else {
@@ -2058,7 +2057,7 @@ class Chat {
     const { location } = window.top || window.parent || window;
     const noEmbedUrl = location.href.split('#')[0];
     const urlCheck =
-      /^((http[s]?|ftp):\/)?\/?([^:\/\s]+)((\/\w+)*\/)([\w\-\.]+[^#?\s]+)(.*)?(#[\w\-]+)?$/gm;
+      /^((http[s]?|ftp):\/)?\/?([^:/\s]+)((\/\w+)*\/)([\w-.]+[^#?\s]+)(.*)?(#[\w-]+)?$/gm;
     if (!parts[0]) {
       MessageBuilder.error(
         'No argument provided - /embed <link> OR /e <link>'
@@ -2092,10 +2091,11 @@ class Chat {
             location.href = `${noEmbedUrl}#twitch-clip/${match[6]}`;
             break;
           case 'www.youtube.com':
-          case 'youtube.com':
+          case 'youtube.com': {
             const params = new URLSearchParams(match[7]);
             location.href = `${noEmbedUrl}#youtube/${params.get('v')}`;
             break;
+          }
           case 'www.youtu.be':
           case 'youtu.be':
             location.href = `${noEmbedUrl}#youtube/${match[6]}`;
@@ -2128,7 +2128,7 @@ class Chat {
     const { location } = window.top || window.parent || window;
     const EmbedSplit = location.href.split('#');
     const urlCheck =
-      /^((http[s]?|ftp):\/)?\/?([^:\/\s]+)((\/\w+)*\/)([\w\-\.]+[^#?\s]+)(.*)?(#[\w\-]+)?$/gm;
+      /^((http[s]?|ftp):\/)?\/?([^:/\s]+)((\/\w+)*\/)([\w-.]+[^#?\s]+)(.*)?(#[\w-]+)?$/gm;
     if (!parts[0] && EmbedSplit[1]) {
       this.source.send('MSG', { data: `#${EmbedSplit[1]}` });
     } else if (!parts[0] && !EmbedSplit[1]) {
@@ -2166,11 +2166,12 @@ class Chat {
             this.source.send('MSG', { data: `${msg} ${moreMsg}` });
             break;
           case 'www.youtube.com':
-          case 'youtube.com':
+          case 'youtube.com': {
             const params = new URLSearchParams(match[7]);
             msg = `#youtube/${params.get('v')}`;
             this.source.send('MSG', { data: `${msg} ${moreMsg}` });
             break;
+          }
           case 'www.youtu.be':
           case 'youtu.be':
             msg = `#youtube/${match[6]}`;
@@ -2327,7 +2328,7 @@ class Chat {
       return;
     }
     this.busystalk = true;
-    const limit = parts[1] ? parseInt(parts[1]) : 3;
+    const limit = parts[1] ? parseInt(parts[1], 10) : 3;
     MessageBuilder.info(`Getting messages for ${[parts[0]]} ...`).into(this);
 
     fetch(
@@ -2399,7 +2400,7 @@ class Chat {
       return;
     }
     this.busymentions = true;
-    const limit = parts[1] ? parseInt(parts[1]) : 3;
+    const limit = parts[1] ? parseInt(parts[1], 10) : 3;
     MessageBuilder.info(`Getting mentions for ${[parts[0]]} ...`).into(this);
     fetch(
       `${this.config.api.base}/api/chat/mentions?username=${encodeURIComponent(
@@ -2444,8 +2445,9 @@ class Chat {
     const conv = this.whispers.get(normalized);
     if (conv) {
       ChatMenu.closeMenus(this);
-      this.windows.has(normalized) ||
+      if (!this.windows.has(normalized)) {
         this.createConversation(conv, nick, normalized);
+      }
       this.windowToFront(normalized);
       this.menus.get('whisper-users').redraw();
       this.input.focus();
@@ -2476,8 +2478,6 @@ class Chat {
               const date = moment(data[0].timestamp).format(DATE_FORMATS.FULL);
               MessageBuilder.info(`Last message ${date}`).into(this, win);
               data.reverse().forEach((e) => {
-                const user =
-                  this.users.get(e.from.toLowerCase()) || new ChatUser(e.from);
                 MessageBuilder.historical(e.message, user, e.timestamp).into(
                   this,
                   win
@@ -2504,7 +2504,9 @@ class Chat {
       conv.unread = 0;
       conv.open = true;
     });
-    win.on('hide', () => (conv.open = false));
+    win.on('hide', () => {
+      conv.open = false;
+    });
   }
 
   static removeSlashCmdFromText(msg) {
@@ -2512,20 +2514,13 @@ class Chat {
   }
 
   static extractNicks(text) {
-    let match;
-    const nicks = new Set();
-    while ((match = nickmessageregex.exec(text))) {
-      nicks.add(match[1]);
-    }
-    return [...nicks];
+    const uniqueNicks = new Set(text.match(nickmessageregex));
+    return [...uniqueNicks];
   }
 
   static removeClasses(search) {
-    return function (i, c) {
-      return (
-        c.match(new RegExp(`\\b${search}(?:[A-z-]+)?\\b`, 'g')) || []
-      ).join(' ');
-    };
+    return (i, c) =>
+      (c.match(new RegExp(`\\b${search}(?:[A-z-]+)?\\b`, 'g')) || []).join(' ');
   }
 
   static isArraysEqual(a, b) {
@@ -2544,10 +2539,6 @@ class Chat {
       });
       if (timeout) setTimeout(() => n.close(), 8000);
     }
-  }
-
-  static makeSafeForRegex(str) {
-    return str.trim().replace(regexsafe, '\\$&');
   }
 
   static parseTimeInterval(str) {
@@ -2576,8 +2567,9 @@ class Chat {
       days: 86400000000000,
     };
     str.replace(regextime, ($0, number, unit) => {
-      number *= unit ? units[unit.toLowerCase()] || units.s : units.s;
-      nanoseconds += +number;
+      const addNs =
+        number * (unit ? units[unit.toLowerCase()] || units.s : units.s);
+      nanoseconds += addNs;
     });
     return nanoseconds;
   }
@@ -2592,10 +2584,10 @@ class Chat {
     return link;
   }
 
-  static reqParam(name, url) {
-    name = name.replace(/[\[\]]/g, '\\$&');
-    url = location || window.location.href || null;
-    const regex = new RegExp(`[?&]${name}(=([^&#]*)|&|#|$)`);
+  static reqParam(name) {
+    const sanitizedName = name.replace(/[[\]]/g, '\\$&');
+    const url = window.location || window.location.href || null;
+    const regex = new RegExp(`[?&]${sanitizedName}(=([^&#]*)|&|#|$)`);
     const results = regex.exec(url);
     if (!results || !results[2]) return null;
     return decodeURIComponent(results[2].replace(/\+/g, ' '));

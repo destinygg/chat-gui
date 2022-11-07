@@ -1,5 +1,3 @@
-/* global Math */
-
 import { KEYCODES, isKeyCode } from './const';
 import ChatStore from './store';
 

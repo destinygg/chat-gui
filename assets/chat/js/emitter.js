@@ -4,7 +4,10 @@ class EventEmitter {
   }
 
   on(name, fn) {
-    this.listeners.has(name) || this.listeners.set(name, []);
+    if (!this.listeners.has(name)) {
+      this.listeners.set(name, []);
+    }
+
     this.listeners.get(name).push(fn);
     return this;
   }

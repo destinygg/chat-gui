@@ -3,7 +3,7 @@ import moment from 'moment';
 function isMuteActive(mute) {
   // If either field is `undefined`, we don't have enough information to
   // determine if the mute is expired.
-  if (mute.timestamp == undefined || mute.duration == undefined) {
+  if (mute.timestamp === undefined || mute.duration === undefined) {
     return null;
   }
 

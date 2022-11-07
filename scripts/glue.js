@@ -1,10 +1,11 @@
+/* eslint-disable no-console, import/no-extraneous-dependencies */
 const fs = require('fs');
 const path = require('path');
 const Spritesmith = require('spritesmith');
 
 const NEWLINE = '\r\n';
 
-const glueImages = function (dir, name, cb) {
+function glueImages(dir, name, cb) {
   const out = `${dir + name}.png`;
   fs.readdir(`${dir + name}/`, (err, files) => {
     if (err) throw err;
@@ -15,14 +16,14 @@ const glueImages = function (dir, name, cb) {
         algorithm: 'binary-tree',
         padding: 2,
       },
-      (err, result) => {
-        if (err) throw err;
+      (e, result) => {
+        if (e) throw e;
         fs.writeFileSync(out, result.image);
         if (cb) cb(dir, name, result.coordinates);
       }
     );
   });
-};
+}
 
 glueImages('./assets/icons/', 'icons', (dir, name, coordinates) => {
   const names = Object.keys(coordinates)
@@ -38,11 +39,11 @@ glueImages('./assets/icons/', 'icons', (dir, name, coordinates) => {
   scss += NEWLINE;
   scss += Object.keys(coordinates)
     .map((f) => {
-      const name = path.basename(f, path.extname(f));
+      const fileName = path.basename(f, path.extname(f));
       const d = coordinates[f];
       return (
         `` +
-        `.icon-${name} {${NEWLINE}    background-position: -${d.x}px -${d.y}px;${NEWLINE}    width: ${d.width}px;${NEWLINE}    height: ${d.height}px;${NEWLINE}}`
+        `.icon-${fileName} {${NEWLINE}    background-position: -${d.x}px -${d.y}px;${NEWLINE}    width: ${d.width}px;${NEWLINE}    height: ${d.height}px;${NEWLINE}}`
       );
     })
     .join(NEWLINE);

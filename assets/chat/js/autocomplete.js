@@ -1,6 +1,6 @@
 import $ from 'jquery';
-import Chat from './chat';
 import { KEYCODES, getKeyCode } from './const';
+import makeSafeForRegex from './regex';
 
 let suggestTimeoutId;
 const minWordLength = 1;
@@ -10,11 +10,6 @@ function getBucketId(id) {
   return (id.match(/[\S]/)[0] || '_').toLowerCase();
 }
 
-function promoteIfSelected(ac) {
-  if (ac.selected >= 0 && ac.results[ac.selected]) {
-    ac.results[ac.selected].weight = Date.now();
-  }
-}
 function sortResults(a, b) {
   if (!a || !b) return 0;
 
@@ -25,12 +20,12 @@ function sortResults(a, b) {
   if (a.weight !== b.weight) return a.weight > b.weight ? -1 : 1;
 
   // order lexically fourth
-  a = a.data.toLowerCase();
-  b = b.data.toLowerCase();
+  const lowerA = a.data.toLowerCase();
+  const lowerB = b.data.toLowerCase();
 
-  if (a === b) return 0;
+  if (lowerA === lowerB) return 0;
 
-  return a > b ? 1 : -1;
+  return lowerA > lowerB ? 1 : -1;
 }
 function buildSearchCriteria(str, offset) {
   let pre = str.substring(0, offset);
@@ -45,7 +40,7 @@ function buildSearchCriteria(str, offset) {
 
   // Ignore the first char as part of the search and flag as a user only search
   if (pre.lastIndexOf('@') === 0) {
-    startCaret++;
+    startCaret += 1;
     pre = pre.substring(1);
     useronly = true;
   }
@@ -58,13 +53,6 @@ function buildSearchCriteria(str, offset) {
     useronly,
     orig: str,
   };
-}
-function buildHelpers(ac) {
-  if (ac.results.length > 0) {
-    ac.container[0].innerHTML = ac.results
-      .map((res, k) => `<li data-index="${k}">${res.data}</li>`)
-      .join('');
-  }
 }
 function timeoutHelpers(ac) {
   if (suggestTimeoutId) clearTimeout(suggestTimeoutId);
@@ -97,7 +85,7 @@ class ChatAutoComplete {
     /** @member jQuery */
     this.ui = $(`<div id="chat-auto-complete"><ul></ul></div>`);
     this.ui.on('click', 'li', (e) =>
-      this.select(parseInt(e.currentTarget.getAttribute('data-index')))
+      this.select(parseInt(e.currentTarget.getAttribute('data-index'), 10))
     );
     this.container = $(this.ui[0].firstElementChild);
     this.buckets = new Map();
@@ -137,10 +125,10 @@ class ChatAutoComplete {
       const keycode = getKeyCode(e);
       const char = String.fromCharCode(keycode) || '';
       if (keycode === KEYCODES.ENTER) {
-        promoteIfSelected(this);
+        this.promoteIfSelected();
         this.reset();
       } else if (char.length > 0) {
-        promoteIfSelected(this);
+        this.promoteIfSelected();
         const str = this.input.val().toString();
         const offset = this.input[0].selectionStart + 1;
         const pre = str.substring(0, offset);
@@ -179,8 +167,10 @@ class ChatAutoComplete {
     });
     // Mouse down, if there is no text selection search the word from where the caret is
     this.input.on('mouseup', () => {
-      if (this.input[0].selectionStart !== this.input[0].selectionEnd)
-        return this.reset();
+      if (this.input[0].selectionStart !== this.input[0].selectionEnd) {
+        this.reset();
+        return;
+      }
       const needle = this.input.val().toString();
       const offset = this.input[0].selectionStart;
       const criteria = buildSearchCriteria(needle, offset);
@@ -194,7 +184,7 @@ class ChatAutoComplete {
     this.criteria = criteria;
     if (criteria.word.length >= minWordLength) {
       const bucket = this.buckets.get(getBucketId(criteria.word)) || new Map();
-      const regex = new RegExp(`^${Chat.makeSafeForRegex(criteria.pre)}`, 'i');
+      const regex = new RegExp(`^${makeSafeForRegex(criteria.pre)}`, 'i');
       this.results = [...bucket.values()]
         // filter exact matches
         // .filter(a => a.data !== criteria.word)
@@ -207,7 +197,7 @@ class ChatAutoComplete {
         .sort(sortResults)
         .slice(0, maxResults);
     }
-    buildHelpers(this);
+    this.buildHelpers();
     updateHelpers(this);
     timeoutHelpers(this);
   }
@@ -264,6 +254,20 @@ class ChatAutoComplete {
     // Update selection gui
     selectHelper(this);
     updateHelpers(this);
+  }
+
+  promoteIfSelected() {
+    if (this.selected >= 0 && this.results[this.selected]) {
+      this.results[this.selected].weight = Date.now();
+    }
+  }
+
+  buildHelpers() {
+    if (this.results.length > 0) {
+      this.container[0].innerHTML = this.results
+        .map((res, k) => `<li data-index="${k}">${res.data}</li>`)
+        .join('');
+    }
   }
 }
 

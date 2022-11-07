@@ -1,59 +1,11 @@
 import $ from 'jquery';
-import UserFeatures from './features';
 
 /** @var Array tlds */
-const tlds = require('../../tld.json');
+const tlds = require('../../../tld.json');
 
 const gtld = `(?:${[...tlds].join('|')})`;
-const el = document.createElement('div');
 
-class HtmlTextFormatter {
-  format(chat, str /* , message=null */) {
-    el.textContent = str;
-    return el.innerHTML;
-  }
-}
-
-class EmoteFormatter {
-  format(chat, str, message = null) {
-    const regex =
-      !message || !message.user
-        ? chat.emoteService.systemEmoteRegex
-        : chat.emoteService.emoteRegexForUser(message.user);
-
-    if (regex != null) {
-      return str.replace(regex, '$1<div title="$2" class="emote $2">$2 </div>');
-    }
-    return str;
-  }
-}
-
-class GreenTextFormatter {
-  format(chat, str, message = null) {
-    if (message.user && str.indexOf('&gt;') === 0) {
-      str = `<span class="greentext">${str}</span>`;
-      ``;
-    }
-    return str;
-  }
-}
-
-class MentionedUserFormatter {
-  format(chat, str, message = null) {
-    if (message && message.mentioned && message.mentioned.length > 0) {
-      return str.replace(
-        new RegExp(
-          `((?:^|\\s)@?)(${message.mentioned.join('|')})(?=$|\\s|[\.\?!,])`,
-          'igm'
-        ),
-        `$1<span class="chat-user">$2</span>`
-      );
-    }
-    return str;
-  }
-}
-
-class UrlFormatter {
+export default class UrlFormatter {
   constructor() {
     const unicodeShortcuts = {
       'p{L}':
@@ -88,7 +40,7 @@ class UrlFormatter {
     const strict = `\\b${scheme}${pathCont}`;
     const relaxed = `${strict}|${webURL}`;
     this.linkregex = new RegExp(relaxed, 'gi');
-    this._elem = $('<div></div>');
+    this.elem = $('<div></div>');
   }
 
   // stolen from angular.js
@@ -96,18 +48,18 @@ class UrlFormatter {
   encodeUrl(value) {
     return value
       .replace(/&/g, '&amp;')
-      .replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, (value) => {
-        const hi = value.charCodeAt(0);
-        const low = value.charCodeAt(1);
+      .replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, (v) => {
+        const hi = v.charCodeAt(0);
+        const low = v.charCodeAt(1);
         return `&#${(hi - 0xd800) * 0x400 + (low - 0xdc00) + 0x10000};`;
       })
-      .replace(/([^\#-~| |!])/g, (value) => `&#${value.charCodeAt(0)};`)
+      .replace(/([^#-~| |!])/g, (v) => `&#${v.charCodeAt(0)};`)
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;');
   }
 
-  format(chat, str, message = null) {
-    if (!str) return;
+  format(chat, str) {
+    if (!str) return undefined;
     const self = this;
     let extraclass = '';
 
@@ -115,119 +67,15 @@ class UrlFormatter {
     else if (/\b(?:NSFW|SPOILERS?)\b/i.test(str)) extraclass = 'nsfw-link';
 
     return str.replace(self.linkregex, (url, scheme) => {
-      scheme = scheme ? '' : 'http://';
-      const decodedUrl = self._elem.html(url).text();
+      const decodedUrl = self.elem.html(url).text();
       const m = decodedUrl.match(self.linkregex);
       if (m) {
-        url = self.encodeUrl(m[0]);
+        const encodedUrl = self.encodeUrl(m[0]);
         const extra = self.encodeUrl(decodedUrl.substring(m[0].length));
-        const href = scheme + url;
-        return `<a target="_blank" class="externallink ${extraclass}" href="${href}" rel="nofollow">${url}</a>${extra}`;
+        const href = `${scheme ? '' : 'http://'}${encodedUrl}`;
+        return `<a target="_blank" class="externallink ${extraclass}" href="${href}" rel="nofollow">${encodedUrl}</a>${extra}`;
       }
       return url;
     });
   }
 }
-
-class EmbedUrlFormatter {
-  constructor() {
-    this.bigscreenPath = '/bigscreen';
-    this.bigscreenregex =
-      /(^|\s)((#twitch(-vod|-clip)?|#youtube|#vimeo)\/[\w\-]{3,64}|#facebook\/\d{10,20}\/videos\/\d{10,20})\b/g;
-
-    try {
-      const { location } = window.top || window.parent || window;
-      this.currentPath = location.pathname;
-      this.url = `${location.protocol}//${location.host}${this.bigscreenPath}${
-        location.search ? location.search : ''
-      }`.replace(/\/$/, '');
-    } catch (e) {
-      console.error(e);
-    }
-  }
-
-  format(chat, str /* , message=null */) {
-    // Open embed links in a new tab when in embedded/popout chat.
-    const target = this.currentPath === this.bigscreenPath ? '_top' : '_blank';
-    let extraclass = '';
-
-    if (/\b(?:NSFL)\b/i.test(str)) extraclass = 'nsfl-link';
-    else if (/\b(?:NSFW|SPOILERS?)\b/i.test(str)) extraclass = 'nsfw-link';
-
-    return str.replace(
-      this.bigscreenregex,
-      `$1<a class="externallink bookmarklink ${extraclass}" href="${this.url}$2" target="${target}">$2</a>`
-    );
-  }
-}
-
-class BadWordsCensorshipFormatter {
-  constructor() {
-    this.badWordsRegex =
-      /(fuck|shit|cunt|whore|bitch|faggot|fag|nigger|nigga|gusano|cracker|rape)/gi;
-  }
-
-  format(chat, str /* , message=null */) {
-    if (chat.settings.get('censorbadwords')) {
-      str = str.replace(this.badWordsRegex, (match) =>
-        '*'.repeat(match.length)
-      );
-    }
-
-    return str;
-  }
-}
-
-class AmazonAssociatesTagInjector {
-  constructor() {
-    this.amazonLinkRegex =
-      /\bhttps:\/\/www\.amazon\.(com|ca|co\.uk|de)[-a-zA-Z0-9()@:%_\+.~#?&//=]*\b/gi;
-  }
-
-  format(chat, str) {
-    if (!chat.config.amazonTags) {
-      return str;
-    }
-
-    const injectedStr = str.replace(this.amazonLinkRegex, (amazonLink) => {
-      try {
-        const parsedAmazonLink = new URL(amazonLink);
-
-        const tag = chat.config.amazonTags[parsedAmazonLink.host];
-        if (!tag) {
-          return amazonLink;
-        }
-
-        parsedAmazonLink.searchParams.set('tag', tag);
-        return parsedAmazonLink.toString();
-      } catch (_) {
-        return amazonLink;
-      }
-    });
-
-    return injectedStr;
-  }
-}
-
-class SuspostFormatter {
-  format(chat, str, message = null) {
-    const u = message?.user;
-    if ((u?.isPrivileged() || u?.isSubscriber()) && str.indexOf('ඞ') === 0) {
-      str = `<span class="sus">${str}</span>`;
-    }
-
-    return str;
-  }
-}
-
-export {
-  EmoteFormatter,
-  GreenTextFormatter,
-  HtmlTextFormatter,
-  MentionedUserFormatter,
-  UrlFormatter,
-  EmbedUrlFormatter,
-  BadWordsCensorshipFormatter,
-  AmazonAssociatesTagInjector,
-  SuspostFormatter,
-};

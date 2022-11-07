@@ -74,7 +74,7 @@ class ChatWindow extends EventEmitter {
     message.afterRender(chat);
     this.lastmessage = message;
     this.lines.append(message.ui);
-    this.linecount++;
+    this.linecount += 1;
     this.cleanup();
   }
 
@@ -93,14 +93,14 @@ class ChatWindow extends EventEmitter {
   }
 
   lock() {
-    this.locks++;
+    this.locks += 1;
     if (this.locks === 1) {
       this.waspinned = this.scrollplugin.isPinned();
     }
   }
 
   unlock() {
-    this.locks--;
+    this.locks -= 1;
     if (this.locks === 0) {
       this.scrollplugin.updateAndPin(this.waspinned);
     }

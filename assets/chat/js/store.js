@@ -1,5 +1,3 @@
-/* global window */
-
 const localStorage = window.localStorage || {
   setItem: () => {},
   getItem: () => {},
@@ -13,9 +11,7 @@ class ChatStore {
       str = JSON.stringify(
         obj instanceof Map || obj instanceof Set ? [...obj] : obj
       );
-    } catch (e) {
-      console.error(e);
-    }
+    } catch {} // eslint-disable-line no-empty
     localStorage.setItem(name, str);
   }
 
@@ -23,18 +19,14 @@ class ChatStore {
     let data = null;
     try {
       data = JSON.parse(localStorage.getItem(name));
-    } catch (e) {
-      console.error(e);
-    }
+    } catch {} // eslint-disable-line no-empty
     return data;
   }
 
   static remove(name) {
     try {
       localStorage.removeItem(name);
-    } catch (e) {
-      console.error(e);
-    }
+    } catch {} // eslint-disable-line no-empty
   }
 }
 

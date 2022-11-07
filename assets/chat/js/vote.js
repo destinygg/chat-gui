@@ -16,17 +16,31 @@ const PollType = {
   Weighted: 1,
 };
 
+function parseQuestion(msg) {
+  if (msg.indexOf('?') === -1) {
+    throw new Error('Must contain a ?');
+  }
+  const parts = msg.split('?');
+  const question = `${parts[0]}?`;
+  if (parts[1].trim() !== '') {
+    const options = parts[1].split(VOTE_CONJUNCTION).map((a) => a.trim());
+    if (options.length < 2 && question.match(VOTE_INTERROGATIVE)) {
+      throw new Error('question needs at least 2 available answers');
+    }
+    return { question, options };
+  }
+  return { question, options: ['Yes', 'No'] };
+}
 function parseQuestionAndTime(rawQuestion) {
   let time;
   const match = rawQuestion.match(VOTE_TIME);
   if (match && match[0]) {
-    rawQuestion = rawQuestion.replace(VOTE_TIME, '');
     switch (match[0].replace(/[0-9]+/, '').toLowerCase()) {
       case 's':
-        time = parseInt(match[0]) * 1000;
+        time = parseInt(match[0], 10) * 1000;
         break;
       case 'm':
-        time = parseInt(match[0]) * 60 * 1000;
+        time = parseInt(match[0], 10) * 60 * 1000;
         break;
       default:
         time = VOTE_DEFAULT_TIME;
@@ -35,24 +49,9 @@ function parseQuestionAndTime(rawQuestion) {
   } else {
     time = VOTE_DEFAULT_TIME;
   }
-  const question = parseQuestion(rawQuestion.trim());
+  const question = parseQuestion(rawQuestion.replace(VOTE_TIME, '').trim());
   question.time = Math.max(VOTE_MIN_TIME, Math.min(time, VOTE_MAX_TIME));
   return question;
-}
-function parseQuestion(msg) {
-  if (msg.indexOf('?') === -1) {
-    throw 'Must contain a ?';
-  }
-  const parts = msg.split('?');
-  const question = `${parts[0]}?`;
-  if (parts[1].trim() !== '') {
-    const options = parts[1].split(VOTE_CONJUNCTION).map((a) => a.trim());
-    if (options.length < 2 && question.match(VOTE_INTERROGATIVE)) {
-      throw 'question needs at least 2 available answers';
-    }
-    return { question, options };
-  }
-  return { question, options: ['Yes', 'No'] };
 }
 
 class ChatVote {
@@ -121,7 +120,7 @@ class ChatVote {
 
   isMsgVoteCastFmt(txt) {
     if (txt.length === 1 && txt.match(/[0-9]/i)) {
-      const int = parseInt(txt);
+      const int = parseInt(txt, 10);
       return int > 0 && int <= this.vote.question.options.length;
     }
     return false;
@@ -147,8 +146,6 @@ class ChatVote {
 
   votesForUser(user) {
     switch (this.vote.type) {
-      case PollType.Normal:
-        return 1;
       case PollType.Weighted:
         if (user.hasFeature(UserFeatures.SUB_TIER_4)) {
           return 16;
@@ -162,6 +159,10 @@ class ChatVote {
         if (user.hasFeature(UserFeatures.SUB_TIER_1)) {
           return 2;
         }
+
+        return 1;
+      case PollType.Normal:
+      default:
         return 1;
     }
   }
@@ -210,7 +211,6 @@ class ChatVote {
       this.timerEndVote = setTimeout(() => this.endVote(), this.vote.time);
       return true;
     } catch (e) {
-      console.error(e);
       this.voting = false;
       return false;
     }
@@ -294,11 +294,12 @@ class ChatVote {
         `<label class="vote-close" title="Close"></label>` +
         `</div>` +
         `<div class="opt-options">${question.options.reduce((a, v, i) => {
-          a += `<div class="opt" title="Vote">`;
-          a += `<div class="opt-info"><strong>${i + 1}</strong></div>`;
-          a += `<div class="opt-bar"><div class="opt-bar-inner" style="width: 0;"><span class="opt-bar-value">0</span></div></div>`;
-          a += `</div>`;
-          return a;
+          const newOption =
+            `<div class="opt" title="Vote">` +
+            `<div class="opt-info"><strong>${i + 1}</strong></div>` +
+            `<div class="opt-bar"><div class="opt-bar-inner" style="width: 0;"><span class="opt-bar-value">0</span></div></div>` +
+            `</div>`;
+          return a + newOption;
         }, '')}</div>` +
         `<label class="vote-label"></label>` +
         `</div>`
@@ -307,12 +308,13 @@ class ChatVote {
 
   voteStartMessage() {
     switch (this.vote.type) {
-      case PollType.Normal:
-        return `A vote has been started. Type ${this.vote.totals
-          .map((a, i) => i + 1)
-          .join(' or ')} in chat to participate.`;
       case PollType.Weighted:
         return `A sub-weighted vote has been started. <strong>The value of your vote depends on your subscription tier.</strong> Type ${this.vote.totals
+          .map((a, i) => i + 1)
+          .join(' or ')} in chat to participate.`;
+      case PollType.Normal:
+      default:
+        return `A vote has been started. Type ${this.vote.totals
           .map((a, i) => i + 1)
           .join(' or ')} in chat to participate.`;
     }

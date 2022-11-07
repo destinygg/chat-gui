@@ -25,16 +25,6 @@ const chat = new Chat({
 const html = $('body,html');
 
 switch ((Chat.reqParam('t') || 'embed').toUpperCase()) {
-  case 'EMBED':
-    chat
-      .withGui(embedHtml)
-      .then(() => chat.loadUserAndSettings())
-      .then(() => chat.loadEmotesAndFlairs())
-      .then(() => chat.loadHistory())
-      .then(() => chat.loadWhispers())
-      .then(() => chat.connect());
-    break;
-
   case 'STREAM':
     html.css('background', 'transparent');
     chat
@@ -59,6 +49,17 @@ switch ((Chat.reqParam('t') || 'embed').toUpperCase()) {
                 </div>
             `
       )
+      .then(() => chat.connect());
+    break;
+
+  case 'EMBED':
+  default:
+    chat
+      .withGui(embedHtml)
+      .then(() => chat.loadUserAndSettings())
+      .then(() => chat.loadEmotesAndFlairs())
+      .then(() => chat.loadHistory())
+      .then(() => chat.loadWhispers())
       .then(() => chat.connect());
     break;
 }

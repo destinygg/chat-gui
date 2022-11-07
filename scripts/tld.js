@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 const http = require('http');
 const fs = require('fs');
 
@@ -6,9 +7,50 @@ const TLD_MIN = 271; // Only update if at least this many found (original count)
 
 const targetFile = 'assets/tld.json';
 
-const cb = function () {
+function cb() {
   console.log('Done!');
-};
+}
+
+function parseTLDs(data) {
+  // List of pseudo TLD-s we want to support
+  const list = ['bit', 'exit', 'gnu', 'i2p', 'local', 'onion', 'zkey'];
+
+  // Make sure data is string
+  if (typeof data !== 'string') return null;
+
+  // Parse response data by line
+  const arr = data.split('\n');
+  for (const idx of arr) {
+    const tld = arr[idx];
+
+    // Ignore invalid/weird TLDs or comment
+    const shouldSkip =
+      typeof tld !== 'string' ||
+      tld.length < 1 ||
+      tld[0] === '#' ||
+      tld.indexOf('XN--') >= 0;
+
+    if (!shouldSkip) {
+      list.push(tld);
+    }
+  }
+
+  // Only return fetched list if its larger than default
+  if (list.length <= TLD_MIN) return null;
+
+  list.sort((x, y) => {
+    // Sort by size then alphabetically
+    if (x.length === y.length) {
+      if (x === y) {
+        return 0;
+      }
+
+      return x < y ? -1 : 1;
+    }
+    return y.length - x.length;
+  });
+  return list;
+}
 
 // Asynchronously fetch TLDs, if valid then replace
 http
@@ -36,39 +78,3 @@ http
     console.log(`TLD fetch failed, using defaults: ${e.message}`);
     cb();
   });
-
-function parseTLDs(data) {
-  // List of pseudo TLD-s we want to support
-  const list = ['bit', 'exit', 'gnu', 'i2p', 'local', 'onion', 'zkey'];
-
-  // Make sure data is string
-  if (typeof data !== 'string') return null;
-
-  // Parse response data by line
-  const arr = data.split('\n');
-  for (const idx in arr) {
-    const tld = arr[idx];
-    if (
-      typeof tld !== 'string' ||
-      tld.length < 1 ||
-      tld[0] === '#' ||
-      tld.indexOf('XN--') >= 0
-    ) {
-      // Ignore invalid/weird TLDs or comment
-      continue;
-    }
-    list.push(tld);
-  }
-
-  // Only return fetched list if its larger than default
-  if (list.length <= TLD_MIN) return null;
-
-  list.sort((x, y) => {
-    // Sort by size then alphabetically
-    if (x.length === y.length) {
-      return x < y ? -1 : x > y ? 1 : 0;
-    }
-    return y.length - x.length;
-  });
-  return list;
-}

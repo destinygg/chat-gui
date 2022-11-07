@@ -1,5 +1,3 @@
-/* global window */
-
 import EventEmitter from './emitter';
 
 const WebSocket = window.WebSocket || window.MozWebSocket;
@@ -38,7 +36,7 @@ class ChatSource extends EventEmitter {
 
   connect(url) {
     this.url = url;
-    this.retryAttempts++;
+    this.retryAttempts += 1;
     try {
       if (this.retryTimer !== null) {
         clearTimeout(this.retryTimer);

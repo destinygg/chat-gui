@@ -25,13 +25,17 @@ class ChatUserFocus {
     }
   }
 
-  toggleFocus(username, bool = null) {
-    username = (username || '').toLowerCase();
-    const index = this.focused.indexOf(username.toLowerCase());
+  toggleFocus(username = '', onlyAdd = false) {
+    const normalizedUsername = username.toLowerCase();
+    const index = this.focused.indexOf(normalizedUsername);
     const focused = index !== -1;
-    if (bool === null) bool = !focused;
-    if (bool && !focused) this.addCssRule(username);
-    else if (!bool && focused) this.removeCssRule(index);
+
+    if (!focused) {
+      this.addCssRule(normalizedUsername);
+    } else if (!onlyAdd) {
+      this.removeCssRule(index);
+    }
+
     return this;
   }
 
@@ -54,7 +58,7 @@ class ChatUserFocus {
   }
 
   clearFocus() {
-    this.focused.forEach((i) => this.css.deleteRule(0));
+    this.focused.forEach(() => this.css.deleteRule(0));
     this.focused = [];
     this.redraw();
   }

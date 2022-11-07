@@ -1,7 +1,7 @@
 import $ from 'jquery';
 import 'nanoscroller';
 
-const is_touch_device =
+const isTouchDevice =
   'ontouchstart' in window || // works on most browsers
   navigator.maxTouchPoints; // works on IE10/11 and Surface
 
@@ -24,7 +24,7 @@ class ChatScrollPlugin {
     this.scroller = $el.nanoScroller({
       sliderMinHeight: 40,
       disableResize: true,
-      alwaysVisible: is_touch_device,
+      alwaysVisible: isTouchDevice,
     })[0].nanoscroller;
   }
 

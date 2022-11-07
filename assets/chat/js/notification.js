@@ -1,3 +1,4 @@
+/* eslint-disable */
 /* global window, document, navigator */
 /*
 Copyright (C) 2013 Hendrik Beskow

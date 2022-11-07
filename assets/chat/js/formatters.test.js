@@ -43,9 +43,9 @@ describe('Inject tag', () => {
       'hey ShawarmaFury, check out these cool earphones (https://www.amazon.com/dp/B08LMBJFGD?psc=1&ref=ppx_yo2_dt_b_product_details&tag=cakesh-20)',
       chatStub,
     ],
-  ])('%s', (_, message, expectedMessage, chatStub) => {
+  ])('%s', (_, message, expectedMessage, stub) => {
     const injector = new AmazonAssociatesTagInjector();
-    expect(injector.format(chatStub, message)).toBe(expectedMessage);
+    expect(injector.format(stub, message)).toBe(expectedMessage);
   });
 });
 
@@ -66,8 +66,8 @@ describe("Don't inject tag", () => {
       'cool earphones check it out lads https://www.amazon.com/dp/B08LMBJFGD?psc=1&ref=ppx_yo2_dt_b_product_details',
       chatStubWithoutTags,
     ],
-  ])('%s', (_, message, chatStub) => {
+  ])('%s', (_, message, stub) => {
     const injector = new AmazonAssociatesTagInjector();
-    expect(injector.format(chatStub, message)).toBe(message);
+    expect(injector.format(stub, message)).toBe(message);
   });
 });

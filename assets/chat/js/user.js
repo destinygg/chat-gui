@@ -13,16 +13,16 @@ class ChatUser {
     }
   }
 
-  hasAnyFeatures(...args) {
-    for (const element of args) {
+  hasAnyFeatures(...features) {
+    let exists = false;
+    features.forEach((f) => {
       if (
-        this.features.indexOf(
-          typeof element !== 'string' ? element.toString() : element
-        ) !== -1
+        this.features.indexOf(typeof f !== 'string' ? f.toString() : f) !== -1
       )
-        return true;
-    }
-    return false;
+        exists = true;
+    });
+
+    return exists;
   }
 
   hasFeature(feature) {
