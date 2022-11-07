@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-npx prettier -cwu --loglevel silent .
+npx lint-staged
