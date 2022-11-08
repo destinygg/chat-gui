@@ -11,6 +11,7 @@ function getBucketId(id) {
 }
 
 function sortResults(a, b) {
+  console.log(a);
   if (!a || !b) return 0;
 
   // order emotes second
