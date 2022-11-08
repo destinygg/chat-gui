@@ -1,4 +1,4 @@
-/* global window, document, navigator */
+/* eslint-disable */
 /*
 Copyright (C) 2013 Hendrik Beskow
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -124,4 +124,4 @@ const Notification = (function (win, doc, nav) {
     return win.Notification
 }(window, document, navigator));
 
-export {Notification}
+export { Notification };
