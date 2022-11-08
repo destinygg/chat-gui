@@ -80,7 +80,9 @@
   },
   "lint-staged": {
     "*.js": [
-      "eslint --fix --max-warnings=0 .",
+      "eslint --fix --max-warnings=0 ."
+    ],
+    "*": [
       "prettier -cwu --loglevel silent ."
     ]
   }
