@@ -1,0 +1,21 @@
+name: Check formatting and lint
+
+on:
+  pull_request:
+
+jobs:
+  formatting-and-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 14
+      - run: npm ci
+
+      - name: Check formatting with Prettier
+      - run: npx prettier -cu .
+
+      - name: Lint with ESLint
+      - run: npx eslint .
