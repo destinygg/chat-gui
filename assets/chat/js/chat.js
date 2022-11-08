@@ -1889,7 +1889,14 @@ class Chat {
             credentials: 'include',
             method: 'POST',
             headers: { 'X-CSRF-Guard': 'YEE' },
-        }).catch(console.warn);
+        })
+            .then(res => res.json())
+            .then((data) => {
+                if (!data.success) {
+                    MessageBuilder.error(data.message).into(this);
+                }
+                return;
+            });
     }
 
     openConversation(nick){
