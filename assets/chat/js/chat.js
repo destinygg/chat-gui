@@ -489,7 +489,6 @@ class Chat {
       Settings.upgrade(this, oldversion, newversion);
       this.settings.set('schemaversion', newversion);
       this.saveSettings();
->>>>>>> master
     }
 
     this.taggednicks = new Map(this.settings.get('taggednicks'));
