@@ -4,21 +4,6 @@ on:
   pull_request:
 
 jobs:
-  check-formatting:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 14
-
-      - name: Install Node.js dependencies
-        run: npm ci
-
-      - name: Check formatting
-        run: npx prettier -cu .
-
   lint:
     runs-on: ubuntu-latest
     steps:
@@ -31,5 +16,9 @@ jobs:
       - name: Install Node.js dependencies
         run: npm ci
 
-      - name: Lint
+      - name: Check formatting with Prettier
+        run: npx prettier -cu .
+
+      - name: Lint with ESLint
+        if: success() || failure()
         run: npx eslint --max-warnings=0 .
