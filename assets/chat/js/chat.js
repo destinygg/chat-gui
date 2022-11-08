@@ -25,6 +25,7 @@ import ChatWindow from './window';
 import { ChatVote, parseQuestionAndTime } from './vote';
 import { isMuteActive, MutedTimer } from './mutedtimer';
 import EmoteService from './emotes';
+import UserFeatures from './features';
 import makeSafeForRegex from './regex';
 
 const regexslashcmd = /^\/([a-z0-9]+)[\s]?/i;
@@ -310,6 +311,10 @@ const commandsinfo = new Map([
       desc: 'Start a sub-weighted vote.',
     },
   ],
+  ['host', {
+    desc: 'Hosts a livestream, video, or vod to bigscreen.',
+    admin: true
+}],
 ]);
 const banstruct = {
   id: 0,
