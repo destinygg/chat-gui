@@ -79,6 +79,9 @@
     "testEnvironment": "jsdom"
   },
   "lint-staged": {
-    "*": "prettier -cwu --loglevel silent ."
+    "*.js": [
+      "eslint --fix --max-warnings=0 .",
+      "prettier -cwu --loglevel silent ."
+    ]
   }
 }
