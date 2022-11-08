@@ -8,7 +8,8 @@
     "glue": "node scripts/glue.js",
     "start": "webpack serve --mode=development",
     "test": "jest",
-    "prepare": "cp .githooks/* .git/hooks/"
+    "prepare": "cp .githooks/* .git/hooks/",
+    "lint": "eslint --fix --max-warnings=0 . && prettier -cwu ."
   },
   "repository": {
     "type": "git",
@@ -80,7 +81,9 @@
   },
   "lint-staged": {
     "*.js": [
-      "eslint --fix --max-warnings=0 .",
+      "eslint --fix --max-warnings=0 ."
+    ],
+    "*": [
       "prettier -cwu --loglevel silent ."
     ]
   }

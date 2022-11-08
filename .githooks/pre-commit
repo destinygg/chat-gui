@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-npx lint-staged
+npx lint-staged --concurrent false
