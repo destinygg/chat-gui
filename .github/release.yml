@@ -8,4 +8,4 @@ changelog:
         - bug
     - title: Other changes
       labels:
-        - "*"
+        - '*'
