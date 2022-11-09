@@ -70,18 +70,18 @@ const errorstrings = new Map([
 const hintstrings = new Map([
   [
     'slashhelp',
-    'Type in /help for more a list of commands, do advanced things like modify your scroll-back size',
+    'Type in /help for more a list of commands, do advanced things like modify your scroll-back size.',
   ],
   [
     'tabcompletion',
-    'Use the tab key to auto-complete names and emotes (for user only completion prepend a @ or press shift)',
+    'Use the tab key to auto-complete names and emotes (for user only completion prepend a @ or hold shift).',
   ],
   [
     'hoveremotes',
-    'Hovering your mouse over an emote will show you the emote code',
+    'Hovering your cursor over an emote will show you the emote code.',
   ],
-  ['highlight', 'Chat messages containing your username will be highlighted'],
-  ['notify', 'Use /msg <username> to send a private message to someone'],
+  ['highlight', 'Chat messages containing your username will be highlighted.'],
+  ['notify', 'Use /msg <nick> to send a private message to someone.'],
   [
     'ignoreuser',
     'Use /ignore <nick> to hide messages from pesky chatters. You can even ignore multiple users at once - /ignore <nick_1> ... <nick_n>!',
@@ -91,7 +91,7 @@ const hintstrings = new Map([
     'tagshint',
     `Use the /tag <nick> [<color> <note>] to tag users you like. There are preset colors to choose from ${tagcolors.join(
       ', '
-    )}`,
+    )}.`,
   ],
   [
     'bigscreen',
@@ -133,97 +133,103 @@ const commandsinfo = new Map([
   [
     'help',
     {
-      desc: 'Helpful information.',
+      desc: 'List all chat commands.',
     },
   ],
   [
     'emotes',
     {
-      desc: 'A list of the chats emotes in text form.',
+      desc: 'Return all emotes in text form.',
     },
   ],
   [
     'me',
     {
-      desc: 'A normal message, but emotive.',
+      desc: 'Send an action message in italics.',
     },
   ],
   [
     'message',
     {
-      desc: 'Whisper someone',
+      desc: 'Send a whisper to <nick>.',
       alias: ['msg', 'whisper', 'w', 'tell', 't', 'notify'],
     },
   ],
   [
     'ignore',
     {
-      desc: 'No longer see user messages, without <nick> to list the nicks ignored',
+      desc: 'Stop showing you messages from <nick>.',
     },
   ],
   [
     'unignore',
     {
-      desc: 'Remove a user from your ignore list',
+      desc: 'Remove <nick> from your ignore list.',
     },
   ],
   [
     'unignoreall',
     {
-      desc: 'Clear your ignore list',
+      desc: 'Remove all users from your ignore list.',
     },
   ],
   [
     'highlight',
     {
-      desc: 'Highlights target nicks messages for easier visibility',
+      desc: 'Highlight messages from <nick> for easier visibility.',
     },
   ],
   [
     'unhighlight',
     {
-      desc: 'Unhighlight target nick',
+      desc: 'Unhighlight <nick>.',
     },
   ],
   [
     'maxlines',
     {
-      desc: 'The maximum number of lines the chat will store',
+      desc: 'Set the maximum number of <lines> the chat will store.',
     },
   ],
   [
     'mute',
     {
-      desc: 'The users messages will be blocked from everyone.',
+      desc: 'Stop <nick> from sending messages.',
       admin: true,
     },
   ],
   [
     'unmute',
     {
-      desc: 'Unmute the user.',
+      desc: 'Unmute <nick>.',
       admin: true,
     },
   ],
   [
     'subonly',
     {
-      desc: 'Subscribers only',
+      desc: 'Turn the subscribers-only chat mode <on> or <off>.',
       admin: true,
     },
   ],
   [
     'ban',
     {
-      desc: 'User will no longer be able to connect to the chat.',
+      desc: 'Stop <nick> from connecting to the chat.',
       admin: true,
     },
   ],
   [
     'unban',
     {
-      desc: 'Unban a user',
+      desc: 'Unban <nick>.',
       admin: true,
+    },
+  ],
+  [
+    'baninfo',
+    {
+      desc: 'Check your ban status.',
     },
   ],
   [
@@ -235,60 +241,60 @@ const commandsinfo = new Map([
   [
     'tag',
     {
-      desc: 'Mark a users messages',
+      desc: "Mark <nick>'s messages.",
     },
   ],
   [
     'untag',
     {
-      desc: 'No longer mark the users messages',
+      desc: 'Untags <nick>.',
     },
   ],
   [
     'embed',
     {
-      desc: 'Embeds a video to bigscreen',
+      desc: 'Embed a video to bigscreen.',
       alias: ['e'],
     },
   ],
   [
     'postembed',
     {
-      desc: 'Posts embedded content in chat or generates and posts an embeddable link',
+      desc: 'Post a video embed in chat.',
       alias: ['pe'],
     },
   ],
   [
     'open',
     {
-      desc: 'Opens a conversation',
+      desc: 'Open a conversation with a user.',
       alias: ['o'],
     },
   ],
   [
     'exit',
     {
-      desc: 'Exit the conversation you are in.',
+      desc: 'Exit the conversation you have open.',
     },
   ],
   [
     'reply',
     {
-      desc: 'Reply to the last private message.',
+      desc: 'Reply to the last whisper you received.',
       alias: ['r'],
     },
   ],
   [
     'stalk',
     {
-      desc: 'Return a list of messages from <nick>',
+      desc: 'Return a list of messages from <nick>.',
       alias: ['s'],
     },
   ],
   [
     'mentions',
     {
-      desc: 'Return a list of messages where <nick> is mentioned',
+      desc: 'Return a list of messages where <nick> is mentioned.',
       alias: ['m'],
     },
   ],
@@ -1235,7 +1241,7 @@ class Chat {
 
   onNAMES(data) {
     MessageBuilder.status(
-      `Connected. serving ${data.connectioncount || 0} connections and ${
+      `Connected. Serving ${data.connectioncount || 0} connections and ${
         data.users.length
       } users.`
     ).into(this);
@@ -1423,7 +1429,7 @@ class Chat {
     switch (desc) {
       case 'banned': {
         let messageText =
-          'You have been banned! Check your profile for more information. <a target="_blank" class="externallink" href="/subscribe" rel="nofollow">Subscribing</a> or <a target="_blank" class="externallink" href="/donate" rel="nofollow">donating</a> removes non-permanent bans.';
+          'You have been banned! Check your <a target="_blank" class="externallink" href="/profile" rel="nofollow">profile</a> for more information. <a target="_blank" class="externallink" href="/subscribe" rel="nofollow">Subscribing</a> or <a target="_blank" class="externallink" href="/donate" rel="nofollow">donating</a> removes non-permanent bans.';
 
         // Append ban appeal hint if a URL was provided.
         if (this.config.banAppealUrl) {
@@ -1459,7 +1465,7 @@ class Chat {
   onSUBONLY(data) {
     const submode = data.data === 'on' ? 'enabled' : 'disabled';
     MessageBuilder.command(
-      `Subscriber only mode ${submode} by ${data.nick}`,
+      `Subscriber only mode ${submode} by ${data.nick}.`,
       data.timestamp
     ).into(this);
   }
@@ -1632,7 +1638,7 @@ class Chat {
       parseQuestionAndTime(textOnly);
     } catch {
       MessageBuilder.info(
-        `Usage: ${slashCommand} <question>? <option 1> or <option 2>[ or <option 3>[ or <option 4> ... [ or <option n>]]][ <time>]`
+        `Usage: ${slashCommand} <question>? <option 1> or <option 2> [or <option 3> [or <option 4> ... [or <option n>]]] [<time>].`
       ).into(this);
       return;
     }
@@ -1670,7 +1676,7 @@ class Chat {
 
   cmdEMOTES() {
     MessageBuilder.info(
-      `Available emoticons: ${this.emoteService.prefixes.join(', ')}`
+      `Available emotes: ${this.emoteService.prefixes.join(', ')}.`
     ).into(this);
   }
 
@@ -1703,12 +1709,12 @@ class Chat {
   cmdIGNORE(parts) {
     if (!parts[0]) {
       if (this.ignoring.size <= 0) {
-        MessageBuilder.info('Your ignore list is empty').into(this);
+        MessageBuilder.info('Your ignore list is empty.').into(this);
       } else {
         MessageBuilder.info(
           `Ignoring the following people: ${Array.from(
             this.ignoring.values()
-          ).join(', ')}`
+          ).join(', ')}.`
         ).into(this);
       }
     } else {
@@ -1720,7 +1726,7 @@ class Chat {
       const failure = parts.some((username) => {
         if (!nickregex.test(username)) {
           MessageBuilder.info(
-            `${username} is not a valid nick - /ignore <nick> OR /ignore <nick_1> <nick_2> ... <nick_n>`
+            `${username} is not a valid nick - /ignore <nick> OR /ignore <nick_1> <nick_2> ... <nick_n>.`
           ).into(this);
           return true;
         }
@@ -1751,7 +1757,7 @@ class Chat {
       const failure = parts.some((username) => {
         if (!nickregex.test(username)) {
           MessageBuilder.info(
-            `${username} is not a valid nick - /unignore <nick> OR /unignore <nick_1> <nick_2> ... <nick_n>`
+            `${username} is not a valid nick - /unignore <nick> OR /unignore <nick_1> <nick_2> ... <nick_n>.`
           ).into(this);
           return true;
         }
@@ -1788,15 +1794,15 @@ class Chat {
       ).into(this);
     } else {
       this.unignoreall();
-      MessageBuilder.status(`Your ignore list has been cleared`).into(this);
+      MessageBuilder.status(`Your ignore list has been cleared.`).into(this);
     }
   }
 
   cmdMUTE(parts) {
     if (parts.length === 0) {
-      MessageBuilder.info(`Usage: /mute <nick>[ <time>]`).into(this);
+      MessageBuilder.info(`Usage: /mute <nick> [<time>].`).into(this);
     } else if (!nickregex.test(parts[0])) {
-      MessageBuilder.info(`Invalid nick - /mute <nick>[ <time>]`).into(this);
+      MessageBuilder.info(`Invalid nick - /mute <nick> [<time>].`).into(this);
     } else {
       const duration = parts[1] ? Chat.parseTimeInterval(parts[1]) : null;
       if (duration && duration > 0) {
@@ -1810,12 +1816,12 @@ class Chat {
   cmdBAN(parts, command) {
     if (parts.length === 0 || parts.length < 3) {
       MessageBuilder.info(
-        `Usage: /${command} <nick> <time> <reason> (time can be 'permanent')`
+        `Usage: /${command} <nick> <time> <reason> (time can be 'permanent').`
       ).into(this);
     } else if (!nickregex.test(parts[0])) {
-      MessageBuilder.info('Invalid nick').into(this);
+      MessageBuilder.info('Invalid nick.').into(this);
     } else if (!parts[2]) {
-      MessageBuilder.error('Providing a reason is mandatory').into(this);
+      MessageBuilder.error('Providing a reason is mandatory.').into(this);
     } else {
       const payload = {
         nick: parts[0],
@@ -1832,9 +1838,9 @@ class Chat {
 
   cmdUNBAN(parts, command) {
     if (parts.length === 0) {
-      MessageBuilder.info(`Usage: /${command} nick`).into(this);
+      MessageBuilder.info(`Usage: /${command} <nick>.`).into(this);
     } else if (!nickregex.test(parts[0])) {
-      MessageBuilder.info('Invalid nick').into(this);
+      MessageBuilder.info('Invalid nick.').into(this);
     } else {
       this.source.send(command, { data: parts[0] });
     }
@@ -1853,19 +1859,19 @@ class Chat {
   cmdMAXLINES(parts, command) {
     if (parts.length === 0) {
       MessageBuilder.info(
-        `Maximum lines stored: ${this.settings.get('maxlines')}`
+        `Maximum lines stored: ${this.settings.get('maxlines')}.`
       ).into(this);
       return;
     }
     const newmaxlines = Math.abs(parseInt(parts[0], 10));
     if (!newmaxlines) {
       MessageBuilder.info(
-        `Invalid argument - /${command} is expecting a number`
+        `Invalid argument - /${command} is expecting a number.`
       ).into(this);
     } else {
       this.settings.set('maxlines', newmaxlines);
       this.applySettings();
-      MessageBuilder.info(`Set maximum lines to ${newmaxlines}`).into(this);
+      MessageBuilder.info(`Set maximum lines to ${newmaxlines}.`).into(this);
     }
   }
 
@@ -1874,9 +1880,9 @@ class Chat {
     if (parts.length === 0) {
       if (highlights.length > 0)
         MessageBuilder.info(
-          `Currently highlighted users: ${highlights.join(',')}`
+          `Currently highlighted users: ${highlights.join(',')}.`
         ).into(this);
-      else MessageBuilder.info(`No highlighted users`).into(this);
+      else MessageBuilder.info(`No highlighted users.`).into(this);
       return;
     }
     if (!nickregex.test(parts[0])) {
@@ -1895,8 +1901,8 @@ class Chat {
     }
     MessageBuilder.info(
       command.toUpperCase() === 'HIGHLIGHT'
-        ? `Highlighting ${nick}`
-        : `No longer highlighting ${nick}`
+        ? `Highlighting ${nick}.`
+        : `No longer highlighting ${nick}.`
     ).into(this);
     this.settings.set('highlightnicks', highlights);
     this.applySettings();
@@ -1917,7 +1923,7 @@ class Chat {
         ).into(this);
       } else {
         MessageBuilder.info(
-          `New format: ${this.settings.get('timestampformat')}`
+          `New format: ${this.settings.get('timestampformat')}.`
         ).into(this);
         this.settings.set('timestampformat', format);
         this.applySettings();
@@ -2011,7 +2017,7 @@ class Chat {
     this.settings.set('taggednicks', [...this.taggednicks]);
     this.settings.set('taggednotes', [...this.taggednotes]);
     this.applySettings();
-    MessageBuilder.info(`Tagged ${parts[0]} as ${color}`).into(this);
+    MessageBuilder.info(`Tagged ${parts[0]} as ${color}.`).into(this);
   }
 
   cmdUNTAG(parts) {
@@ -2050,7 +2056,7 @@ class Chat {
     this.settings.set('taggednicks', [...this.taggednicks]);
     this.settings.set('taggednotes', [...this.taggednotes]);
     this.applySettings();
-    MessageBuilder.info(`Un-tagged ${n}`).into(this);
+    MessageBuilder.info(`Un-tagged ${n}.`).into(this);
   }
 
   cmdEMBED(parts) {
@@ -2133,7 +2139,7 @@ class Chat {
       this.source.send('MSG', { data: `#${EmbedSplit[1]}` });
     } else if (!parts[0] && !EmbedSplit[1]) {
       MessageBuilder.error(
-        'Nothing embedded - /postembed OR /pe OR /postembed <link> <message (optional)> OR /pe <link> <message (optional)>'
+        'Nothing embedded - /postembed OR /pe OR /postembed <link> [<message>] OR /pe <link> [<message>]'
       ).into(this);
       MessageBuilder.info(
         'Valid links: Twitch Streams, Twitch VODs, Twitch Clips, Youtube Videos, Vimeo Video.'
@@ -2184,7 +2190,7 @@ class Chat {
             break;
           default:
             MessageBuilder.error(
-              'Invalid link - /postembed OR /pe OR /postembed <link> <message (optional)> OR /pe <link> <message (optional)>'
+              'Invalid link - /postembed OR /pe OR /postembed <link> [<message>] OR /pe <link> [<message>]'
             ).into(this);
             MessageBuilder.info(
               'Valid links: Twitch Streams, Twitch VODs, Twitch Clips, Youtube Videos, Vimeo Videos.'
@@ -2198,7 +2204,7 @@ class Chat {
         this.source.send('MSG', { data: `#${EmbedSplit[1]} ${moreMsg}` });
       } else {
         MessageBuilder.error(
-          'Invalid link - /postembed OR /pe OR /postembed <link> <message (optional)> OR /pe <link> <message (optional)>'
+          'Invalid link - /postembed OR /pe OR /postembed <link> [<message>] OR /pe <link> [<message>]'
         ).into(this);
         MessageBuilder.info(
           'Valid links: Twitch Streams, Twitch VODs, Twitch Clips, Youtube Videos, Vimeo Videos.'
@@ -2226,7 +2232,7 @@ class Chat {
         } else {
           const end = moment(b.endtimestamp).calendar();
           MessageBuilder.info(
-            `Temporary ban by ${by} started on ${start} and ending by ${end}`
+            `Temporary ban by ${by} started on ${start} and ending by ${end}.`
           ).into(this);
         }
         if (b.reason) {
@@ -2238,7 +2244,7 @@ class Chat {
           m.historical = true;
           m.into(this);
         }
-        MessageBuilder.info(`End of ban information`).into(this);
+        MessageBuilder.info(`End of ban information.`).into(this);
       })
       .catch(() =>
         MessageBuilder.error(
@@ -2296,7 +2302,7 @@ class Chat {
         ? this.replyusername
         : lastuser;
     if (username === null) {
-      MessageBuilder.info(`No-one to reply to :(`).into(this);
+      MessageBuilder.info(`No one to reply to. :(`).into(this);
     } else {
       this.input.val(`/w ${username} `);
     }
@@ -2318,7 +2324,7 @@ class Chat {
       return;
     }
     if (this.busystalk) {
-      MessageBuilder.error('Still busy stalking').into(this);
+      MessageBuilder.error(`Still busy stalking ${[parts[0]]} ...`).into(this);
       return;
     }
     if (this.nextallowedstalk && this.nextallowedstalk.isAfter(new Date())) {
@@ -2329,7 +2335,7 @@ class Chat {
     }
     this.busystalk = true;
     const limit = parts[1] ? parseInt(parts[1], 10) : 3;
-    MessageBuilder.info(`Getting messages for ${[parts[0]]} ...`).into(this);
+    MessageBuilder.info(`Getting messages from ${[parts[0]]} ...`).into(this);
 
     fetch(
       `${this.config.api.base}/api/chat/stalk?username=${encodeURIComponent(
@@ -2340,13 +2346,13 @@ class Chat {
       .then((res) => res.json())
       .then((d) => {
         if (!d || !d.lines || d.lines.length === 0) {
-          MessageBuilder.info(`No messages for ${parts[0]}`).into(this);
+          MessageBuilder.info(`No messages from ${parts[0]}.`).into(this);
         } else {
           const date = moment
             .utc(d.lines[d.lines.length - 1].timestamp * 1000)
             .local()
             .format(DATE_FORMATS.FULL);
-          MessageBuilder.info(`Stalked ${parts[0]} last seen ${date}`).into(
+          MessageBuilder.info(`Stalked ${parts[0]} last seen ${date}.`).into(
             this
           );
           d.lines.forEach((a) =>
@@ -2360,7 +2366,7 @@ class Chat {
       })
       .catch(() =>
         MessageBuilder.error(
-          `No messages for ${parts[0]} received. Try again later`
+          `No messages from ${parts[0]} received. Try again later.`
         ).into(this)
       )
       .then(() => {
@@ -2387,7 +2393,9 @@ class Chat {
       return;
     }
     if (this.busymentions) {
-      MessageBuilder.error('Still busy getting mentions').into(this);
+      MessageBuilder.error(`Still busy getting ${[parts[0]]}'s mentions`).into(
+        this
+      );
       return;
     }
     if (
@@ -2411,14 +2419,14 @@ class Chat {
       .then((res) => res.json())
       .then((d) => {
         if (!d || d.length === 0) {
-          MessageBuilder.info(`No mentions for ${parts[0]}`).into(this);
+          MessageBuilder.info(`No mentions for ${parts[0]}.`).into(this);
         } else {
           const date = moment
             .utc(d[d.length - 1].date * 1000)
             .local()
             .format(DATE_FORMATS.FULL);
           MessageBuilder.info(
-            `Mentions for ${parts[0]} last seen ${date}`
+            `Mentions for ${parts[0]} last seen ${date}.`
           ).into(this);
           d.forEach((a) =>
             MessageBuilder.historical(
@@ -2431,7 +2439,7 @@ class Chat {
       })
       .catch(() =>
         MessageBuilder.error(
-          `No mentions for ${parts[0]} received. Try again later`
+          `No mentions for ${parts[0]} received. Try again later.`
         ).into(this)
       )
       .then(() => {
@@ -2476,7 +2484,7 @@ class Chat {
           .then((data) => {
             if (data.length > 0) {
               const date = moment(data[0].timestamp).format(DATE_FORMATS.FULL);
-              MessageBuilder.info(`Last message ${date}`).into(this, win);
+              MessageBuilder.info(`Last message ${date}.`).into(this, win);
               data.reverse().forEach((e) => {
                 MessageBuilder.historical(e.message, user, e.timestamp).into(
                   this,
