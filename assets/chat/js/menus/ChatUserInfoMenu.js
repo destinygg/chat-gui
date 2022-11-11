@@ -1,4 +1,5 @@
 import $ from 'jquery';
+import moment from 'moment';
 import ChatMenu from './ChatMenu';
 import { MessageBuilder } from '../messages';
 import ChatUser from '../user';
@@ -12,11 +13,13 @@ export default class ChatUserInfoMenu extends ChatMenu {
 
     this.header = this.ui.find('.toolbar span');
 
+    this.createdDateSubheader = this.ui.find('.user-info h5.date-subheader')[0];
+
     this.flairList = this.ui.find('.user-info .flairs');
-    [this.flairSubheader] = this.ui.find('.user-info h5');
+    this.flairSubheader = this.ui.find('.user-info h5.flairs-subheader')[0];
 
     this.messagesContainer = this.ui.find('.content');
-    [, this.messagesSubheader] = this.ui.find('.user-info h5');
+    this.messagesSubheader = this.ui.find('.user-info h5.stalk-subheader')[0];
 
     this.muteUserBtn = this.ui.find('#mute-user-btn');
     this.banUserBtn = this.ui.find('#ban-user-btn');
@@ -213,6 +216,17 @@ export default class ChatUserInfoMenu extends ChatMenu {
     const nick = message.data('username');
     const usernameFeatures = message.find('.user')[0].attributes.class.value;
 
+    const formattedDate = this.buildCreatedDate(nick);
+    if (formattedDate === '') {
+      this.createdDateSubheader.style.display = 'none';
+      this.createdDateSubheader.replaceChildren(
+        'Unable to display account creation date'
+      );
+    } else {
+      this.createdDateSubheader.style.display = '';
+      this.createdDateSubheader.replaceChildren('Joined on ', formattedDate);
+    }
+
     const featuresList = this.buildFeatures(nick, usernameFeatures);
     if (featuresList === '') {
       this.flairList.toggleClass('hidden', true);
@@ -242,6 +256,20 @@ export default class ChatUserInfoMenu extends ChatMenu {
     });
 
     super.redraw();
+  }
+
+  buildCreatedDate(nick) {
+    const user = this.chat.users.get(nick);
+    if (user.createdDate === '') {
+      return '';
+    }
+    const timeHTML = document.createElement('time');
+    timeHTML.className = 'time';
+    timeHTML.textContent = moment(user.createdDate).format(
+      'Do MMMM, YYYY h:mm a'
+    );
+    timeHTML.setAttribute('datetime', user.createdDate);
+    return timeHTML;
   }
 
   buildFeatures(nick, messageFeatures) {

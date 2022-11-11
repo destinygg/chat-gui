@@ -892,11 +892,19 @@ class Chat {
     if (!user) {
       user = new ChatUser(data);
       this.users.set(normalized, user);
-    } else if (
-      Object.hasOwn(data, 'features') &&
-      !Chat.isArraysEqual(data.features, user.features)
-    ) {
-      user.features = data.features;
+    } else {
+      if (
+        Object.hasOwn(data, 'features') &&
+        !Chat.isArraysEqual(data.features, user.features)
+      ) {
+        user.features = data.features;
+      }
+      if (
+        Object.hasOwn(data, 'createdDate') &&
+        data.createdDate !== user.createdDate
+      ) {
+        user.createdDate = data.createdDate;
+      }
     }
     return user;
   }
