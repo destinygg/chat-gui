@@ -45,12 +45,10 @@ class ChatUserFocus {
     let rule;
     if (isFlair) {
       rule = `.msg-user:has(.features .flair.${value}){opacity:1 !important;}`
+    } else if (this.chat.settings.get('focusmentioned')) {
+      rule = `.msg-user[data-username="${value}"],.msg-user[data-mentioned~="${value}"]{opacity:1 !important;}`;
     } else {
-      if (this.chat.settings.get('focusmentioned')) {
-        rule = `.msg-user[data-username="${value}"],.msg-user[data-mentioned~="${value}"]{opacity:1 !important;}`;
-      } else {
-        rule = `.msg-user[data-username="${value}"]{opacity:1 !important;}`;
-      }
+      rule = `.msg-user[data-username="${value}"]{opacity:1 !important;}`;
     }
     this.css.insertRule(rule, this.focused.length); // max 4294967295
     this.focused.push(value);
