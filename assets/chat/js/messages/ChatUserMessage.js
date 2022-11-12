@@ -55,7 +55,8 @@ export default class ChatUserMessage extends ChatMessage {
       .filter((e) => chat.flairsMap.has(e))
       .map((e) => chat.flairsMap.get(e))
       .reduce(
-        (str, e) => `${str}<i data-flair="${e.name}"class="flair ${e.name}" title="${e.label}"></i> `,
+        (str, e) =>
+          `${str}<i data-flair="${e.name}" class="flair ${e.name}" title="${e.label}"></i> `,
         ''
       );
     return features !== '' ? `<span class="features">${features}</span>` : '';

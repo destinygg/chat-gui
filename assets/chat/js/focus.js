@@ -44,7 +44,7 @@ class ChatUserFocus {
   addCssRule(value, isFlair) {
     let rule;
     if (isFlair) {
-      rule = `.msg-user:has(.features .flair.${value}){opacity:1 !important;}`
+      rule = `.msg-user:has(.features .flair.${value}){opacity:1 !important;}`;
     } else if (this.chat.settings.get('focusmentioned')) {
       rule = `.msg-user[data-username="${value}"],.msg-user[data-mentioned~="${value}"]{opacity:1 !important;}`;
     } else {

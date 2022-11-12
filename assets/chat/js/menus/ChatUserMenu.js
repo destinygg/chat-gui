@@ -124,7 +124,8 @@ export default class ChatUserMenu extends ChatMenu {
       .map((e) => this.chat.flairsMap.get(e))
       .sort((a, b) => a.priority - b.priority)
       .reduce(
-        (str, e) => `${str}<i data-flair="${e.name}" class="flair ${e.name}" title="${e.label}"></i> `,
+        (str, e) =>
+          `${str}<i data-flair="${e.name}" class="flair ${e.name}" title="${e.label}"></i> `,
         ''
       );
     return features !== '' ? `<span class="features">${features}</span>` : '';
