@@ -758,7 +758,7 @@ class Chat {
   }
 
   async loadHistory() {
-    fetch(`${this.config.api.base}/api/chat/history`)
+    return fetch(`${this.config.api.base}/api/chat/history`)
       .then((res) => res.json())
       .then((json) => {
         this.setHistory(json);
