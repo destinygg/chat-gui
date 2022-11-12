@@ -16,22 +16,24 @@ class ChatUserFocus {
     const t = $(target);
     if (t.hasClass('chat-user')) {
       if (!this.chat.settings.get('focusmentioned'))
-        this.toggleFocus(t.closest('.msg-user').data('username'), true);
+        this.toggleFocus(t.closest('.msg-user').data('username'), false, true);
       this.toggleFocus(t.text());
     } else if (t.hasClass('user')) {
       this.toggleFocus(t.text());
+    } else if (t.hasClass('flair')) {
+      this.toggleFocus(t.data('flair'), true);
     } else if (this.focused.length > 0) {
       this.clearFocus();
     }
   }
 
-  toggleFocus(username = '', onlyAdd = false) {
-    const normalizedUsername = username.toLowerCase();
-    const index = this.focused.indexOf(normalizedUsername);
+  toggleFocus(value = '', isFlair = false, onlyAdd = false) {
+    const normalized = value.toLowerCase();
+    const index = this.focused.indexOf(normalized);
     const focused = index !== -1;
 
     if (!focused) {
-      this.addCssRule(normalizedUsername);
+      this.addCssRule(normalized, isFlair);
     } else if (!onlyAdd) {
       this.removeCssRule(index);
     }
@@ -39,15 +41,19 @@ class ChatUserFocus {
     return this;
   }
 
-  addCssRule(username) {
+  addCssRule(value, isFlair) {
     let rule;
-    if (this.chat.settings.get('focusmentioned')) {
-      rule = `.msg-user[data-username="${username}"],.msg-user[data-mentioned~="${username}"]{opacity:1 !important;}`;
+    if (isFlair) {
+      rule = `.msg-user:has(.features .flair.${value}){opacity:1 !important;}`
     } else {
-      rule = `.msg-user[data-username="${username}"]{opacity:1 !important;}`;
+      if (this.chat.settings.get('focusmentioned')) {
+        rule = `.msg-user[data-username="${value}"],.msg-user[data-mentioned~="${value}"]{opacity:1 !important;}`;
+      } else {
+        rule = `.msg-user[data-username="${value}"]{opacity:1 !important;}`;
+      }
     }
     this.css.insertRule(rule, this.focused.length); // max 4294967295
-    this.focused.push(username);
+    this.focused.push(value);
     this.redraw();
   }
 
@@ -64,7 +70,7 @@ class ChatUserFocus {
   }
 
   redraw() {
-    this.chat.ui.toggleClass('focus-user', this.focused.length > 0);
+    this.chat.ui.toggleClass('focus', this.focused.length > 0);
   }
 }
 

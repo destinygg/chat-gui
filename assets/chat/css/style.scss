@@ -318,6 +318,7 @@ hr {
   align-items: center;
   margin-left: -$gutter-xs;
   .flair {
+    cursor: pointer;
     margin-left: $gutter-xs;
   }
 }
@@ -518,7 +519,7 @@ hr {
 }
 
 /* Focus or highlight a line */
-.focus-user .msg-chat {
+.focus .msg-chat {
   opacity: 0.3;
 }
 
@@ -1013,6 +1014,7 @@ hr {
         align-items: center;
         margin-right: $gutter-md;
         .flair {
+          cursor: pointer;
           margin-right: $gutter-xs;
         }
       }
