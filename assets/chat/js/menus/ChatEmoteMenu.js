@@ -38,8 +38,11 @@ export default class ChatEmoteMenu extends ChatMenu {
       if (!emotes.length) return;
 
       const title = tier === 0 ? 'All Users' : `Tier ${tier} Subscribers`;
-      const locked = tier > this.chat.user.subTier && !this.chat.user.isPrivileged();
-      this.emoteMenuContent.append(this.buildEmoteMenuSection(title, emotes, locked));
+      const locked =
+        tier > this.chat.user.subTier && !this.chat.user.isPrivileged();
+      this.emoteMenuContent.append(
+        this.buildEmoteMenuSection(title, emotes, locked)
+      );
     });
 
     const twitchEmotes = this.chat.emoteService.twitchEmotePrefixes;
@@ -51,11 +54,17 @@ export default class ChatEmoteMenu extends ChatMenu {
   }
 
   buildEmoteMenuSection(title, emotes, disabled = false) {
-    const emotesStr = emotes.map((e) => this.buildEmoteItem(e, disabled)).join('');
+    const emotesStr = emotes
+      .map((e) => this.buildEmoteItem(e, disabled))
+      .join('');
     if (emotesStr !== '') {
       return `<div>
-              <div id="emote-subscribe-note">${disabled ? '<i class="lock"></i>' : ''}${title}</div>
-              <div class="emote-group${disabled ? ' disabled' : ''}">${emotesStr}</div>
+              <div id="emote-subscribe-note">${
+                disabled ? '<i class="lock"></i>' : ''
+              }${title}</div>
+              <div class="emote-group${
+                disabled ? ' disabled' : ''
+              }">${emotesStr}</div>
           </div>`;
     }
     return '';
@@ -64,10 +73,14 @@ export default class ChatEmoteMenu extends ChatMenu {
   buildEmoteItem(emote, disabled) {
     if (this.searchterm && this.searchterm.length > 0) {
       if (emote.toLowerCase().indexOf(this.searchterm.toLowerCase()) >= 0) {
-        return `<div class="emote-item"><span title="${emote}" class="emote ${emote}${disabled ? ' disabled' : ''}">${emote}</span></div>`;
+        return `<div class="emote-item"><span title="${emote}" class="emote ${emote}${
+          disabled ? ' disabled' : ''
+        }">${emote}</span></div>`;
       }
     } else {
-      return `<div class="emote-item"><span title="${emote}" class="emote ${emote}${disabled ? ' disabled' : ''}">${emote}</span></div>`;
+      return `<div class="emote-item"><span title="${emote}" class="emote ${emote}${
+        disabled ? ' disabled' : ''
+      }">${emote}</span></div>`;
     }
     return '';
   }
