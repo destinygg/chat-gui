@@ -1570,7 +1570,7 @@ body.pref-fontscale[data-fontscale='10'] {
     align-items: center;
   }
   .opt:first-child:nth-last-child(n + 10) .opt-info,
-  .opt:nth-last-child(n + 10) ~ .opt .opt-info {
+  .opt:first-child:nth-last-child(n + 10) ~ .opt .opt-info {
     min-width: 1.7em;
   }
   .opt-info {
