@@ -119,7 +119,7 @@ class ChatVote {
   }
 
   isMsgVoteCastFmt(txt) {
-    if (txt.length === 1 && txt.match(/[0-9]/i)) {
+    if (txt.match(/^[0-9]+$/i)) {
       const int = parseInt(txt, 10);
       return int > 0 && int <= this.vote.question.options.length;
     }
