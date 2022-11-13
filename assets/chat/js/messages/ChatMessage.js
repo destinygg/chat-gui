@@ -53,10 +53,7 @@ export default class ChatMessage extends ChatUIMessage {
 
   buildMessageTxt(chat) {
     // TODO we strip off the `/me ` of every message -- must be a better way to do this
-    let msg =
-      this.message.substring(0, 4).toLowerCase() === '/me '
-        ? this.message.substring(4)
-        : this.message;
+    let msg = this.message.replace(/^(\/me\s{1})/i, '');
     if (!this.unformatted)
       formatters.forEach((f) => {
         msg = f.format(chat, msg, this);
