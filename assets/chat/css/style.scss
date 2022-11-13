@@ -915,23 +915,42 @@ hr {
 }
 
 #chat-emote-list {
+  .lock {
+    width: 1em;
+    height: 1em;
+    opacity: 0.5;
+    display: inline-flex;
+    margin-right: $gutter-sm;
+    background: transparent url('../img/icon-lock.svg') no-repeat center center;
+    background-size: contain;
+  }
   .content {
     text-align: center;
     outline: 0;
+    .emote-group {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin: $gutter-lg;
+      .emote-item {
+        user-select: none;
+        padding: $gutter-sm;
+        margin: auto;
+        .emote {
+          cursor: pointer;
+          &.disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+          }
+        }
+      }
+    }
   }
-  .emote-group {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    margin: $gutter-lg;
-  }
-  .emote-group:not(.disabled) .emote:hover {
-    cursor: pointer;
-  }
-  .emote-item {
-    user-select: none;
-    padding: $gutter-sm;
-    margin: auto;
+  input {
+    padding: $gutter-lg $gutter-lg;
+    border: none;
+    background: none;
+    border-radius: 0;
   }
 }
 
