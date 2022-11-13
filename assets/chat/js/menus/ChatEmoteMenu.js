@@ -38,7 +38,8 @@ export default class ChatEmoteMenu extends ChatMenu {
       if (!emotes.length) return;
 
       const title = tier === 0 ? 'All Users' : `Tier ${tier} Subscribers`;
-      this.emoteMenuContent.append(this.buildEmoteMenuSection(title, emotes, tier > this.chat.user.subTier && !this.chat.user.isPrivileged()));
+      const locked = tier > this.chat.user.subTier && !this.chat.user.isPrivileged();
+      this.emoteMenuContent.append(this.buildEmoteMenuSection(title, emotes, locked));
     });
 
     const twitchEmotes = this.chat.emoteService.twitchEmotePrefixes;
@@ -68,6 +69,7 @@ export default class ChatEmoteMenu extends ChatMenu {
     } else {
       return `<div class="emote-item"><span title="${emote}" class="emote ${emote}${disabled ? ' disabled' : ''}">${emote}</span></div>`;
     }
+    return '';
   }
 
   selectEmote(emote) {
