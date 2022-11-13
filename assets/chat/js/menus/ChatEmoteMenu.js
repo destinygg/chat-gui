@@ -77,12 +77,11 @@ export default class ChatEmoteMenu extends ChatMenu {
           disabled ? ' disabled' : ''
         }">${emote}</span></div>`;
       }
-    } else {
-      return `<div class="emote-item"><span title="${emote}" class="emote ${emote}${
-        disabled ? ' disabled' : ''
-      }">${emote}</span></div>`;
+      return '';
     }
-    return '';
+    return `<div class="emote-item"><span title="${emote}" class="emote ${emote}${
+      disabled ? ' disabled' : ''
+    }">${emote}</span></div>`;
   }
 
   selectEmote(emote) {
