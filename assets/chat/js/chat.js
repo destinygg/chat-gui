@@ -1275,7 +1275,10 @@ class Chat {
         }
         return;
       }
-      if (this.chatvote.isMsgVoteStopFmt(data.data)) {
+      if (
+        this.chatvote.isVoteStarted() &&
+        this.chatvote.isMsgVoteStopFmt(data.data)
+      ) {
         this.source.emit('VOTESTOP', data);
         return;
       }
@@ -1329,7 +1332,7 @@ class Chat {
       return;
     }
 
-    this.chatvote.endVote();
+    this.chatvote.endVote(data.timestamp);
   }
 
   onVOTECAST(data) {

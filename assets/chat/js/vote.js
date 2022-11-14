@@ -211,7 +211,7 @@ class ChatVote {
 
       const elapsedTime = new Date().getTime() - startTime;
       this.timerEndVote = setTimeout(
-        () => this.endVote(),
+        () => this.endVote(new Date().getTime()),
         this.vote.time - elapsedTime
       );
 
@@ -222,7 +222,7 @@ class ChatVote {
     }
   }
 
-  endVote() {
+  endVote(timestamp) {
     this.voting = false;
     clearTimeout(this.timerEndVote);
     clearTimeout(this.timerHideVote);
@@ -241,7 +241,12 @@ class ChatVote {
 
     this.ui.label.html(`Vote ended! ${this.vote.votesCast} votes cast.`);
     this.ui.vote.addClass('vote-completed');
-    this.timerHideVote = setTimeout(() => this.hide(), 7000);
+    const elapsedTime = new Date().getTime() - timestamp;
+    if (7000 - elapsedTime > 0) {
+      this.timerHideVote = setTimeout(() => this.hide(), 7000 - elapsedTime);
+    } else {
+      this.hide();
+    }
     this.vote = null;
   }
 
