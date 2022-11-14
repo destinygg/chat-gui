@@ -70,7 +70,7 @@ const errorstrings = new Map([
 const hintstrings = new Map([
   [
     'slashhelp',
-    'Type in /help for more a list of commands, do advanced things like modify your scroll-back size.',
+    'Type in /help for a list of more commands that do advanced things, like modify your scroll-back size.',
   ],
   [
     'tabcompletion',
@@ -158,7 +158,7 @@ const commandsinfo = new Map([
   [
     'ignore',
     {
-      desc: 'Stop showing you messages from <nick>.',
+      desc: 'Stop showing messages from <nick>.',
     },
   ],
   [
