@@ -24,6 +24,7 @@ export default class ChatUserInfoMenu extends ChatMenu {
     this.logsUserBtn = this.ui.find('#logs-user-btn');
     this.whisperUserBtn = this.ui.find('#whisper-user-btn');
     this.ignoreUserBtn = this.ui.find('#ignore-user-btn');
+    this.unignoreUserBtn = this.ui.find('#unignore-user-btn');
 
     this.actionInputs = this.ui.find('#action-durations');
     this.muteDurations = ['1m', '10m', '1h', '1d'];
@@ -46,29 +47,29 @@ export default class ChatUserInfoMenu extends ChatMenu {
   }
 
   showUser(e, user, userlist = false) {
-      this.clickedNick = user.data('username');
+    this.clickedNick = user.data('username');
 
-      this.setActionsVisibility();
+    this.setActionsVisibility();
     this.addContent(user, userlist);
 
-      const rect = this.chat.output[0].getBoundingClientRect();
-      // calculating floating window location (if it doesn't fit on screen, adjusting it a bit so it does)
-      const x =
-        this.ui.width() + e.clientX > rect.width
-          ? e.clientX - rect.left + (rect.width - (this.ui.width() + e.clientX))
-          : e.clientX - rect.left;
-      const y =
-        this.ui.height() + e.clientY > rect.height
-          ? e.clientY -
-            rect.top +
-            (rect.height - (this.ui.height() + e.clientY)) -
-            12
-          : e.clientY - rect.top - 12;
+    const rect = this.chat.output[0].getBoundingClientRect();
+    // calculating floating window location (if it doesn't fit on screen, adjusting it a bit so it does)
+    const x =
+      this.ui.width() + e.clientX > rect.width
+        ? e.clientX - rect.left + (rect.width - (this.ui.width() + e.clientX))
+        : e.clientX - rect.left;
+    const y =
+      this.ui.height() + e.clientY > rect.height
+        ? e.clientY -
+          rect.top +
+          (rect.height - (this.ui.height() + e.clientY)) -
+          12
+        : e.clientY - rect.top - 12;
 
-      this.ui[0].style.left = `${x}px`;
-      this.ui[0].style.top = `${y}px`;
+    this.ui[0].style.left = `${x}px`;
+    this.ui[0].style.top = `${y}px`;
 
-      super.show();
+    super.show();
   }
 
   configureButtons() {
@@ -127,6 +128,12 @@ export default class ChatUserInfoMenu extends ChatMenu {
       MessageBuilder.status(`Ignoring ${this.clickedNick}`).into(this.chat);
       super.hide();
     });
+
+    this.unignoreUserBtn.on('click', () => {
+      this.chat.ignore(this.clickedNick, false);
+      MessageBuilder.status(`${this.clickedNick} has been removed from your ignore list`).into(this.chat);
+      super.hide();
+    });
   }
 
   setActionsVisibility() {
@@ -141,6 +148,15 @@ export default class ChatUserInfoMenu extends ChatMenu {
     this.actionInputs.addClass('hidden');
     this.banUserBtn.removeClass('active');
     this.muteUserBtn.removeClass('active');
+    
+    if (this.chat.ignoring.has(this.clickedNick.toLowerCase())) {
+      this.ignoreUserBtn.toggleClass('hidden', true);
+      this.unignoreUserBtn.toggleClass('hidden', false);
+    } else {
+      this.ignoreUserBtn.toggleClass('hidden', false);
+      this.unignoreUserBtn.toggleClass('hidden', true);
+    }
+
   }
 
   setInputVisibility(button) {

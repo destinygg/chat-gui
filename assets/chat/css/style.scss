@@ -1183,6 +1183,11 @@ hr {
       center;
     background-size: contain;
   }
+  #unignore-user-btn .btn-icon {
+    background: transparent url('../img/icon-unignore.svg') no-repeat center
+      center;
+    background-size: contain;
+  }
   #action-durations {
     height: calc(20px + 2 * $gutter-md);
     display: flex;
