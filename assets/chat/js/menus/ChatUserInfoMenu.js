@@ -131,7 +131,9 @@ export default class ChatUserInfoMenu extends ChatMenu {
 
     this.unignoreUserBtn.on('click', () => {
       this.chat.ignore(this.clickedNick, false);
-      MessageBuilder.status(`${this.clickedNick} has been removed from your ignore list`).into(this.chat);
+      MessageBuilder.status(
+        `${this.clickedNick} has been removed from your ignore list`
+      ).into(this.chat);
       super.hide();
     });
   }
@@ -148,7 +150,7 @@ export default class ChatUserInfoMenu extends ChatMenu {
     this.actionInputs.addClass('hidden');
     this.banUserBtn.removeClass('active');
     this.muteUserBtn.removeClass('active');
-    
+
     if (this.chat.ignoring.has(this.clickedNick.toLowerCase())) {
       this.ignoreUserBtn.toggleClass('hidden', true);
       this.unignoreUserBtn.toggleClass('hidden', false);
@@ -156,7 +158,6 @@ export default class ChatUserInfoMenu extends ChatMenu {
       this.ignoreUserBtn.toggleClass('hidden', false);
       this.unignoreUserBtn.toggleClass('hidden', true);
     }
-
   }
 
   setInputVisibility(button) {
@@ -230,9 +231,13 @@ export default class ChatUserInfoMenu extends ChatMenu {
   addContent(message, userlist) {
     this.messageArray = userlist ? [] : [message];
 
-    const prettyNick = userlist ? message[0].text : message.find('.user')[0].text;
+    const prettyNick = userlist
+      ? message[0].text
+      : message.find('.user')[0].text;
     const nick = message.data('username');
-    const usernameFeatures = userlist ? message[0].classList.value : message.find('.user')[0].attributes.class.value;
+    const usernameFeatures = userlist
+      ? message[0].classList.value
+      : message.find('.user')[0].attributes.class.value;
 
     const featuresList = this.buildFeatures(nick, usernameFeatures);
     if (featuresList === '') {
@@ -249,7 +254,9 @@ export default class ChatUserInfoMenu extends ChatMenu {
       this.messagesSubheader.style.display = 'none';
     } else {
       this.messagesList.toggleClass('hidden', false);
-      this.messagesSubheader.innerText = `Selected message${messageList.length === 1 ? '' : 's'}:`;
+      this.messagesSubheader.innerText = `Selected message${
+        messageList.length === 1 ? '' : 's'
+      }:`;
       this.messagesSubheader.style.display = '';
     }
 
