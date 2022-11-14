@@ -1676,7 +1676,7 @@ class Chat {
 
   cmdEMOTES() {
     MessageBuilder.info(
-      `Available emotes: ${this.emoteService.prefixes.join(', ')}.`
+      `Available emotes: ${this.emoteService.prefixes.join(' ')}`
     ).into(this);
   }
 
