@@ -15,6 +15,7 @@ export default class ChatUserInfoMenu extends ChatMenu {
     this.flairList = this.ui.find('.user-info .flairs');
     [this.flairSubheader] = this.ui.find('.user-info h5');
 
+    this.messagesList = this.ui.find('.user-info .stalk');
     this.messagesContainer = this.ui.find('.content');
     [, this.messagesSubheader] = this.ui.find('.user-info h5');
 
@@ -32,10 +33,23 @@ export default class ChatUserInfoMenu extends ChatMenu {
 
     this.chat.output.on('contextmenu', '.msg-user .user', (e) => {
       const user = $(e.currentTarget).closest('.msg-user');
+      this.showUser(e, user);
+
+      // gotta return false so that the actual context menu doesn't show up
+      return false;
+    });
+
+    // preventing the window from closing instantly
+    this.chat.output.on('mouseup', '.msg-user .user', (e) => {
+      e.stopPropagation();
+    });
+  }
+
+  showUser(e, user, userlist = false) {
       this.clickedNick = user.data('username');
 
       this.setActionsVisibility();
-      this.addContent(user);
+    this.addContent(user, userlist);
 
       const rect = this.chat.output[0].getBoundingClientRect();
       // calculating floating window location (if it doesn't fit on screen, adjusting it a bit so it does)
@@ -55,15 +69,6 @@ export default class ChatUserInfoMenu extends ChatMenu {
       this.ui[0].style.top = `${y}px`;
 
       super.show();
-
-      // gotta return false so that the actual context menu doesn't show up
-      return false;
-    });
-
-    // preventing the window from closing instantly
-    this.chat.output.on('mouseup', '.msg-user .user', (e) => {
-      e.stopPropagation();
-    });
   }
 
   configureButtons() {
@@ -206,12 +211,12 @@ export default class ChatUserInfoMenu extends ChatMenu {
     super.hide();
   }
 
-  addContent(message) {
-    this.messageArray = [message];
+  addContent(message, userlist) {
+    this.messageArray = userlist ? [] : [message];
 
-    const prettyNick = message.find('.user')[0].text;
+    const prettyNick = userlist ? message[0].text : message.find('.user')[0].text;
     const nick = message.data('username');
-    const usernameFeatures = message.find('.user')[0].attributes.class.value;
+    const usernameFeatures = userlist ? message[0].classList.value : message.find('.user')[0].attributes.class.value;
 
     const featuresList = this.buildFeatures(nick, usernameFeatures);
     if (featuresList === '') {
@@ -222,11 +227,14 @@ export default class ChatUserInfoMenu extends ChatMenu {
       this.flairSubheader.style.display = '';
     }
 
-    const messageList = this.createMessages();
-    if (messageList.length === 1) {
-      this.messagesSubheader.innerText = 'Selected message:';
+    const messageList = this.createMessages(userlist);
+    if (messageList.length === 0) {
+      this.messagesList.toggleClass('hidden', true);
+      this.messagesSubheader.style.display = 'none';
     } else {
-      this.messagesSubheader.innerText = 'Selected messages:';
+      this.messagesList.toggleClass('hidden', false);
+      this.messagesSubheader.innerText = `Selected message${messageList.length === 1 ? '' : 's'}:`;
+      this.messagesSubheader.style.display = '';
     }
 
     this.header.text('');
@@ -258,7 +266,7 @@ export default class ChatUserInfoMenu extends ChatMenu {
     return features !== '' ? `<span class="features">${features}</span>` : '';
   }
 
-  createMessages() {
+  createMessages(userlist) {
     const displayedMessages = [];
     if (this.messageArray.length > 0) {
       let nextMsg = this.messageArray[0].next('.msg-continue');
@@ -272,7 +280,7 @@ export default class ChatUserInfoMenu extends ChatMenu {
         const msg = MessageBuilder.message(text, new ChatUser(nick));
         displayedMessages.push(msg.html(this.chat));
       });
-    } else {
+    } else if (!userlist) {
       const msg = MessageBuilder.error(
         "Wasn't able to grab the clicked message"
       );

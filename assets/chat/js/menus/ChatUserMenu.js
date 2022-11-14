@@ -62,6 +62,15 @@ export default class ChatUserMenu extends ChatMenu {
       this.chat.input.val(`/whisper ${username} ${value}`).focus();
       return false;
     });
+    this.container.on('contextmenu', '.users .user', (e) => {
+      const userinfo = this.chat.menus.get('user-info');
+      if (userinfo) {
+        const user = $(e.currentTarget).closest('.user');
+        userinfo.showUser(e, user, true);
+        return false;
+      }
+      return true;
+    });
     this.chat.source.on('JOIN', (data) => this.addAndRedraw(data.nick));
     this.chat.source.on('QUIT', (data) => this.removeAndRedraw(data.nick));
     this.chat.source.on('NAMES', () => this.addAll());
