@@ -1262,30 +1262,32 @@ class Chat {
   onMSG(data) {
     const textonly = Chat.removeSlashCmdFromText(data.data);
     const usr = this.users.get(data.nick.toLowerCase());
-
-    // Checking if old messages are loading avoids starting votes for cached
-    // `/vote` commands.
-    if (!this.backlogloading) {
-      // Voting is processed entirely in clients through messages with
-      // type `MSG`, but we emit `VOTE`, `VOTESTOP`, and `VOTECAST`
-      // events to mimic server involvement.
+  
+    // Voting is processed entirely in clients through messages with
+    // type `MSG`, but we emit `VOTE`, `VOTESTOP`, and `VOTECAST`
+    // events to mimic server involvement.
+    if (this.chatvote.canUserStartVote(usr)) {
       if (this.chatvote.isMsgVoteStartFmt(data.data)) {
-        this.source.emit('VOTE', data);
+        const now = new Date().getTime();
+        const question = parseQuestionAndTime(data.data)
+        if (now - data.timestamp < question.time) {
+          this.source.emit('VOTE', data);
+        }
         return;
       }
       if (this.chatvote.isMsgVoteStopFmt(data.data)) {
         this.source.emit('VOTESTOP', data);
         return;
       }
-      if (
-        this.chatvote.isVoteStarted() &&
-        this.chatvote.isMsgVoteCastFmt(data.data)
-      ) {
-        this.source.emit(`VOTECAST`, data);
-        return;
-      }
     }
-
+    if (
+      this.chatvote.isVoteStarted() &&
+      this.chatvote.isMsgVoteCastFmt(data.data)
+    ) {
+      this.source.emit(`VOTECAST`, data);
+      return;
+    }
+  
     const win = this.mainwindow;
     if (
       win.lastmessage !== null &&
@@ -1310,8 +1312,8 @@ class Chat {
     if (this.chatvote.isVoteStarted() || !this.chatvote.canUserStartVote(usr)) {
       return;
     }
-
-    if (this.chatvote.startVote(data.data, usr)) {
+  
+    if (this.chatvote.startVote(data.data, usr, data.timestamp)) {
       new ChatMessage(
         this.chatvote.voteStartMessage(),
         null,

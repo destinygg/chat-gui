@@ -167,7 +167,7 @@ class ChatVote {
     }
   }
 
-  startVote(rawCommand, user) {
+  startVote(rawCommand, user, startTime) {
     try {
       this.voting = true;
       clearTimeout(this.timerEndVote);
@@ -178,7 +178,7 @@ class ChatVote {
       const question = parseQuestionAndTime(rawQuestion);
       this.vote = {
         type: type === '/svote' ? PollType.Weighted : PollType.Normal,
-        start: new Date(),
+        start: new Date(startTime),
         time: question.time,
         question,
         totals: question.options.map(() => 0),
@@ -208,7 +208,10 @@ class ChatVote {
       this.show();
 
       this.timerHeartBeat = setInterval(() => this.updateTimers(), 1000);
-      this.timerEndVote = setTimeout(() => this.endVote(), this.vote.time);
+
+      const elapsedTime = new Date().getTime() - startTime;
+      this.timerEndVote = setTimeout(() => this.endVote(), this.vote.time - elapsedTime);
+
       return true;
     } catch (e) {
       this.voting = false;
