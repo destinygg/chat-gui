@@ -1262,14 +1262,14 @@ class Chat {
   onMSG(data) {
     const textonly = Chat.removeSlashCmdFromText(data.data);
     const usr = this.users.get(data.nick.toLowerCase());
-  
+
     // Voting is processed entirely in clients through messages with
     // type `MSG`, but we emit `VOTE`, `VOTESTOP`, and `VOTECAST`
     // events to mimic server involvement.
     if (this.chatvote.canUserStartVote(usr)) {
       if (this.chatvote.isMsgVoteStartFmt(data.data)) {
         const now = new Date().getTime();
-        const question = parseQuestionAndTime(data.data)
+        const question = parseQuestionAndTime(data.data);
         if (now - data.timestamp < question.time) {
           this.source.emit('VOTE', data);
         }
@@ -1287,7 +1287,7 @@ class Chat {
       this.source.emit(`VOTECAST`, data);
       return;
     }
-  
+
     const win = this.mainwindow;
     if (
       win.lastmessage !== null &&
@@ -1312,7 +1312,7 @@ class Chat {
     if (this.chatvote.isVoteStarted() || !this.chatvote.canUserStartVote(usr)) {
       return;
     }
-  
+
     if (this.chatvote.startVote(data.data, usr, data.timestamp)) {
       new ChatMessage(
         this.chatvote.voteStartMessage(),

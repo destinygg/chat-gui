@@ -210,7 +210,10 @@ class ChatVote {
       this.timerHeartBeat = setInterval(() => this.updateTimers(), 1000);
 
       const elapsedTime = new Date().getTime() - startTime;
-      this.timerEndVote = setTimeout(() => this.endVote(), this.vote.time - elapsedTime);
+      this.timerEndVote = setTimeout(
+        () => this.endVote(),
+        this.vote.time - elapsedTime
+      );
 
       return true;
     } catch (e) {
