@@ -347,9 +347,11 @@ class Chat {
     this.css = null;
     this.output = null;
     this.input = null;
+    this.subonlyicon = null;
     this.loginscrn = null;
     this.loadingscrn = null;
     this.showmotd = true;
+    this.subonly = false;
     this.authenticated = false;
     this.backlogloading = false;
     this.unresolved = [];
@@ -518,6 +520,7 @@ class Chat {
     this.ishidden = (document.visibilityState || 'visible') !== 'visible';
     this.output = this.ui.find('#chat-output-frame');
     this.input = this.ui.find('#chat-input-control');
+    this.subonlyicon = this.ui.find('#chat-input-subonly');
     this.loginscrn = this.ui.find('#chat-login-screen');
     this.loadingscrn = this.ui.find('#chat-loading');
     this.windowselect = this.ui.find('#chat-windows-select');
@@ -1463,11 +1466,16 @@ class Chat {
   }
 
   onSUBONLY(data) {
-    const submode = data.data === 'on' ? 'enabled' : 'disabled';
+    this.subonly = data.data === 'on';
     MessageBuilder.command(
-      `Subscriber only mode ${submode} by ${data.nick}.`,
+      `Subscriber only mode ${this.subonly ? 'enabled' : 'disabled'} by ${data.nick}.`,
       data.timestamp
     ).into(this);
+    if (this.subonly) {
+      this.subonlyicon.show();
+    } else {
+      this.subonlyicon.hide();
+    }
   }
 
   onBROADCAST(data) {

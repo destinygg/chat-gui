@@ -231,6 +231,28 @@ hr {
 #chat-input-control::placeholder {
   color: $color-chat-place;
 }
+#chat-input-subonly {
+  cursor: pointer;
+  display: none;
+  position: absolute;
+  top: $gutter-sm;
+  right: $gutter-sm;
+  width: 1.5em;
+  height: 1.5em;
+  .btn-icon {
+    display: inline-block;
+    opacity: 0.75;
+    transition: opacity 150ms;
+    width: 100%;
+    height: 100%;
+    background: transparent url('../img/icon-subonly.svg') no-repeat center center;
+    background-size: contain;
+    &:hover {
+      opacity: 1;
+    }
+  }
+}
+
 .chat-lines {
   font-family: $chat-lines-font;
   line-height: 1.65em;
