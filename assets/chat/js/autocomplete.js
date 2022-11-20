@@ -207,7 +207,10 @@ class ChatAutoComplete {
     this.results = [];
     this.selected = -1;
     this.container.css('left', 0);
-    this.container.find(`li.active`).get().forEach((e) => $(e).toggleClass('active', false));
+    this.container
+      .find(`li.active`)
+      .get()
+      .forEach((e) => $(e).toggleClass('active', false));
     updateHelpers(this);
   }
 
@@ -283,14 +286,24 @@ class ChatAutoComplete {
           existingElements.push(element);
           elements.delete(res.data);
         } else {
-          elements.set(res.data, $(`<li data-name="${res.data}" data-index="${k}">${res.isemote ? `<span class="emote ${res.data}"></span>` : ''}${res.data}</li>`)[0]);
+          elements.set(
+            res.data,
+            $(
+              `<li data-name="${res.data}" data-index="${k}">${
+                res.isemote ? `<span class="emote ${res.data}"></span>` : ''
+              }${res.data}</li>`
+            )[0]
+          );
         }
       });
       [...Array.from(elements.values())].forEach((e) => {
         let inserted = false;
         if (existingElements.length > 0) {
           for (let i = 0; i < existingElements.length; i++) {
-            if (parseInt(e.dataset.index, 10) < parseInt(existingElements[i].dataset.index, 10)) {
+            if (
+              parseInt(e.dataset.index, 10) <
+              parseInt(existingElements[i].dataset.index, 10)
+            ) {
               this.container[0].insertBefore(e, existingElements[i]);
               inserted = true;
               break;
