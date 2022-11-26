@@ -46,6 +46,9 @@ export default class ChatUserMenu extends ChatMenu {
     this.container.on('click', '.user', (e) =>
       this.chat.userfocus.toggleFocus(e.target.getAttribute('data-username'))
     );
+    this.container.on('click', '.flair', (e) =>
+      this.chat.userfocus.toggleFocus(e.target.getAttribute('data-flair'), true)
+    );
     this.container.on('click', '.mention-nick', (e) => {
       ChatMenu.closeMenus(this.chat);
       const value = this.chat.input.val().toString().trim();
@@ -121,7 +124,8 @@ export default class ChatUserMenu extends ChatMenu {
       .map((e) => this.chat.flairsMap.get(e))
       .sort((a, b) => a.priority - b.priority)
       .reduce(
-        (str, e) => `${str}<i class="flair ${e.name}" title="${e.label}"></i> `,
+        (str, e) =>
+          `${str}<i data-flair="${e.name}" class="flair ${e.name}" title="${e.label}"></i> `,
         ''
       );
     return features !== '' ? `<span class="features">${features}</span>` : '';
