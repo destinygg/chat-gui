@@ -22,7 +22,7 @@ import ChatUserFocus from './focus';
 import ChatStore from './store';
 import Settings from './settings';
 import ChatWindow from './window';
-import { ChatVote, parseQuestionAndTime } from './vote';
+import { ChatVote, parseQuestionAndTime, VOTE_END_TIME } from './vote';
 import { isMuteActive, MutedTimer } from './mutedtimer';
 import EmoteService from './emotes';
 import makeSafeForRegex from './regex';
@@ -1271,27 +1271,32 @@ class Chat {
     const textonly = Chat.removeSlashCmdFromText(data.data);
     const usr = this.users.get(data.nick.toLowerCase());
 
-    // Checking if old messages are loading avoids starting votes for cached
-    // `/vote` commands.
-    if (!this.backlogloading) {
-      // Voting is processed entirely in clients through messages with
-      // type `MSG`, but we emit `VOTE`, `VOTESTOP`, and `VOTECAST`
-      // events to mimic server involvement.
+    // Voting is processed entirely in clients through messages with
+    // type `MSG`, but we emit `VOTE`, `VOTESTOP`, and `VOTECAST`
+    // events to mimic server involvement.
+    if (this.chatvote.canUserStartVote(usr)) {
       if (this.chatvote.isMsgVoteStartFmt(data.data)) {
-        this.source.emit('VOTE', data);
-        return;
-      }
-      if (this.chatvote.isMsgVoteStopFmt(data.data)) {
-        this.source.emit('VOTESTOP', data);
+        const now = new Date().getTime();
+        const question = parseQuestionAndTime(data.data);
+        if (now - data.timestamp < question.time + VOTE_END_TIME) {
+          this.source.emit('VOTE', data);
+        }
         return;
       }
       if (
         this.chatvote.isVoteStarted() &&
-        this.chatvote.isMsgVoteCastFmt(data.data)
+        this.chatvote.isMsgVoteStopFmt(data.data)
       ) {
-        this.source.emit(`VOTECAST`, data);
+        this.source.emit('VOTESTOP', data);
         return;
       }
+    }
+    if (
+      this.chatvote.canCastVote(data.timestamp) &&
+      this.chatvote.isMsgVoteCastFmt(data.data)
+    ) {
+      this.source.emit(`VOTECAST`, data);
+      return;
     }
 
     const win = this.mainwindow;
@@ -1319,7 +1324,7 @@ class Chat {
       return;
     }
 
-    if (this.chatvote.startVote(data.data, usr)) {
+    if (this.chatvote.startVote(data.data, usr, data.timestamp)) {
       new ChatMessage(
         this.chatvote.voteStartMessage(),
         null,
@@ -1335,7 +1340,7 @@ class Chat {
       return;
     }
 
-    this.chatvote.endVote();
+    this.chatvote.endVote(data.timestamp);
   }
 
   onVOTECAST(data) {
@@ -1345,7 +1350,7 @@ class Chat {
     }
 
     // NOTE method returns false, if the GUI is hidden
-    if (this.chatvote.castVote(data.data, usr)) {
+    if (this.chatvote.castVote(data.data, usr, data.timestamp)) {
       if (data.nick === this.user.username) {
         this.chatvote.markVote(data.data);
       }
