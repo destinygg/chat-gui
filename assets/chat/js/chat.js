@@ -22,7 +22,7 @@ import ChatUserFocus from './focus';
 import ChatStore from './store';
 import Settings from './settings';
 import ChatWindow from './window';
-import { ChatVote, parseQuestionAndTime } from './vote';
+import { ChatVote, parseQuestionAndTime, VOTE_END_TIME } from './vote';
 import { isMuteActive, MutedTimer } from './mutedtimer';
 import EmoteService from './emotes';
 import makeSafeForRegex from './regex';
@@ -1270,7 +1270,7 @@ class Chat {
       if (this.chatvote.isMsgVoteStartFmt(data.data)) {
         const now = new Date().getTime();
         const question = parseQuestionAndTime(data.data);
-        if (now - data.timestamp < question.time) {
+        if (now - data.timestamp < (question.time + VOTE_END_TIME)) {
           this.source.emit('VOTE', data);
         }
         return;
@@ -1284,7 +1284,7 @@ class Chat {
       }
     }
     if (
-      this.chatvote.isVoteStarted() &&
+      this.chatvote.canCastVote(data.timestamp) &&
       this.chatvote.isMsgVoteCastFmt(data.data)
     ) {
       this.source.emit(`VOTECAST`, data);
@@ -1342,7 +1342,7 @@ class Chat {
     }
 
     // NOTE method returns false, if the GUI is hidden
-    if (this.chatvote.castVote(data.data, usr)) {
+    if (this.chatvote.castVote(data.data, usr, data.timestamp)) {
       if (data.nick === this.user.username) {
         this.chatvote.markVote(data.data);
       }
