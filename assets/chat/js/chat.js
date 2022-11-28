@@ -1270,7 +1270,7 @@ class Chat {
       if (this.chatvote.isMsgVoteStartFmt(data.data)) {
         const now = new Date().getTime();
         const question = parseQuestionAndTime(data.data);
-        if (now - data.timestamp < (question.time + VOTE_END_TIME)) {
+        if (now - data.timestamp < question.time + VOTE_END_TIME) {
           this.source.emit('VOTE', data);
         }
         return;

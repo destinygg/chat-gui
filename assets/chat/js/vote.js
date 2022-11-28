@@ -96,7 +96,11 @@ class ChatVote {
 
   canCastVote(timestamp) {
     if (this.vote) {
-      return (new Date(timestamp).getTime() - (this.vote.start.getTime() + this.vote.time + VOTE_END_TIME)) < 0
+      return (
+        new Date(timestamp).getTime() -
+          (this.vote.start.getTime() + this.vote.time + VOTE_END_TIME) <
+        0
+      );
     }
     return false;
   }
@@ -139,7 +143,11 @@ class ChatVote {
   }
 
   castVote(opt, user, timestamp = new Date().getTime()) {
-    if (this.canCastVote(timestamp) && !this.hidden && this.canVote(user.username)) {
+    if (
+      this.canCastVote(timestamp) &&
+      !this.hidden &&
+      this.canVote(user.username)
+    ) {
       this.vote.votes.set(user.username, opt);
 
       const votes = this.votesForUser(user);
@@ -249,7 +257,10 @@ class ChatVote {
     this.ui.vote.addClass('vote-completed');
     const elapsedTime = new Date().getTime() - timestamp;
     if (VOTE_END_TIME - elapsedTime > 0) {
-      this.timerHideVote = setTimeout(() => this.reset(), VOTE_END_TIME - elapsedTime);
+      this.timerHideVote = setTimeout(
+        () => this.reset(),
+        VOTE_END_TIME - elapsedTime
+      );
     } else {
       this.reset();
     }
@@ -261,7 +272,6 @@ class ChatVote {
   }
 
   markWinner() {
-
     $('.opt-winner').removeClass('opt-winner');
 
     const firstIndex = this.vote.totals.reduce(
