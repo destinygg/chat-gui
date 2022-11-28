@@ -98,7 +98,7 @@ class ChatVote {
     if (this.vote) {
       return (
         new Date(timestamp).getTime() -
-          (this.vote.start.getTime() + this.vote.time + VOTE_END_TIME) <
+          (this.vote.start.getTime() + this.vote.time) <
         0
       );
     }
