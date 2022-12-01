@@ -318,6 +318,13 @@ const commandsinfo = new Map([
       admin: true,
     },
   ],
+  [
+    'unhost',
+    {
+      desc: 'Removes hosted content from bigscreen.',
+      admin: true,
+    },
+  ],
 ]);
 const banstruct = {
   id: 0,
@@ -458,6 +465,7 @@ class Chat {
     this.control.on('VOTESTOP', (data) => this.cmdVOTESTOP(data));
     this.control.on('VS', (data) => this.cmdVOTESTOP(data));
     this.control.on('HOST', (data) => this.cmdHOST(data));
+    this.control.on('UNHOST', () => this.cmdUNHOST());
   }
 
   setUser(user) {
@@ -2450,7 +2458,8 @@ class Chat {
   }
 
   cmdHOST(parts) {
-    const [url, displayName] = parts;
+    const displayName = parts[1];
+    let url = parts[0];
 
     if (!this.user.hasAnyFeatures(UserFeatures.ADMIN, UserFeatures.MODERATOR)) {
       MessageBuilder.error(errorstrings.get('nopermission')).into(this);
@@ -2471,7 +2480,7 @@ class Chat {
         url = `https://${url}`;
       }
 
-      new URL(url);
+      new URL(url); // eslint-disable-line no-new
     } catch (e) {
       MessageBuilder.error(
         'Invalid url - /host <url> <displayName optional>'
@@ -2490,7 +2499,25 @@ class Chat {
         if (!data.success) {
           MessageBuilder.error(data.message).into(this);
         }
-        return;
+      });
+  }
+
+  cmdUNHOST() {
+    if (!this.user.hasAnyFeatures(UserFeatures.ADMIN, UserFeatures.MODERATOR)) {
+      MessageBuilder.error(errorstrings.get('nopermission')).into(this);
+      return;
+    }
+
+    fetch(`${this.config.api.base}/api/stream/unhost`, {
+      credentials: 'include',
+      method: 'POST',
+      headers: { 'X-CSRF-Guard': 'YEE' },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (!data.success) {
+          MessageBuilder.error(data.message).into(this);
+        }
       });
   }
 
