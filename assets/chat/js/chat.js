@@ -1164,6 +1164,11 @@ class Chat {
   }
 
   focusIfNothingSelected() {
+    // If this is a mobile screen, return to avoid focusing input and bringing up the virtual keyboard
+    if (window.screen.width <= 768) {
+      return;
+    }
+
     if (this.debounceFocus === undefined) {
       this.debounceFocus = debounce(10, false, (c) => c.input.focus());
     }
