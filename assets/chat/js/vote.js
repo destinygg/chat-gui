@@ -166,6 +166,9 @@ class ChatVote {
   votesForUser(user) {
     switch (this.vote.type) {
       case PollType.Weighted:
+        if (user.hasFeature(UserFeatures.SUB_TIER_5)) {
+          return 32;
+        }
         if (user.hasFeature(UserFeatures.SUB_TIER_4)) {
           return 16;
         }
