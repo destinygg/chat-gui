@@ -10,6 +10,7 @@ const UserMenuSections = [
   { name: 'Vip', flairs: ['vip'] },
   { name: 'Trusted User', flairs: ['flair4'] },
   { name: 'Contributor', flairs: ['flair5', 'flair16'] }, // Contributor & Emote Contributor.
+  { name: 'Subscriber Tier 5', flairs: ['flair42'] },
   { name: 'Subscriber Tier 4', flairs: ['flair8'] },
   { name: 'Subscriber Tier 3', flairs: ['flair3'] },
   { name: 'Subscriber Tier 2', flairs: ['flair1'] },

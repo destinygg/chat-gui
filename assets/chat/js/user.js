@@ -54,6 +54,9 @@ class ChatUser {
   }
 
   get subTier() {
+    if (this.hasFeature(UserFeature.SUB_TIER_5)) {
+      return 5;
+    }
     if (this.hasFeature(UserFeature.SUB_TIER_4)) {
       return 4;
     }
