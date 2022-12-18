@@ -858,6 +858,7 @@ hr {
     top: auto;
     left: auto;
     h5 {
+      justify-content: space-between;
       padding: $gutter-md;
       font-size: 1.1em;
       font-weight: normal;
@@ -868,7 +869,6 @@ hr {
       margin: 0;
     }
     span {
-      flex: 1;
       line-height: 1.25em;
       display: inline-block;
     }
