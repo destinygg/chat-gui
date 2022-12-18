@@ -1038,7 +1038,7 @@ hr {
         }
       }
     }
-    .user {
+    .user-entry {
       margin: 0;
       cursor: pointer;
       padding: 0 $gutter-lg;
@@ -1089,10 +1089,10 @@ hr {
   .scrollable {
     max-height: calc(100% - 3em);
   }
-  &.search-in .user {
+  &.search-in .user-entry {
     display: none;
   }
-  &.search-in .user.found {
+  &.search-in .user-entry.found {
     display: flex;
   }
   input {

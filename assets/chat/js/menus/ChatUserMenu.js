@@ -206,7 +206,7 @@ export default class ChatUserMenu extends ChatMenu {
   }
 
   removeElement(username) {
-    this.container.find(`.user[data-username="${username}"]`).remove();
+    this.container.find(`.user-entry[data-username="${username}"]`).remove();
     this.totalcount -= 1;
   }
 
@@ -217,7 +217,7 @@ export default class ChatUserMenu extends ChatMenu {
     const features =
       user.features.length === 0 ? 'nofeature' : user.features.join(' ');
     const usr = $(
-      `<a data-username="${user.username}" class="user ${features}">${label}<div class="user-actions"><i class="mention-nick"></i><i class="whisper-nick"></i></div></a>`
+      `<div class="user-entry" data-username="${user.username}"><a class="user ${features}">${label}</a><div class="user-actions"><i class="mention-nick"></i><i class="whisper-nick"></i></div></div>`
     );
     const section = this.sections.get(this.highestSection(user));
 
@@ -241,7 +241,9 @@ export default class ChatUserMenu extends ChatMenu {
   }
 
   hasElement(username) {
-    return this.container.find(`.user[data-username="${username}"]`).length > 0;
+    return (
+      this.container.find(`.user-entry[data-username="${username}"]`).length > 0
+    );
   }
 
   filter() {
@@ -263,7 +265,7 @@ export default class ChatUserMenu extends ChatMenu {
         });
       });
     } else {
-      this.container.children('.user').removeClass('found');
+      this.container.children('.user-entry').removeClass('found');
     }
   }
 
