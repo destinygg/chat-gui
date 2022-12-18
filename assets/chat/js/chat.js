@@ -2585,10 +2585,13 @@ class Chat {
               const date = moment(data[0].timestamp).format(DATE_FORMATS.FULL);
               MessageBuilder.info(`Last message ${date}.`).into(this, win);
               data.reverse().forEach((e) => {
-                MessageBuilder.historical(e.message, user, e.timestamp).into(
-                  this,
-                  win
-                );
+                const inboxUser =
+                  this.users.get(e.from.toLowerCase()) || new ChatUser(e.from);
+                MessageBuilder.historical(
+                  e.message,
+                  inboxUser,
+                  e.timestamp
+                ).into(this, win);
               });
             }
           })
