@@ -44,8 +44,10 @@ export default class ChatUserMenu extends ChatMenu {
     this.searchinput = this.ui.find(
       '#chat-user-list-search .form-control:first'
     );
-    this.container.on('click', '.user', (e) =>
-      this.chat.userfocus.toggleFocus(e.target.getAttribute('data-username'))
+    this.container.on('click', '.user-entry', (e) =>
+      this.chat.userfocus.toggleFocus(
+        e.currentTarget.getAttribute('data-username')
+      )
     );
     this.container.on('click', '.flair', (e) =>
       this.chat.userfocus.toggleFocus(e.target.getAttribute('data-flair'), true)
@@ -217,7 +219,7 @@ export default class ChatUserMenu extends ChatMenu {
     const features =
       user.features.length === 0 ? 'nofeature' : user.features.join(' ');
     const usr = $(
-      `<div class="user-entry" data-username="${user.username}"><a class="user ${features}">${label}</a><div class="user-actions"><i class="mention-nick"></i><i class="whisper-nick"></i></div></div>`
+      `<div class="user-entry" data-username="${user.username}"><span class="user ${features}">${label}</span><div class="user-actions"><i class="mention-nick"></i><i class="whisper-nick"></i></div></div>`
     );
     const section = this.sections.get(this.highestSection(user));
 
