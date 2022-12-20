@@ -45,7 +45,9 @@ export default class ChatUserMenu extends ChatMenu {
       '#chat-user-list-search .form-control:first'
     );
     this.container.on('click', '.user-entry', (e) =>
-      this.chat.userfocus.toggleFocus(e.target.getAttribute('data-username'))
+      this.chat.userfocus.toggleFocus(
+        e.currentTarget.getAttribute('data-username')
+      )
     );
     this.container.on('click', '.flair', (e) =>
       this.chat.userfocus.toggleFocus(e.target.getAttribute('data-flair'), true)
