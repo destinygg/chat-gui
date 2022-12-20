@@ -15,8 +15,7 @@ class ChatScrollPlugin {
       $el.on('update', () =>
         $el.toggleClass('chat-unpinned', !this.isPinned())
       ); // debounce
-      $el.on('mousedown', '.chat-scroll-notify', () => false);
-      $el.on('mouseup', '.chat-scroll-notify', () => {
+      $el.on('click', '.chat-scroll-notify', () => {
         this.updateAndPin(true);
         return false;
       });
