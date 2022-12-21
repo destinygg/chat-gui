@@ -29,7 +29,9 @@ export default class EmoteService {
   }
 
   getEmote(emote) {
-    return this.emotes.find((e) => e.prefix.toLowerCase() === emote.toLowerCase());
+    return this.emotes.find(
+      (e) => e.prefix.toLowerCase() === emote.toLowerCase()
+    );
   }
 
   emotePrefixesForTier(tier) {
