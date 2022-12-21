@@ -577,6 +577,7 @@ hr {
   }
 }
 .emote {
+  cursor: pointer;
   z-index: 1;
   display: inline-block;
   position: relative;
@@ -1100,6 +1101,33 @@ hr {
     border: none;
     background: none;
     border-radius: 0;
+  }
+}
+
+#chat-emote-tooltip {
+  height: fit-content;
+  width: fit-content;
+  min-width: 75px;
+  max-width: 250px;
+  .emote-image {
+    display: flex;
+    justify-content: center;
+    padding: $gutter-md;
+  }
+  .emote-info {
+    border-top: 1px solid $color-surface-dark4;
+    padding: $gutter-sm;
+    div {
+      display: flex;
+      justify-content: center;
+      &.name {
+        font-weight: 500;
+        color: $text-color;
+      }
+      &.author {
+        color: $text-color1;
+      }
+    }
   }
 }
 

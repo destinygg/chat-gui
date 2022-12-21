@@ -28,6 +28,10 @@ export default class EmoteService {
     return this.emotes.filter((e) => e.twitch).map((e) => e.prefix);
   }
 
+  getEmote(emote) {
+    return this.emotes.find((e) => e.prefix.toLowerCase() === emote.toLowerCase());
+  }
+
   emotePrefixesForTier(tier) {
     return this.emotes
       .filter((e) => e.minimumSubTier === tier && !e.twitch)
