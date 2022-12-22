@@ -47,14 +47,8 @@ export default class ChatEmoteTooltip extends ChatMenu {
   }
 
   setCreator(emote) {
-    const emoteData = this.chat.emoteService.getEmote(emote);
-    if (emoteData) {
-      if (emoteData.creator) {
-        this.creator.text(emoteData.creator);
-        this.creator.show();
-        return;
-      }
-    }
-    this.creator.hide();
+    const { creator } = this.chat.emoteService.getEmote(emote) ?? {};
+    this.creator.text(creator);
+    this.creator[creator ? 'show' : 'hide']();
   }
 }
