@@ -493,7 +493,6 @@ hr {
 
 /* Broadcasts */
 .msg-broadcast {
-  text-shadow: 1px 1px 3px rgba(0, 0, 0, 1);
   background-color: $color-chat-emphasize;
   color: $color-text-broadcast !important;
   font-size: 1.1em;
@@ -1484,8 +1483,7 @@ button.btn {
   .msg-chat {
     margin: 0;
     padding: 1px 20px 1px 5px;
-    text-shadow: -1px -1px 0 rgba(black, 0.75), 1px -1px 1px rgba(black, 0.75),
-      -1px 1px 0 rgba(black, 0.75), 1px 1px 1px rgba(black, 0.75);
+    filter: drop-shadow(1px 1px 1px black);
     letter-spacing: 0.03em;
   }
 
