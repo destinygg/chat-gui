@@ -13,6 +13,7 @@ import {
   ChatUserMenu,
   ChatWhisperUsers,
   ChatEmoteMenu,
+  ChatEmoteTooltip,
   ChatSettingsMenu,
   ChatUserInfoMenu,
 } from './menus';
@@ -566,6 +567,14 @@ class Chat {
       )
     );
     this.menus.set(
+      'emote-tooltip',
+      new ChatEmoteTooltip(
+        this.ui.find('#chat-emote-tooltip'),
+        this.output.find('.msg-user .text .emote'),
+        this
+      )
+    );
+    this.menus.set(
       'users',
       new ChatUserMenu(
         this.ui.find('#chat-user-list'),
@@ -581,7 +590,6 @@ class Chat {
         this
       )
     );
-
     this.menus.set(
       'user-info',
       new ChatUserInfoMenu(
