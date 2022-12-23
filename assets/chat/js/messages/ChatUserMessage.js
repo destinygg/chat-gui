@@ -38,9 +38,10 @@ export default class ChatUserMessage extends ChatMessage {
     if (this.target) ctrl = ' whispered: ';
     else if (this.slashme || this.continued) ctrl = '';
 
+    const colorFlair = this.usernameColorFlair(chat.flairs);
     const user = `${this.buildFeatures(this.user, chat)} <a title="${
       this.title
-    }" class="user ${this.user.features.join(' ')}">${this.user.username}</a>`;
+    }" class="user ${colorFlair?.name}">${this.user.username}</a>`;
     return this.wrap(
       `${this.buildTime()} ${user}<span class="ctrl">${ctrl}</span> ${this.buildMessageTxt(
         chat
@@ -55,9 +56,23 @@ export default class ChatUserMessage extends ChatMessage {
       .filter((e) => chat.flairsMap.has(e))
       .map((e) => chat.flairsMap.get(e))
       .reduce(
-        (str, e) => `${str}<i class="flair ${e.name}" title="${e.label}"></i> `,
+        (str, e) =>
+          `${str}<i data-flair="${e.name}" class="flair ${e.name}" title="${e.label}"></i> `,
         ''
       );
     return features !== '' ? `<span class="features">${features}</span>` : '';
+  }
+
+  /**
+   * Return the highest priority flair with a color, if one exists. This is the
+   * flair whose style should be applied to the user's username.
+   */
+  usernameColorFlair(allFlairs) {
+    return allFlairs
+      .filter((flair) =>
+        this.user.features.some((userFlair) => userFlair === flair.name)
+      )
+      .sort((a, b) => (a.priority - b.priority >= 0 ? 1 : -1))
+      .find((f) => f.rainbowColor || f.color);
   }
 }

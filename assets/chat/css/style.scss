@@ -264,7 +264,7 @@ hr {
   .user {
     font-weight: 500;
     cursor: pointer;
-    padding-left: $gutter-sm;
+    margin-left: $gutter-sm;
     color: $color-label-user;
   }
   .chat-user {
@@ -318,6 +318,7 @@ hr {
   align-items: center;
   margin-left: -$gutter-xs;
   .flair {
+    cursor: pointer;
     margin-left: $gutter-xs;
   }
 }
@@ -492,7 +493,6 @@ hr {
 
 /* Broadcasts */
 .msg-broadcast {
-  text-shadow: 1px 1px 3px rgba(0, 0, 0, 1);
   background-color: $color-chat-emphasize;
   color: $color-text-broadcast !important;
   font-size: 1.1em;
@@ -518,7 +518,7 @@ hr {
 }
 
 /* Focus or highlight a line */
-.focus-user .msg-chat {
+.focus .msg-chat {
   opacity: 0.3;
 }
 
@@ -576,6 +576,7 @@ hr {
   }
 }
 .emote {
+  cursor: pointer;
   z-index: 1;
   display: inline-block;
   position: relative;
@@ -857,6 +858,7 @@ hr {
     top: auto;
     left: auto;
     h5 {
+      justify-content: space-between;
       padding: $gutter-md;
       font-size: 1.1em;
       font-weight: normal;
@@ -867,7 +869,6 @@ hr {
       margin: 0;
     }
     span {
-      flex: 1;
       line-height: 1.25em;
       display: inline-block;
     }
@@ -1032,11 +1033,12 @@ hr {
         align-items: center;
         margin-right: $gutter-md;
         .flair {
+          cursor: pointer;
           margin-right: $gutter-xs;
         }
       }
     }
-    .user {
+    .user-entry {
       margin: 0;
       cursor: pointer;
       padding: 0 $gutter-lg;
@@ -1087,10 +1089,10 @@ hr {
   .scrollable {
     max-height: calc(100% - 3em);
   }
-  &.search-in .user {
+  &.search-in .user-entry {
     display: none;
   }
-  &.search-in .user.found {
+  &.search-in .user-entry.found {
     display: flex;
   }
   input {
@@ -1098,6 +1100,33 @@ hr {
     border: none;
     background: none;
     border-radius: 0;
+  }
+}
+
+#chat-emote-tooltip {
+  height: fit-content;
+  width: fit-content;
+  min-width: 75px;
+  max-width: 250px;
+  .emote-image {
+    display: flex;
+    justify-content: center;
+    padding: $gutter-md;
+  }
+  .emote-info {
+    border-top: 1px solid $color-surface-dark4;
+    padding: $gutter-sm;
+    div {
+      display: flex;
+      justify-content: center;
+      &.name {
+        font-weight: 500;
+        color: $text-color;
+      }
+      &.author {
+        color: $text-color1;
+      }
+    }
   }
 }
 
@@ -1487,8 +1516,7 @@ button.btn {
   .msg-chat {
     margin: 0;
     padding: 1px 20px 1px 5px;
-    text-shadow: -1px -1px 0 rgba(black, 0.75), 1px -1px 1px rgba(black, 0.75),
-      -1px 1px 0 rgba(black, 0.75), 1px 1px 1px rgba(black, 0.75);
+    filter: drop-shadow(1px 1px 1px black);
     letter-spacing: 0.03em;
   }
 
