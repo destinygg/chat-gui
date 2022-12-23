@@ -68,11 +68,10 @@ export default class ChatUserMenu extends ChatMenu {
       this.chat.input.val(`/whisper ${username} ${value}`).focus();
       return false;
     });
-    this.container.on('contextmenu', '.users .user', (e) => {
+    this.container.on('contextmenu', '.users .user-entry', (e) => {
       const userinfo = this.chat.menus.get('user-info');
       if (userinfo) {
-        const user = $(e.currentTarget).closest('.user');
-        userinfo.showUser(e, user, true);
+        userinfo.showUser(e, $(e.currentTarget), true);
         return false;
       }
       return true;

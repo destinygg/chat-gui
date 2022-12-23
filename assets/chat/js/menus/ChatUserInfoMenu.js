@@ -234,13 +234,9 @@ export default class ChatUserInfoMenu extends ChatMenu {
   addContent(message, userlist) {
     this.messageArray = userlist ? [] : [message];
 
-    const prettyNick = userlist
-      ? message[0].text
-      : message.find('.user')[0].text;
+    const prettyNick = message.find('.user')[0].innerText;
     const nick = message.data('username');
-    const usernameFeatures = userlist
-      ? message[0].classList.value
-      : message.find('.user')[0].attributes.class.value;
+    const usernameFeatures = message.find('.user')[0].classList.value;
 
     const formattedDate = this.buildCreatedDate(nick);
     if (formattedDate === '') {
@@ -290,7 +286,7 @@ export default class ChatUserInfoMenu extends ChatMenu {
   }
 
   buildCreatedDate(nick) {
-    const user = this.chat.users.get(nick);
+    const user = this.chat.users.get(nick.toLowerCase());
     if (user.createdDate === '') {
       return '';
     }
