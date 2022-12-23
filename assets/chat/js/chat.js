@@ -1760,6 +1760,8 @@ class Chat {
           ).join(', ')}.`
         ).into(this);
       }
+    } else if (parts.some((username) => username === this.user.nick)) {
+      MessageBuilder.info('You can\'t add yourself to your ignore list.').into(this);
     } else {
       // this is a little ugly, but it allows us to not ignore anything if there's an invalid nick in there
       // think that's less confusing/nicer compared to partially ignoring
