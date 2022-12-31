@@ -7,7 +7,13 @@ import { Notification } from './notification';
 import EventEmitter from './emitter';
 import ChatSource from './source';
 import ChatUser from './user';
-import { MessageBuilder, MessageTypes, ChatMessage } from './messages';
+import {
+  MessageBuilder,
+  MessageTypes,
+  ChatMessage,
+  checkPin,
+  removeCurrentPin,
+} from './messages';
 import {
   ChatMenu,
   ChatUserMenu,
@@ -319,6 +325,21 @@ const commandsinfo = new Map([
     },
   ],
   [
+    'pin',
+    {
+      desc: 'Pins a message to chat',
+      alias: ['motd'],
+    },
+  ],
+  [
+    'unpin',
+    {
+      desc: 'Unpins a message from chat',
+      admin: true,
+      alias: ['unmotd'],
+    },
+  ],
+  [
     'host',
     {
       desc: 'Hosts a livestream, video, or vod to bigscreen.',
@@ -404,6 +425,7 @@ class Chat {
     this.source.on('DISPATCH', (data) => this.onDISPATCH(data));
     this.source.on('CLOSE', (data) => this.onCLOSE(data));
     this.source.on('NAMES', (data) => this.onNAMES(data));
+    this.source.on('PIN', (data) => this.onPIN(data));
     this.source.on('QUIT', (data) => this.onQUIT(data));
     this.source.on('MSG', (data) => this.onMSG(data));
     this.source.on('MUTE', (data) => this.onMUTE(data));
@@ -471,6 +493,8 @@ class Chat {
     this.control.on('V', (data) => this.cmdVOTE(data, 'VOTE'));
     this.control.on('VOTESTOP', (data) => this.cmdVOTESTOP(data));
     this.control.on('VS', (data) => this.cmdVOTESTOP(data));
+    this.control.on('PIN', (data) => this.cmdPIN(data, false));
+    this.control.on('UNPIN', (data) => this.cmdPIN(data, true));
     this.control.on('HOST', (data) => this.cmdHOST(data));
     this.control.on('UNHOST', () => this.cmdUNHOST());
   }
@@ -543,6 +567,7 @@ class Chat {
     this.userfocus = new ChatUserFocus(this, this.css);
     this.mainwindow = new ChatWindow('main').into(this);
     this.mutedtimer = new MutedTimer(this);
+    this.pinnedMessage = null;
 
     this.ui.find('#chat-vote-frame:first').each((i, e) => {
       this.chatvote = new ChatVote(this, $(e));
@@ -1286,6 +1311,42 @@ class Chat {
     if (this.showmotd) {
       this.cmdHINT([Math.floor(Math.random() * hintstrings.size)]);
       this.showmotd = false;
+    }
+  }
+
+  onPIN(msg) {
+    const pinnedMessageStored = ChatStore.read('chat.pinnedmessage');
+    switch (checkPin(msg, pinnedMessageStored)) {
+      case 0: {
+        ChatStore.write(
+          'chat.pinnedmessage',
+          removeCurrentPin(pinnedMessageStored)
+        );
+        this.pinnedMessage = this.pinnedMessage
+          ? this.pinnedMessage.unpin()
+          : null;
+        break;
+      }
+      case 1: {
+        // double check if the same PIN event exists in history so that we create a double
+        if (this.pinnedMessage && this.pinnedMessage.uuid === msg.uuid) break;
+        this.pinnedMessage = this.pinnedMessage
+          ? this.pinnedMessage.unpin()
+          : null;
+        const usr = this.users.get(msg.nick.toLowerCase());
+        this.pinnedMessage = MessageBuilder.pinned(
+          msg.data,
+          usr,
+          msg.timestamp,
+          msg.uuid
+        )
+          .into(this)
+          .pin(this);
+        break;
+      }
+      default: {
+        break;
+      }
     }
   }
 
@@ -2553,6 +2614,36 @@ class Chat {
           MessageBuilder.error(data.message).into(this);
         }
       });
+  }
+
+  cmdPIN(parts, unpin) {
+    if (unpin) {
+      this.source.send('PIN', { data: '' });
+    } else if (parts.length === 0) {
+      if (!this.pinnedMessage) {
+        const pinnedMessageStored = ChatStore.read('chat.pinnedmessage');
+        if (Object.hasOwn(pinnedMessageStored, 'current')) {
+          const usr = this.users.get(
+            pinnedMessageStored.current.nick.toLowerCase()
+          );
+          this.pinnedMessage = MessageBuilder.pinned(
+            pinnedMessageStored.current.data,
+            usr,
+            pinnedMessageStored.current.timestamp,
+            pinnedMessageStored.current.uuid
+          )
+            .into(this)
+            .pin(this);
+        } else {
+          MessageBuilder.info('No dismissed pinned message to show :(').into(
+            this
+          );
+        }
+      }
+    } else {
+      const message = parts.join(' ');
+      this.source.send('PIN', { data: message });
+    }
   }
 
   openConversation(nick) {
