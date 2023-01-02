@@ -808,7 +808,7 @@ class Chat {
             this.whispers.set(e.username.toLowerCase(), {
               id: e.messageid,
               nick: e.username,
-              unread: e.unread,
+              unread: Number(e.unread),
               open: false,
             })
           );
