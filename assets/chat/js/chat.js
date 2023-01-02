@@ -2112,14 +2112,14 @@ class Chat {
         'No argument provided - /embed <link> OR /e <link>'
       ).into(this);
       MessageBuilder.info(
-        'Valid links: Twitch Streams, Twitch VODs, Twitch Clips, Youtube Videos, Vimeo Videos.'
+        'Valid links: Twitch Streams, Twitch VODs, Twitch Clips, Youtube Videos, Vimeo Videos, Rumble Videos.'
       ).into(this);
     } else if (parts.length > 1) {
       MessageBuilder.error(
         'More than one argument provided - /embed <link> OR /e <link>'
       ).into(this);
       MessageBuilder.info(
-        'Valid links: Twitch Streams, Twitch VODs, Twitch Clips, Youtube Videos, Vimeo Videos.'
+        'Valid links: Twitch Streams, Twitch VODs, Twitch Clips, Youtube Videos, Vimeo Videos, Rumble Videos.'
       ).into(this);
     } else {
       const matchedHost = parts[0].matchAll(urlCheck);
@@ -2153,12 +2153,22 @@ class Chat {
           case 'vimeo.com':
             location.href = `${noEmbedUrl}#vimeo/${match[6]}`;
             break;
+          case 'www.rumble.com':
+          case 'rumble.com':
+            if (match[5] === '/embed') {
+              location.href = `${noEmbedUrl}#rumble/${match[6].split('/')[0]}`;
+            } else {
+              MessageBuilder.error(
+                'Rumble links have to be embed links - https://rumble.com/embed/<id>'
+              ).into(this);
+            }
+            break;
           default:
             MessageBuilder.error(
               'Invalid link - /embed <link> OR /e <link>'
             ).into(this);
             MessageBuilder.info(
-              'Valid links: Twitch Streams, Twitch VODs, Twitch Clips, Youtube Videos, Vimeo Videos.'
+              'Valid links: Twitch Streams, Twitch VODs, Twitch Clips, Youtube Videos, Vimeo Videos, Rumble Videos.'
             ).into(this);
             break;
         }
@@ -2167,7 +2177,7 @@ class Chat {
           this
         );
         MessageBuilder.info(
-          'Valid links: Twitch Streams, Twitch VODs, Twitch Clips, Youtube Videos, Vimeo Videos.'
+          'Valid links: Twitch Streams, Twitch VODs, Twitch Clips, Youtube Videos, Vimeo Videos, Rumble Videos.'
         ).into(this);
       }
     }
@@ -2185,7 +2195,7 @@ class Chat {
         'Nothing embedded - /postembed OR /pe OR /postembed <link> [<message>] OR /pe <link> [<message>]'
       ).into(this);
       MessageBuilder.info(
-        'Valid links: Twitch Streams, Twitch VODs, Twitch Clips, Youtube Videos, Vimeo Video.'
+        'Valid links: Twitch Streams, Twitch VODs, Twitch Clips, Youtube Videos, Vimeo Videos, Rumble Videos.'
       ).into(this);
     } else {
       const matchedHost = parts[0].matchAll(urlCheck);
@@ -2231,12 +2241,23 @@ class Chat {
             msg = `#vimeo/${match[6]}`;
             this.source.send('MSG', { data: `${msg} ${moreMsg}` });
             break;
+          case 'www.rumble.com':
+          case 'rumble.com':
+            if (match[5] === '/embed') {
+              msg = `#rumble/${match[6].split('/')[0]}`;
+              this.source.send('MSG', { data: `${msg} ${moreMsg}` });
+            } else {
+              MessageBuilder.error(
+                'Rumble links have to be embed links - https://rumble.com/embed/<id>'
+              ).into(this);
+            }
+            break;
           default:
             MessageBuilder.error(
               'Invalid link - /postembed OR /pe OR /postembed <link> [<message>] OR /pe <link> [<message>]'
             ).into(this);
             MessageBuilder.info(
-              'Valid links: Twitch Streams, Twitch VODs, Twitch Clips, Youtube Videos, Vimeo Videos.'
+              'Valid links: Twitch Streams, Twitch VODs, Twitch Clips, Youtube Videos, Vimeo Videos, Rumble Videos.'
             ).into(this);
             break;
         }
@@ -2250,7 +2271,7 @@ class Chat {
           'Invalid link - /postembed OR /pe OR /postembed <link> [<message>] OR /pe <link> [<message>]'
         ).into(this);
         MessageBuilder.info(
-          'Valid links: Twitch Streams, Twitch VODs, Twitch Clips, Youtube Videos, Vimeo Videos.'
+          'Valid links: Twitch Streams, Twitch VODs, Twitch Clips, Youtube Videos, Vimeo Videos, Rumble Videos.'
         ).into(this);
       }
     }
