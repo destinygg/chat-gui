@@ -16,8 +16,8 @@ export default class ChatEmoteTooltip extends ChatMenuFloating {
       this.setCreator(emote);
       this.emote.html(`<div class="emote ${emote}">${emote}</div>`);
 
-      super.position(e);
-      super.show();
+      this.position(e);
+      this.show();
     });
 
     this.emote.on('click', '.emote', (e) => {

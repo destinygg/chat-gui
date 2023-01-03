@@ -55,8 +55,8 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     this.setActionsVisibility();
     this.addContent(user, userlist);
 
-    super.position(e);
-    super.show();
+    this.position(e);
+    this.show();
   }
 
   configureButtons() {
@@ -101,19 +101,19 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
           });
         this.chat.openConversation(this.clickedNick);
       }
-      super.hide();
+      this.hide();
     });
 
     this.logsUserBtn.on('click', () => {
       this.chat.cmdSTALK([this.clickedNick]);
-      super.hide();
+      this.hide();
     });
 
     this.ignoreUserBtn.on('click', () => {
       this.chat.ignore(this.clickedNick, true);
       this.chat.removeMessageByNick(this.clickedNick);
       MessageBuilder.status(`Ignoring ${this.clickedNick}`).into(this.chat);
-      super.hide();
+      this.hide();
     });
 
     this.unignoreUserBtn.on('click', () => {
@@ -121,7 +121,7 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
       MessageBuilder.status(
         `${this.clickedNick} has been removed from your ignore list`
       ).into(this.chat);
-      super.hide();
+      this.hide();
     });
   }
 
@@ -212,7 +212,7 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
       default:
         break;
     }
-    super.hide();
+    this.hide();
   }
 
   addContent(message, userlist) {
@@ -266,7 +266,7 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
       this.messagesContainer.append(element);
     });
 
-    super.redraw();
+    this.redraw();
   }
 
   buildCreatedDate(nick) {
