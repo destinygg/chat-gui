@@ -6,7 +6,7 @@ import ChatMenuFloating from './ChatMenuFloating';
 
 export default class ChatUserInfoMenu extends ChatMenuFloating {
   constructor(ui, btn, chat) {
-    super(ui, btn, chat);
+    super(ui, btn, chat, '.toolbar');
 
     this.clickedNick = '';
     this.messageArray = [];
