@@ -370,7 +370,7 @@ class Chat {
     this.backlogloading = false;
     this.unresolved = [];
 
-    this.flairs = new Set();
+    this.flairs = [];
     this.flairsMap = new Map();
     this.emoteService = new EmoteService();
 
