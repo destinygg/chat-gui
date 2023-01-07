@@ -1,4 +1,3 @@
-import $ from 'jquery';
 import MessageTypes from './MessageTypes';
 
 export default class ChatUIMessage {
@@ -22,9 +21,14 @@ export default class ChatUIMessage {
     classes.push(this.classes);
     classes.unshift(`msg-${this.type.toLowerCase()}`);
     classes.unshift(`msg-chat`);
-    return $('<div></div>', { ...attr, class: classes.join(' ') }).html(
-      content
-    )[0].outerHTML;
+
+    const wrapped = document.createElement('div');
+    Object.assign(wrapped, {
+      ...attr,
+      className: classes.join(' '),
+    });
+    wrapped.innerHTML = content;
+    return wrapped;
   }
 
   // eslint-disable-next-line no-unused-vars

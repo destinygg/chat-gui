@@ -32,7 +32,7 @@ class ChatWindow extends EventEmitter {
         `<div class="chat-scroll-notify">More messages below</div>` +
         `</div>`
     );
-    this.lines = this.ui.find('.chat-lines');
+    this.lines = this.ui.get(0).querySelector('.chat-lines');
   }
 
   destroy() {
@@ -45,8 +45,8 @@ class ChatWindow extends EventEmitter {
     const normalized = this.name.toLowerCase();
     this.maxlines = chat.settings.get('maxlines');
     this.scrollplugin = new ChatScrollPlugin(
-      this.lines.get(0),
-      this.lines.get(0).parentElement
+      this.lines,
+      this.lines.parentElement
     );
     this.tag =
       chat.taggednicks.get(normalized) ||
@@ -73,7 +73,7 @@ class ChatWindow extends EventEmitter {
   }
 
   addMessage(chat, message) {
-    message.ui = $(message.html(chat));
+    message.ui = message.html(chat);
     message.afterRender(chat);
     this.lastmessage = message;
     this.lines.append(message.ui);
@@ -82,13 +82,15 @@ class ChatWindow extends EventEmitter {
   }
 
   getlines(sel) {
-    return this.lines.children(sel);
+    return this.lines.children.querySelectorAll(sel);
   }
 
   removelines(sel) {
-    const remove = this.lines.children(sel);
+    const remove = this.lines.children.querySelectorAll(sel);
     this.linecount -= remove.length;
-    remove.remove();
+    remove.forEach((element) => {
+      element.remove();
+    });
   }
 
   locked() {
@@ -113,11 +115,13 @@ class ChatWindow extends EventEmitter {
   // Get the scroll position before adding the new line / removing old lines
   cleanup() {
     if (this.scrollplugin.isPinned() || this.waspinned) {
-      const lines = this.lines.children();
+      const lines = [...this.lines.children];
       if (lines.length >= this.maxlines) {
         const remove = lines.slice(0, lines.length - this.maxlines);
         this.linecount -= remove.length;
-        remove.remove();
+        remove.forEach((element) => {
+          element.remove();
+        });
       }
     }
   }
