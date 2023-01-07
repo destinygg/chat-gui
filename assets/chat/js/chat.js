@@ -327,7 +327,7 @@ const commandsinfo = new Map([
   [
     'pin',
     {
-      desc: 'Pins a message to chat',
+      desc: "Shows you the current pinned message if you dismissed it, or, if you're an admin, pins a message to chat",
       alias: ['motd'],
     },
   ],
@@ -494,7 +494,9 @@ class Chat {
     this.control.on('VOTESTOP', (data) => this.cmdVOTESTOP(data));
     this.control.on('VS', (data) => this.cmdVOTESTOP(data));
     this.control.on('PIN', (data) => this.cmdPIN(data, false));
+    this.control.on('MOTD', (data) => this.cmdPIN(data, false));
     this.control.on('UNPIN', (data) => this.cmdPIN(data, true));
+    this.control.on('UNMOTD', (data) => this.cmdPIN(data, true));
     this.control.on('HOST', (data) => this.cmdHOST(data));
     this.control.on('UNHOST', () => this.cmdUNHOST());
   }
@@ -1328,7 +1330,7 @@ class Chat {
         break;
       }
       case 1: {
-        // double check if the same PIN event exists in history so that we create a double
+        // double check if the same PIN event exists in history so that we don't create a double
         if (this.pinnedMessage && this.pinnedMessage.uuid === msg.uuid) break;
         this.pinnedMessage = this.pinnedMessage
           ? this.pinnedMessage.unpin()
@@ -1345,6 +1347,8 @@ class Chat {
         break;
       }
       default: {
+        pinnedMessageStored.current = msg;
+        ChatStore.write('chat.pinnedmessage', pinnedMessageStored);
         break;
       }
     }
