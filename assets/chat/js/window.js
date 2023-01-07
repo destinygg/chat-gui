@@ -1,4 +1,5 @@
 import $ from 'jquery';
+import { throttle } from 'throttle-debounce';
 import ChatScrollPlugin from './scroll';
 import EventEmitter from './emitter';
 
@@ -78,7 +79,7 @@ class ChatWindow extends EventEmitter {
     this.lastmessage = message;
     this.lines.append(message.ui);
     this.linecount += 1;
-    this.cleanup();
+    this.cleanupThrottle();
   }
 
   getlines(sel) {
@@ -125,6 +126,8 @@ class ChatWindow extends EventEmitter {
       }
     }
   }
+
+  cleanupThrottle = throttle(50, this.cleanup);
 
   updateAndPin(pin = true) {
     this.scrollplugin.updateAndPin(pin);
