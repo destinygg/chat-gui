@@ -2,6 +2,21 @@ import ChatStore from '../store';
 import ChatUserMessage from './ChatUserMessage';
 import MessageTypes from './MessageTypes';
 
+/**
+ * @typedef {Object} PINEvent
+ * @property {string} uuid Pin's UUID
+ * @property {string} data Pin's data
+ * @property {string} nick Pin's nick
+ * @property {number} timestamp Pin's timestamp
+ */
+
+/**
+ * @typedef {{
+ *   current?: PINEvent;
+ *   [uuid: string]: boolean;
+ * }} PINStored
+ */
+
 export default class PinnedMessage extends ChatUserMessage {
   constructor(message, user, timestamp, uuid) {
     super(message, user, timestamp);
@@ -15,7 +30,7 @@ export default class PinnedMessage extends ChatUserMessage {
       ? ChatStore.read('chat.pinnedmessage')
       : {};
     pinnedMessageStored.current = {
-      uuid: uuid,
+      uuid,
       data: message,
       nick: user.nick.toLowerCase(),
       timestamp: timestamp.valueOf(),
@@ -24,6 +39,10 @@ export default class PinnedMessage extends ChatUserMessage {
     ChatStore.write('chat.pinnedmessage', pinnedMessageStored);
   }
 
+  /**
+   * Unpins the current message.
+   * @returns {null} null
+   */
   unpin() {
     const pinnedMessageStored = ChatStore.read('chat.pinnedmessage');
     pinnedMessageStored[`${this.uuid}`] = true;
@@ -42,6 +61,11 @@ export default class PinnedMessage extends ChatUserMessage {
     return null;
   }
 
+  /**
+   * Pins the current message.
+   * @param {Chat} chat
+   * @returns {PinnedMessage} Pinned message.
+   */
   pin(chat = null) {
     chat.mainwindow.lock();
     this.ui.toggleClass('msg-pinned', true);
@@ -86,10 +110,13 @@ export default class PinnedMessage extends ChatUserMessage {
   }
 }
 
+/**
+ * Checks the received pin against the stored one.
+ * @param {PINEvent} msg - Received pin.
+ * @param {PINStored} stored - Stored pin.
+ * @returns {0 | 1 | 2} Pin condition, where 0 is an empty/"clear" pin, 1 is a new/never dismissed pin and 2 is an old/dismissed pin.
+ */
 export function checkPin(msg, stored) {
-  // 0 - clear pin
-  // 1 - new pin or old pin (not dismissed)
-  // 2 - old pin (dismissed)
   if (!Object.hasOwn(msg, 'data')) {
     return 0;
   }
@@ -102,6 +129,11 @@ export function checkPin(msg, stored) {
   return 1;
 }
 
+/**
+ * Removes the current stored pin from the stored pin object.
+ * @param {PINStored} stored
+ * @returns {PINStored} Cleared stored pin.
+ */
 export function removeCurrentPin(stored) {
   if (Object.hasOwn(stored, 'current')) {
     const { current, ...clearStored } = stored;
