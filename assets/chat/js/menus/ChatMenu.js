@@ -10,7 +10,7 @@ export default class ChatMenu extends EventEmitter {
     this.visible = false;
     this.shown = false;
     this.ui.find('.scrollable').each((i, e) => {
-      this.scrollplugin = new ChatScrollPlugin(chat, e);
+      this.scrollplugin = new ChatScrollPlugin(e.querySelector('.content'), e);
     });
     this.ui.on('click', '.close,.chat-menu-close', this.hide.bind(this));
     this.btn.on('click', (e) => {

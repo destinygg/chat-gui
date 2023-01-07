@@ -27,8 +27,8 @@ class ChatWindow extends EventEmitter {
     this.tag = null;
     this.lastmessage = null;
     this.ui = $(
-      `<div id="chat-win-${name}" class="chat-output ${type} nano" style="display: none;">` +
-        `<div class="chat-lines nano-content"></div>` +
+      `<div id="chat-win-${name}" class="chat-output ${type}" style="display: none;">` +
+        `<div class="chat-lines"></div>` +
         `<div class="chat-scroll-notify">More messages below</div>` +
         `</div>`
     );
@@ -44,7 +44,10 @@ class ChatWindow extends EventEmitter {
   into(chat) {
     const normalized = this.name.toLowerCase();
     this.maxlines = chat.settings.get('maxlines');
-    this.scrollplugin = new ChatScrollPlugin(chat, this.ui);
+    this.scrollplugin = new ChatScrollPlugin(
+      this.lines.get(0),
+      this.lines.get(0).parentElement
+    );
     this.tag =
       chat.taggednicks.get(normalized) ||
       tagcolors[Math.floor(Math.random() * tagcolors.length)];
