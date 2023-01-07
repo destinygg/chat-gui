@@ -1726,7 +1726,10 @@ class Chat {
   cmdHELP() {
     let str = `Available commands: \r`;
     commandsinfo.forEach((a, k) => {
-      str += ` /${k} - ${a.desc} \r`;
+      str +=
+        a.alias !== undefined
+          ? ` /${k}, /${a.alias.join(', /')} - ${a.desc} \r`
+          : ` /${k} - ${a.desc} \r`;
     });
     MessageBuilder.info(str).into(this);
   }
