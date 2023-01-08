@@ -71,8 +71,14 @@ class ChatInput {
 
     this.ui.on('paste', (e) => {
       e.preventDefault();
-      this.value += e.originalEvent.clipboardData.getData('text/plain');
-      this.render();
+      const paste = e.originalEvent.clipboardData.getData('text/plain');
+      if (paste.length > 0) {
+        const caret = this.caret.get();
+        this.previousValueLength = this.value.length;
+        this.value =
+          this.value.substring(0, caret) + paste + this.value.substring(caret);
+        this.render();
+      }
     });
 
     this.render();
