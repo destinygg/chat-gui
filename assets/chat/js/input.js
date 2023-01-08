@@ -51,6 +51,24 @@ class ChatInput {
       }
     });
 
+    this.ui.on('cut', (e) => {
+      e.preventDefault();
+      if (window.getSelection().toString().length > 0) {
+        // write to clipboard.
+        navigator.clipboard.writeText(window.getSelection().toString());
+
+        // remove from value.
+        const caret = this.caret.get();
+        this.previousValueLength = this.value.length;
+        this.value =
+          this.value.substring(
+            0,
+            caret - window.getSelection().toString().length
+          ) + this.value.substring(caret);
+        this.render();
+      }
+    });
+
     this.ui.on('paste', (e) => {
       e.preventDefault();
       this.value += e.originalEvent.clipboardData.getData('text/plain');
