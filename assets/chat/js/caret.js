@@ -16,14 +16,14 @@ class Caret {
         preCaretRange.setEnd(range.endContainer, range.endOffset);
         caretOffset = preCaretRange.toString().length;
       }
-    } else if (document.selection && document.selection.type !== "Control") {
+    } else if (document.selection && document.selection.type !== 'Control') {
       const textRange = document.selection.createRange();
       const preCaretTextRange = document.body.createTextRange();
       preCaretTextRange.moveToElementText(this.ui[0]);
-      preCaretTextRange.setEndPoint("EndToEnd", textRange);
+      preCaretTextRange.setEndPoint('EndToEnd', textRange);
       caretOffset = preCaretTextRange.text.length;
     }
-    
+
     this.stored = caretOffset;
     return caretOffset;
   }
@@ -34,11 +34,12 @@ class Caret {
       const sel = window.getSelection();
 
       if (startIndex === -1) {
-        const lastNode = this.ui[0].childNodes[this.ui[0].childNodes.length - 1];
+        const lastNode =
+          this.ui[0].childNodes[this.ui[0].childNodes.length - 1];
         const node = this.getTextNode(lastNode);
         range.setStart(node, node.length);
       } else {
-        const {nodeIndex, offset} = this.getNodeIndex(startIndex, nodes);
+        const { nodeIndex, offset } = this.getNodeIndex(startIndex, nodes);
         const node = this.getTextNode(this.ui[0].childNodes[nodeIndex]);
         range.setStart(node, offset);
       }
@@ -64,11 +65,11 @@ class Caret {
       if (index <= len) {
         return {
           nodeIndex: n,
-          offset: index - previousLen
+          offset: index - previousLen,
         };
       }
     }
-    return {nodeIndex: 0, offset: 0};
+    return { nodeIndex: 0, offset: 0 };
   }
 
   getTextNode(node) {

@@ -58,7 +58,7 @@ class ChatAutoComplete {
     });
 
     this.ui.on('click', 'li', (e) => {
-      const index = parseInt(e.currentTarget.getAttribute('data-index'), 10)
+      const index = parseInt(e.currentTarget.getAttribute('data-index'), 10);
       this.tabIndex = index;
       this.select(index);
     });
@@ -67,14 +67,17 @@ class ChatAutoComplete {
   select(index) {
     const right = this.chat.ui.width();
     const width = $(this.ui[0].children[0]).width();
-    const left = ((width - right) / this.results.length) * (this.tabIndex + 1) + 15;
+    const left =
+      ((width - right) / this.results.length) * (this.tabIndex + 1) + 15;
     if (width - right > 0) {
       this.ui.css('left', this.tabIndex > 3 ? -left : 0);
     }
 
     const pre = this.message.substring(0, this.rangeStart);
     const post = this.message.substring(this.rangeEnd);
-    this.input.val(`${pre}${this.hasAt ? '@' : ''}${this.results[index].value} ${post}`);
+    this.input.val(
+      `${pre}${this.hasAt ? '@' : ''}${this.results[index].value} ${post}`
+    );
     this.input.caret.set();
 
     this.render();
@@ -88,21 +91,21 @@ class ChatAutoComplete {
         return {
           wordIndex: n,
           startIndex: this.input.caret.get() - words[n].length,
-          endIndex: this.input.caret.get()
+          endIndex: this.input.caret.get(),
         };
       }
     }
     return {
       wordIndex: 0,
       startIndex: this.input.caret.get() - words[0].length,
-      endIndex: this.input.caret.get()
-    }
+      endIndex: this.input.caret.get(),
+    };
   }
 
   search() {
     this.message = this.input.val();
     const words = this.message.split(/(\s+?)/g);
-    const {wordIndex, startIndex, endIndex} = this.getWord(words);
+    const { wordIndex, startIndex, endIndex } = this.getWord(words);
     this.rangeStart = startIndex;
     this.rangeEnd = endIndex;
     let currentWord = words[wordIndex];
@@ -111,12 +114,16 @@ class ChatAutoComplete {
         this.hasAt = true;
         this.hasColon = false;
         currentWord = currentWord.substring(1);
-        this.results = this.trie.all(currentWord).filter((data) => !data.isEmote);
+        this.results = this.trie
+          .all(currentWord)
+          .filter((data) => !data.isEmote);
       } else if (currentWord.startsWith(':')) {
         this.hasAt = false;
         this.hasColon = true;
         currentWord = currentWord.substring(1);
-        this.results = this.trie.all(currentWord).filter((data) => data.isEmote);
+        this.results = this.trie
+          .all(currentWord)
+          .filter((data) => data.isEmote);
       } else {
         this.hasAt = false;
         this.hasColon = false;
@@ -141,11 +148,18 @@ class ChatAutoComplete {
   render() {
     this.chat.ui.toggleClass('chat-autocomplete-in', this.results.length > 0);
     this.ui.toggleClass('active', this.results.length > 0);
-    const html = [...this.results].map((data, index) => `<li data-index="${index}"${index === this.tabIndex ? ` class="active"` : ''}>${data.value}</li>`).join('');
+    const html = [...this.results]
+      .map(
+        (data, index) =>
+          `<li data-index="${index}"${
+            index === this.tabIndex ? ` class="active"` : ''
+          }>${data.value}</li>`
+      )
+      .join('');
     this.ui[0].children[0].innerHTML = html;
     this.timeout();
   }
-  
+
   timeout() {
     if (this.timer) clearTimeout(this.timer);
     this.timer = setTimeout(() => {

@@ -35,7 +35,7 @@ class Trie {
     }
     return false;
   }
-  
+
   deleteNode(str, node, index = 0) {
     const parentNode = node.parent;
     parentNode.children.delete(node.char);
@@ -54,7 +54,7 @@ class Trie {
       if (node.leaf) return node.data;
     }
     return null;
-  };
+  }
 
   all(str = '') {
     const normalized = str.toLowerCase();
@@ -64,7 +64,7 @@ class Trie {
       return this.children(node, []);
     }
     return [];
-  };
+  }
 
   getNode(str) {
     let currentNode = this.root;

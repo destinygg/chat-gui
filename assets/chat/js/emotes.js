@@ -29,14 +29,12 @@ export default class EmoteService {
   }
 
   getEmote(emote, ignorecase = true) {
-    return this.emotes.find(
-      (e) => {
-        if (ignorecase) {
-          return e.prefix.toLowerCase() === emote.toLowerCase();
-        }
-        return e.prefix === emote
+    return this.emotes.find((e) => {
+      if (ignorecase) {
+        return e.prefix.toLowerCase() === emote.toLowerCase();
       }
-    );
+      return e.prefix === emote;
+    });
   }
 
   emotePrefixesForTier(tier) {

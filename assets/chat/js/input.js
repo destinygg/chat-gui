@@ -22,7 +22,8 @@ class ChatInput {
         if (char.length > 0) {
           const caret = this.caret.get();
           this.previousValueLength = this.value.length;
-          this.value = this.value.substring(0, caret) + char + this.value.substring(caret);
+          this.value =
+            this.value.substring(0, caret) + char + this.value.substring(caret);
           this.render();
         }
       }
@@ -34,9 +35,14 @@ class ChatInput {
         const caret = this.caret.get();
         this.previousValueLength = this.value.length;
         if (window.getSelection().toString().length === 0) {
-          this.value = this.value.substring(0, caret - 1) + this.value.substring(caret);
+          this.value =
+            this.value.substring(0, caret - 1) + this.value.substring(caret);
         } else {
-          this.value = this.value.substring(0, caret - window.getSelection().toString().length) + this.value.substring(caret);
+          this.value =
+            this.value.substring(
+              0,
+              caret - window.getSelection().toString().length
+            ) + this.value.substring(caret);
         }
         this.render();
       }
@@ -69,7 +75,7 @@ class ChatInput {
 
   set placeholder(placeholder) {
     this.bgText = placeholder;
-    this.ui.attr('placeholder', this.bgText); 
+    this.ui.attr('placeholder', this.bgText);
   }
 
   render() {
@@ -80,7 +86,9 @@ class ChatInput {
 
     [...this.value.split(/(\s+?)/g)].forEach((value) => {
       const emote = this.chat.emoteService.getEmote(value, false);
-      const username = value.startsWith('@') ? value.substring(1).toLowerCase() : value.toLowerCase();
+      const username = value.startsWith('@')
+        ? value.substring(1).toLowerCase()
+        : value.toLowerCase();
       const user = this.chat.users.has(username);
       if (emote || user) {
         if (nodeText !== '') {
@@ -92,9 +100,14 @@ class ChatInput {
       if (emote) {
         text += `<div data-type="emote" data-emote="${emote.prefix}" class="msg-chat"><span title="${emote.prefix}" class="emote ${emote.prefix}">${emote.prefix}</span></div>`;
       } else if (user) {
-        text += `<div data-type="user" data-username="${username}"><span class="user ${this.chat.users.get(username).features.join(' ')}">${value}</span></div>`;
+        text += `<div data-type="user" data-username="${username}"><span class="user ${this.chat.users
+          .get(username)
+          .features.join(' ')}">${value}</span></div>`;
       } else {
-        text += value.replace(/</gm, '&lt;').replace(/>/gm, '&gt;').replace(/\s/gm, '&nbsp;');
+        text += value
+          .replace(/</gm, '&lt;')
+          .replace(/>/gm, '&gt;')
+          .replace(/\s/gm, '&nbsp;');
         nodeText += value;
       }
     });
