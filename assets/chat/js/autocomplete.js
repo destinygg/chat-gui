@@ -1,273 +1,159 @@
 import $ from 'jquery';
-import { KEYCODES, getKeyCode } from './const';
-import makeSafeForRegex from './regex';
+import { KEYCODES, isKeyCode, getKeyCode } from './const';
+import Trie from './Trie';
 
-let suggestTimeoutId;
-const minWordLength = 1;
 const maxResults = 20;
-
-function getBucketId(id) {
-  return (id.match(/[\S]/)[0] || '_').toLowerCase();
-}
-
 function sortResults(a, b) {
   if (!a || !b) return 0;
 
   // order emotes second
-  if (a.isemote !== b.isemote) return a.isemote && !b.isemote ? -1 : 1;
+  if (a.isEmote !== b.isEmote) return a.isEmote && !b.isEmote ? -1 : 1;
 
   // order according to recency third
   if (a.weight !== b.weight) return a.weight > b.weight ? -1 : 1;
 
   // order lexically fourth
-  const lowerA = a.data.toLowerCase();
-  const lowerB = b.data.toLowerCase();
+  const lowerA = a.value.toLowerCase();
+  const lowerB = b.value.toLowerCase();
 
   if (lowerA === lowerB) return 0;
 
   return lowerA > lowerB ? 1 : -1;
 }
-function buildSearchCriteria(str, offset) {
-  let pre = str.substring(0, offset);
-  let post = str.substring(offset);
-  let startCaret = pre.lastIndexOf(' ') + 1;
-  const endCaret = post.indexOf(' ');
-  let useronly = false;
-
-  if (startCaret > 0) pre = pre.substring(startCaret);
-
-  if (endCaret > -1) post = post.substring(0, endCaret);
-
-  // Ignore the first char as part of the search and flag as a user only search
-  if (pre.lastIndexOf('@') === 0) {
-    startCaret += 1;
-    pre = pre.substring(1);
-    useronly = true;
-  }
-
-  return {
-    word: pre + post,
-    pre,
-    post,
-    startCaret,
-    useronly,
-    orig: str,
-  };
-}
-function timeoutHelpers(ac) {
-  if (suggestTimeoutId) clearTimeout(suggestTimeoutId);
-  suggestTimeoutId = setTimeout(() => ac.reset(), 15000, ac);
-}
-function updateHelpers(ac) {
-  ac.chat.ui.toggleClass('chat-autocomplete-in', ac.results.length > 0);
-  ac.ui.toggleClass('active', ac.results.length > 0);
-}
-function selectHelper(ac) {
-  // Positioning
-  if (ac.selected !== -1 && ac.results.length > 0) {
-    const list = ac.ui.find(`li`).get();
-    const offset = ac.container.position().left;
-    const maxwidth = ac.ui.width();
-    $(list[ac.selected + 3]).each((i, e) => {
-      const right = $(e).position().left + offset + $(e).outerWidth();
-      if (right > maxwidth) ac.container.css('left', offset + maxwidth - right);
-    });
-    $(list[Math.max(0, ac.selected - 2)]).each((i, e) => {
-      const left = $(e).position().left + offset;
-      if (left < 0) ac.container.css('left', -$(e).position().left);
-    });
-    list.forEach((e, i) => $(e).toggleClass('active', i === ac.selected));
-  }
-}
 
 class ChatAutoComplete {
-  constructor() {
-    /** @member jQuery */
-    this.ui = $(`<div id="chat-auto-complete"><ul></ul></div>`);
-    this.ui.on('click', 'li', (e) =>
-      this.select(parseInt(e.currentTarget.getAttribute('data-index'), 10))
-    );
-    this.container = $(this.ui[0].firstElementChild);
-    this.buckets = new Map();
-    this.results = [];
-    this.criteria = null;
-    this.selected = -1;
-    this.input = null;
-  }
-
-  bind(chat) {
+  constructor(chat) {
     this.chat = chat;
-    this.input = chat.input;
-    this.ui.insertBefore(chat.input);
-    let originval = '';
-    let shiftdown = false;
-    let keypressed = false;
+    this.ui = this.chat.ui.find('#chat-auto-complete');
+    this.input = this.chat.input;
 
-    // The reason why this has a bind method, is that the chat relies autocomplete objecting being around
-    // Key down for any key, but we cannot get the charCode from it (like keypress).
-    this.input.on('keydown', (e) => {
-      originval = this.input.val().toString();
-      const keycode = getKeyCode(e);
-      if (keycode === KEYCODES.TAB) {
-        if (this.results.length > 0)
-          this.select(
-            this.selected >= this.results.length - 1 ? 0 : this.selected + 1
-          );
-        e.preventDefault();
-        e.stopPropagation();
-      } else if (shiftdown !== e.shiftKey && this.criteria !== null) {
-        shiftdown = !!e.shiftKey;
-        this.search(this.criteria, shiftdown);
-      }
-    });
-    // Key press of characters that actually input into the field
+    this.timer = null;
+    this.hasAt = false;
+    this.hasColon = false;
+    this.rangeStart = 0;
+    this.rangeEnd = 0;
+    this.message = '';
+    this.trie = new Trie();
+    this.results = [];
+    this.tabIndex = -1;
+
     this.input.on('keypress', (e) => {
       const keycode = getKeyCode(e);
       const char = String.fromCharCode(keycode) || '';
-      if (keycode === KEYCODES.ENTER) {
-        this.promoteIfSelected();
-        this.reset();
-      } else if (char.length > 0) {
-        this.promoteIfSelected();
-        const str = this.input.val().toString();
-        const offset = this.input[0].selectionStart + 1;
-        const pre = str.substring(0, offset);
-        const post = str.substring(offset);
-        const criteria = buildSearchCriteria(pre + char + post, offset);
-        this.search(criteria);
-        // If the first result is exact, highlight it.
-        if (this.results.length > 0 && this.results[0].data === criteria.word) {
-          this.selected = 0;
-          selectHelper(this);
-          updateHelpers(this);
+      if (char.length > 0) this.search();
+    });
+
+    this.input.on('keydown', (e) => {
+      if (isKeyCode(e, KEYCODES.BACKSPACE)) this.search();
+      if (isKeyCode(e, KEYCODES.TAB)) {
+        e.preventDefault();
+        if (this.tabIndex + 1 > this.results.length - 1) {
+          this.tabIndex = 0;
+        } else {
+          this.tabIndex += 1;
         }
-        keypressed = true;
+
+        this.select(this.tabIndex);
       }
     });
-    // Key up, we handle things like backspace if the keypress never found a char.
-    this.input.on('keyup', (e) => {
-      const keycode = getKeyCode(e);
-      if (keycode !== KEYCODES.TAB && keycode !== KEYCODES.ENTER) {
-        const str = this.input.val().toString();
-        if (str.trim().length === 0) this.reset();
-        // If a key WAS pressed, but keypress event did not fire
-        // Check if the value changed between the key down, and key up
-        // Keys like `backspace`
-        else if (!keypressed && str !== originval) {
-          const offset = this.input[0].selectionStart;
-          const criteria = buildSearchCriteria(str, offset);
-          this.search(criteria);
-        } else if (shiftdown !== e.shiftKey && this.criteria !== null) {
-          shiftdown = !!e.shiftKey;
-          this.search(this.criteria, shiftdown);
-        }
-      }
-      keypressed = false;
-      originval = '';
+
+    this.ui.on('click', 'li', (e) => {
+      const index = parseInt(e.currentTarget.getAttribute('data-index'), 10)
+      this.tabIndex = index;
+      this.select(index);
     });
-    // Mouse down, if there is no text selection search the word from where the caret is
-    this.input.on('mouseup', () => {
-      if (this.input[0].selectionStart !== this.input[0].selectionEnd) {
-        this.reset();
-        return;
-      }
-      const needle = this.input.val().toString();
-      const offset = this.input[0].selectionStart;
-      const criteria = buildSearchCriteria(needle, offset);
-      this.search(criteria);
-    });
-  }
-
-  search(criteria, useronly = false) {
-    this.selected = -1;
-    this.results = [];
-    this.criteria = criteria;
-    if (criteria.word.length >= minWordLength) {
-      const bucket = this.buckets.get(getBucketId(criteria.word)) || new Map();
-      const regex = new RegExp(`^${makeSafeForRegex(criteria.pre)}`, 'i');
-      this.results = [...bucket.values()]
-        // filter exact matches
-        // .filter(a => a.data !== criteria.word)
-        // filter users if user search
-        .filter(
-          (a) =>
-            (!a.isemote || !(criteria.useronly || useronly)) &&
-            regex.test(a.data)
-        )
-        .sort(sortResults)
-        .slice(0, maxResults);
-    }
-    this.buildHelpers();
-    updateHelpers(this);
-    timeoutHelpers(this);
-  }
-
-  reset() {
-    this.criteria = null;
-    this.results = [];
-    this.selected = -1;
-    updateHelpers(this);
-  }
-
-  add(str, isemote = false, weight = 1) {
-    const id = getBucketId(str);
-    const bucket =
-      this.buckets.get(id) || this.buckets.set(id, new Map()).get(id);
-    const data = Object.assign(bucket.get(str) || {}, {
-      data: str,
-      weight,
-      isemote,
-    });
-    bucket.set(str, data);
-    return data;
-  }
-
-  remove(str, userOnly = false) {
-    const bucket = this.buckets.get(getBucketId(str));
-    if (bucket && bucket.has(str)) {
-      const a = bucket.get(str);
-      if ((userOnly && !a.isemote) || !userOnly) {
-        bucket.delete(str);
-      }
-    }
   }
 
   select(index) {
-    this.selected = Math.min(index, this.results.length - 1);
-    const result = this.results[this.selected];
-    if (!result) return;
+    const right = this.chat.ui.width();
+    const width = $(this.ui[0].children[0]).width();
+    const left = ((width - right) / this.results.length) * (this.tabIndex + 1) + 15;
+    if (width - right > 0) {
+      this.ui.css('left', this.tabIndex > 3 ? -left : 0);
+    }
 
-    const pre = this.criteria.orig.substr(0, this.criteria.startCaret);
-    let post = this.criteria.orig.substr(
-      this.criteria.startCaret + this.criteria.word.length
-    );
+    const pre = this.message.substring(0, this.rangeStart);
+    const post = this.message.substring(this.rangeEnd);
+    this.input.val(`${pre}${this.hasAt ? '@' : ''}${this.results[index].value} ${post}`);
+    this.input.caret.set();
 
-    // always add a space after our completion if there isn't one since people
-    // would usually add one anyway
-    if (post[0] !== ' ' || post.length === 0) post = ` ${post}`;
-    this.input.focus().val(pre + result.data + post);
-
-    // Move the caret to the end of the replacement string + 1 for the space
-    const s = pre.length + result.data.length + 1;
-    this.input[0].setSelectionRange(s, s);
-
-    // Update selection gui
-    selectHelper(this);
-    updateHelpers(this);
+    this.render();
   }
 
-  promoteIfSelected() {
-    if (this.selected >= 0 && this.results[this.selected]) {
-      this.results[this.selected].weight = Date.now();
+  getWord(words) {
+    let len = 0;
+    for (let n = 0; n < words.length; n++) {
+      len += words[n].length;
+      if (this.input.caret.get() <= len) {
+        return {
+          wordIndex: n,
+          startIndex: this.input.caret.get() - words[n].length,
+          endIndex: this.input.caret.get()
+        };
+      }
+    }
+    return {
+      wordIndex: 0,
+      startIndex: this.input.caret.get() - words[0].length,
+      endIndex: this.input.caret.get()
     }
   }
 
-  buildHelpers() {
-    if (this.results.length > 0) {
-      this.container[0].innerHTML = this.results
-        .map((res, k) => `<li data-index="${k}">${res.data}</li>`)
-        .join('');
+  search() {
+    this.message = this.input.val();
+    const words = this.message.split(/(\s+?)/g);
+    const {wordIndex, startIndex, endIndex} = this.getWord(words);
+    this.rangeStart = startIndex;
+    this.rangeEnd = endIndex;
+    let currentWord = words[wordIndex];
+    if (currentWord !== '') {
+      if (currentWord.startsWith('@')) {
+        this.hasAt = true;
+        this.hasColon = false;
+        currentWord = currentWord.substring(1);
+        this.results = this.trie.all(currentWord).filter((data) => !data.isEmote);
+      } else if (currentWord.startsWith(':')) {
+        this.hasAt = false;
+        this.hasColon = true;
+        currentWord = currentWord.substring(1);
+        this.results = this.trie.all(currentWord).filter((data) => data.isEmote);
+      } else {
+        this.hasAt = false;
+        this.hasColon = false;
+        this.results = this.trie.all(currentWord);
+      }
+      this.results.sort(sortResults).slice(0, maxResults);
+    } else {
+      this.results = [];
     }
+    this.tabIndex = -1;
+    this.render();
+  }
+
+  add(str, isEmote = false, weight = 1) {
+    this.trie.add(str, { value: str, isEmote, weight });
+  }
+
+  remove(str) {
+    this.trie.remove(str);
+  }
+
+  render() {
+    this.chat.ui.toggleClass('chat-autocomplete-in', this.results.length > 0);
+    this.ui.toggleClass('active', this.results.length > 0);
+    const html = [...this.results].map((data, index) => `<li data-index="${index}"${index === this.tabIndex ? ` class="active"` : ''}>${data.value}</li>`).join('');
+    this.ui[0].children[0].innerHTML = html;
+    this.timeout();
+  }
+  
+  timeout() {
+    if (this.timer) clearTimeout(this.timer);
+    this.timer = setTimeout(() => {
+      this.ui.css('left', 0);
+      this.results = [];
+      this.tabIndex = -1;
+      this.render();
+    }, 15000);
   }
 }
 

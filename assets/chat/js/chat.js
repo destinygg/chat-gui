@@ -363,6 +363,7 @@ class Chat {
     this.ui = null;
     this.css = null;
     this.output = null;
+    this.autocomplete = null;
     this.input = null;
     this.loginscrn = null;
     this.loadingscrn = null;
@@ -380,7 +381,6 @@ class Chat {
     this.whispers = new Map();
     this.windows = new Map();
     this.settings = new Map(settingsdefault);
-    this.autocomplete = new ChatAutoComplete();
     this.menus = new Map();
     this.taggednicks = new Map();
     this.taggednotes = new Map();
@@ -540,6 +540,7 @@ class Chat {
     this.loadingscrn = this.ui.find('#chat-loading');
     this.windowselect = this.ui.find('#chat-windows-select');
     this.input = new ChatInput(this);
+    this.autocomplete = new ChatAutoComplete(this);
     this.inputhistory = new ChatInputHistory(this);
     this.userfocus = new ChatUserFocus(this, this.css);
     this.mainwindow = new ChatWindow('main').into(this);
@@ -604,8 +605,6 @@ class Chat {
       this.autocomplete.add(`/${k}`);
       (a.alias || []).forEach((i) => this.autocomplete.add(`/${i}`));
     });
-
-    this.autocomplete.bind(this);
 
     // Chat input
     // Dynamically adjust input's height.
@@ -1294,7 +1293,7 @@ class Chat {
     const normalized = data.nick.toLowerCase();
     if (this.users.has(normalized)) {
       this.users.delete(normalized);
-      this.autocomplete.remove(data.nick, true);
+      this.autocomplete.remove(data.nick);
     }
   }
 
