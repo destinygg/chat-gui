@@ -212,6 +212,9 @@ hr {
 }
 
 #chat-input-control {
+  -moz-appearance: textfield-multiline;
+  -webkit-appearance: textarea;
+  min-height: 53px;
   max-height: 140px;
   position: relative;
   color: $color-chat-text2;
@@ -227,9 +230,15 @@ hr {
   box-sizing: border-box;
   display: block;
   overflow: hidden;
-}
-#chat-input-control::placeholder {
-  color: $color-chat-place;
+  &:empty::before {
+    content: attr(placeholder);
+    color: $color-chat-place;
+    cursor: text;
+  }
+  div {
+    display: inline;
+    padding: 0 !important;
+  }
 }
 .chat-lines {
   font-family: $chat-lines-font;

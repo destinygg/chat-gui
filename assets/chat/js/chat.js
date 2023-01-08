@@ -18,6 +18,7 @@ import {
   ChatUserInfoMenu,
 } from './menus';
 import ChatAutoComplete from './autocomplete';
+import ChatInput from './input';
 import ChatInputHistory from './history';
 import ChatUserFocus from './focus';
 import ChatStore from './store';
@@ -535,10 +536,10 @@ class Chat {
 
     this.ishidden = (document.visibilityState || 'visible') !== 'visible';
     this.output = this.ui.find('#chat-output-frame');
-    this.input = this.ui.find('#chat-input-control');
     this.loginscrn = this.ui.find('#chat-login-screen');
     this.loadingscrn = this.ui.find('#chat-loading');
     this.windowselect = this.ui.find('#chat-windows-select');
+    this.input = new ChatInput(this);
     this.inputhistory = new ChatInputHistory(this);
     this.userfocus = new ChatUserFocus(this, this.css);
     this.mainwindow = new ChatWindow('main').into(this);
@@ -619,7 +620,7 @@ class Chat {
         e.stopPropagation();
         this.control.emit('SEND', this.input.val().toString().trim());
         this.adjustInputHeight();
-        this.input.focus();
+        this.input.val('').focus();
       }
     });
 
@@ -1206,7 +1207,7 @@ class Chat {
     const placeholderText = this.authenticated
       ? `Write something ${this.user.username} ...`
       : `Write something ...`;
-    this.input.attr('placeholder', placeholderText);
+    this.input.placeholder = placeholderText;
   }
 
   adjustInputHeight() {
