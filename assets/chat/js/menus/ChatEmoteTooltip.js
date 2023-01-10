@@ -9,7 +9,7 @@ export default class ChatEmoteTooltip extends ChatMenu {
     this.name = this.ui.find('.emote-info .name');
     this.creator = this.ui.find('.emote-info .creator');
 
-    this.chat.output.on('click', '.msg-user .text .emote', (e) => {
+    this.chat.output.on('click', '.msg-chat .text .emote', (e) => {
       const emote = $(e.currentTarget).closest('.emote')[0].innerText;
 
       this.name.text(emote);
