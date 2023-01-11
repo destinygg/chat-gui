@@ -6,20 +6,15 @@ import streamHtml from './views/stream.html';
 
 /**
  * GET Params
- * u:   socket url
- * a:   api url
- * s:   cdn url
- * c:   cache key
  * t:   template [EMBED | STREAM]
  * f:   font scale on STREAM layout [1 ... 10]
  * @type {Chat}
  */
 
 const chat = new Chat({
-  url: Chat.reqParam('u') || `ws://localhost:9000`,
-  api: { base: Chat.reqParam('a') || `http://localhost:8181` },
-  cdn: { base: Chat.reqParam('s') || `http://localhost:8182` },
-  cacheKey: Chat.reqParam('c') || new Date().getTime(),
+  url: 'wss://localhost:8282/chat',
+  api: { base: 'https://localhost:8282' },
+  cdn: { base: 'https://localhost:8282/cdn' },
 });
 
 const html = $('body,html');
