@@ -1,5 +1,25 @@
+require('dotenv').config();
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 require('webpack');
+
+/**
+ * Reads `sid` and `rememberme` session tokens from the environment and adds
+ * them to a request. Assumes the `Cookie` header is formatted `k1=v1; k2=v2`.
+ * @param {http.ClientRequest} request
+ */
+function bakeCookies(request) {
+  let cookies = request.getHeader('Cookie');
+
+  const { SID, REMEMBERME } = process.env;
+  if (SID) {
+    cookies = cookies.replace(/(sid=).*?(;|$)/, `$1${SID}$2`);
+  }
+  if (REMEMBERME) {
+    cookies += `; rememberme=${REMEMBERME}`;
+  }
+
+  request.setHeader('Cookie', cookies);
+}
 
 module.exports = {
   devServer: {
@@ -10,6 +30,9 @@ module.exports = {
         target: 'https://www.destiny.gg',
         secure: false,
         changeOrigin: true,
+        onProxyReq: (proxyReq) => {
+          bakeCookies(proxyReq);
+        },
       },
       '/cdn': {
         target: 'https://cdn.destiny.gg',
@@ -28,6 +51,9 @@ module.exports = {
         headers: {
           Origin: 'https://www.destiny.gg',
           Host: 'chat.destiny.gg',
+        },
+        onProxyReqWs: (proxyReq) => {
+          bakeCookies(proxyReq);
         },
       },
     },
