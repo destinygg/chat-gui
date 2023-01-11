@@ -3,7 +3,34 @@ require('webpack');
 
 module.exports = {
   devServer: {
+    https: true,
     port: 8282,
+    proxy: {
+      '/api': {
+        target: 'https://www.destiny.gg',
+        secure: false,
+        changeOrigin: true,
+      },
+      '/cdn': {
+        target: 'https://cdn.destiny.gg',
+        pathRewrite: { '^/cdn': '' },
+        secure: false,
+        headers: {
+          Origin: 'https://www.destiny.gg',
+          Host: 'cdn.destiny.gg',
+        },
+      },
+      '/chat': {
+        target: 'wss://chat.destiny.gg/ws',
+        pathRewrite: { '^/chat': '' },
+        secure: false,
+        ws: true,
+        headers: {
+          Origin: 'https://www.destiny.gg',
+          Host: 'chat.destiny.gg',
+        },
+      },
+    },
   },
   entry: {
     demo: './assets/demo.js',
