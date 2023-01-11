@@ -327,7 +327,8 @@ const commandsinfo = new Map([
   [
     'pin',
     {
-      desc: "Shows you the current pinned message if you dismissed it, or, if you're an admin, pins a message to chat",
+      desc: 'Pins a message to chat',
+      admin: true,
       alias: ['motd'],
     },
   ],
@@ -493,10 +494,10 @@ class Chat {
     this.control.on('V', (data) => this.cmdVOTE(data, 'VOTE'));
     this.control.on('VOTESTOP', (data) => this.cmdVOTESTOP(data));
     this.control.on('VS', (data) => this.cmdVOTESTOP(data));
-    this.control.on('PIN', (data) => this.cmdPIN(data, false));
-    this.control.on('MOTD', (data) => this.cmdPIN(data, false));
-    this.control.on('UNPIN', (data) => this.cmdPIN(data, true));
-    this.control.on('UNMOTD', (data) => this.cmdPIN(data, true));
+    this.control.on('PIN', (data) => this.cmdPIN(data));
+    this.control.on('MOTD', (data) => this.cmdPIN(data));
+    this.control.on('UNPIN', () => this.cmdUNPIN());
+    this.control.on('UNMOTD', () => this.cmdUNPIN());
     this.control.on('HOST', (data) => this.cmdHOST(data));
     this.control.on('UNHOST', () => this.cmdUNHOST());
   }
@@ -2620,34 +2621,17 @@ class Chat {
       });
   }
 
-  cmdPIN(parts, unpin) {
-    if (unpin) {
-      this.source.send('PIN', { data: '' });
-    } else if (parts.length === 0) {
-      if (!this.pinnedMessage) {
-        const pinnedMessageStored = ChatStore.read('chat.pinnedmessage');
-        if (Object.hasOwn(pinnedMessageStored, 'current')) {
-          const usr = this.users.get(
-            pinnedMessageStored.current.nick.toLowerCase()
-          );
-          this.pinnedMessage = MessageBuilder.pinned(
-            pinnedMessageStored.current.data,
-            usr,
-            pinnedMessageStored.current.timestamp,
-            pinnedMessageStored.current.uuid
-          )
-            .into(this)
-            .pin(this);
-        } else {
-          MessageBuilder.info('No dismissed pinned message to show :(').into(
-            this
-          );
-        }
-      }
+  cmdPIN(parts) {
+    if (parts.length === 0) {
+      MessageBuilder.error('No message provided - /pin <message>').into(this);
     } else {
       const message = parts.join(' ');
       this.source.send('PIN', { data: message });
     }
+  }
+
+  cmdUNPIN() {
+    this.source.send('PIN', { data: '' });
   }
 
   openConversation(nick) {
