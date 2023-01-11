@@ -35,7 +35,7 @@ export default class PinnedMessage extends ChatUserMessage {
       nick: user.nick.toLowerCase(),
       timestamp: timestamp.valueOf(),
     };
-    pinnedMessageStored[`${uuid}`] = false;
+    pinnedMessageStored[uuid] = false;
     ChatStore.write('chat.pinnedmessage', pinnedMessageStored);
   }
 
@@ -45,7 +45,7 @@ export default class PinnedMessage extends ChatUserMessage {
    */
   unpin() {
     const pinnedMessageStored = ChatStore.read('chat.pinnedmessage');
-    pinnedMessageStored[`${this.uuid}`] = true;
+    pinnedMessageStored[this.uuid] = true;
     ChatStore.write('chat.pinnedmessage', pinnedMessageStored);
 
     this.ui.toggleClass('msg-pinned', false);
@@ -117,11 +117,11 @@ export default class PinnedMessage extends ChatUserMessage {
  * @returns {0 | 1 | 2} Pin condition, where 0 is an empty/"clear" pin, 1 is a new/never dismissed pin and 2 is an old/dismissed pin.
  */
 export function checkPin(msg, stored) {
-  if (!Object.hasOwn(msg, 'data')) {
+  if (!msg.data) {
     return 0;
   }
   if (stored !== null && Object.hasOwn(stored, msg.uuid)) {
-    if (!stored[`${msg.uuid}`]) {
+    if (!stored[msg.uuid]) {
       return 1;
     }
     return 2;
