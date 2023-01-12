@@ -81,7 +81,9 @@ class ChatAutoComplete {
     const post = this.message.substring(this.rangeEnd);
     const atEnd = this.input.caret.isAtEnd(this.input.val());
     this.input.val(
-      `${pre}${this.hasAt ? '@' : ''}${this.results[index].value}${atEnd ? ' ' : ''}${post}`
+      `${pre}${this.hasAt ? '@' : ''}${this.results[index].value}${
+        atEnd ? ' ' : ''
+      }${post}`
     );
 
     if (atEnd) this.input.caret.set();
