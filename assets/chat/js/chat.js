@@ -664,6 +664,12 @@ class Chat {
       this.focusIfNothingSelected();
     });
     const onresize = () => {
+      // If this is a mobile screen, don't close menus.
+      // The virtual keyboard triggers a 'resize' event, and menus shouldn't be closed whenever the virtual keyboard is opened
+      if (window.screen.width <= 768) {
+        return;
+      }
+
       if (!resizing) {
         resizing = true;
         ChatMenu.closeMenus(this);
