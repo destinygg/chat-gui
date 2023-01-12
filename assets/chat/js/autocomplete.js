@@ -40,7 +40,11 @@ class ChatAutoComplete {
     this.input.on('keypress', (e) => {
       const keycode = getKeyCode(e);
       const char = String.fromCharCode(keycode) || '';
-      if (char.length > 0) this.search();
+      if (char.length > 0) {
+        this.tabIndex = -1;
+        this.ui.css('left', 0);
+        this.search();
+      }
     });
 
     this.input.on('keydown', (e) => {
