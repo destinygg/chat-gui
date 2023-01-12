@@ -77,6 +77,14 @@ class Caret {
     if (node.childNodes.length > 0) return this.getTextNode(node.childNodes[0]);
     return null;
   }
+
+  isAtStart() {
+    return this.get() === 0;
+  }
+
+  isAtEnd(string) {
+    return this.get() === string.length;
+  }
 }
 
 export default Caret;
