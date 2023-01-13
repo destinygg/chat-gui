@@ -15,7 +15,7 @@ class ChatInput {
     this.ui.on('mouseup', () => this.caret.get());
 
     this.ui.on('keypress', (e) => {
-      if (!isKeyCode(e, KEYCODES.ENTER) && !e.ctrlKey) {
+      if (!isKeyCode(e, KEYCODES.ENTER) && !e.ctrlKey && !e.metaKey) {
         e.preventDefault();
         const keycode = getKeyCode(e);
         const char = String.fromCharCode(keycode) || '';
