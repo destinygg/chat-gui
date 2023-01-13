@@ -79,11 +79,11 @@ class Caret {
   }
 
   isAtStart() {
-    return this.get() === 0;
+    return this.stored === 0;
   }
 
   isAtEnd(string) {
-    return this.get() === string.length;
+    return this.stored === string.length;
   }
 }
 
