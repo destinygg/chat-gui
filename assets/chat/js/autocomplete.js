@@ -27,6 +27,7 @@ class ChatAutoComplete {
     this.ui = this.chat.ui.find('#chat-auto-complete');
     this.input = this.chat.input;
 
+    this.active = false;
     this.timer = null;
     this.hasAt = false;
     this.hasColon = false;
@@ -48,16 +49,27 @@ class ChatAutoComplete {
     });
 
     this.input.on('keydown', (e) => {
+      if (isKeyCode(e, KEYCODES.UP) || isKeyCode(e, KEYCODES.DOWN)) this.reset();
       if (isKeyCode(e, KEYCODES.BACKSPACE)) this.search();
-      if (isKeyCode(e, KEYCODES.TAB)) {
+      if (this.active) {
+        if (isKeyCode(e, KEYCODES.TAB) || isKeyCode(e, KEYCODES.RIGHT)) {
         e.preventDefault();
         if (this.tabIndex + 1 > this.results.length - 1) {
           this.tabIndex = 0;
         } else {
           this.tabIndex += 1;
         }
-
         this.select(this.tabIndex);
+      }
+        if (isKeyCode(e, KEYCODES.LEFT)) {
+          e.preventDefault();
+          if (this.tabIndex - 1 < 0) {
+            this.tabIndex = this.results.length - 1;
+          } else {
+            this.tabIndex -= 1;
+          }
+          this.select(this.tabIndex);
+        }
       }
     });
 
@@ -156,6 +168,8 @@ class ChatAutoComplete {
   render() {
     this.chat.ui.toggleClass('chat-autocomplete-in', this.results.length > 0);
     this.ui.toggleClass('active', this.results.length > 0);
+    this.active = this.results.length > 0;
+    if (this.results.length > 0) {
     const html = [...this.results]
       .map(
         (data, index) =>
@@ -167,15 +181,20 @@ class ChatAutoComplete {
     this.ui[0].children[0].innerHTML = html;
     this.timeout();
   }
+  }
 
-  timeout() {
-    if (this.timer) clearTimeout(this.timer);
+  reset() {
+    this.active = false;
     this.timer = setTimeout(() => {
       this.ui.css('left', 0);
       this.results = [];
       this.tabIndex = -1;
       this.render();
-    }, 15000);
+  }
+
+  timeout() {
+    if (this.timer) clearTimeout(this.timer);
+    this.timer = setTimeout(() => this.reset(), 15000);
   }
 }
 
