@@ -23,10 +23,10 @@ export default class ChatUIMessage {
     classes.unshift(`msg-chat`);
 
     const wrapped = document.createElement('div');
-    Object.assign(wrapped, {
-      ...attr,
-      className: classes.join(' '),
-    });
+    wrapped.className = classes.join(' ');
+    Object.entries(attr).forEach(([key, value]) =>
+      wrapped.setAttribute(key, value)
+    );
     wrapped.innerHTML = content;
     return wrapped;
   }
