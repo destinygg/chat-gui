@@ -83,7 +83,7 @@ export default class PinnedMessage extends ChatUserMessage {
       unpinMessage.setAttribute('title', 'Unpin Message');
 
       unpinMessage.addEventListener('click', () => {
-        chat.cmdPIN([], true);
+        chat.cmdUNPIN();
       });
 
       this.unpinBtn = unpinMessage;
