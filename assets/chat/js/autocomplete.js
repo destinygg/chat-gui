@@ -53,14 +53,14 @@ class ChatAutoComplete {
       if (isKeyCode(e, KEYCODES.BACKSPACE)) this.search();
       if (this.active) {
         if (isKeyCode(e, KEYCODES.TAB) || isKeyCode(e, KEYCODES.RIGHT)) {
-        e.preventDefault();
-        if (this.tabIndex + 1 > this.results.length - 1) {
-          this.tabIndex = 0;
-        } else {
-          this.tabIndex += 1;
+          e.preventDefault();
+          if (this.tabIndex + 1 > this.results.length - 1) {
+            this.tabIndex = 0;
+          } else {
+            this.tabIndex += 1;
+          }
+          this.select(this.tabIndex);
         }
-        this.select(this.tabIndex);
-      }
         if (isKeyCode(e, KEYCODES.LEFT)) {
           e.preventDefault();
           if (this.tabIndex - 1 < 0) {
@@ -78,16 +78,14 @@ class ChatAutoComplete {
       this.tabIndex = index;
       this.select(index);
     });
+
+    window.addEventListener('resize', () => {
+      this.position();
+    });
   }
 
   select(index) {
-    const right = this.chat.ui.width();
-    const width = $(this.ui[0].children[0]).width();
-    const left =
-      ((width - right) / this.results.length) * (this.tabIndex + 1) + 15;
-    if (width - right > 0) {
-      this.ui.css('left', this.tabIndex > 3 ? -left : 0);
-    }
+    this.position();
 
     const pre = this.message.substring(0, this.rangeStart);
     const post = this.message.substring(this.rangeEnd);
@@ -101,6 +99,33 @@ class ChatAutoComplete {
     if (atEnd) this.input.caret.set();
 
     this.render();
+  }
+
+  position() {
+    const padding = 8.5838;
+    const list = $(this.ui[0].children[0]);
+    const chatWidth = this.chat.ui.width();
+    const listWidth = list.width();
+    if (listWidth <= chatWidth) {
+      this.ui.css('left', 0);
+    } else {
+      const items = list.children();
+      let leftWidth = 0;
+      for (let i = 0; i <= this.tabIndex; i++) {
+        leftWidth += $(items[i]).width() + padding;
+      }
+
+      const itemWidth = $(items[this.tabIndex]).width() + padding;
+      const left = leftWidth - ((chatWidth / 2) - (itemWidth / 2));
+      const right = listWidth - left + (itemWidth / 2);
+      if (left <= 0) {
+        this.ui.css({'left': 0});
+      } else if (right <= chatWidth) {
+        this.ui.css('left', -((listWidth - chatWidth) + (padding * 2)));
+      } else {
+        this.ui.css('left', -left);
+      }
+    }
   }
 
   getWord(words) {
@@ -170,26 +195,25 @@ class ChatAutoComplete {
     this.ui.toggleClass('active', this.results.length > 0);
     this.active = this.results.length > 0;
     if (this.results.length > 0) {
-    const html = [...this.results]
-      .map(
-        (data, index) =>
-          `<li data-index="${index}"${
-            index === this.tabIndex ? ` class="active"` : ''
-          }>${data.value}</li>`
-      )
-      .join('');
-    this.ui[0].children[0].innerHTML = html;
-    this.timeout();
-  }
+      const html = [...this.results]
+        .map(
+          (data, index) =>
+            `<li data-index="${index}"${
+              index === this.tabIndex ? ` class="active"` : ''
+            }>${data.value}</li>`
+        )
+        .join('');
+      this.ui[0].children[0].innerHTML = html;
+      this.timeout();
+    }
   }
 
   reset() {
     this.active = false;
-    this.timer = setTimeout(() => {
-      this.ui.css('left', 0);
-      this.results = [];
-      this.tabIndex = -1;
-      this.render();
+    this.ui.css('left', 0);
+    this.results = [];
+    this.tabIndex = -1;
+    this.render();
   }
 
   timeout() {
