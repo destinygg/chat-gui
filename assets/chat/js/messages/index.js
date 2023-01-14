@@ -3,6 +3,6 @@ export { default as MessageTypes } from './MessageTypes';
 export { default as ChatMessage } from './ChatMessage';
 export {
   default as PinnedMessage,
-  checkPin,
+  checkIfPinWasDismissed,
   removeCurrentPin,
 } from './PinnedMessage';

@@ -111,22 +111,13 @@ export default class PinnedMessage extends ChatUserMessage {
 }
 
 /**
- * Checks the received pin against the stored one.
+ * Checks if the received pin was dismissed before.
  * @param {PINEvent} msg - Received pin.
  * @param {PINStored} stored - Stored pin.
- * @returns {0 | 1 | 2} Pin condition, where 0 is an empty/"clear" pin, 1 is a new/never dismissed pin and 2 is an old/dismissed pin.
+ * @returns {boolean} Dismissal status.
  */
-export function checkPin(msg, stored) {
-  if (!msg.data) {
-    return 0;
-  }
-  if (stored !== null && Object.hasOwn(stored, msg.uuid)) {
-    if (!stored[msg.uuid]) {
-      return 1;
-    }
-    return 2;
-  }
-  return 1;
+export function checkIfPinWasDismissed(msg, stored) {
+  return stored?.[msg.uuid];
 }
 
 /**

@@ -52,7 +52,6 @@ export default class MessageBuilder {
   }
 
   static pinned(message, user, timestamp, uuid) {
-    const m = new PinnedMessage(message, user, timestamp, uuid);
-    return m;
+    return new PinnedMessage(message, user, timestamp, uuid);
   }
 }

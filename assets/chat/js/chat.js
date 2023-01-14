@@ -11,7 +11,7 @@ import {
   MessageBuilder,
   MessageTypes,
   ChatMessage,
-  checkPin,
+  checkIfPinWasDismissed,
   removeCurrentPin,
 } from './messages';
 import {
@@ -1319,40 +1319,37 @@ class Chat {
 
   onPIN(msg) {
     const pinnedMessageStored = ChatStore.read('chat.pinnedmessage');
-    switch (checkPin(msg, pinnedMessageStored)) {
-      case 0: {
-        ChatStore.write(
-          'chat.pinnedmessage',
-          removeCurrentPin(pinnedMessageStored)
-        );
-        this.pinnedMessage = this.pinnedMessage
-          ? this.pinnedMessage.unpin()
-          : null;
-        break;
-      }
-      case 1: {
-        // double check if the same PIN event exists in history so that we don't create a double
-        if (this.pinnedMessage && this.pinnedMessage.uuid === msg.uuid) break;
-        this.pinnedMessage = this.pinnedMessage
-          ? this.pinnedMessage.unpin()
-          : null;
-        const usr = this.users.get(msg.nick.toLowerCase());
-        this.pinnedMessage = MessageBuilder.pinned(
-          msg.data,
-          usr,
-          msg.timestamp,
-          msg.uuid
-        )
-          .into(this)
-          .pin(this);
-        break;
-      }
-      default: {
-        pinnedMessageStored.current = msg;
-        ChatStore.write('chat.pinnedmessage', pinnedMessageStored);
-        break;
-      }
+
+    if (!msg.data) {
+      ChatStore.write(
+        'chat.pinnedmessage',
+        removeCurrentPin(pinnedMessageStored)
+      );
+      this.pinnedMessage = this.pinnedMessage
+        ? this.pinnedMessage.unpin()
+        : null;
+      return;
     }
+
+    if (checkIfPinWasDismissed(msg, pinnedMessageStored)) {
+      pinnedMessageStored.current = msg;
+      ChatStore.write('chat.pinnedmessage', pinnedMessageStored);
+      return;
+    }
+
+    // double check if the same PIN event exists in history so that we don't create a double
+    if (this.pinnedMessage && this.pinnedMessage.uuid === msg.uuid) return;
+
+    this.pinnedMessage = this.pinnedMessage ? this.pinnedMessage.unpin() : null;
+    const usr = this.users.get(msg.nick.toLowerCase());
+    this.pinnedMessage = MessageBuilder.pinned(
+      msg.data,
+      usr,
+      msg.timestamp,
+      msg.uuid
+    )
+      .into(this)
+      .pin(this);
   }
 
   onQUIT(data) {
@@ -2622,12 +2619,11 @@ class Chat {
   }
 
   cmdPIN(parts) {
-    if (parts.length === 0) {
+    if (!parts.length) {
       MessageBuilder.error('No message provided - /pin <message>').into(this);
-    } else {
-      const message = parts.join(' ');
-      this.source.send('PIN', { data: message });
+      return;
     }
+    this.source.send('PIN', { data: parts.join(' ') });
   }
 
   cmdUNPIN() {
