@@ -49,7 +49,8 @@ class ChatAutoComplete {
     });
 
     this.input.on('keydown', (e) => {
-      if (isKeyCode(e, KEYCODES.UP) || isKeyCode(e, KEYCODES.DOWN)) this.reset();
+      if (isKeyCode(e, KEYCODES.UP) || isKeyCode(e, KEYCODES.DOWN))
+        this.reset();
       if (isKeyCode(e, KEYCODES.BACKSPACE)) this.search();
       if (this.active) {
         if (isKeyCode(e, KEYCODES.TAB) || isKeyCode(e, KEYCODES.RIGHT)) {
@@ -116,12 +117,12 @@ class ChatAutoComplete {
       }
 
       const itemWidth = $(items[this.tabIndex]).width() + padding;
-      const left = leftWidth - ((chatWidth / 2) - (itemWidth / 2));
-      const right = listWidth - left + (itemWidth / 2);
+      const left = leftWidth - (chatWidth / 2 - itemWidth / 2);
+      const right = listWidth - left + itemWidth / 2;
       if (left <= 0) {
-        this.ui.css({'left': 0});
+        this.ui.css('left', 0);
       } else if (right <= chatWidth) {
-        this.ui.css('left', -((listWidth - chatWidth) + (padding * 2)));
+        this.ui.css('left', -(listWidth - chatWidth + padding * 2));
       } else {
         this.ui.css('left', -left);
       }

@@ -24,13 +24,17 @@ class ChatInput {
           this.previousValueLength = this.value.length;
           if (window.getSelection().toString().length === 0) {
             this.value =
-              this.value.substring(0, caret) + char + this.value.substring(caret);
+              this.value.substring(0, caret) +
+              char +
+              this.value.substring(caret);
           } else {
             this.value =
               this.value.substring(
                 0,
                 caret - window.getSelection().toString().length
-              ) + char + this.value.substring(caret);
+              ) +
+              char +
+              this.value.substring(caret);
           }
           this.render();
         }
