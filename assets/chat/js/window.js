@@ -83,11 +83,11 @@ class ChatWindow extends EventEmitter {
   }
 
   getlines(sel) {
-    return this.lines.children.querySelectorAll(sel);
+    return this.lines.querySelectorAll(sel);
   }
 
   removelines(sel) {
-    const remove = this.lines.children.querySelectorAll(sel);
+    const remove = this.lines.querySelectorAll(sel);
     this.linecount -= remove.length;
     remove.forEach((element) => {
       element.remove();
