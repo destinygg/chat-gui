@@ -27,7 +27,6 @@ class ChatAutoComplete {
     this.ui = this.chat.ui.find('#chat-auto-complete');
     this.input = this.chat.input;
 
-    this.active = false;
     this.timer = null;
     this.hasAt = false;
     this.hasColon = false;
@@ -52,7 +51,7 @@ class ChatAutoComplete {
       if (isKeyCode(e, KEYCODES.UP) || isKeyCode(e, KEYCODES.DOWN))
         this.reset();
       if (isKeyCode(e, KEYCODES.BACKSPACE)) this.search();
-      if (this.active) {
+      if (this.results.length > 0) {
         if (isKeyCode(e, KEYCODES.TAB) || isKeyCode(e, KEYCODES.RIGHT)) {
           e.preventDefault();
           if (this.tabIndex + 1 > this.results.length - 1) {
@@ -81,7 +80,9 @@ class ChatAutoComplete {
     });
 
     window.addEventListener('resize', () => {
-      this.position();
+      if (this.results.length > 0) {
+        this.position();
+      }
     });
   }
 
@@ -194,7 +195,6 @@ class ChatAutoComplete {
   render() {
     this.chat.ui.toggleClass('chat-autocomplete-in', this.results.length > 0);
     this.ui.toggleClass('active', this.results.length > 0);
-    this.active = this.results.length > 0;
     if (this.results.length > 0) {
       const html = [...this.results]
         .map(
@@ -210,7 +210,6 @@ class ChatAutoComplete {
   }
 
   reset() {
-    this.active = false;
     this.ui.css('left', 0);
     this.results = [];
     this.tabIndex = -1;
