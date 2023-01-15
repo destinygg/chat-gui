@@ -4,5 +4,4 @@ export { default as ChatMessage } from './ChatMessage';
 export {
   default as PinnedMessage,
   checkIfPinWasDismissed,
-  removeCurrentPin,
 } from './PinnedMessage';

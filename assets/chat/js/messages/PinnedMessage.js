@@ -12,7 +12,6 @@ import MessageTypes from './MessageTypes';
 
 /**
  * @typedef {{
- *   current?: PINEvent;
  *   [uuid: string]: boolean;
  * }} PINStored
  */
@@ -26,15 +25,7 @@ export default class PinnedMessage extends ChatUserMessage {
     this.closePinBtn = undefined;
     this.unpinBtn = undefined;
 
-    const pinnedMessageStored = ChatStore.read('chat.pinnedmessage')
-      ? ChatStore.read('chat.pinnedmessage')
-      : {};
-    pinnedMessageStored.current = {
-      uuid,
-      data: message,
-      nick: user.nick.toLowerCase(),
-      timestamp: timestamp.valueOf(),
-    };
+    const pinnedMessageStored = ChatStore.read('chat.pinnedmessage') ?? {};
     pinnedMessageStored[uuid] = false;
     ChatStore.write('chat.pinnedmessage', pinnedMessageStored);
   }
@@ -53,7 +44,7 @@ export default class PinnedMessage extends ChatUserMessage {
     this.closePinBtn.remove();
     this.closePinBtn = undefined;
 
-    if (this.unpinBtn !== undefined) {
+    if (this.unpinBtn) {
       this.unpinBtn.remove();
       this.unpinBtn = undefined;
     }
@@ -118,17 +109,4 @@ export default class PinnedMessage extends ChatUserMessage {
  */
 export function checkIfPinWasDismissed(msg, stored) {
   return stored?.[msg.uuid];
-}
-
-/**
- * Removes the current stored pin from the stored pin object.
- * @param {PINStored} stored
- * @returns {PINStored} Cleared stored pin.
- */
-export function removeCurrentPin(stored) {
-  if (Object.hasOwn(stored, 'current')) {
-    const { current, ...clearStored } = stored;
-    return clearStored;
-  }
-  return stored;
 }

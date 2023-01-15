@@ -12,7 +12,6 @@ import {
   MessageTypes,
   ChatMessage,
   checkIfPinWasDismissed,
-  removeCurrentPin,
 } from './messages';
 import {
   ChatMenu,
@@ -1321,26 +1320,16 @@ class Chat {
     const pinnedMessageStored = ChatStore.read('chat.pinnedmessage');
 
     if (!msg.data) {
-      ChatStore.write(
-        'chat.pinnedmessage',
-        removeCurrentPin(pinnedMessageStored)
-      );
-      this.pinnedMessage = this.pinnedMessage
-        ? this.pinnedMessage.unpin()
-        : null;
+      this.pinnedMessage = this.pinnedMessage?.unpin();
       return;
     }
 
-    if (checkIfPinWasDismissed(msg, pinnedMessageStored)) {
-      pinnedMessageStored.current = msg;
-      ChatStore.write('chat.pinnedmessage', pinnedMessageStored);
-      return;
-    }
+    if (checkIfPinWasDismissed(msg, pinnedMessageStored)) return;
 
     // double check if the same PIN event exists in history so that we don't create a double
-    if (this.pinnedMessage && this.pinnedMessage.uuid === msg.uuid) return;
+    if (this.pinnedMessage?.uuid === msg.uuid) return;
 
-    this.pinnedMessage = this.pinnedMessage ? this.pinnedMessage.unpin() : null;
+    this.pinnedMessage = this.pinnedMessage?.unpin();
     const usr = this.users.get(msg.nick.toLowerCase());
     this.pinnedMessage = MessageBuilder.pinned(
       msg.data,
