@@ -238,6 +238,10 @@ hr {
   div {
     display: inline;
     padding: 0 !important;
+    .user {
+      cursor: text;
+      margin: 0;
+    }
   }
 }
 .chat-lines {

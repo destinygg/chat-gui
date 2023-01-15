@@ -136,7 +136,7 @@ class ChatInput {
       if (emote) {
         text += `<div data-type="emote" data-emote="${emote.prefix}" class="msg-chat"><span title="${emote.prefix}" class="emote ${emote.prefix}">${emote.prefix}</span></div>`;
       } else if (user) {
-        text += `<div data-type="user" data-username="${username}"><span class="user ${this.chat.users
+        text += `<div data-type="user" data-username="${username}" class="msg-chat"><span class="user ${this.chat.users
           .get(username)
           .features.join(' ')}">${value}</span></div>`;
       } else {
