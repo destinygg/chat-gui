@@ -1317,20 +1317,19 @@ class Chat {
   }
 
   onPIN(msg) {
-    const pinnedMessageStored = ChatStore.read('chat.pinnedmessage');
-
     if (!msg.data) {
-      this.pinnedMessage = this.pinnedMessage?.unpin();
+      this.pinnedMessage?.unpin();
       return;
     }
 
-    if (checkIfPinWasDismissed(msg, pinnedMessageStored)) return;
+    if (checkIfPinWasDismissed(msg.uuid)) return;
 
     // double check if the same PIN event exists in history so that we don't create a double
     if (this.pinnedMessage?.uuid === msg.uuid) return;
 
-    this.pinnedMessage = this.pinnedMessage?.unpin();
-    const usr = this.users.get(msg.nick.toLowerCase());
+    this.pinnedMessage?.unpin();
+    const usr =
+      this.users.get(msg.nick.toLowerCase()) ?? new ChatUser(msg.nick);
     this.pinnedMessage = MessageBuilder.pinned(
       msg.data,
       usr,

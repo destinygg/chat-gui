@@ -4,10 +4,10 @@ import MessageTypes from './MessageTypes';
 
 /**
  * @typedef {Object} PINEvent
- * @property {string} uuid Pin's UUID
- * @property {string} data Pin's data
- * @property {string} nick Pin's nick
- * @property {number} timestamp Pin's timestamp
+ * @property {string} uuid
+ * @property {string} data Pinned message's text
+ * @property {string} nick
+ * @property {number} timestamp
  */
 
 /**
@@ -16,18 +16,30 @@ import MessageTypes from './MessageTypes';
  * }} PINStored
  */
 
+/**
+ * Checks if the received pin was dismissed before.
+ * @param {string} uuid
+ * @returns {boolean}
+ */
+export function checkIfPinWasDismissed(uuid) {
+  return ChatStore.read('chat.pinnedmessage')?.[uuid];
+}
+
+/**
+ * Sets the pin's status in localStorage as dismissed.
+ * @param {string} uuid
+ */
+function dismissPin(uuid) {
+  const pinnedMessageStored = ChatStore.read('chat.pinnedmessage') ?? {};
+  pinnedMessageStored[uuid] = true;
+  ChatStore.write('chat.pinnedmessage', pinnedMessageStored);
+}
+
 export default class PinnedMessage extends ChatUserMessage {
   constructor(message, user, timestamp, uuid) {
     super(message, user, timestamp);
     this.uuid = uuid;
     this.type = MessageTypes.PINNED;
-
-    this.closePinBtn = undefined;
-    this.unpinBtn = undefined;
-
-    const pinnedMessageStored = ChatStore.read('chat.pinnedmessage') ?? {};
-    pinnedMessageStored[uuid] = false;
-    ChatStore.write('chat.pinnedmessage', pinnedMessageStored);
   }
 
   /**
@@ -35,19 +47,12 @@ export default class PinnedMessage extends ChatUserMessage {
    * @returns {null} null
    */
   unpin() {
-    const pinnedMessageStored = ChatStore.read('chat.pinnedmessage');
-    pinnedMessageStored[this.uuid] = true;
-    ChatStore.write('chat.pinnedmessage', pinnedMessageStored);
+    dismissPin(this.uuid);
 
     this.ui.toggleClass('msg-pinned', false);
 
-    this.closePinBtn.remove();
-    this.closePinBtn = undefined;
-
-    if (this.unpinBtn) {
-      this.unpinBtn.remove();
-      this.unpinBtn = undefined;
-    }
+    document.getElementById('close-pin-btn')?.remove();
+    document.getElementById('unpin-btn')?.remove();
 
     return null;
   }
@@ -77,7 +82,6 @@ export default class PinnedMessage extends ChatUserMessage {
         chat.cmdUNPIN();
       });
 
-      this.unpinBtn = unpinMessage;
       this.ui.prepend(unpinMessage);
     }
 
@@ -94,19 +98,8 @@ export default class PinnedMessage extends ChatUserMessage {
       chat.pinnedMessage = this.unpin();
     });
 
-    this.closePinBtn = closePin;
     this.ui.prepend(closePin);
 
     return this;
   }
-}
-
-/**
- * Checks if the received pin was dismissed before.
- * @param {PINEvent} msg - Received pin.
- * @param {PINStored} stored - Stored pin.
- * @returns {boolean} Dismissal status.
- */
-export function checkIfPinWasDismissed(msg, stored) {
-  return stored?.[msg.uuid];
 }
