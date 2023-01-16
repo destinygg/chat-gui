@@ -36,8 +36,8 @@
     "dotenv": "^16.0.3",
     "jquery": "^3.6.0",
     "moment": "~2.29.1",
-    "nanoscroller": "~0.8.7",
     "normalize.css": "~8.0.1",
+    "overlayscrollbars": "^2.0.3",
     "sass-loader": "^11.1.1",
     "throttle-debounce": "~3.0.1",
     "whatwg-fetch": "^3.6.2"
