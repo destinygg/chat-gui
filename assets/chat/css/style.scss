@@ -887,6 +887,9 @@ hr {
       }
     }
   }
+  .floating-window {
+    height: fit-content !important;
+  }
   .chat-menu-inner {
     height: 100%;
     display: flex;
