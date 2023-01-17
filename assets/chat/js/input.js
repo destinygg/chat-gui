@@ -7,7 +7,7 @@ class ChatInput {
     this.ui = this.chat.ui.find('#chat-input-control');
     this.bgText = this.ui.attr('placeholder');
 
-    this.startArrowSelect = {node: null, offset: 0};
+    this.startArrowSelect = { node: null, offset: 0 };
     this.previousValueLength = 0;
     this.caret = new Caret(this.ui);
     this.nodes = [];
@@ -40,18 +40,21 @@ class ChatInput {
       if (left || right) {
         e.preventDefault();
         const caret = this.caret.get();
-        if ((left && caret > 0) || right && (caret < this.value.length)) {
-          const { nodeIndex } = this.caret.getNodeIndex(caret + (left ? -1 : 1), this.nodes);
+        if ((left && caret > 0) || (right && caret < this.value.length)) {
+          const { nodeIndex } = this.caret.getNodeIndex(
+            caret + (left ? -1 : 1),
+            this.nodes
+          );
           if (e.shiftKey) {
             const selection = window.getSelection();
             const start = {
               node: selection.anchorNode,
-              offset: selection.anchorOffset
-            }
+              offset: selection.anchorOffset,
+            };
             const end = {
               node: selection.focusNode,
-              offset: selection.focusOffset
-            }
+              offset: selection.focusOffset,
+            };
 
             if (start.offset === end.offset || !this.startArrowSelect.node) {
               if (left) {
@@ -71,7 +74,9 @@ class ChatInput {
             }
 
             if (start.offset < 0) {
-              const newNode = this.caret.getTextNode(start.node.previousSibling);
+              const newNode = this.caret.getTextNode(
+                start.node.previousSibling
+              );
               if (newNode) {
                 start.node = newNode;
                 start.offset = newNode.textContent.length;
@@ -95,7 +100,7 @@ class ChatInput {
             this.startArrowSelect.node = null;
             this.startArrowSelect.offset = 0;
             if (this.nodes[nodeIndex].type === 'emote') {
-              const len = this.nodes[nodeIndex].value.length + 1
+              const len = this.nodes[nodeIndex].value.length + 1;
               this.caret.set(caret + (left ? -len : len), this.nodes);
             } else {
               this.caret.set(caret + (left ? -1 : 1), this.nodes);
@@ -131,13 +136,17 @@ class ChatInput {
     this.previousValueLength = this.value.length;
     if (window.getSelection().toString().length === 0) {
       this.value =
-        this.value.substring(0, caret + modifier) + value + this.value.substring(caret);
+        this.value.substring(0, caret + modifier) +
+        value +
+        this.value.substring(caret);
     } else {
       this.value =
         this.value.substring(
           0,
           caret - window.getSelection().toString().length
-        ) + value + this.value.substring(caret);
+        ) +
+        value +
+        this.value.substring(caret);
     }
   }
 
@@ -173,10 +182,10 @@ class ChatInput {
       const user = this.chat.users.has(username);
       if (emote || user) {
         if (nodeText !== '') {
-          this.nodes.push({type: 'text', value: nodeText});
+          this.nodes.push({ type: 'text', value: nodeText });
           nodeText = '';
         }
-        this.nodes.push({type: emote ? 'emote' : 'user', value});
+        this.nodes.push({ type: emote ? 'emote' : 'user', value });
       }
       if (emote) {
         text += `<div data-type="emote" data-emote="${emote.prefix}" class="msg-chat"><span title="${emote.prefix}" class="emote ${emote.prefix}">${emote.prefix}</span></div>`;
@@ -193,7 +202,7 @@ class ChatInput {
       }
     });
 
-    if (nodeText !== '') this.nodes.push({type: 'text', value: nodeText});
+    if (nodeText !== '') this.nodes.push({ type: 'text', value: nodeText });
 
     this.ui.html(text);
     this.ui.attr('data-input', this.value);
