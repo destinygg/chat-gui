@@ -48,25 +48,16 @@ class ChatAutoComplete {
     });
 
     this.input.on('keydown', (e) => {
-      if (isKeyCode(e, KEYCODES.UP) || isKeyCode(e, KEYCODES.DOWN))
+      if ((isKeyCode(e, KEYCODES.ENTER) || isKeyCode(e, KEYCODES.UP) || isKeyCode(e, KEYCODES.DOWN)) && !e.ctrlKey && !e.metaKey)
         this.reset();
       if (isKeyCode(e, KEYCODES.BACKSPACE)) this.search();
       if (this.results.length > 0) {
-        if (isKeyCode(e, KEYCODES.TAB) || isKeyCode(e, KEYCODES.RIGHT)) {
+        if (isKeyCode(e, KEYCODES.TAB)) {
           e.preventDefault();
           if (this.tabIndex + 1 > this.results.length - 1) {
             this.tabIndex = 0;
           } else {
             this.tabIndex += 1;
-          }
-          this.select(this.tabIndex);
-        }
-        if (isKeyCode(e, KEYCODES.LEFT)) {
-          e.preventDefault();
-          if (this.tabIndex - 1 < 0) {
-            this.tabIndex = this.results.length - 1;
-          } else {
-            this.tabIndex -= 1;
           }
           this.select(this.tabIndex);
         }
