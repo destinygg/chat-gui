@@ -48,7 +48,13 @@ class ChatAutoComplete {
     });
 
     this.input.on('keydown', (e) => {
-      if ((isKeyCode(e, KEYCODES.ENTER) || isKeyCode(e, KEYCODES.UP) || isKeyCode(e, KEYCODES.DOWN)) && !e.ctrlKey && !e.metaKey)
+      if (
+        (isKeyCode(e, KEYCODES.ENTER) ||
+          isKeyCode(e, KEYCODES.UP) ||
+          isKeyCode(e, KEYCODES.DOWN)) &&
+        !e.ctrlKey &&
+        !e.metaKey
+      )
         this.reset();
       if (isKeyCode(e, KEYCODES.BACKSPACE)) this.search();
       if (this.results.length > 0) {
