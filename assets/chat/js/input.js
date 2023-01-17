@@ -7,6 +7,7 @@ class ChatInput {
     this.ui = this.chat.ui.find('#chat-input-control');
     this.bgText = this.ui.attr('placeholder');
 
+    this.startArrowSelect = {node: null, offset: 0};
     this.previousValueLength = 0;
     this.caret = new Caret(this.ui);
     this.nodes = [];
@@ -20,87 +21,95 @@ class ChatInput {
         const keycode = getKeyCode(e);
         const char = String.fromCharCode(keycode) || '';
         if (char.length > 0) {
-          const caret = this.caret.get();
-          this.previousValueLength = this.value.length;
-          if (window.getSelection().toString().length === 0) {
-            this.value =
-              this.value.substring(0, caret) +
-              char +
-              this.value.substring(caret);
-          } else {
-            this.value =
-              this.value.substring(
-                0,
-                caret - window.getSelection().toString().length
-              ) +
-              char +
-              this.value.substring(caret);
-          }
+          this.caretOrSelectReplace(0, char);
           this.render();
         }
       }
     });
 
     this.ui.on('keydown', (e) => {
+      if (isKeyCode(e, KEYCODES.TAB)) e.preventDefault();
       if (isKeyCode(e, KEYCODES.BACKSPACE)) {
         e.preventDefault();
-        const caret = this.caret.get();
-        this.previousValueLength = this.value.length;
-        if (window.getSelection().toString().length === 0) {
-          this.value =
-            this.value.substring(0, caret - 1) + this.value.substring(caret);
-        } else {
-          this.value =
-            this.value.substring(
-              0,
-              caret - window.getSelection().toString().length
-            ) + this.value.substring(caret);
-        }
+        this.caretOrSelectReplace(-1);
         this.render();
       }
-      if (isKeyCode(e, KEYCODES.LEFT)) {
+
+      const left = isKeyCode(e, KEYCODES.LEFT);
+      const right = isKeyCode(e, KEYCODES.RIGHT);
+      if (left || right) {
         e.preventDefault();
         const caret = this.caret.get();
-        if (caret > 0) {
-          const { nodeIndex } = this.caret.getNodeIndex(caret - 1, this.nodes);
-          if (this.nodes[nodeIndex].type === 'emote') {
-            this.caret.set(caret - (this.nodes[nodeIndex].value.length + 1), this.nodes);
+        if ((left && caret > 0) || right && (caret < this.value.length)) {
+          const { nodeIndex } = this.caret.getNodeIndex(caret + (left ? -1 : 1), this.nodes);
+          if (e.shiftKey) {
+            const selection = window.getSelection();
+            const start = {
+              node: selection.anchorNode,
+              offset: selection.anchorOffset
+            }
+            const end = {
+              node: selection.focusNode,
+              offset: selection.focusOffset
+            }
+
+            if (start.offset === end.offset || !this.startArrowSelect.node) {
+              if (left) {
+                this.startArrowSelect = end;
+                start.offset -= 1;
+              }
+              if (right) {
+                this.startArrowSelect = start;
+                end.offset += 1;
+              }
+            } else if (this.startArrowSelect.offset < end.offset) {
+              if (left) end.offset -= 1;
+              if (right) end.offset += 1;
+            } else if (this.startArrowSelect.offset > start.offset) {
+              if (left) start.offset -= 1;
+              if (right) start.offset += 1;
+            }
+
+            if (start.offset < 0) {
+              const newNode = this.caret.getTextNode(start.node.previousSibling);
+              if (newNode) {
+                start.node = newNode;
+                start.offset = newNode.textContent.length;
+              }
+            }
+
+            if (end.offset > end.node.textContent.length) {
+              const newNode = this.caret.getTextNode(end.node.nextSibling);
+              if (newNode) {
+                end.node = newNode;
+                end.offset = 0;
+              }
+            }
+
+            const range = new Range();
+            range.setStart(start.node, start.offset);
+            range.setEnd(end.node, end.offset);
+            window.getSelection().removeAllRanges();
+            window.getSelection().addRange(range);
           } else {
-            this.caret.set(caret - 1, this.nodes);
+            this.startArrowSelect.node = null;
+            this.startArrowSelect.offset = 0;
+            if (this.nodes[nodeIndex].type === 'emote') {
+              const len = this.nodes[nodeIndex].value.length + 1
+              this.caret.set(caret + (left ? -len : len), this.nodes);
+            } else {
+              this.caret.set(caret + (left ? -1 : 1), this.nodes);
+            }
           }
         }
-      }
-      if (isKeyCode(e, KEYCODES.RIGHT)) {
-        e.preventDefault();
-        const caret = this.caret.get();
-        if (caret < this.value.length) {
-          const { nodeIndex } = this.caret.getNodeIndex(caret + 1, this.nodes);
-          if (this.nodes[nodeIndex].type === 'emote') {
-            this.caret.set(caret + this.nodes[nodeIndex].value.length + 1, this.nodes);
-          } else {
-            this.caret.set(caret + 1, this.nodes);
-          }
-        }
-      }
-      if (isKeyCode(e, KEYCODES.TAB)) {
-        e.preventDefault();
       }
     });
 
     this.ui.on('cut', (e) => {
       e.preventDefault();
       if (window.getSelection().toString().length > 0) {
-        // write to clipboard.
         navigator.clipboard.writeText(window.getSelection().toString());
-
-        // remove from value.
-        const caret = this.caret.get();
-        this.previousValueLength = this.value.length;
-        this.value =
-          this.value.substring(
-            0,
-            caret - window.getSelection().toString().length
-          ) + this.value.substring(caret);
+        this.caretOrSelectReplace();
         this.render();
       }
     });
@@ -109,15 +118,27 @@ class ChatInput {
       e.preventDefault();
       const paste = e.originalEvent.clipboardData.getData('text/plain');
       if (paste.length > 0) {
-        const caret = this.caret.get();
-        this.previousValueLength = this.value.length;
-        this.value =
-          this.value.substring(0, caret) + paste + this.value.substring(caret);
+        this.caretOrSelectReplace(0, paste);
         this.render();
       }
     });
 
     this.render();
+  }
+
+  caretOrSelectReplace(modifier = 0, value = '') {
+    const caret = this.caret.get();
+    this.previousValueLength = this.value.length;
+    if (window.getSelection().toString().length === 0) {
+      this.value =
+        this.value.substring(0, caret + modifier) + value + this.value.substring(caret);
+    } else {
+      this.value =
+        this.value.substring(
+          0,
+          caret - window.getSelection().toString().length
+        ) + value + this.value.substring(caret);
+    }
   }
 
   val(value = null) {

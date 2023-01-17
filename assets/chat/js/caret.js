@@ -73,6 +73,7 @@ class Caret {
   }
 
   getTextNode(node) {
+    if (!node) return null;
     if (node.nodeName === '#text') return node;
     if (node.childNodes.length > 0) return this.getTextNode(node.childNodes[0]);
     return null;
