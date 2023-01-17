@@ -61,7 +61,7 @@ class Caret {
     let len = 0;
     for (let n = 0; n < nodes.length; n++) {
       previousLen = len;
-      len += nodes[n].length;
+      len += nodes[n].value.length;
       if (index <= len) {
         return {
           nodeIndex: n,

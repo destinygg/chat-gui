@@ -58,6 +58,30 @@ class ChatInput {
         }
         this.render();
       }
+      if (isKeyCode(e, KEYCODES.LEFT)) {
+        e.preventDefault();
+        const caret = this.caret.get();
+        if (caret > 0) {
+          const { nodeIndex } = this.caret.getNodeIndex(caret - 1, this.nodes);
+          if (this.nodes[nodeIndex].type === 'emote') {
+            this.caret.set(caret - (this.nodes[nodeIndex].value.length + 1), this.nodes);
+          } else {
+            this.caret.set(caret - 1, this.nodes);
+          }
+        }
+      }
+      if (isKeyCode(e, KEYCODES.RIGHT)) {
+        e.preventDefault();
+        const caret = this.caret.get();
+        if (caret < this.value.length) {
+          const { nodeIndex } = this.caret.getNodeIndex(caret + 1, this.nodes);
+          if (this.nodes[nodeIndex].type === 'emote') {
+            this.caret.set(caret + this.nodes[nodeIndex].value.length + 1, this.nodes);
+          } else {
+            this.caret.set(caret + 1, this.nodes);
+          }
+        }
+      }
       if (isKeyCode(e, KEYCODES.TAB)) {
         e.preventDefault();
       }
@@ -128,10 +152,10 @@ class ChatInput {
       const user = this.chat.users.has(username);
       if (emote || user) {
         if (nodeText !== '') {
-          this.nodes.push(nodeText);
+          this.nodes.push({type: 'text', value: nodeText});
           nodeText = '';
         }
-        this.nodes.push(value);
+        this.nodes.push({type: emote ? 'emote' : 'user', value});
       }
       if (emote) {
         text += `<div data-type="emote" data-emote="${emote.prefix}" class="msg-chat"><span title="${emote.prefix}" class="emote ${emote.prefix}">${emote.prefix}</span></div>`;
@@ -148,7 +172,7 @@ class ChatInput {
       }
     });
 
-    if (nodeText !== '') this.nodes.push(nodeText);
+    if (nodeText !== '') this.nodes.push({type: 'text', value: nodeText});
 
     this.ui.html(text);
     this.ui.attr('data-input', this.value);
