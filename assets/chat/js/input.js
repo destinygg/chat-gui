@@ -204,6 +204,8 @@ class ChatInput {
 
     if (nodeText !== '') this.nodes.push({ type: 'text', value: nodeText });
 
+    text = text.replace(/(&nbsp;)(?!&nbsp;|$)/gm, ' ');
+
     this.ui.html(text);
     this.ui.attr('data-input', this.value);
 
