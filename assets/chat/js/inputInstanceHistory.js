@@ -20,17 +20,23 @@ class ChatInputInstanceHistory {
     return false;
   }
 
-  post(value, caret) {
-    const lastHistory = this.history[this.history.length - 1];
-    if (lastHistory) {
-      if (value === lastHistory.value) return;
-    }
-
+  post(value, caret, sel) {
     if (this.index < this.history.length - 1) {
       this.history = this.history.splice(0, this.index);
     }
 
-    this.history.push({ value, caret });
+    const selection = {
+      start: {
+        node: sel.anchorNode,
+        offset: sel.anchorOffset,
+      },
+      end: {
+        node: sel.focusNode,
+        offset: sel.focusOffset,
+      },
+    };
+
+    this.history.push({ value, caret, selection });
 
     if (this.history.length > 25) {
       this.history = this.history.splice(this.history.length - 25, 25);

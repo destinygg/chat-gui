@@ -28,32 +28,39 @@ class Caret {
     return caretOffset;
   }
 
-  set(startIndex = -1, nodes = []) {
-    if (this.ui[0].childNodes.length > 0) {
-      const range = document.createRange();
-      const sel = window.getSelection();
+  set(startIndex, nodes) {
+    if (startIndex >= 0) {
+      if (this.ui[0].childNodes.length > 0) {
+        const range = new Range();
+        const selection = window.getSelection();
 
-      if (startIndex === -1) {
-        const lastNode =
-          this.ui[0].childNodes[this.ui[0].childNodes.length - 1];
-        const node = this.getTextNode(lastNode);
-        range.setStart(node, node.length);
-      } else {
         const { nodeIndex, offset } = this.getNodeIndex(startIndex, nodes);
         const node = this.getTextNode(this.ui[0].childNodes[nodeIndex]);
         range.setStart(node, offset);
-      }
-      range.collapse(true);
+        range.collapse(true);
 
-      sel.removeAllRanges();
-      sel.addRange(range);
+        selection.removeAllRanges();
+        selection.addRange(range);
 
-      if (startIndex === -1) {
-        this.get();
-      } else {
         this.stored = startIndex;
       }
     }
+  }
+
+  setEnd() {
+    const range = new Range();
+    const selection = window.getSelection();
+
+    const lastNode = this.ui[0].childNodes[this.ui[0].childNodes.length - 1];
+    const node = this.getTextNode(lastNode);
+
+    range.setStart(node, node.length);
+    range.collapse(true);
+
+    selection.removeAllRanges();
+    selection.addRange(range);
+
+    this.get();
   }
 
   getNodeIndex(index, nodes) {
@@ -77,6 +84,42 @@ class Caret {
     if (node.nodeName === '#text') return node;
     if (node.childNodes.length > 0) return this.getTextNode(node.childNodes[0]);
     return null;
+  }
+
+  getRawIndex(node, offset) {
+    const childNodes = [...this.ui[0].childNodes];
+    let index = offset;
+    for (let i = 0; i < childNodes.indexOf(node); i++) {
+      index += this.getTextNode(childNodes[i]).length;
+    }
+    return index;
+  }
+
+  getSelectionRange(lh = true) {
+    const selection = window.getSelection();
+    const start = this.getRawIndex(
+      selection.anchorNode,
+      selection.anchorOffset
+    );
+    const end = this.getRawIndex(selection.focusNode, selection.focusOffset);
+    if (start > end && lh) return { end, start };
+    return { start, end };
+  }
+
+  setSelectionRange(startIndex, endIndex, nodes) {
+    const start = this.getNodeIndex(startIndex, nodes);
+    const end = this.getNodeIndex(endIndex, nodes);
+
+    const startNode = this.getTextNode(this.ui[0].childNodes[start.nodeIndex]);
+    const endNode = this.getTextNode(this.ui[0].childNodes[end.nodeIndex]);
+
+    const range = new Range();
+    const selection = window.getSelection();
+
+    range.setStart(startNode, start.offset);
+    range.setEnd(endNode, end.offset);
+    selection.removeAllRanges();
+    selection.addRange(range);
   }
 
   isAtStart() {

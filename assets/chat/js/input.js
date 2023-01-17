@@ -8,14 +8,20 @@ class ChatInput {
     this.ui = this.chat.ui.find('#chat-input-control');
     this.bgText = this.ui.attr('placeholder');
 
-    this.startArrowSelect = { node: null, offset: 0 };
+    this.selectBase = -1;
     this.previousValueLength = 0;
     this.caret = new Caret(this.ui);
     this.history = new ChatInputInstanceHistory();
     this.nodes = [];
     this.value = '';
 
-    this.ui.on('mouseup', () => this.caret.get());
+    this.ui.on('mouseup', () => {
+      this.caret.get();
+      const { start, end } = this.caret.getSelectionRange(true);
+      if (start > end) this.selectBase = end;
+      else if (start < end) this.selectBase = start;
+      else this.selectBase = -1;
+    });
 
     this.ui.on('keypress', (e) => {
       if (!isKeyCode(e, KEYCODES.ENTER) && !e.ctrlKey && !e.metaKey) {
@@ -43,64 +49,33 @@ class ChatInput {
         e.preventDefault();
         const caret = this.caret.get();
         if ((left && caret > 0) || (right && caret < this.value.length)) {
-          const { nodeIndex } = this.caret.getNodeIndex(
-            caret + (left ? -1 : 1),
-            this.nodes
-          );
           if (e.shiftKey) {
-            const selection = window.getSelection();
-            const start = {
-              node: selection.anchorNode,
-              offset: selection.anchorOffset,
-            };
-            const end = {
-              node: selection.focusNode,
-              offset: selection.focusOffset,
-            };
-
-            if (start.offset === end.offset || !this.startArrowSelect.node) {
+            let { start, end } = this.caret.getSelectionRange(true);
+            if (start === end || this.selectBase === -1) {
               if (left) {
-                this.startArrowSelect = end;
-                start.offset -= 1;
+                this.selectBase = start;
+                start -= 1;
               }
               if (right) {
-                this.startArrowSelect = start;
-                end.offset += 1;
+                this.selectBase = end;
+                end += 1;
               }
-            } else if (this.startArrowSelect.offset < end.offset) {
-              if (left) end.offset -= 1;
-              if (right) end.offset += 1;
-            } else if (this.startArrowSelect.offset > start.offset) {
-              if (left) start.offset -= 1;
-              if (right) start.offset += 1;
+            } else if (this.selectBase === start) {
+              if (left) end -= 1;
+              if (right) end += 1;
+            } else if (this.selectBase === end) {
+              if (left) start -= 1;
+              if (right) start += 1;
             }
-
-            if (start.offset < 0) {
-              const newNode = this.caret.getTextNode(
-                start.node.previousSibling
-              );
-              if (newNode) {
-                start.node = newNode;
-                start.offset = newNode.textContent.length;
-              }
-            }
-
-            if (end.offset > end.node.textContent.length) {
-              const newNode = this.caret.getTextNode(end.node.nextSibling);
-              if (newNode) {
-                end.node = newNode;
-                end.offset = 0;
-              }
-            }
-
-            const range = new Range();
-            range.setStart(start.node, start.offset);
-            range.setEnd(end.node, end.offset);
-            window.getSelection().removeAllRanges();
-            window.getSelection().addRange(range);
+            if (start < 0) start = 0;
+            if (end > this.value.length) end = this.value.length;
+            this.caret.setSelectionRange(start, end, this.nodes);
           } else {
-            this.startArrowSelect.node = null;
-            this.startArrowSelect.offset = 0;
+            this.selectBase = -1;
+            const { nodeIndex } = this.caret.getNodeIndex(
+              caret + (left ? -1 : 1),
+              this.nodes
+            );
             if (this.nodes[nodeIndex].type === 'emote') {
               const len = this.nodes[nodeIndex].value.length + 1;
               this.caret.set(caret + (left ? -len : len), this.nodes);
@@ -128,7 +103,7 @@ class ChatInput {
         !(e.ctrlKey && isKeyCode(e, 90)) &&
         !(e.ctrlKey && isKeyCode(e, 89))
       ) {
-        this.history.post(this.value, this.caret.stored);
+        this.history.post(this.value, this.caret.stored, window.getSelection());
       }
     });
 
@@ -156,8 +131,17 @@ class ChatInput {
   loadInstance() {
     const data = this.history.get();
     this.previousValueLength = this.value.length;
-    this.val(data.value);
+    this.value = data.value;
+    this.render();
+
     this.caret.set(data.caret, this.nodes);
+
+    const range = new Range();
+    const selection = window.getSelection();
+    range.setStart(data.selection.start.node, data.selection.start.offset);
+    range.setEnd(data.selection.end.node, data.selection.end.offset);
+    selection.removeAllRanges();
+    selection.addRange(range);
   }
 
   caretOrSelectReplace(modifier = 0, value = '') {

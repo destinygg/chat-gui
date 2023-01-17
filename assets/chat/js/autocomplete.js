@@ -95,7 +95,7 @@ class ChatAutoComplete {
       }${post}`
     );
 
-    if (atEnd) this.input.caret.set();
+    if (atEnd) this.input.caret.setEnd();
 
     this.render();
   }
