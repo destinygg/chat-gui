@@ -14,7 +14,10 @@ function ChatEmoteMessageCount(message) {
   else if (message.emotecount >= 5) stepClass = ' x5';
   message.combo.attr('class', `chat-combo${stepClass}`);
   message.combo_count.text(`${message.emotecount}`);
-  message.ui.append(message.text.detach(), message.combo.detach());
+  message.ui.append(
+    message.text.detach().get(0),
+    message.combo.detach().get(0)
+  );
 }
 const ChatEmoteMessageCountThrottle = throttle(63, ChatEmoteMessageCount);
 
@@ -51,7 +54,7 @@ export default class ChatEmoteMessage extends ChatMessage {
       ' ',
       this.combo_txt
     );
-    this.ui.append(this.text, this.combo);
+    this.ui.append(this.text.get(0), this.combo.get(0));
   }
 
   incEmoteCount() {

@@ -372,7 +372,7 @@ class Chat {
     this.backlogloading = false;
     this.unresolved = [];
 
-    this.flairs = new Set();
+    this.flairs = [];
     this.flairsMap = new Map();
     this.emoteService = new EmoteService();
 
@@ -664,6 +664,12 @@ class Chat {
       this.focusIfNothingSelected();
     });
     const onresize = () => {
+      // If this is a mobile screen, don't close menus.
+      // The virtual keyboard triggers a 'resize' event, and menus shouldn't be closed whenever the virtual keyboard is opened
+      if (window.screen.width <= 768) {
+        return;
+      }
+
       if (!resizing) {
         resizing = true;
         ChatMenu.closeMenus(this);
@@ -693,7 +699,7 @@ class Chat {
       const nick = $(e.currentTarget).closest('.msg-user').data('username');
       this.getActiveWindow()
         .getlines(`.censored[data-username="${nick}"]`)
-        .removeClass('censored');
+        .forEach((line) => line.classList.remove('censored'));
       return false;
     });
 
@@ -1141,10 +1147,10 @@ class Chat {
     );
     switch (parseInt(this.settings.get('showremoved') || 1, 10)) {
       case 0: // remove
-        c.remove();
+        c.forEach((line) => line.remove());
         break;
       case 1: // censor
-        c.addClass('censored');
+        c.forEach((line) => line.classList.add('censored'));
         break;
       case 2: // do nothing
       default:
@@ -2058,10 +2064,19 @@ class Chat {
 
     this.mainwindow
       .getlines(`.msg-user[data-username="${n}"]`)
-      .removeClass(Chat.removeClasses('msg-tagged'))
-      .addClass(`msg-tagged msg-tagged-${color}`)
-      .find('.user')
-      .attr('title', note);
+      .forEach((line) => {
+        const classesToRemove = Chat.removeClasses(
+          'msg-tagged',
+          line.classList.value
+        );
+        classesToRemove.forEach((className) =>
+          line.classList.remove(className)
+        );
+        ['msg-tagged', `msg-tagged-${color}`].forEach((tag) =>
+          line.classList.add(tag)
+        );
+        line.querySelector('.user').title = note;
+      });
 
     this.taggednicks.set(n, color);
     this.taggednotes.set(n, note);
@@ -2097,10 +2112,17 @@ class Chat {
     const n = parts[0].toLowerCase();
 
     this.mainwindow
-      .getlines(`.msg-chat[data-username="${n}"]`)
-      .removeClass(Chat.removeClasses('msg-tagged'))
-      .find('.user')
-      .removeAttr('title');
+      .getlines(`.msg-user[data-username="${n}"]`)
+      .forEach((line) => {
+        const classesToRemove = Chat.removeClasses(
+          'msg-tagged',
+          line.classList.value
+        );
+        classesToRemove.forEach((className) =>
+          line.classList.remove(className)
+        );
+        line.querySelector('.user').removeAttribute('title');
+      });
 
     this.taggednicks.delete(n);
     this.taggednotes.delete(n);
@@ -2665,9 +2687,10 @@ class Chat {
     return [...uniqueNicks];
   }
 
-  static removeClasses(search) {
-    return (i, c) =>
-      (c.match(new RegExp(`\\b${search}(?:[A-z-]+)?\\b`, 'g')) || []).join(' ');
+  static removeClasses(search, classList) {
+    return (
+      classList.match(new RegExp(`\\b${search}(?:[A-z-]+)?\\b`, 'g')) || []
+    );
   }
 
   static isArraysEqual(a, b) {
