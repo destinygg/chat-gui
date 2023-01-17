@@ -620,6 +620,7 @@ class Chat {
         this.control.emit('SEND', this.input.val().toString().trim());
         this.adjustInputHeight();
         this.input.val('').focus();
+        this.input.history.empty();
       }
     });
 

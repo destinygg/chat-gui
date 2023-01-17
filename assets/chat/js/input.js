@@ -1,5 +1,6 @@
 import { KEYCODES, isKeyCode, getKeyCode } from './const';
 import Caret from './caret';
+import ChatInputInstanceHistory from './inputInstanceHistory';
 
 class ChatInput {
   constructor(chat) {
@@ -10,6 +11,7 @@ class ChatInput {
     this.startArrowSelect = { node: null, offset: 0 };
     this.previousValueLength = 0;
     this.caret = new Caret(this.ui);
+    this.history = new ChatInputInstanceHistory();
     this.nodes = [];
     this.value = '';
 
@@ -108,6 +110,26 @@ class ChatInput {
           }
         }
       }
+
+      if (e.ctrlKey && isKeyCode(e, 90)) {
+        if (this.history.undo()) {
+          this.loadInstance();
+        }
+      }
+      if (e.ctrlKey && isKeyCode(e, 89)) {
+        if (this.history.redo()) {
+          this.loadInstance();
+        }
+      }
+    });
+
+    this.ui.on('keyup', (e) => {
+      if (
+        !(e.ctrlKey && isKeyCode(e, 90)) &&
+        !(e.ctrlKey && isKeyCode(e, 89))
+      ) {
+        this.history.post(this.value, this.caret.stored);
+      }
     });
 
     this.ui.on('cut', (e) => {
@@ -129,6 +151,13 @@ class ChatInput {
     });
 
     this.render();
+  }
+
+  loadInstance() {
+    const data = this.history.get();
+    this.previousValueLength = this.value.length;
+    this.val(data.value);
+    this.caret.set(data.caret, this.nodes);
   }
 
   caretOrSelectReplace(modifier = 0, value = '') {

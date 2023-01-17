@@ -175,7 +175,7 @@ class ChatAutoComplete {
       }
       this.results.sort(sortResults).slice(0, maxResults);
     } else {
-      this.results = [];
+      this.reset();
     }
     this.tabIndex = -1;
     this.render();
