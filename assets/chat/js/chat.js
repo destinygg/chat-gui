@@ -1217,9 +1217,7 @@ class Chat {
 
   adjustInputHeight() {
     // Check if the input exists on the page and return if it doesn't.
-    if (this.input.length === 0) {
-      return;
-    }
+    if (!this.input) return;
 
     const maxHeightPixels = this.input.css('maxHeight');
     const maxHeight = parseInt(maxHeightPixels.slice(0, -2), 10);

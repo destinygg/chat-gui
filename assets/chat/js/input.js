@@ -155,6 +155,8 @@ class ChatInput {
 
     const difference = this.value.length - this.previousValueLength;
     this.caret.set(prevCaret + difference, this.nodes);
+
+    this.chat.adjustInputHeight();
   }
 
   focus() {
