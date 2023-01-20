@@ -1522,7 +1522,7 @@ class Chat {
       }.`,
       data.timestamp
     ).into(this);
-    if (this.subonly) {
+    if (this.subonly && !this.user.isSubscriber()) {
       this.subonlyicon.show();
     } else {
       this.subonlyicon.hide();
