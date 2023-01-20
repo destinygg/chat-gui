@@ -5,10 +5,12 @@ class ChatUser {
     if (typeof args === 'string') {
       this.nick = args;
       this.username = args;
+      this.createdDate = args;
       this.features = [];
     } else {
       this.nick = args.nick || '';
       this.username = args.nick || '';
+      this.createdDate = args.createdDate || '';
       this.features = args.features || [];
     }
   }
@@ -52,6 +54,9 @@ class ChatUser {
   }
 
   get subTier() {
+    if (this.hasFeature(UserFeature.SUB_TIER_5)) {
+      return 5;
+    }
     if (this.hasFeature(UserFeature.SUB_TIER_4)) {
       return 4;
     }

@@ -13,6 +13,7 @@ import {
   ChatUserMenu,
   ChatWhisperUsers,
   ChatEmoteMenu,
+  ChatEmoteTooltip,
   ChatSettingsMenu,
   ChatUserInfoMenu,
 } from './menus';
@@ -22,14 +23,15 @@ import ChatUserFocus from './focus';
 import ChatStore from './store';
 import Settings from './settings';
 import ChatWindow from './window';
-import { ChatVote, parseQuestionAndTime } from './vote';
+import { ChatVote, parseQuestionAndTime, VOTE_END_TIME } from './vote';
 import { isMuteActive, MutedTimer } from './mutedtimer';
 import EmoteService from './emotes';
+import UserFeatures from './features';
 import makeSafeForRegex from './regex';
 
 const regexslashcmd = /^\/([a-z0-9]+)[\s]?/i;
 const regextime = /(\d+(?:\.\d*)?)([a-z]+)?/gi;
-const nickmessageregex = /(?:(?:^|\s)@?)([a-zA-Z0-9_]{3,20})(?=$|\s|[.?!,])/g;
+const nickmessageregex = /(?=@?)(\w{3,20})/g;
 const nickregex = /^[a-zA-Z0-9_]{3,20}$/;
 const nsfwnsflregex = /\b(?:NSFL|NSFW)\b/i;
 const nsfwregex = /\b(?:NSFW)\b/i;
@@ -316,6 +318,20 @@ const commandsinfo = new Map([
       desc: 'Start a sub-weighted vote.',
     },
   ],
+  [
+    'host',
+    {
+      desc: 'Hosts a livestream, video, or vod to bigscreen.',
+      admin: true,
+    },
+  ],
+  [
+    'unhost',
+    {
+      desc: 'Removes hosted content from bigscreen.',
+      admin: true,
+    },
+  ],
 ]);
 const banstruct = {
   id: 0,
@@ -356,7 +372,7 @@ class Chat {
     this.backlogloading = false;
     this.unresolved = [];
 
-    this.flairs = new Set();
+    this.flairs = [];
     this.flairsMap = new Map();
     this.emoteService = new EmoteService();
 
@@ -457,6 +473,8 @@ class Chat {
     this.control.on('V', (data) => this.cmdVOTE(data, 'VOTE'));
     this.control.on('VOTESTOP', (data) => this.cmdVOTESTOP(data));
     this.control.on('VS', (data) => this.cmdVOTESTOP(data));
+    this.control.on('HOST', (data) => this.cmdHOST(data));
+    this.control.on('UNHOST', () => this.cmdUNHOST());
   }
 
   setUser(user) {
@@ -552,6 +570,14 @@ class Chat {
       )
     );
     this.menus.set(
+      'emote-tooltip',
+      new ChatEmoteTooltip(
+        this.ui.find('#chat-emote-tooltip'),
+        this.output.find('.msg-user .text .emote'),
+        this
+      )
+    );
+    this.menus.set(
       'users',
       new ChatUserMenu(
         this.ui.find('#chat-user-list'),
@@ -567,7 +593,6 @@ class Chat {
         this
       )
     );
-
     this.menus.set(
       'user-info',
       new ChatUserInfoMenu(
@@ -642,6 +667,12 @@ class Chat {
       this.focusIfNothingSelected();
     });
     const onresize = () => {
+      // If this is a mobile screen, don't close menus.
+      // The virtual keyboard triggers a 'resize' event, and menus shouldn't be closed whenever the virtual keyboard is opened
+      if (window.screen.width <= 768) {
+        return;
+      }
+
       if (!resizing) {
         resizing = true;
         ChatMenu.closeMenus(this);
@@ -671,7 +702,7 @@ class Chat {
       const nick = $(e.currentTarget).closest('.msg-user').data('username');
       this.getActiveWindow()
         .getlines(`.censored[data-username="${nick}"]`)
-        .removeClass('censored');
+        .forEach((line) => line.classList.remove('censored'));
       return false;
     });
 
@@ -786,7 +817,7 @@ class Chat {
             this.whispers.set(e.username.toLowerCase(), {
               id: e.messageid,
               nick: e.username,
-              unread: e.unread,
+              unread: Number(e.unread),
               open: false,
             })
           );
@@ -901,11 +932,19 @@ class Chat {
     if (!user) {
       user = new ChatUser(data);
       this.users.set(normalized, user);
-    } else if (
-      Object.hasOwn(data, 'features') &&
-      !Chat.isArraysEqual(data.features, user.features)
-    ) {
-      user.features = data.features;
+    } else {
+      if (
+        Object.hasOwn(data, 'features') &&
+        !Chat.isArraysEqual(data.features, user.features)
+      ) {
+        user.features = data.features;
+      }
+      if (
+        Object.hasOwn(data, 'createdDate') &&
+        data.createdDate !== user.createdDate
+      ) {
+        user.createdDate = data.createdDate;
+      }
     }
     return user;
   }
@@ -1111,10 +1150,10 @@ class Chat {
     );
     switch (parseInt(this.settings.get('showremoved') || 1, 10)) {
       case 0: // remove
-        c.remove();
+        c.forEach((line) => line.remove());
         break;
       case 1: // censor
-        c.addClass('censored');
+        c.forEach((line) => line.classList.add('censored'));
         break;
       case 2: // do nothing
       default:
@@ -1159,6 +1198,11 @@ class Chat {
   }
 
   focusIfNothingSelected() {
+    // If this is a mobile screen, return to avoid focusing input and bringing up the virtual keyboard
+    if (window.screen.width <= 768) {
+      return;
+    }
+
     if (this.debounceFocus === undefined) {
       this.debounceFocus = debounce(10, false, (c) => c.input.focus());
     }
@@ -1266,27 +1310,32 @@ class Chat {
     const textonly = Chat.removeSlashCmdFromText(data.data);
     const usr = this.users.get(data.nick.toLowerCase());
 
-    // Checking if old messages are loading avoids starting votes for cached
-    // `/vote` commands.
-    if (!this.backlogloading) {
-      // Voting is processed entirely in clients through messages with
-      // type `MSG`, but we emit `VOTE`, `VOTESTOP`, and `VOTECAST`
-      // events to mimic server involvement.
+    // Voting is processed entirely in clients through messages with
+    // type `MSG`, but we emit `VOTE`, `VOTESTOP`, and `VOTECAST`
+    // events to mimic server involvement.
+    if (this.chatvote.canUserStartVote(usr)) {
       if (this.chatvote.isMsgVoteStartFmt(data.data)) {
-        this.source.emit('VOTE', data);
-        return;
-      }
-      if (this.chatvote.isMsgVoteStopFmt(data.data)) {
-        this.source.emit('VOTESTOP', data);
+        const now = new Date().getTime();
+        const question = parseQuestionAndTime(data.data);
+        if (now - data.timestamp < question.time + VOTE_END_TIME) {
+          this.source.emit('VOTE', data);
+        }
         return;
       }
       if (
         this.chatvote.isVoteStarted() &&
-        this.chatvote.isMsgVoteCastFmt(data.data)
+        this.chatvote.isMsgVoteStopFmt(data.data)
       ) {
-        this.source.emit(`VOTECAST`, data);
+        this.source.emit('VOTESTOP', data);
         return;
       }
+    }
+    if (
+      this.chatvote.canCastVote(data.timestamp) &&
+      this.chatvote.isMsgVoteCastFmt(data.data)
+    ) {
+      this.source.emit(`VOTECAST`, data);
+      return;
     }
 
     const win = this.mainwindow;
@@ -1314,7 +1363,7 @@ class Chat {
       return;
     }
 
-    if (this.chatvote.startVote(data.data, usr)) {
+    if (this.chatvote.startVote(data.data, usr, data.timestamp)) {
       new ChatMessage(
         this.chatvote.voteStartMessage(),
         null,
@@ -1330,7 +1379,7 @@ class Chat {
       return;
     }
 
-    this.chatvote.endVote();
+    this.chatvote.endVote(data.timestamp);
   }
 
   onVOTECAST(data) {
@@ -1340,7 +1389,7 @@ class Chat {
     }
 
     // NOTE method returns false, if the GUI is hidden
-    if (this.chatvote.castVote(data.data, usr)) {
+    if (this.chatvote.castVote(data.data, usr, data.timestamp)) {
       if (data.nick === this.user.username) {
         this.chatvote.markVote(data.data);
       }
@@ -1725,6 +1774,14 @@ class Chat {
           ).join(', ')}.`
         ).into(this);
       }
+    } else if (
+      parts.some(
+        (username) => username.toLowerCase() === this.user.nick.toLowerCase()
+      )
+    ) {
+      MessageBuilder.info("You can't add yourself to your ignore list.").into(
+        this
+      );
     } else {
       // this is a little ugly, but it allows us to not ignore anything if there's an invalid nick in there
       // think that's less confusing/nicer compared to partially ignoring
@@ -2015,10 +2072,19 @@ class Chat {
 
     this.mainwindow
       .getlines(`.msg-user[data-username="${n}"]`)
-      .removeClass(Chat.removeClasses('msg-tagged'))
-      .addClass(`msg-tagged msg-tagged-${color}`)
-      .find('.user')
-      .attr('title', note);
+      .forEach((line) => {
+        const classesToRemove = Chat.removeClasses(
+          'msg-tagged',
+          line.classList.value
+        );
+        classesToRemove.forEach((className) =>
+          line.classList.remove(className)
+        );
+        ['msg-tagged', `msg-tagged-${color}`].forEach((tag) =>
+          line.classList.add(tag)
+        );
+        line.querySelector('.user').title = note;
+      });
 
     this.taggednicks.set(n, color);
     this.taggednotes.set(n, note);
@@ -2054,10 +2120,17 @@ class Chat {
     const n = parts[0].toLowerCase();
 
     this.mainwindow
-      .getlines(`.msg-chat[data-username="${n}"]`)
-      .removeClass(Chat.removeClasses('msg-tagged'))
-      .find('.user')
-      .removeAttr('title');
+      .getlines(`.msg-user[data-username="${n}"]`)
+      .forEach((line) => {
+        const classesToRemove = Chat.removeClasses(
+          'msg-tagged',
+          line.classList.value
+        );
+        classesToRemove.forEach((className) =>
+          line.classList.remove(className)
+        );
+        line.querySelector('.user').removeAttribute('title');
+      });
 
     this.taggednicks.delete(n);
     this.taggednotes.delete(n);
@@ -2077,14 +2150,14 @@ class Chat {
         'No argument provided - /embed <link> OR /e <link>'
       ).into(this);
       MessageBuilder.info(
-        'Valid links: Twitch Streams, Twitch VODs, Twitch Clips, Youtube Videos, Vimeo Videos.'
+        'Valid links: Twitch Streams, Twitch VODs, Twitch Clips, Youtube Videos, Vimeo Videos, Rumble Videos.'
       ).into(this);
     } else if (parts.length > 1) {
       MessageBuilder.error(
         'More than one argument provided - /embed <link> OR /e <link>'
       ).into(this);
       MessageBuilder.info(
-        'Valid links: Twitch Streams, Twitch VODs, Twitch Clips, Youtube Videos, Vimeo Videos.'
+        'Valid links: Twitch Streams, Twitch VODs, Twitch Clips, Youtube Videos, Vimeo Videos, Rumble Videos.'
       ).into(this);
     } else {
       const matchedHost = parts[0].matchAll(urlCheck);
@@ -2118,12 +2191,22 @@ class Chat {
           case 'vimeo.com':
             location.href = `${noEmbedUrl}#vimeo/${match[6]}`;
             break;
+          case 'www.rumble.com':
+          case 'rumble.com':
+            if (match[5] === '/embed') {
+              location.href = `${noEmbedUrl}#rumble/${match[6].split('/')[0]}`;
+            } else {
+              MessageBuilder.error(
+                'Rumble links have to be embed links - https://rumble.com/embed/<id>'
+              ).into(this);
+            }
+            break;
           default:
             MessageBuilder.error(
               'Invalid link - /embed <link> OR /e <link>'
             ).into(this);
             MessageBuilder.info(
-              'Valid links: Twitch Streams, Twitch VODs, Twitch Clips, Youtube Videos, Vimeo Videos.'
+              'Valid links: Twitch Streams, Twitch VODs, Twitch Clips, Youtube Videos, Vimeo Videos, Rumble Videos.'
             ).into(this);
             break;
         }
@@ -2132,7 +2215,7 @@ class Chat {
           this
         );
         MessageBuilder.info(
-          'Valid links: Twitch Streams, Twitch VODs, Twitch Clips, Youtube Videos, Vimeo Videos.'
+          'Valid links: Twitch Streams, Twitch VODs, Twitch Clips, Youtube Videos, Vimeo Videos, Rumble Videos.'
         ).into(this);
       }
     }
@@ -2150,7 +2233,7 @@ class Chat {
         'Nothing embedded - /postembed OR /pe OR /postembed <link> [<message>] OR /pe <link> [<message>]'
       ).into(this);
       MessageBuilder.info(
-        'Valid links: Twitch Streams, Twitch VODs, Twitch Clips, Youtube Videos, Vimeo Video.'
+        'Valid links: Twitch Streams, Twitch VODs, Twitch Clips, Youtube Videos, Vimeo Videos, Rumble Videos.'
       ).into(this);
     } else {
       const matchedHost = parts[0].matchAll(urlCheck);
@@ -2196,12 +2279,23 @@ class Chat {
             msg = `#vimeo/${match[6]}`;
             this.source.send('MSG', { data: `${msg} ${moreMsg}` });
             break;
+          case 'www.rumble.com':
+          case 'rumble.com':
+            if (match[5] === '/embed') {
+              msg = `#rumble/${match[6].split('/')[0]}`;
+              this.source.send('MSG', { data: `${msg} ${moreMsg}` });
+            } else {
+              MessageBuilder.error(
+                'Rumble links have to be embed links - https://rumble.com/embed/<id>'
+              ).into(this);
+            }
+            break;
           default:
             MessageBuilder.error(
               'Invalid link - /postembed OR /pe OR /postembed <link> [<message>] OR /pe <link> [<message>]'
             ).into(this);
             MessageBuilder.info(
-              'Valid links: Twitch Streams, Twitch VODs, Twitch Clips, Youtube Videos, Vimeo Videos.'
+              'Valid links: Twitch Streams, Twitch VODs, Twitch Clips, Youtube Videos, Vimeo Videos, Rumble Videos.'
             ).into(this);
             break;
         }
@@ -2215,7 +2309,7 @@ class Chat {
           'Invalid link - /postembed OR /pe OR /postembed <link> [<message>] OR /pe <link> [<message>]'
         ).into(this);
         MessageBuilder.info(
-          'Valid links: Twitch Streams, Twitch VODs, Twitch Clips, Youtube Videos, Vimeo Videos.'
+          'Valid links: Twitch Streams, Twitch VODs, Twitch Clips, Youtube Videos, Vimeo Videos, Rumble Videos.'
         ).into(this);
       }
     }
@@ -2456,6 +2550,70 @@ class Chat {
       });
   }
 
+  cmdHOST(parts) {
+    const displayName = parts[1];
+    let url = parts[0];
+
+    if (!this.user.hasAnyFeatures(UserFeatures.ADMIN, UserFeatures.MODERATOR)) {
+      MessageBuilder.error(errorstrings.get('nopermission')).into(this);
+      return;
+    }
+
+    if (!url) {
+      MessageBuilder.error(
+        'No argument provided - /host <url> <displayName optional>'
+      ).into(this);
+      return;
+    }
+
+    try {
+      // new URL() will throw an invalid error if the provided url
+      // does not start with http(s)//.
+      if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        url = `https://${url}`;
+      }
+
+      new URL(url); // eslint-disable-line no-new
+    } catch (e) {
+      MessageBuilder.error(
+        'Invalid url - /host <url> <displayName optional>'
+      ).into(this);
+      return;
+    }
+
+    fetch(`${this.config.api.base}/api/stream/host`, {
+      body: JSON.stringify({ url, displayName }),
+      credentials: 'include',
+      method: 'POST',
+      headers: { 'X-CSRF-Guard': 'YEE' },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (!data.success) {
+          MessageBuilder.error(data.message).into(this);
+        }
+      });
+  }
+
+  cmdUNHOST() {
+    if (!this.user.hasAnyFeatures(UserFeatures.ADMIN, UserFeatures.MODERATOR)) {
+      MessageBuilder.error(errorstrings.get('nopermission')).into(this);
+      return;
+    }
+
+    fetch(`${this.config.api.base}/api/stream/unhost`, {
+      credentials: 'include',
+      method: 'POST',
+      headers: { 'X-CSRF-Guard': 'YEE' },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (!data.success) {
+          MessageBuilder.error(data.message).into(this);
+        }
+      });
+  }
+
   openConversation(nick) {
     const normalized = nick.toLowerCase();
     const conv = this.whispers.get(normalized);
@@ -2494,10 +2652,13 @@ class Chat {
               const date = moment(data[0].timestamp).format(DATE_FORMATS.FULL);
               MessageBuilder.info(`Last message ${date}.`).into(this, win);
               data.reverse().forEach((e) => {
-                MessageBuilder.historical(e.message, user, e.timestamp).into(
-                  this,
-                  win
-                );
+                const inboxUser =
+                  this.users.get(e.from.toLowerCase()) || new ChatUser(e.from);
+                MessageBuilder.historical(
+                  e.message,
+                  inboxUser,
+                  e.timestamp
+                ).into(this, win);
               });
             }
           })
@@ -2534,9 +2695,10 @@ class Chat {
     return [...uniqueNicks];
   }
 
-  static removeClasses(search) {
-    return (i, c) =>
-      (c.match(new RegExp(`\\b${search}(?:[A-z-]+)?\\b`, 'g')) || []).join(' ');
+  static removeClasses(search, classList) {
+    return (
+      classList.match(new RegExp(`\\b${search}(?:[A-z-]+)?\\b`, 'g')) || []
+    );
   }
 
   static isArraysEqual(a, b) {

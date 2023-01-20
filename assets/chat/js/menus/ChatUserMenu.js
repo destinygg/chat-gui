@@ -10,6 +10,7 @@ const UserMenuSections = [
   { name: 'Vip', flairs: ['vip'] },
   { name: 'Trusted User', flairs: ['flair4'] },
   { name: 'Contributor', flairs: ['flair5', 'flair16'] }, // Contributor & Emote Contributor.
+  { name: 'Subscriber Tier 5', flairs: ['flair42'] },
   { name: 'Subscriber Tier 4', flairs: ['flair8'] },
   { name: 'Subscriber Tier 3', flairs: ['flair3'] },
   { name: 'Subscriber Tier 2', flairs: ['flair1'] },
@@ -43,8 +44,13 @@ export default class ChatUserMenu extends ChatMenu {
     this.searchinput = this.ui.find(
       '#chat-user-list-search .form-control:first'
     );
-    this.container.on('click', '.user', (e) =>
-      this.chat.userfocus.toggleFocus(e.target.getAttribute('data-username'))
+    this.container.on('click', '.user-entry', (e) =>
+      this.chat.userfocus.toggleFocus(
+        e.currentTarget.getAttribute('data-username')
+      )
+    );
+    this.container.on('click', '.flair', (e) =>
+      this.chat.userfocus.toggleFocus(e.target.getAttribute('data-flair'), true)
     );
     this.container.on('click', '.mention-nick', (e) => {
       ChatMenu.closeMenus(this.chat);
@@ -61,6 +67,14 @@ export default class ChatUserMenu extends ChatMenu {
       const username = $(e.target).parent().parent().data('username');
       this.chat.input.val(`/whisper ${username} ${value}`).focus();
       return false;
+    });
+    this.container.on('contextmenu', '.users .user-entry', (e) => {
+      const userinfo = this.chat.menus.get('user-info');
+      if (userinfo) {
+        userinfo.showUser(e, $(e.currentTarget), true);
+        return false;
+      }
+      return true;
     });
     this.chat.source.on('JOIN', (data) => this.addAndRedraw(data.nick));
     this.chat.source.on('QUIT', (data) => this.removeAndRedraw(data.nick));
@@ -121,7 +135,8 @@ export default class ChatUserMenu extends ChatMenu {
       .map((e) => this.chat.flairsMap.get(e))
       .sort((a, b) => a.priority - b.priority)
       .reduce(
-        (str, e) => `${str}<i class="flair ${e.name}" title="${e.label}"></i> `,
+        (str, e) =>
+          `${str}<i data-flair="${e.name}" class="flair ${e.name}" title="${e.label}"></i> `,
         ''
       );
     return features !== '' ? `<span class="features">${features}</span>` : '';
@@ -201,7 +216,7 @@ export default class ChatUserMenu extends ChatMenu {
   }
 
   removeElement(username) {
-    this.container.find(`.user[data-username="${username}"]`).remove();
+    this.container.find(`.user-entry[data-username="${username}"]`).remove();
     this.totalcount -= 1;
   }
 
@@ -212,7 +227,7 @@ export default class ChatUserMenu extends ChatMenu {
     const features =
       user.features.length === 0 ? 'nofeature' : user.features.join(' ');
     const usr = $(
-      `<a data-username="${user.username}" class="user ${features}">${label}<div class="user-actions"><i class="mention-nick"></i><i class="whisper-nick"></i></div></a>`
+      `<div class="user-entry" data-username="${user.username}"><span class="user ${features}">${label}</span><div class="user-actions"><i class="mention-nick"></i><i class="whisper-nick"></i></div></div>`
     );
     const section = this.sections.get(this.highestSection(user));
 
@@ -236,7 +251,9 @@ export default class ChatUserMenu extends ChatMenu {
   }
 
   hasElement(username) {
-    return this.container.find(`.user[data-username="${username}"]`).length > 0;
+    return (
+      this.container.find(`.user-entry[data-username="${username}"]`).length > 0
+    );
   }
 
   filter() {
@@ -258,7 +275,7 @@ export default class ChatUserMenu extends ChatMenu {
         });
       });
     } else {
-      this.container.children('.user').removeClass('found');
+      this.container.children('.user-entry').removeClass('found');
     }
   }
 

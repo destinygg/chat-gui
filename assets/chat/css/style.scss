@@ -286,7 +286,7 @@ hr {
   .user {
     font-weight: 500;
     cursor: pointer;
-    padding-left: $gutter-sm;
+    margin-left: $gutter-sm;
     color: $color-label-user;
   }
   .chat-user {
@@ -340,6 +340,7 @@ hr {
   align-items: center;
   margin-left: -$gutter-xs;
   .flair {
+    cursor: pointer;
     margin-left: $gutter-xs;
   }
 }
@@ -514,7 +515,6 @@ hr {
 
 /* Broadcasts */
 .msg-broadcast {
-  text-shadow: 1px 1px 3px rgba(0, 0, 0, 1);
   background-color: $color-chat-emphasize;
   color: $color-text-broadcast !important;
   font-size: 1.1em;
@@ -540,7 +540,7 @@ hr {
 }
 
 /* Focus or highlight a line */
-.focus-user .msg-chat {
+.focus .msg-chat {
   opacity: 0.3;
 }
 
@@ -598,6 +598,7 @@ hr {
   }
 }
 .emote {
+  cursor: pointer;
   z-index: 1;
   display: inline-block;
   position: relative;
@@ -879,6 +880,7 @@ hr {
     top: auto;
     left: auto;
     h5 {
+      justify-content: space-between;
       padding: $gutter-md;
       font-size: 1.1em;
       font-weight: normal;
@@ -889,7 +891,6 @@ hr {
       margin: 0;
     }
     span {
-      flex: 1;
       line-height: 1.25em;
       display: inline-block;
     }
@@ -908,6 +909,9 @@ hr {
       }
     }
   }
+  .floating-window {
+    height: fit-content !important;
+  }
   .chat-menu-inner {
     height: 100%;
     display: flex;
@@ -916,6 +920,7 @@ hr {
   }
   .scrollable {
     flex: 1;
+    height: 100%;
   }
   &.active {
     display: block;
@@ -1054,11 +1059,12 @@ hr {
         align-items: center;
         margin-right: $gutter-md;
         .flair {
+          cursor: pointer;
           margin-right: $gutter-xs;
         }
       }
     }
-    .user {
+    .user-entry {
       margin: 0;
       cursor: pointer;
       padding: 0 $gutter-lg;
@@ -1109,10 +1115,10 @@ hr {
   .scrollable {
     max-height: calc(100% - 3em);
   }
-  &.search-in .user {
+  &.search-in .user-entry {
     display: none;
   }
-  &.search-in .user.found {
+  &.search-in .user-entry.found {
     display: flex;
   }
   input {
@@ -1120,6 +1126,33 @@ hr {
     border: none;
     background: none;
     border-radius: 0;
+  }
+}
+
+#chat-emote-tooltip {
+  height: fit-content;
+  width: fit-content;
+  min-width: 75px;
+  max-width: 250px;
+  .emote-image {
+    display: flex;
+    justify-content: center;
+    padding: $gutter-md;
+  }
+  .emote-info {
+    border-top: 1px solid $color-surface-dark4;
+    padding: $gutter-sm;
+    div {
+      display: flex;
+      justify-content: center;
+      &.name {
+        font-weight: 500;
+        color: $text-color;
+      }
+      &.author {
+        color: $text-color1;
+      }
+    }
   }
 }
 
@@ -1202,6 +1235,11 @@ hr {
   }
   #ignore-user-btn .btn-icon {
     background: transparent url('../img/icon-ignore.svg') no-repeat center
+      center;
+    background-size: contain;
+  }
+  #unignore-user-btn .btn-icon {
+    background: transparent url('../img/icon-unignore.svg') no-repeat center
       center;
     background-size: contain;
   }
@@ -1341,61 +1379,95 @@ hr {
   display: block;
 }
 
-/* Nano */
-.nano {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
+/* OverlayScrollbars theme */
+.dgg-scroller-theme.os-scrollbar-horizontal {
+  right: 10px;
+  height: 10px;
 }
 
-.nano > .nano-content {
-  overflow-anchor: none;
-  position: absolute;
-  overflow: scroll;
-  overflow-x: hidden;
-  top: 0;
+.dgg-scroller-theme.os-scrollbar-vertical {
+  bottom: 10px;
+  width: 10px;
+}
+
+.dgg-scroller-theme.os-scrollbar-rtl.os-scrollbar-horizontal {
+  left: 10px;
   right: 0;
-  bottom: 0;
+}
+
+.dgg-scroller-theme.os-scrollbar {
+  padding: 2px;
+  box-sizing: border-box;
+  background: transparent;
+}
+
+.dgg-scroller-theme.os-scrollbar-unusable {
+  background: transparent;
+}
+
+.dgg-scroller-theme.os-scrollbar > .os-scrollbar-track {
+  background: transparent;
+}
+
+.dgg-scroller-theme.os-scrollbar-horizontal
+  > .os-scrollbar-track
+  > .os-scrollbar-handle {
+  min-width: 30px;
+}
+
+.dgg-scroller-theme.os-scrollbar-vertical
+  > .os-scrollbar-track
+  > .os-scrollbar-handle {
+  min-height: 30px;
+}
+
+.dgg-scroller-theme.os-scrollbar-transition
+  > .os-scrollbar-track
+  > .os-scrollbar-handle {
+  transition: background-color 0.3s;
+}
+
+.dgg-scroller-theme.os-scrollbar > .os-scrollbar-track > .os-scrollbar-handle {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+.dgg-scroller-theme.os-scrollbar:hover
+  > .os-scrollbar-track
+  > .os-scrollbar-handle {
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.dgg-scroller-theme.os-scrollbar
+  > .os-scrollbar-track
+  > .os-scrollbar-handle.active {
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.dgg-scroller-theme.os-scrollbar-horizontal .os-scrollbar-handle:before,
+.dgg-scroller-theme.os-scrollbar-vertical .os-scrollbar-handle:before {
+  content: '';
+  position: absolute;
   left: 0;
-}
-
-.nano > .nano-content:focus {
-  outline: none;
-}
-
-.nano > .nano-content::-webkit-scrollbar {
-  display: none;
-}
-
-.has-scrollbar > .nano-content::-webkit-scrollbar {
+  right: 0;
+  top: 0;
+  bottom: 0;
   display: block;
 }
 
-.nano > .nano-pane {
-  background: transparent;
-  position: absolute;
-  width: $gutter-md;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  visibility: hidden \9; /* Target only IE7 and IE8 with this hack */
-  opacity: 0.01;
-  transition: 0.2s;
+.dgg-scroller-theme.os-scrollbar-horizontal .os-scrollbar-handle:before {
+  top: -6px;
+  bottom: -2px;
 }
 
-.nano > .nano-pane > .nano-slider {
-  opacity: 0.5;
-  background: $color-surface-light2;
-  position: relative;
-  border-radius: 0;
+.dgg-scroller-theme.os-scrollbar-vertical .os-scrollbar-handle:before {
+  left: -6px;
+  right: -2px;
 }
 
-.nano:hover > .nano-pane,
-.nano-pane.active,
-.nano-pane.flashed {
-  visibility: visible \9; /* Target only IE7 and IE8 with this hack */
-  opacity: 0.99;
+.dgg-scroller-theme.os-scrollbar-rtl.os-scrollbar-vertical
+  .os-scrollbar-handle:before {
+  right: -6px;
+  left: -2px;
 }
 
 /** Form Controls */
@@ -1490,7 +1562,7 @@ button.btn {
   }
 
   .continue,
-  .nano-slider {
+  .os-scrollbar {
     visibility: hidden !important;
   }
 
@@ -1504,8 +1576,7 @@ button.btn {
   .msg-chat {
     margin: 0;
     padding: 1px 20px 1px 5px;
-    text-shadow: -1px -1px 0 rgba(black, 0.75), 1px -1px 1px rgba(black, 0.75),
-      -1px 1px 0 rgba(black, 0.75), 1px 1px 1px rgba(black, 0.75);
+    filter: drop-shadow(1px 1px 1px black);
     letter-spacing: 0.03em;
   }
 

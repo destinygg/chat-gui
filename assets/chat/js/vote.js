@@ -6,10 +6,11 @@ const VOTE_START = /^\/(vote|svote) /i;
 const VOTE_STOP = /^\/votestop/i;
 const VOTE_CONJUNCTION = /\bor\b/i;
 const VOTE_INTERROGATIVE = /^(how|why|when|what|where)\b/i;
-const VOTE_TIME = /\b([0-9]+(?:m|s)?)$/i;
+const VOTE_TIME = /\b([0-9]+(?:m|s))$/i;
 const VOTE_DEFAULT_TIME = 30000;
 const VOTE_MAX_TIME = 10 * 60 * 1000;
 const VOTE_MIN_TIME = 5000;
+const VOTE_END_TIME = 7000;
 
 const PollType = {
   Normal: 0,
@@ -93,6 +94,17 @@ class ChatVote {
     }
   }
 
+  canCastVote(timestamp) {
+    if (this.vote) {
+      return (
+        new Date(timestamp).getTime() -
+          (this.vote.start.getTime() + this.vote.time) <
+        0
+      );
+    }
+    return false;
+  }
+
   isVoteStarted() {
     return this.voting;
   }
@@ -130,8 +142,12 @@ class ChatVote {
     return !this.vote.votes.has(user.username);
   }
 
-  castVote(opt, user) {
-    if (this.voting && !this.hidden && this.canVote(user.username)) {
+  castVote(opt, user, timestamp = new Date().getTime()) {
+    if (
+      this.canCastVote(timestamp) &&
+      !this.hidden &&
+      this.canVote(user.username)
+    ) {
       this.vote.votes.set(user.username, opt);
 
       const votes = this.votesForUser(user);
@@ -139,6 +155,9 @@ class ChatVote {
       this.vote.votesCast += votes;
 
       this.throttleVoteCast(opt);
+
+      if (!this.voting) this.markWinner();
+
       return true;
     }
     return false;
@@ -147,6 +166,9 @@ class ChatVote {
   votesForUser(user) {
     switch (this.vote.type) {
       case PollType.Weighted:
+        if (user.hasFeature(UserFeatures.SUB_TIER_5)) {
+          return 32;
+        }
         if (user.hasFeature(UserFeatures.SUB_TIER_4)) {
           return 16;
         }
@@ -167,7 +189,7 @@ class ChatVote {
     }
   }
 
-  startVote(rawCommand, user) {
+  startVote(rawCommand, user, startTime) {
     try {
       this.voting = true;
       clearTimeout(this.timerEndVote);
@@ -178,7 +200,7 @@ class ChatVote {
       const question = parseQuestionAndTime(rawQuestion);
       this.vote = {
         type: type === '/svote' ? PollType.Weighted : PollType.Normal,
-        start: new Date(),
+        start: new Date(startTime),
         time: question.time,
         question,
         totals: question.options.map(() => 0),
@@ -207,8 +229,18 @@ class ChatVote {
       this.updateBars();
       this.show();
 
-      this.timerHeartBeat = setInterval(() => this.updateTimers(), 1000);
-      this.timerEndVote = setTimeout(() => this.endVote(), this.vote.time);
+      this.timerHeartBeat = setInterval(() => this.updateTimers(), 500);
+
+      const elapsedTime = new Date().getTime() - startTime;
+      if (this.vote.time - elapsedTime > 0) {
+        this.timerEndVote = setTimeout(
+          () => this.endVote(startTime + this.vote.time),
+          this.vote.time - elapsedTime
+        );
+      } else {
+        this.endVote(startTime + this.vote.time);
+      }
+
       return true;
     } catch (e) {
       this.voting = false;
@@ -216,11 +248,34 @@ class ChatVote {
     }
   }
 
-  endVote() {
+  endVote(timestamp) {
     this.voting = false;
     clearTimeout(this.timerEndVote);
     clearTimeout(this.timerHideVote);
     clearInterval(this.timerHeartBeat);
+
+    this.markWinner();
+
+    this.ui.label.html(`Vote ended! ${this.vote.votesCast} votes cast.`);
+    this.ui.vote.addClass('vote-completed');
+    const elapsedTime = new Date().getTime() - timestamp;
+    if (VOTE_END_TIME - elapsedTime > 0) {
+      this.timerHideVote = setTimeout(
+        () => this.reset(),
+        VOTE_END_TIME - elapsedTime
+      );
+    } else {
+      this.reset();
+    }
+  }
+
+  reset() {
+    this.vote = null;
+    this.hide();
+  }
+
+  markWinner() {
+    $('.opt-winner').removeClass('opt-winner');
 
     const firstIndex = this.vote.totals.reduce(
       (max, x, i, arr) => (x > arr[max] ? i : max),
@@ -232,11 +287,6 @@ class ChatVote {
     choices
       .find(`.opt-choice:nth-child(${firstIndex + 1})`)
       .addClass('opt-winner');
-
-    this.ui.label.html(`Vote ended! ${this.vote.votesCast} votes cast.`);
-    this.ui.vote.addClass('vote-completed');
-    this.timerHideVote = setTimeout(() => this.hide(), 7000);
-    this.vote = null;
   }
 
   markVote(opt) {
@@ -321,4 +371,4 @@ class ChatVote {
   }
 }
 
-export { ChatVote, parseQuestionAndTime };
+export { ChatVote, parseQuestionAndTime, VOTE_END_TIME };
