@@ -1517,7 +1517,9 @@ class Chat {
   onSUBONLY(data) {
     this.subonly = data.data === 'on';
     MessageBuilder.command(
-      `Subscriber only mode ${this.subonly ? 'enabled' : 'disabled'} by ${data.nick}.`,
+      `Subscriber only mode ${this.subonly ? 'enabled' : 'disabled'}${
+        data.nick ? ` by ${data.nick}` : ''
+      }.`,
       data.timestamp
     ).into(this);
     if (this.subonly) {
