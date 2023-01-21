@@ -1,6 +1,7 @@
 import $ from 'jquery';
 import { throttle } from 'throttle-debounce';
 import UserFeatures from './features';
+import { MessageBuilder } from './messages';
 
 const VOTE_START = /^\/(vote|svote) /i;
 const VOTE_STOP = /^\/votestop/i;
@@ -63,12 +64,17 @@ class ChatVote {
     this.voting = false;
     this.hidden = true;
     this.timerHeartBeat = -1;
-    this.timerEndVote = -1;
     this.timerHideVote = -1;
     this.ui.on('click touch', '.vote-close', () => this.hide());
     this.ui.on('click touch', '.opt', (e) => {
       if (this.voting) {
-        this.chat.cmdSEND(`${$(e.currentTarget).index() + 1}`);
+        if (this.canVote(this.chat.user)) {
+          this.chat.source.send('CASTVOTE', {
+            vote: `${$(e.currentTarget).index() + 1}`,
+          });
+        } else {
+          MessageBuilder.error(`You have already voted!`).into(this);
+        }
       }
     });
     this.throttleVoteCast = throttle(100, false, () => {
@@ -92,17 +98,6 @@ class ChatVote {
       this.ui.addClass('active');
       this.chat.mainwindow.unlock();
     }
-  }
-
-  canCastVote(timestamp) {
-    if (this.vote) {
-      return (
-        new Date(timestamp).getTime() -
-          (this.vote.start.getTime() + this.vote.time) <
-        0
-      );
-    }
-    return false;
   }
 
   isVoteStarted() {
@@ -133,31 +128,23 @@ class ChatVote {
   isMsgVoteCastFmt(txt) {
     if (txt.match(/^[0-9]+$/i)) {
       const int = parseInt(txt, 10);
-      return int > 0 && int <= this.vote.question.options.length;
+      return int > 0 && int <= this.vote.options.length;
     }
     return false;
   }
 
   canVote(user) {
-    return !this.vote.votes.has(user.username);
+    return !this.vote.votes.includes(user.username);
   }
 
-  castVote(opt, user, timestamp = new Date().getTime()) {
-    if (
-      this.canCastVote(timestamp) &&
-      !this.hidden &&
-      this.canVote(user.username)
-    ) {
-      this.vote.votes.set(user.username, opt);
-
+  castVote(data, user) {
+    if (!this.hidden && this.canVote(data)) {
+      this.vote.votes.push(user.username);
       const votes = this.votesForUser(user);
-      this.vote.totals[opt - 1] += votes;
+      this.vote.totals[data.vote - 1] += votes;
       this.vote.votesCast += votes;
-
-      this.throttleVoteCast(opt);
-
+      this.throttleVoteCast(data.vote);
       if (!this.voting) this.markWinner();
-
       return true;
     }
     return false;
@@ -189,24 +176,23 @@ class ChatVote {
     }
   }
 
-  startVote(rawCommand, user, startTime) {
+  startVote(data) {
     try {
       this.voting = true;
-      clearTimeout(this.timerEndVote);
       clearTimeout(this.timerHideVote);
       clearInterval(this.timerHeartBeat);
 
-      const [type, rawQuestion] = rawCommand.split(/\s+(.*)/);
-      const question = parseQuestionAndTime(rawQuestion);
       this.vote = {
-        type: type === '/svote' ? PollType.Weighted : PollType.Normal,
-        start: new Date(startTime),
-        time: question.time,
-        question,
-        totals: question.options.map(() => 0),
-        votes: new Map(),
-        user: user.username,
-        votesCast: 0,
+        type: data.weighted ? PollType.Weighted : PollType.Normal,
+        start: new Date(data.start),
+        offset: new Date(data.now).getTime() - new Date().getTime(),
+        time: data.time,
+        question: data.question,
+        options: data.options,
+        totals: data.totals,
+        votes: data.votes,
+        user: data.nick,
+        votesCast: data.totalvotes,
       };
 
       const html = this.buildVoteFrame();
@@ -231,16 +217,6 @@ class ChatVote {
 
       this.timerHeartBeat = setInterval(() => this.updateTimers(), 500);
 
-      const elapsedTime = new Date().getTime() - startTime;
-      if (this.vote.time - elapsedTime > 0) {
-        this.timerEndVote = setTimeout(
-          () => this.endVote(startTime + this.vote.time),
-          this.vote.time - elapsedTime
-        );
-      } else {
-        this.endVote(startTime + this.vote.time);
-      }
-
       return true;
     } catch (e) {
       this.voting = false;
@@ -248,9 +224,8 @@ class ChatVote {
     }
   }
 
-  endVote(timestamp) {
+  endVote() {
     this.voting = false;
-    clearTimeout(this.timerEndVote);
     clearTimeout(this.timerHideVote);
     clearInterval(this.timerHeartBeat);
 
@@ -258,15 +233,7 @@ class ChatVote {
 
     this.ui.label.html(`Vote ended! ${this.vote.votesCast} votes cast.`);
     this.ui.vote.addClass('vote-completed');
-    const elapsedTime = new Date().getTime() - timestamp;
-    if (VOTE_END_TIME - elapsedTime > 0) {
-      this.timerHideVote = setTimeout(
-        () => this.reset(),
-        VOTE_END_TIME - elapsedTime
-      );
-    } else {
-      this.reset();
-    }
+    this.timerHideVote = setTimeout(() => this.reset(), VOTE_END_TIME);
   }
 
   reset() {
@@ -298,10 +265,15 @@ class ChatVote {
   updateTimers() {
     const remaining = Math.floor(
       Math.min(
-        (this.vote.time - (new Date() - this.vote.start)) / 1000 + 1,
+        (this.vote.time -
+          (new Date().getTime() +
+            this.vote.offset -
+            this.vote.start.getTime())) /
+          1000,
         this.vote.time / 1000
       )
     );
+
     this.ui.label.html(
       `(Type in chat to participate) Started by ${
         this.vote.user
@@ -311,7 +283,7 @@ class ChatVote {
 
   updateBars() {
     if (this.vote && this.vote.question) {
-      this.vote.question.options.forEach((opt, i) => {
+      this.vote.options.forEach((opt, i) => {
         const percent =
           this.vote.votesCast > 0
             ? (this.vote.totals[i] / this.vote.votesCast) * 100
@@ -325,9 +297,9 @@ class ChatVote {
   }
 
   buildVoteFrame() {
-    const { question } = this.vote;
-    const tagQuestion = $(`<span />`).text(question.question)[0];
-    const tagOptions = question.options
+    const { question, options } = this.vote;
+    const tagQuestion = $(`<span />`).text(question)[0];
+    const tagOptions = options
       .map((v, i) => {
         const tagVal = $(`<span/>`).text(v)[0];
         return `<span class="opt-choice"><strong>${i + 1}</strong> ${
@@ -343,7 +315,7 @@ class ChatVote {
         `</label>` +
         `<label class="vote-close" title="Close"></label>` +
         `</div>` +
-        `<div class="opt-options">${question.options.reduce((a, v, i) => {
+        `<div class="opt-options">${options.reduce((a, v, i) => {
           const newOption =
             `<div class="opt" title="Vote">` +
             `<div class="opt-info"><strong>${i + 1}</strong></div>` +

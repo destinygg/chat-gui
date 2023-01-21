@@ -23,7 +23,7 @@ import ChatUserFocus from './focus';
 import ChatStore from './store';
 import Settings from './settings';
 import ChatWindow from './window';
-import { ChatVote, parseQuestionAndTime, VOTE_END_TIME } from './vote';
+import { ChatVote, parseQuestionAndTime } from './vote';
 import { isMuteActive, MutedTimer } from './mutedtimer';
 import EmoteService from './emotes';
 import UserFeatures from './features';
@@ -68,6 +68,9 @@ const errorstrings = new Map([
   ],
   ['notfound', 'The user was not found'],
   ['notconnected', 'You have to be connected to use that'],
+  ['activevote', 'Vote already started.'],
+  ['noactivevote', 'No vote started.'],
+  ['alreadyvoted', 'You have already voted!'],
 ]);
 const hintstrings = new Map([
   [
@@ -416,7 +419,7 @@ class Chat {
     this.source.on('BROADCAST', (data) => this.onBROADCAST(data));
     this.source.on('PRIVMSGSENT', (data) => this.onPRIVMSGSENT(data));
     this.source.on('PRIVMSG', (data) => this.onPRIVMSG(data));
-    this.source.on('VOTE', (data) => this.onVOTE(data));
+    this.source.on('VOTESTART', (data) => this.onVOTESTART(data));
     this.source.on('VOTESTOP', (data) => this.onVOTESTOP(data));
     this.source.on('VOTECAST', (data) => this.onVOTECAST(data));
 
@@ -1306,35 +1309,6 @@ class Chat {
   onMSG(data) {
     const textonly = Chat.removeSlashCmdFromText(data.data);
     const usr = this.users.get(data.nick.toLowerCase());
-
-    // Voting is processed entirely in clients through messages with
-    // type `MSG`, but we emit `VOTE`, `VOTESTOP`, and `VOTECAST`
-    // events to mimic server involvement.
-    if (this.chatvote.canUserStartVote(usr)) {
-      if (this.chatvote.isMsgVoteStartFmt(data.data)) {
-        const now = new Date().getTime();
-        const question = parseQuestionAndTime(data.data);
-        if (now - data.timestamp < question.time + VOTE_END_TIME) {
-          this.source.emit('VOTE', data);
-        }
-        return;
-      }
-      if (
-        this.chatvote.isVoteStarted() &&
-        this.chatvote.isMsgVoteStopFmt(data.data)
-      ) {
-        this.source.emit('VOTESTOP', data);
-        return;
-      }
-    }
-    if (
-      this.chatvote.canCastVote(data.timestamp) &&
-      this.chatvote.isMsgVoteCastFmt(data.data)
-    ) {
-      this.source.emit(`VOTECAST`, data);
-      return;
-    }
-
     const win = this.mainwindow;
     if (
       win.lastmessage !== null &&
@@ -1354,13 +1328,13 @@ class Chat {
     }
   }
 
-  onVOTE(data) {
+  onVOTESTART(data) {
     const usr = this.users.get(data.nick.toLowerCase());
     if (this.chatvote.isVoteStarted() || !this.chatvote.canUserStartVote(usr)) {
       return;
     }
 
-    if (this.chatvote.startVote(data.data, usr, data.timestamp)) {
+    if (this.chatvote.startVote(data)) {
       new ChatMessage(
         this.chatvote.voteStartMessage(),
         null,
@@ -1376,7 +1350,7 @@ class Chat {
       return;
     }
 
-    this.chatvote.endVote(data.timestamp);
+    this.chatvote.endVote();
   }
 
   onVOTECAST(data) {
@@ -1386,9 +1360,9 @@ class Chat {
     }
 
     // NOTE method returns false, if the GUI is hidden
-    if (this.chatvote.castVote(data.data, usr, data.timestamp)) {
+    if (this.chatvote.castVote(data, usr)) {
       if (data.nick === this.user.username) {
-        this.chatvote.markVote(data.data);
+        this.chatvote.markVote(data.vote);
       }
     }
   }
@@ -1645,7 +1619,7 @@ class Chat {
       ) {
         if (this.chatvote.canVote(this.user)) {
           MessageBuilder.info(`Your vote has been cast!`).into(this);
-          this.source.send('MSG', { data: raw });
+          this.source.send('CASTVOTE', { vote: raw });
           this.input.val('');
         } else {
           MessageBuilder.error(`You have already voted!`).into(this);
@@ -1703,8 +1677,14 @@ class Chat {
       return;
     }
 
-    this.source.send('MSG', { data: `${slashCommand} ${textOnly}` });
-    // TODO if the chat isn't connected, the user has no warning of this action failing
+    const { question, options, time } = parseQuestionAndTime(textOnly);
+    const dataOut = {
+      weighted: slashCommand === '/svote',
+      time,
+      question,
+      options,
+    };
+    this.source.send('STARTVOTE', dataOut);
   }
 
   cmdVOTESTOP() {
@@ -1719,8 +1699,7 @@ class Chat {
       return;
     }
 
-    this.source.send('MSG', { data: '/votestop' });
-    // TODO if the chat isn't connected, the user has no warning of this action failing
+    this.source.send('STOPVOTE', {});
   }
 
   cmdEMOTES() {
