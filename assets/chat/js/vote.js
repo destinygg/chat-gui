@@ -179,6 +179,7 @@ class ChatVote {
 
       this.vote = {
         canVote: data.canvote,
+        myVote: data.myvote,
         type: data.weighted ? PollType.Weighted : PollType.Normal,
         start: new Date(data.start),
         offset: new Date(data.now).getTime() - new Date().getTime(),
@@ -208,6 +209,11 @@ class ChatVote {
       this.chat.mainwindow.unlock();
       this.updateTimers();
       this.updateBars();
+
+      if (this.vote.myVote !== 0) {
+        this.markVote(this.vote.myVote);
+      }
+
       this.show();
 
       this.timerHeartBeat = setInterval(() => this.updateTimers(), 500);
