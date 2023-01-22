@@ -1355,13 +1355,8 @@ class Chat {
 
   onVOTECAST(data) {
     const usr = this.users.get(data.nick.toLowerCase());
-    if (!this.chatvote.canVote(usr)) {
-      return;
-    }
-
-    // NOTE method returns false, if the GUI is hidden
     if (this.chatvote.castVote(data, usr)) {
-      if (data.nick === this.user.username) {
+      if (data.nick.toLowerCase() === this.user.nick.toLowerCase()) {
         this.chatvote.markVote(data.vote);
       }
     }
@@ -1617,7 +1612,7 @@ class Chat {
         this.chatvote.isVoteStarted() &&
         this.chatvote.isMsgVoteCastFmt(textonly)
       ) {
-        if (this.chatvote.canVote(this.user)) {
+        if (this.chatvote.vote.canVote) {
           MessageBuilder.info(`Your vote has been cast!`).into(this);
           this.source.send('CASTVOTE', { vote: raw });
           this.input.val('');

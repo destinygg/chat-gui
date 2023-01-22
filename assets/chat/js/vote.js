@@ -68,12 +68,12 @@ class ChatVote {
     this.ui.on('click touch', '.vote-close', () => this.hide());
     this.ui.on('click touch', '.opt', (e) => {
       if (this.voting) {
-        if (this.canVote(this.chat.user)) {
+        if (this.vote.canVote) {
           this.chat.source.send('CASTVOTE', {
             vote: `${$(e.currentTarget).index() + 1}`,
           });
         } else {
-          MessageBuilder.error(`You have already voted!`).into(this);
+          MessageBuilder.error(`You have already voted!`).into(this.chat);
         }
       }
     });
@@ -133,13 +133,8 @@ class ChatVote {
     return false;
   }
 
-  canVote(user) {
-    return !this.vote.votes.includes(user.username);
-  }
-
   castVote(data, user) {
-    if (!this.hidden && this.canVote(data)) {
-      this.vote.votes.push(user.username);
+    if (!this.hidden) {
       const votes = this.votesForUser(user);
       this.vote.totals[data.vote - 1] += votes;
       this.vote.votesCast += votes;
@@ -183,6 +178,7 @@ class ChatVote {
       clearInterval(this.timerHeartBeat);
 
       this.vote = {
+        canVote: data.canvote,
         type: data.weighted ? PollType.Weighted : PollType.Normal,
         start: new Date(data.start),
         offset: new Date(data.now).getTime() - new Date().getTime(),
@@ -190,7 +186,6 @@ class ChatVote {
         question: data.question,
         options: data.options,
         totals: data.totals,
-        votes: data.votes,
         user: data.nick,
         votesCast: data.totalvotes,
       };
@@ -257,6 +252,7 @@ class ChatVote {
   }
 
   markVote(opt) {
+    this.vote.canVote = false;
     this.ui.vote
       .find(`.opt-options .opt:nth-child(${opt})`)
       .addClass('opt-marked');
