@@ -18,7 +18,7 @@ import {
   ChatUserInfoMenu,
 } from './menus';
 import ChatAutoComplete from './autocomplete';
-import ChatInput from './input';
+import { ChatInput } from './input';
 import ChatInputHistory from './history';
 import ChatUserFocus from './focus';
 import ChatStore from './store';
