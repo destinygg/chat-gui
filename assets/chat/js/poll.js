@@ -3,15 +3,15 @@ import { throttle } from 'throttle-debounce';
 import UserFeatures from './features';
 import { MessageBuilder } from './messages';
 
-const VOTE_START = /^\/(vote|svote) /i;
-const VOTE_STOP = /^\/votestop/i;
-const VOTE_CONJUNCTION = /\bor\b/i;
-const VOTE_INTERROGATIVE = /^(how|why|when|what|where)\b/i;
-const VOTE_TIME = /\b([0-9]+(?:m|s))$/i;
-const VOTE_DEFAULT_TIME = 30000;
-const VOTE_MAX_TIME = 10 * 60 * 1000;
-const VOTE_MIN_TIME = 5000;
-const VOTE_END_TIME = 7000;
+const POLL_START = /^\/(vote|svote|poll|spoll) /i;
+const POLL_STOP = /^\/(votestop|pollstop)/i;
+const POLL_CONJUNCTION = /\bor\b/i;
+const POLL_INTERROGATIVE = /^(how|why|when|what|where)\b/i;
+const POLL_TIME = /\b([0-9]+(?:m|s))$/i;
+const POLL_DEFAULT_TIME = 30000;
+const POLL_MAX_TIME = 10 * 60 * 1000;
+const POLL_MIN_TIME = 5000;
+const POLL_END_TIME = 7000;
 
 const PollType = {
   Normal: 0,
@@ -25,8 +25,8 @@ function parseQuestion(msg) {
   const parts = msg.split('?');
   const question = `${parts[0]}?`;
   if (parts[1].trim() !== '') {
-    const options = parts[1].split(VOTE_CONJUNCTION).map((a) => a.trim());
-    if (options.length < 2 && question.match(VOTE_INTERROGATIVE)) {
+    const options = parts[1].split(POLL_CONJUNCTION).map((a) => a.trim());
+    if (options.length < 2 && question.match(POLL_INTERROGATIVE)) {
       throw new Error('question needs at least 2 available answers');
     }
     return { question, options };
@@ -35,7 +35,7 @@ function parseQuestion(msg) {
 }
 function parseQuestionAndTime(rawQuestion) {
   let time;
-  const match = rawQuestion.match(VOTE_TIME);
+  const match = rawQuestion.match(POLL_TIME);
   if (match && match[0]) {
     switch (match[0].replace(/[0-9]+/, '').toLowerCase()) {
       case 's':
@@ -45,30 +45,30 @@ function parseQuestionAndTime(rawQuestion) {
         time = parseInt(match[0], 10) * 60 * 1000;
         break;
       default:
-        time = VOTE_DEFAULT_TIME;
+        time = POLL_DEFAULT_TIME;
         break;
     }
   } else {
-    time = VOTE_DEFAULT_TIME;
+    time = POLL_DEFAULT_TIME;
   }
-  const question = parseQuestion(rawQuestion.replace(VOTE_TIME, '').trim());
-  question.time = Math.max(VOTE_MIN_TIME, Math.min(time, VOTE_MAX_TIME));
+  const question = parseQuestion(rawQuestion.replace(POLL_TIME, '').trim());
+  question.time = Math.max(POLL_MIN_TIME, Math.min(time, POLL_MAX_TIME));
   return question;
 }
 
-class ChatVote {
+class ChatPoll {
   constructor(chat, ui) {
     this.chat = chat;
     this.ui = ui;
-    this.vote = null;
+    this.poll = null;
     this.voting = false;
     this.hidden = true;
     this.timerHeartBeat = -1;
-    this.timerHideVote = -1;
-    this.ui.on('click touch', '.vote-close', () => this.hide());
+    this.timerHidePoll = -1;
+    this.ui.on('click touch', '.poll-close', () => this.hide());
     this.ui.on('click touch', '.opt', (e) => {
       if (this.voting) {
-        if (this.vote.canVote) {
+        if (this.poll.canVote) {
           this.chat.source.send('CASTVOTE', {
             vote: `${$(e.currentTarget).index() + 1}`,
           });
@@ -100,11 +100,11 @@ class ChatVote {
     }
   }
 
-  isVoteStarted() {
+  isPollStarted() {
     return this.voting;
   }
 
-  canUserStartVote(user) {
+  canUserStartPoll(user) {
     return user.hasAnyFeatures(
       UserFeatures.ADMIN,
       UserFeatures.BOT,
@@ -112,23 +112,23 @@ class ChatVote {
     );
   }
 
-  canUserStopVote(user) {
-    // A user can only stop their own vote.
-    return this.canUserStartVote(user) && this.vote.user === user.nick;
+  canUserStopPoll(user) {
+    // A user can only stop their own poll.
+    return this.canUserStartPoll(user) && this.poll.user === user.nick;
   }
 
-  isMsgVoteStopFmt(txt) {
-    return txt.match(VOTE_STOP);
+  isMsgPollStopFmt(txt) {
+    return txt.match(POLL_STOP);
   }
 
-  isMsgVoteStartFmt(txt) {
-    return txt.match(VOTE_START);
+  isMsgPollStartFmt(txt) {
+    return txt.match(POLL_START);
   }
 
   isMsgVoteCastFmt(txt) {
     if (txt.match(/^[0-9]+$/i)) {
       const int = parseInt(txt, 10);
-      return int > 0 && int <= this.vote.options.length;
+      return int > 0 && int <= this.poll.options.length;
     }
     return false;
   }
@@ -136,8 +136,8 @@ class ChatVote {
   castVote(data, user) {
     if (!this.hidden) {
       const votes = this.votesForUser(user);
-      this.vote.totals[data.vote - 1] += votes;
-      this.vote.votesCast += votes;
+      this.poll.totals[data.vote - 1] += votes;
+      this.poll.votesCast += votes;
       this.throttleVoteCast(data.vote);
       if (!this.voting) this.markWinner();
       return true;
@@ -146,7 +146,7 @@ class ChatVote {
   }
 
   votesForUser(user) {
-    switch (this.vote.type) {
+    switch (this.poll.type) {
       case PollType.Weighted:
         if (user.hasFeature(UserFeatures.SUB_TIER_5)) {
           return 32;
@@ -171,13 +171,13 @@ class ChatVote {
     }
   }
 
-  startVote(data) {
+  startPoll(data) {
     try {
       this.voting = true;
-      clearTimeout(this.timerHideVote);
+      clearTimeout(this.timerHidePoll);
       clearInterval(this.timerHeartBeat);
 
-      this.vote = {
+      this.poll = {
         canVote: data.canvote,
         myVote: data.myvote,
         type: data.weighted ? PollType.Weighted : PollType.Normal,
@@ -191,9 +191,9 @@ class ChatVote {
         votesCast: data.totalvotes,
       };
 
-      const html = this.buildVoteFrame();
-      this.ui.vote = html;
-      this.ui.label = html.find('.vote-label');
+      const html = this.buildPollFrame();
+      this.ui.poll = html;
+      this.ui.label = html.find('.poll-label');
       this.ui.bars = html
         .find('.opt')
         .toArray()
@@ -210,8 +210,8 @@ class ChatVote {
       this.updateTimers();
       this.updateBars();
 
-      if (this.vote.myVote !== 0) {
-        this.markVote(this.vote.myVote);
+      if (this.poll.myVote !== 0) {
+        this.markVote(this.poll.myVote);
       }
 
       this.show();
@@ -225,32 +225,32 @@ class ChatVote {
     }
   }
 
-  endVote() {
+  endPoll() {
     this.voting = false;
-    clearTimeout(this.timerHideVote);
+    clearTimeout(this.timerHidePoll);
     clearInterval(this.timerHeartBeat);
 
     this.markWinner();
 
-    this.ui.label.html(`Vote ended! ${this.vote.votesCast} votes cast.`);
-    this.ui.vote.addClass('vote-completed');
-    this.timerHideVote = setTimeout(() => this.reset(), VOTE_END_TIME);
+    this.ui.label.html(`Poll ended! ${this.poll.votesCast} votes cast.`);
+    this.ui.poll.addClass('poll-completed');
+    this.timerHidePoll = setTimeout(() => this.reset(), POLL_END_TIME);
   }
 
   reset() {
-    this.vote = null;
+    this.poll = null;
     this.hide();
   }
 
   markWinner() {
     $('.opt-winner').removeClass('opt-winner');
 
-    const firstIndex = this.vote.totals.reduce(
+    const firstIndex = this.poll.totals.reduce(
       (max, x, i, arr) => (x > arr[max] ? i : max),
       0
     );
-    const options = this.ui.vote.find('.opt-options');
-    const choices = this.ui.vote.find('.opt-choices');
+    const options = this.ui.poll.find('.opt-options');
+    const choices = this.ui.poll.find('.opt-choices');
     options.find(`.opt:nth-child(${firstIndex + 1})`).addClass('opt-winner');
     choices
       .find(`.opt-choice:nth-child(${firstIndex + 1})`)
@@ -258,37 +258,35 @@ class ChatVote {
   }
 
   markVote(opt) {
-    this.vote.canVote = false;
-    this.ui.vote
+    this.poll.canVote = false;
+    this.ui.poll
       .find(`.opt-options .opt:nth-child(${opt})`)
       .addClass('opt-marked');
   }
 
   updateTimers() {
-    const remaining = Math.floor(
-      Math.min(
-        (this.vote.time -
-          (new Date().getTime() +
-            this.vote.offset -
-            this.vote.start.getTime())) /
-          1000,
-        this.vote.time / 1000
-      )
+    let remaining =
+      (this.poll.time -
+        (new Date().getTime() + this.poll.offset - this.poll.start.getTime())) /
+      1000;
+    remaining = Math.max(
+      0,
+      Math.floor(Math.min(remaining, this.poll.time / 1000))
     );
 
     this.ui.label.html(
       `(Type in chat to participate) Started by ${
-        this.vote.user
+        this.poll.user
       } ending in ${remaining} ${remaining > 1 ? 'seconds' : 'second'}!`
     );
   }
 
   updateBars() {
-    if (this.vote && this.vote.question) {
-      this.vote.options.forEach((opt, i) => {
+    if (this.poll && this.poll.question) {
+      this.poll.options.forEach((opt, i) => {
         const percent =
-          this.vote.votesCast > 0
-            ? (this.vote.totals[i] / this.vote.votesCast) * 100
+          this.poll.votesCast > 0
+            ? (this.poll.totals[i] / this.poll.votesCast) * 100
             : 0;
         this.ui.bars[i].barInner.css('width', `${percent}%`);
         this.ui.bars[i].barValue.text(
@@ -298,8 +296,8 @@ class ChatVote {
     }
   }
 
-  buildVoteFrame() {
-    const { question, options } = this.vote;
+  buildPollFrame() {
+    const { question, options } = this.poll;
     const tagQuestion = $(`<span />`).text(question)[0];
     const tagOptions = options
       .map((v, i) => {
@@ -311,11 +309,11 @@ class ChatVote {
       .join(' ');
     return $(
       `` +
-        `<div class="vote-frame">` +
-        `<div class="vote-header">` +
-        `<label class="vote-question">${tagQuestion.outerHTML}<span class="opt-choices">${tagOptions}</span>` +
+        `<div class="poll-frame">` +
+        `<div class="poll-header">` +
+        `<label class="poll-question">${tagQuestion.outerHTML}<span class="opt-choices">${tagOptions}</span>` +
         `</label>` +
-        `<label class="vote-close" title="Close"></label>` +
+        `<label class="poll-close" title="Close"></label>` +
         `</div>` +
         `<div class="opt-options">${options.reduce((a, v, i) => {
           const newOption =
@@ -325,24 +323,24 @@ class ChatVote {
             `</div>`;
           return a + newOption;
         }, '')}</div>` +
-        `<label class="vote-label"></label>` +
+        `<label class="poll-label"></label>` +
         `</div>`
     );
   }
 
-  voteStartMessage() {
-    switch (this.vote.type) {
+  pollStartMessage() {
+    switch (this.poll.type) {
       case PollType.Weighted:
-        return `A sub-weighted vote has been started. <strong>The value of your vote depends on your subscription tier.</strong> Type ${this.vote.totals
+        return `A sub-weighted poll has been started. <strong>The value of your vote depends on your subscription tier.</strong> Type ${this.poll.totals
           .map((a, i) => i + 1)
           .join(' or ')} in chat to participate.`;
       case PollType.Normal:
       default:
-        return `A vote has been started. Type ${this.vote.totals
+        return `A poll has been started. Type ${this.poll.totals
           .map((a, i) => i + 1)
           .join(' or ')} in chat to participate.`;
     }
   }
 }
 
-export { ChatVote, parseQuestionAndTime, VOTE_END_TIME };
+export { ChatPoll, parseQuestionAndTime };

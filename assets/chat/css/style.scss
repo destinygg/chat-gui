@@ -1620,7 +1620,7 @@ body.pref-fontscale[data-fontscale='10'] {
   }
 }
 
-#chat-vote-frame {
+#chat-poll-frame {
   display: none;
   transform: translateY(-100%);
   transition: transform 250ms ease-out;
@@ -1628,23 +1628,23 @@ body.pref-fontscale[data-fontscale='10'] {
     transform: translateY(0);
     display: block;
   }
-  .vote-frame {
+  .poll-frame {
     padding: 0.5em 0.75em;
     background: #2f2f2f;
     border-radius: 4px;
     margin: 4px;
     color: $text-color;
   }
-  .vote-header {
+  .poll-header {
     display: flex;
   }
-  .vote-label {
+  .poll-label {
     color: $text-color2;
     margin: 0.75em 0 0 0;
     font-size: 0.9em;
     display: block;
   }
-  .vote-question {
+  .poll-question {
     display: block;
     margin: 0 0 0.5em 0;
     flex: 1;
@@ -1705,7 +1705,7 @@ body.pref-fontscale[data-fontscale='10'] {
     background-color: $color-darkred;
     color: $text-color;
   }
-  .vote-completed {
+  .poll-completed {
     .opt {
       .opt-info {
         color: $text-color2;
@@ -1739,7 +1739,7 @@ body.pref-fontscale[data-fontscale='10'] {
       }
     }
   }
-  .vote-close {
+  .poll-close {
     width: 1em;
     height: 1em;
     opacity: 0.5;
@@ -1754,7 +1754,7 @@ body.pref-fontscale[data-fontscale='10'] {
   }
 }
 
-#chat.onstreamchat #chat-vote-frame {
+#chat.onstreamchat #chat-poll-frame {
   display: none !important;
 }
 
