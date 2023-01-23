@@ -70,9 +70,15 @@ export default class UrlFormatter {
       const decodedUrl = self.elem.html(url).text();
       const m = decodedUrl.match(self.linkregex);
       if (m) {
-        const encodedUrl = self.encodeUrl(m[0]);
+        let encodedUrl = self.encodeUrl(m[0]);
+        
         const extra = self.encodeUrl(decodedUrl.substring(m[0].length));
         const href = `${scheme ? '' : 'http://'}${encodedUrl}`;
+
+        if (encodedUrl.length > 40) {
+          encodedUrl = `${encodedUrl.substring(0, 39)}...`
+        }
+        
         return `<a target="_blank" class="externallink ${extraclass}" href="${href}" rel="nofollow">${encodedUrl}</a>${extra}`;
       }
       return url;
