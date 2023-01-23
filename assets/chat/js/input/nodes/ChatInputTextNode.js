@@ -1,7 +1,7 @@
 import ChatInputNode from './ChatInputNode';
 
 export default class ChatInputTextNode extends ChatInputNode {
-  constructor() {
-    super('Text');
+  constructor(input, element, value) {
+    super(input, element, 'text', value);
   }
 }

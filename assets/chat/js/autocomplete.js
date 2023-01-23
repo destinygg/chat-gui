@@ -147,12 +147,7 @@ class ChatAutoComplete {
   }
 
   search() {
-    this.message = this.input.val();
-    const words = this.message.split(/(\s+?)/g);
-    const { wordIndex, startIndex, endIndex } = this.getWord(words);
-    this.rangeStart = startIndex;
-    this.rangeEnd = endIndex;
-    let currentWord = words[wordIndex];
+    let currentWord = this.input.getCurrentWord();
     if (currentWord !== '') {
       if (currentWord.startsWith('@')) {
         this.hasAt = true;

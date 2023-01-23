@@ -34,7 +34,10 @@ class Caret {
         const range = new Range();
         const selection = window.getSelection();
 
-        const { nodeIndex, offset } = this.getNodeIndex(startIndex, nodes);
+        const { nodeIndex, offset } = this.getNodeIndex(
+          startIndex,
+          [...nodes].map((node) => node.value)
+        );
         const node = this.getTextNode(this.ui[0].childNodes[nodeIndex]);
         range.setStart(node, offset);
         range.collapse(true);
@@ -68,7 +71,7 @@ class Caret {
     let len = 0;
     for (let n = 0; n < nodes.length; n++) {
       previousLen = len;
-      len += nodes[n].value.length;
+      len += nodes[n].length;
       if (index <= len) {
         return {
           nodeIndex: n,
