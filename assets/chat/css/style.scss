@@ -235,15 +235,50 @@ hr {
     color: $color-chat-place;
     cursor: text;
   }
-  div {
+  &.italic {
+    font-style: italic;
+  }
+
+  /* Chat input nodes */
+  &.green .chat-input-node-text {
+    color: $color-green-text;
+  }
+
+  .chat-input-node-emote {
     display: inline;
     padding: 0 !important;
-    .user {
-      cursor: text;
-      margin: 0;
+    .emote {
+      cursor: default;
+    }
+    /* &.highlighted::after {
+      content: '';
+      position: relative;
+      background-color: rgba(255, 255, 255, 0.5);
+    } */
+  }
+
+  .chat-input-node-user {
+    font-weight: 600;
+    &.noflair {
+      color: $color-chat-text1;
+    }
+  }
+
+  .chat-input-node-link {
+    color: $color-link;
+    &.nsfw-link {
+      border-style: dashed;
+      border-color: transparent transparent $color-underline-nsfw transparent;
+      border-width: 1px 0 1px 0;
+    }
+    &.nsfl-link {
+      border-style: dashed;
+      border-color: transparent transparent $color-underline-nsfl transparent;
+      border-width: 1px 0 1px 0;
     }
   }
 }
+
 .chat-lines {
   font-family: $chat-lines-font;
   line-height: 1.65em;

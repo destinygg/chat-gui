@@ -1,11 +1,14 @@
 import $ from 'jquery';
 import { KEYCODES, isKeyCode, getKeyCode } from '../const';
+import { BIGSCREENREGEX, LINKREGEX } from '../formatters';
 import Caret from './Caret';
+import ChatInputSelection from './Selection';
 import ChatInputInstanceHistory from './ChatInputInstanceHistory';
 import {
   ChatInputEmoteNode,
   ChatInputTextNode,
   ChatInputUserNode,
+  ChatInputLinkNode,
 } from './nodes';
 
 export default class ChatInput {
@@ -14,20 +17,20 @@ export default class ChatInput {
     this.ui = this.chat.ui.find('#chat-input-control');
     this.bgText = this.ui.attr('placeholder');
 
-    this.selectBase = -1;
-    this.previousValueLength = 0;
+    this.urlregex = new RegExp(LINKREGEX, 'i');
+    this.embedregex = new RegExp(BIGSCREENREGEX);
+
     this.caret = new Caret(this.ui);
+    this.selection = new ChatInputSelection(this);
     this.history = new ChatInputInstanceHistory();
+
     this.nodes = [];
-    this.oldnodes = [];
-    this.value = '';
+
+    this.oldInputValue = '';
+    this.inputValue = '';
 
     this.ui.on('mouseup', () => {
-      this.caret.get();
-      const { start, end } = this.caret.getSelectionRange(true);
-      if (start > end) this.selectBase = end;
-      else if (start < end) this.selectBase = start;
-      else this.selectBase = -1;
+      this.selection.update();
     });
 
     this.ui.on('keypress', (e) => {
@@ -45,7 +48,12 @@ export default class ChatInput {
       if (isKeyCode(e, KEYCODES.TAB)) e.preventDefault();
       if (isKeyCode(e, KEYCODES.BACKSPACE)) {
         e.preventDefault();
-        this.modify(-1);
+        if (window.getSelection().toString().length > 0) {
+          this.selection.remove();
+          this.render();
+        } else {
+          this.modify(-1);
+        }
       }
 
       // const left = isKeyCode(e, KEYCODES.LEFT);
@@ -103,14 +111,23 @@ export default class ChatInput {
       // }
     });
 
-    // this.ui.on('keyup', (e) => {
-    //   if (
-    //     !(e.ctrlKey && isKeyCode(e, 90)) &&
-    //     !(e.ctrlKey && isKeyCode(e, 89))
-    //   ) {
-    //     this.history.post(this.value, this.caret.stored, window.getSelection());
-    //   }
-    // });
+    this.ui.on('keyup', (e) => {
+      if (
+        (e.ctrlKey && isKeyCode(e, 65)) || // CTRL + A
+        isKeyCode(e, KEYCODES.LEFT) ||
+        isKeyCode(e, KEYCODES.RIGHT) ||
+        isKeyCode(e, KEYCODES.UP) ||
+        isKeyCode(e, KEYCODES.DOWN)
+      ) {
+        this.selection.update();
+      }
+      // if (
+      //   !(e.ctrlKey && isKeyCode(e, 90)) &&
+      //   !(e.ctrlKey && isKeyCode(e, 89))
+      // ) {
+      //   this.history.post(this.value, this.caret.stored, window.getSelection());
+      // }
+    });
 
     // this.ui.on('cut', (e) => {
     //   e.preventDefault();
@@ -149,16 +166,13 @@ export default class ChatInput {
 
   modify(modifier = 0, value = '') {
     const caret = this.caret.get();
-    this.previousValueLength = this.value.length;
     if (this.nodes.length === 0) {
-      const element = $('<span data-type="text"></span>').appendTo(this.ui);
+      const element = $('<span>').appendTo(this.ui);
       this.nodes = [new ChatInputTextNode(this, element, '')];
     }
     const { nodeIndex, offset } = this.getCurrentNode();
     if (value === ' ' && this.nodes[nodeIndex].type !== 'text') {
-      const element = $('<span data-type="text"></span>').insertAfter(
-        this.nodes[nodeIndex].element
-      );
+      const element = $('<span>').insertAfter(this.nodes[nodeIndex].element);
       this.nodes.splice(
         nodeIndex + 1,
         0,
@@ -190,13 +204,10 @@ export default class ChatInput {
     if (this.nodes[nodeIndex].type === 'text') return;
 
     const valid = this.nodes[nodeIndex].isValid();
-
     if (!valid) {
       const { value } = this.nodes[nodeIndex];
       if (nodeIndex === 0 || this.nodes[nodeIndex - 1].type !== 'text') {
-        const element = $('<span data-type="text"></span>').insertBefore(
-          this.nodes[nodeIndex].element
-        );
+        const element = $('<span>').insertBefore(this.nodes[nodeIndex].element);
         this.nodes.splice(
           nodeIndex,
           0,
@@ -223,27 +234,30 @@ export default class ChatInput {
       return;
     }
 
-    // TODO: links
+    const emote = this.chat.emoteService.getEmote(word, false);
+    if (emote) {
+      const element = $('<span>').insertAfter(this.nodes[nodeIndex].element);
+      this.insertNode(new ChatInputEmoteNode(this, element, emote.prefix));
+      this.render();
+      return;
+    }
 
     const username = word.startsWith('@')
       ? word.substring(1).toLowerCase()
       : word.toLowerCase();
-    const user = this.chat.users.get(username.toLowerCase());
+    const user = this.chat.users.get(username);
     if (user) {
-      const element = $('<span data-type="user"></span>').insertAfter(
-        this.nodes[nodeIndex].element
-      );
+      const element = $('<span>').insertAfter(this.nodes[nodeIndex].element);
       this.insertNode(new ChatInputUserNode(this, element, word));
       this.render();
       return;
     }
 
-    const emote = this.chat.emoteService.getEmote(word, false);
-    if (emote) {
-      const element = $('<span data-type="emote"></span>').insertAfter(
-        this.nodes[nodeIndex].element
-      );
-      this.insertNode(new ChatInputEmoteNode(this, element, emote.prefix));
+    const embed = this.embedregex.test(word);
+    const url = this.urlregex.test(word);
+    if (embed || url) {
+      const element = $('<span>').insertAfter(this.nodes[nodeIndex].element);
+      this.insertNode(new ChatInputLinkNode(this, element, word));
       this.render();
       return;
     }
@@ -272,9 +286,7 @@ export default class ChatInput {
     const { nodeIndex, offset } = this.getCurrentNode();
     const split = this.nodes[nodeIndex].removeAndSplit(offset);
     if (split !== '') {
-      const element = $('<span data-type="text"></span>').insertAfter(
-        node.element
-      );
+      const element = $('<span>').insertAfter(node.element);
       this.nodes.splice(
         nodeIndex + 1,
         0,
@@ -284,13 +296,33 @@ export default class ChatInput {
     this.nodes.splice(nodeIndex + 1, 0, node);
   }
 
+  // TODO: implement format over whole input.
   val(value = null) {
-    if (value || value === '') {
-      // this.value = value;
-      // this.render();
-      return this;
-    }
-    return this.value;
+    if (!value) return this.value;
+
+    this.value = value;
+    this.ui.empty();
+    this.nodes = [];
+
+    // if (value !== '') {
+    //   const words = [...this.value.split(' ')]
+    //     .filter((v) => v !== '')
+    //     .forEach((word) => {
+    //       console.log(word);
+    //     });
+    // }
+
+    // this.render();
+    return this;
+  }
+
+  get value() {
+    return this.inputValue;
+  }
+
+  set value(val) {
+    this.oldInputValue = this.inputValue;
+    this.inputValue = val;
   }
 
   get placeholder() {
@@ -312,14 +344,19 @@ export default class ChatInput {
           this.nodes.splice(index, 1);
         }
       }
-
       this.joinTextNodes(this.nodes.length - 1);
 
-      [...this.nodes].forEach((node, index) => node.render(index));
+      this.ui.toggleClass(
+        'green',
+        this.value.startsWith('>') || this.value.startsWith('/me >')
+      );
+      this.ui.toggleClass('italic', this.value.startsWith('/me '));
+
+      [...this.nodes].forEach((node) => node.render());
     }
 
     this.ui.attr('data-input', this.value);
-    const difference = this.value.length - this.previousValueLength;
+    const difference = this.value.length - this.oldInputValue.length;
     this.caret.set(prevCaret + difference, this.nodes);
     this.chat.adjustInputHeight();
   }
@@ -337,53 +374,6 @@ export default class ChatInput {
 
     return this.nodes[nodeIndex].getWord(offset);
   }
-
-  // render() {
-  //   this.oldnodes = [];
-  //   const prevCaret = this.caret.get();
-  //   let text = '';
-  //   let nodeText = '';
-
-  //   [...this.value.split(/(\s+?)/g)].forEach((value) => {
-  //     const emote = this.chat.emoteService.getEmote(value, false);
-  //     const username = value.startsWith('@')
-  //       ? value.substring(1).toLowerCase()
-  //       : value.toLowerCase();
-  //     const user = this.chat.users.has(username);
-  //     if (emote || user) {
-  //       if (nodeText !== '') {
-  //         this.oldnodes.push({ type: 'text', value: nodeText });
-  //         nodeText = '';
-  //       }
-  //       this.oldnodes.push({ type: emote ? 'emote' : 'user', value });
-  //     }
-  //     if (emote) {
-  //       text += `<div data-type="emote" data-emote="${emote.prefix}" class="msg-chat"><span title="${emote.prefix}" class="emote ${emote.prefix}">${emote.prefix}</span></div>`;
-  //     } else if (user) {
-  //       text += `<div data-type="user" data-username="${username}" class="msg-chat"><span class="user ${this.chat.users
-  //         .get(username)
-  //         .features.join(' ')}">${value}</span></div>`;
-  //     } else {
-  //       text += value
-  //         .replace(/</gm, '&lt;')
-  //         .replace(/>/gm, '&gt;')
-  //         .replace(/\s/gm, '&nbsp;');
-  //       nodeText += value;
-  //     }
-  //   });
-
-  //   if (nodeText !== '') this.oldnodes.push({ type: 'text', value: nodeText });
-
-  //   text = text.replace(/(&nbsp;)(?!&nbsp;|$)/gm, ' ');
-
-  //   this.ui.html(text);
-  //   this.ui.attr('data-input', this.value);
-
-  //   const difference = this.value.length - this.previousValueLength;
-  //   this.caret.set(prevCaret + difference, this.oldnodes);
-
-  //   this.chat.adjustInputHeight();
-  // }
 
   focus() {
     this.ui.focus();

@@ -1,8 +1,10 @@
+const BIGSCREENREGEX =
+  '(^|\\s)((#twitch(-vod|-clip)?|#youtube|#vimeo|#rumble)\\/[\\w-]{3,64}|#facebook\\/\\d{10,20}\\/videos\\/\\d{10,20})\\b';
+
 export default class EmbedUrlFormatter {
   constructor() {
     this.bigscreenPath = '/bigscreen';
-    this.bigscreenregex =
-      /(^|\s)((#twitch(-vod|-clip)?|#youtube|#vimeo|#rumble)\/[\w-]{3,64}|#facebook\/\d{10,20}\/videos\/\d{10,20})\b/g;
+    this.bigscreenRegex = new RegExp(BIGSCREENREGEX, 'g');
 
     try {
       const { location } = window.top || window.parent || window;
@@ -22,8 +24,10 @@ export default class EmbedUrlFormatter {
     else if (/\b(?:NSFW|SPOILERS?)\b/i.test(str)) extraclass = 'nsfw-link';
 
     return str.replace(
-      this.bigscreenregex,
+      this.BIGSCREENREGEX,
       `$1<a class="externallink bookmarklink ${extraclass}" href="${this.url}$2" target="${target}">$2</a>`
     );
   }
 }
+
+export { BIGSCREENREGEX };

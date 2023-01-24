@@ -6,11 +6,11 @@ import {
   GreenTextFormatter,
   HtmlTextFormatter,
   MentionedUserFormatter,
-  UrlFormatter,
-  EmbedUrlFormatter,
   BadWordsCensorshipFormatter,
   AmazonAssociatesTagInjector,
   SuspostFormatter,
+  UrlFormatter,
+  EmbedUrlFormatter,
 } from '../formatters';
 import { DATE_FORMATS } from '../const';
 

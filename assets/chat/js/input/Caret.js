@@ -1,4 +1,4 @@
-class Caret {
+export default class Caret {
   constructor(ui) {
     this.ui = ui;
     this.stored = 0;
@@ -98,15 +98,17 @@ class Caret {
     return index;
   }
 
-  getSelectionRange(lh = true) {
+  getSelectionRange() {
     const selection = window.getSelection();
-    const start = this.getRawIndex(
+    const anchorIndex = this.getRawIndex(
       selection.anchorNode,
       selection.anchorOffset
     );
-    const end = this.getRawIndex(selection.focusNode, selection.focusOffset);
-    if (start > end && lh) return { end, start };
-    return { start, end };
+    const focusIndex = this.getRawIndex(
+      selection.focusNode,
+      selection.focusOffset
+    );
+    return { anchorIndex, focusIndex };
   }
 
   setSelectionRange(startIndex, endIndex, nodes) {
@@ -133,5 +135,3 @@ class Caret {
     return this.stored === string.length;
   }
 }
-
-export default Caret;

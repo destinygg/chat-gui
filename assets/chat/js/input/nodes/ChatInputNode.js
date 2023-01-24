@@ -4,11 +4,23 @@ export default class ChatInputNode {
     this.element = element;
     this.type = type;
     this.oldvalue = '';
-    this.value = value;
+    this.nodeValue = value;
+
+    this.element.attr('spellcheck', this.type === 'text');
+    this.element.attr('data-type', this.type);
+    this.element.addClass(`chat-input-node-${this.type}`);
+  }
+
+  get value() {
+    return this.nodeValue;
+  }
+
+  set value(val) {
+    this.oldvalue = this.nodeValue;
+    this.nodeValue = val;
   }
 
   modify(offset, modifier, value) {
-    this.oldvalue = this.value;
     if (window.getSelection().toString().length === 0) {
       this.value =
         this.value.substring(0, offset + modifier) +
@@ -36,25 +48,26 @@ export default class ChatInputNode {
     const words = [...this.value.split(/(\s+?)/g)].filter((v) => v !== '');
     const { nodeIndex } = this.input.caret.getNodeIndex(offset, words);
 
-    this.oldvalue = this.value;
     this.value = words.slice(0, nodeIndex).join('');
 
     if (nodeIndex === words.length - 1) return '';
     return words.slice(nodeIndex + 1, words.length).join('');
   }
 
-  render() {
-    if (this.value === '') return;
-    if (this.oldvalue === this.value) return;
-
+  render(customHtml = null) {
+    if (this.value === '' || this.oldvalue === this.value) return;
     this.oldvalue = this.value;
 
-    const html = this.value
-      .replace(/</gm, '&lt;')
-      .replace(/>/gm, '&gt;')
-      .replace(/\s/gm, '&nbsp;')
-      .replace(/(&nbsp;)(?!&nbsp;|$)/gm, ' ');
+    if (customHtml) {
+      this.element.html(customHtml);
+    } else {
+      const html = this.value
+        .replace(/</gm, '&lt;')
+        .replace(/>/gm, '&gt;')
+        .replace(/\s/gm, '&nbsp;')
+        .replace(/(&nbsp;)(?!&nbsp;|$)/gm, ' ');
 
-    this.element.html(html);
+      this.element.html(html);
+    }
   }
 }
