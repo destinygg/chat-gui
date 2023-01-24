@@ -552,10 +552,7 @@ class Chat {
     this.userfocus = new ChatUserFocus(this, this.css);
     this.mainwindow = new ChatWindow('main').into(this);
     this.mutedtimer = new MutedTimer(this);
-
-    this.ui.find('#chat-poll-frame:first').each((i, e) => {
-      this.chatpoll = new ChatPoll(this, $(e));
-    });
+    this.chatpoll = new ChatPoll(this);
 
     this.windowToFront('main');
 
@@ -1341,14 +1338,7 @@ class Chat {
       return;
     }
 
-    if (this.chatpoll.startPoll(data)) {
-      new ChatMessage(
-        this.chatpoll.pollStartMessage(),
-        null,
-        MessageTypes.INFO,
-        true
-      ).into(this);
-    }
+    this.chatpoll.startPoll(data);
   }
 
   onPOLLSTOP(data) {

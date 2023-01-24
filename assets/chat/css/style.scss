@@ -1634,25 +1634,12 @@ body.pref-fontscale[data-fontscale='10'] {
     border-radius: 4px;
     margin: 4px;
     color: $text-color;
-  }
-  .poll-header {
-    display: flex;
-  }
-  .poll-label {
-    color: $text-color2;
-    margin: 0.75em 0 0 0;
-    font-size: 0.9em;
-    display: block;
-  }
-  .poll-question {
-    display: block;
-    margin: 0 0 0.5em 0;
-    flex: 1;
-    strong {
-      margin-left: 0.5em;
-      background: $color-surface-dark3;
-      padding: 0 0.3em;
-      border-radius: 4px;
+    .poll-header {
+      display: flex;
+      margin: 0.5em 0.1em 0.75em 0.1em;
+      .poll-question {
+        font-weight: 700;
+      }
     }
   }
   .opt {
@@ -1690,22 +1677,45 @@ body.pref-fontscale[data-fontscale='10'] {
     border-radius: 0 0 6px 6px;
     padding: 4px;
   }
+  .poll-footer {
+    color: $text-color1;
+    margin: 0.75em 0 0.5em 0;
+    display: flex;
+    .poll-timer {
+      background-color: $color-surface-dark3;
+      overflow: hidden;
+      padding: 3px;
+      flex: 1;
+      border-radius: 6px;
+      .poll-timer-inner {
+        min-height: 0.3em;
+        box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+        background-color: $color-blue;
+        border-radius: 4px;
+      }
+    }
+  }
   .opt-bar-inner {
+    display: flex;
     min-height: 1.4em;
     box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
     transition: all 750ms;
     background-color: $color-darkred;
     border-radius: 4px;
+    font-weight: 500;
     font-size: 0.85em;
     color: $text-color;
     padding: 0 0.25em;
-    text-align: end;
+    .opt-bar-value {
+      position: absolute;
+      right: $gutter-lg * 2;
+    }
   }
   .opt-marked .opt-info {
     background-color: $color-darkred;
     color: $text-color;
   }
-  .poll-completed {
+  &.poll-completed {
     .opt {
       .opt-info {
         color: $text-color2;
@@ -1721,7 +1731,7 @@ body.pref-fontscale[data-fontscale='10'] {
       }
       .opt-bar-inner {
         transition: background-color 750ms;
-        background-color: $color-accent-light;
+        background-color: $color-blue;
         color: $text-color;
       }
     }
@@ -1729,21 +1739,13 @@ body.pref-fontscale[data-fontscale='10'] {
       background-color: $color-darkred;
       color: $text-color;
     }
-    .opt-choice {
-      opacity: 0.25;
-    }
-    .opt-choice.opt-winner {
-      opacity: 1;
-      strong {
-        background-color: $color-accent;
-      }
-    }
   }
   .poll-close {
     width: 1em;
     height: 1em;
     opacity: 0.5;
     font-size: 1.2em;
+    margin-left: auto;
     display: inline-block;
     background: transparent url('../img/icon-close.svg') no-repeat center center;
     background-size: contain;
