@@ -1267,6 +1267,7 @@ class Chat {
   onCLOSE({ retryMilli }) {
     // https://www.iana.org/assignments/websocket/websocket.xml#close-code-number
     // const code = e.event.code || 1006
+    if (this.chatpoll.isPollStarted()) this.chatpoll.endPoll(); // end poll on disconnect so it is not there forever.
     if (retryMilli > 0)
       MessageBuilder.error(
         `Disconnected, retry in ${Math.round(retryMilli / 1000)} seconds ...`
