@@ -384,14 +384,16 @@ class Chat {
     this.css = null;
     this.output = null;
     this.input = null;
+    this.subonlyicon = null;
     this.loginscrn = null;
     this.loadingscrn = null;
     this.showmotd = true;
+    this.subonly = false;
     this.authenticated = false;
     this.backlogloading = false;
     this.unresolved = [];
 
-    this.flairs = new Set();
+    this.flairs = [];
     this.flairsMap = new Map();
     this.emoteService = new EmoteService();
 
@@ -562,6 +564,7 @@ class Chat {
     this.ishidden = (document.visibilityState || 'visible') !== 'visible';
     this.output = this.ui.find('#chat-output-frame');
     this.input = this.ui.find('#chat-input-control');
+    this.subonlyicon = this.ui.find('#chat-input-subonly');
     this.loginscrn = this.ui.find('#chat-login-screen');
     this.loadingscrn = this.ui.find('#chat-loading');
     this.windowselect = this.ui.find('#chat-windows-select');
@@ -691,6 +694,12 @@ class Chat {
       this.focusIfNothingSelected();
     });
     const onresize = () => {
+      // If this is a mobile screen, don't close menus.
+      // The virtual keyboard triggers a 'resize' event, and menus shouldn't be closed whenever the virtual keyboard is opened
+      if (window.screen.width <= 768) {
+        return;
+      }
+
       if (!resizing) {
         resizing = true;
         ChatMenu.closeMenus(this);
@@ -720,7 +729,7 @@ class Chat {
       const nick = $(e.currentTarget).closest('.msg-user').data('username');
       this.getActiveWindow()
         .getlines(`.censored[data-username="${nick}"]`)
-        .removeClass('censored');
+        .forEach((line) => line.classList.remove('censored'));
       return false;
     });
 
@@ -835,7 +844,7 @@ class Chat {
             this.whispers.set(e.username.toLowerCase(), {
               id: e.messageid,
               nick: e.username,
-              unread: e.unread,
+              unread: Number(e.unread),
               open: false,
             })
           );
@@ -1168,10 +1177,10 @@ class Chat {
     );
     switch (parseInt(this.settings.get('showremoved') || 1, 10)) {
       case 0: // remove
-        c.remove();
+        c.forEach((line) => line.remove());
         break;
       case 1: // censor
-        c.addClass('censored');
+        c.forEach((line) => line.classList.add('censored'));
         break;
       case 2: // do nothing
       default:
@@ -1553,11 +1562,18 @@ class Chat {
   }
 
   onSUBONLY(data) {
-    const submode = data.data === 'on' ? 'enabled' : 'disabled';
+    this.subonly = data.data === 'on';
     MessageBuilder.command(
-      `Subscriber only mode ${submode} by ${data.nick}.`,
+      `Subscriber only mode ${this.subonly ? 'enabled' : 'disabled'}${
+        data.nick ? ` by ${data.nick}` : ''
+      }.`,
       data.timestamp
     ).into(this);
+    if (this.subonly && !this.user.isSubscriber()) {
+      this.subonlyicon.show();
+    } else {
+      this.subonlyicon.hide();
+    }
   }
 
   onBROADCAST(data) {
@@ -1807,6 +1823,14 @@ class Chat {
           ).join(', ')}.`
         ).into(this);
       }
+    } else if (
+      parts.some(
+        (username) => username.toLowerCase() === this.user.nick.toLowerCase()
+      )
+    ) {
+      MessageBuilder.info("You can't add yourself to your ignore list.").into(
+        this
+      );
     } else {
       // this is a little ugly, but it allows us to not ignore anything if there's an invalid nick in there
       // think that's less confusing/nicer compared to partially ignoring
@@ -2097,10 +2121,19 @@ class Chat {
 
     this.mainwindow
       .getlines(`.msg-user[data-username="${n}"]`)
-      .removeClass(Chat.removeClasses('msg-tagged'))
-      .addClass(`msg-tagged msg-tagged-${color}`)
-      .find('.user')
-      .attr('title', note);
+      .forEach((line) => {
+        const classesToRemove = Chat.removeClasses(
+          'msg-tagged',
+          line.classList.value
+        );
+        classesToRemove.forEach((className) =>
+          line.classList.remove(className)
+        );
+        ['msg-tagged', `msg-tagged-${color}`].forEach((tag) =>
+          line.classList.add(tag)
+        );
+        line.querySelector('.user').title = note;
+      });
 
     this.taggednicks.set(n, color);
     this.taggednotes.set(n, note);
@@ -2136,10 +2169,17 @@ class Chat {
     const n = parts[0].toLowerCase();
 
     this.mainwindow
-      .getlines(`.msg-chat[data-username="${n}"]`)
-      .removeClass(Chat.removeClasses('msg-tagged'))
-      .find('.user')
-      .removeAttr('title');
+      .getlines(`.msg-user[data-username="${n}"]`)
+      .forEach((line) => {
+        const classesToRemove = Chat.removeClasses(
+          'msg-tagged',
+          line.classList.value
+        );
+        classesToRemove.forEach((className) =>
+          line.classList.remove(className)
+        );
+        line.querySelector('.user').removeAttribute('title');
+      });
 
     this.taggednicks.delete(n);
     this.taggednotes.delete(n);
@@ -2159,14 +2199,14 @@ class Chat {
         'No argument provided - /embed <link> OR /e <link>'
       ).into(this);
       MessageBuilder.info(
-        'Valid links: Twitch Streams, Twitch VODs, Twitch Clips, Youtube Videos, Vimeo Videos.'
+        'Valid links: Twitch Streams, Twitch VODs, Twitch Clips, Youtube Videos, Vimeo Videos, Rumble Videos.'
       ).into(this);
     } else if (parts.length > 1) {
       MessageBuilder.error(
         'More than one argument provided - /embed <link> OR /e <link>'
       ).into(this);
       MessageBuilder.info(
-        'Valid links: Twitch Streams, Twitch VODs, Twitch Clips, Youtube Videos, Vimeo Videos.'
+        'Valid links: Twitch Streams, Twitch VODs, Twitch Clips, Youtube Videos, Vimeo Videos, Rumble Videos.'
       ).into(this);
     } else {
       const matchedHost = parts[0].matchAll(urlCheck);
@@ -2200,12 +2240,22 @@ class Chat {
           case 'vimeo.com':
             location.href = `${noEmbedUrl}#vimeo/${match[6]}`;
             break;
+          case 'www.rumble.com':
+          case 'rumble.com':
+            if (match[5] === '/embed') {
+              location.href = `${noEmbedUrl}#rumble/${match[6].split('/')[0]}`;
+            } else {
+              MessageBuilder.error(
+                'Rumble links have to be embed links - https://rumble.com/embed/<id>'
+              ).into(this);
+            }
+            break;
           default:
             MessageBuilder.error(
               'Invalid link - /embed <link> OR /e <link>'
             ).into(this);
             MessageBuilder.info(
-              'Valid links: Twitch Streams, Twitch VODs, Twitch Clips, Youtube Videos, Vimeo Videos.'
+              'Valid links: Twitch Streams, Twitch VODs, Twitch Clips, Youtube Videos, Vimeo Videos, Rumble Videos.'
             ).into(this);
             break;
         }
@@ -2214,7 +2264,7 @@ class Chat {
           this
         );
         MessageBuilder.info(
-          'Valid links: Twitch Streams, Twitch VODs, Twitch Clips, Youtube Videos, Vimeo Videos.'
+          'Valid links: Twitch Streams, Twitch VODs, Twitch Clips, Youtube Videos, Vimeo Videos, Rumble Videos.'
         ).into(this);
       }
     }
@@ -2232,7 +2282,7 @@ class Chat {
         'Nothing embedded - /postembed OR /pe OR /postembed <link> [<message>] OR /pe <link> [<message>]'
       ).into(this);
       MessageBuilder.info(
-        'Valid links: Twitch Streams, Twitch VODs, Twitch Clips, Youtube Videos, Vimeo Video.'
+        'Valid links: Twitch Streams, Twitch VODs, Twitch Clips, Youtube Videos, Vimeo Videos, Rumble Videos.'
       ).into(this);
     } else {
       const matchedHost = parts[0].matchAll(urlCheck);
@@ -2278,12 +2328,23 @@ class Chat {
             msg = `#vimeo/${match[6]}`;
             this.source.send('MSG', { data: `${msg} ${moreMsg}` });
             break;
+          case 'www.rumble.com':
+          case 'rumble.com':
+            if (match[5] === '/embed') {
+              msg = `#rumble/${match[6].split('/')[0]}`;
+              this.source.send('MSG', { data: `${msg} ${moreMsg}` });
+            } else {
+              MessageBuilder.error(
+                'Rumble links have to be embed links - https://rumble.com/embed/<id>'
+              ).into(this);
+            }
+            break;
           default:
             MessageBuilder.error(
               'Invalid link - /postembed OR /pe OR /postembed <link> [<message>] OR /pe <link> [<message>]'
             ).into(this);
             MessageBuilder.info(
-              'Valid links: Twitch Streams, Twitch VODs, Twitch Clips, Youtube Videos, Vimeo Videos.'
+              'Valid links: Twitch Streams, Twitch VODs, Twitch Clips, Youtube Videos, Vimeo Videos, Rumble Videos.'
             ).into(this);
             break;
         }
@@ -2297,7 +2358,7 @@ class Chat {
           'Invalid link - /postembed OR /pe OR /postembed <link> [<message>] OR /pe <link> [<message>]'
         ).into(this);
         MessageBuilder.info(
-          'Valid links: Twitch Streams, Twitch VODs, Twitch Clips, Youtube Videos, Vimeo Videos.'
+          'Valid links: Twitch Streams, Twitch VODs, Twitch Clips, Youtube Videos, Vimeo Videos, Rumble Videos.'
         ).into(this);
       }
     }
@@ -2695,9 +2756,10 @@ class Chat {
     return [...uniqueNicks];
   }
 
-  static removeClasses(search) {
-    return (i, c) =>
-      (c.match(new RegExp(`\\b${search}(?:[A-z-]+)?\\b`, 'g')) || []).join(' ');
+  static removeClasses(search, classList) {
+    return (
+      classList.match(new RegExp(`\\b${search}(?:[A-z-]+)?\\b`, 'g')) || []
+    );
   }
 
   static isArraysEqual(a, b) {

@@ -8,35 +8,30 @@
 npm ci
 ```
 
-2. Run the Webpack development server
+2. Create a copy of the example `.env` file
+```
+cp .env.example .env
+```
+
+3. (Optional) Use the developer tools in your web browser to access your cookies and obtain your Destiny.gg session tokens: `sid` and `rememberme`
+
+4. (Optional) Add the tokens to your `.env` file
+```
+vim .env
+```
+>Note: Save and exit vim with `:wq`.
+
+5. Run the Webpack development server
 ```
 npm run start
 ```
 
 ## Development server
-Navigate to `http://localhost:8282` in your web browser of choice to access a local instance of Dgg Chat GUI.
+Navigate to `https://localhost:8282` in your web browser of choice to access a local instance of Dgg Chat GUI connected to production Destiny.gg chat.
 
->Note: Due to recent security improvements, you can no longer connect to production or staging Dgg chat from `localhost` (or any other origin). A workaround is coming soon™, so stay tuned.
+If you supplied your session tokens by following steps 3 and 4 above, you'll be authenticated and can chat like normal. Note that the tokens will eventually expire and won't automatically renew in this environment.
 
 ### Query string parameters
-- `u`
-  - Chat WebSocket URL
-  - Default: `ws://localhost:9000`
-
-- `a`
-  - Website API URL
-  - Default: `http://localhost:8181`
-
-- `s`
-  - Website CDN URL
-  - Default: `http://localhost:8182`
-
-- `c`
-  - Flairs and emotes cache key
-  - Example: `1665865293752.1778`
-  - Default: `null`
-  - Note: This value changes every time a flair or emote is updated
-
 - `t`
   - Embed type
   - Possible values: `embed` for Bigscreen chat, `stream` for on-stream chat
@@ -48,12 +43,7 @@ Navigate to `http://localhost:8282` in your web browser of choice to access a lo
   - Note: Only works for the `stream` embed type
 
 ### Examples
-- Connect to `www.destiny.gg` (production)
+- Open the on-stream chat with a font scale of `5`
 ```
-http://localhost:8282/index.html?t=embed&u=wss://chat.destiny.gg/ws&s=https://cdn.destiny.gg&a=https://www.destiny.gg&c=1665865293752.1778
-```
-
-- Connect to `www.omniliberal.dev` (staging)
-```
-http://localhost:8282/index.html?t=embed&u=wss://chat.omniliberal.dev/ws&s=https://cdn.omniliberal.dev&a=https://www.omniliberal.dev&c=1664498644366.7973
+https://localhost:8282/?t=stream&f=5
 ```
