@@ -22,7 +22,8 @@ export default class ChatInput {
 
     this.caret = new Caret(this.ui);
     this.selection = new ChatInputSelection(this);
-    this.history = new ChatInputInstanceHistory();
+    this.history = new ChatInputInstanceHistory(this);
+    this.loadHistory = false;
 
     this.nodes = [];
 
@@ -38,6 +39,7 @@ export default class ChatInput {
         e.preventDefault();
         const keycode = getKeyCode(e);
         const char = String.fromCharCode(keycode) || '';
+        if (this.selection.hasSelection()) this.selection.remove();
         if (char.length > 0) {
           this.modify(0, char);
         }
@@ -46,14 +48,25 @@ export default class ChatInput {
 
     this.ui.on('keydown', (e) => {
       if (isKeyCode(e, KEYCODES.TAB)) e.preventDefault();
+
       if (isKeyCode(e, KEYCODES.BACKSPACE)) {
         e.preventDefault();
-        if (window.getSelection().toString().length > 0) {
+        this.selection.update();
+        if (this.selection.hasSelection()) {
           this.selection.remove();
-          this.render();
         } else {
           this.modify(-1);
         }
+      }
+
+      if (
+        (e.ctrlKey && isKeyCode(e, 65)) || // CTRL + A
+        isKeyCode(e, KEYCODES.LEFT) ||
+        isKeyCode(e, KEYCODES.RIGHT) ||
+        isKeyCode(e, KEYCODES.UP) ||
+        isKeyCode(e, KEYCODES.DOWN)
+      ) {
+        this.selection.update();
       }
 
       // const left = isKeyCode(e, KEYCODES.LEFT);
@@ -82,86 +95,67 @@ export default class ChatInput {
       //       }
       //       if (start < 0) start = 0;
       //       if (end > this.value.length) end = this.value.length;
-      //       this.caret.setSelectionRange(start, end, this.oldnodes);
+      //       this.caret.setSelectionRange(start, end, this.nodes);
       //     } else {
       //       this.selectBase = -1;
       //       const { nodeIndex } = this.caret.getNodeIndex(
       //         caret + (left ? -1 : 1),
-      //         this.oldnodes
+      //         this.nodes
       //       );
-      //       if (this.oldnodes[nodeIndex].type === 'emote') {
-      //         const len = this.oldnodes[nodeIndex].value.length + 1;
-      //         this.caret.set(caret + (left ? -len : len), this.oldnodes);
+      //       if (this.nodes[nodeIndex].isEmote()) {
+      //         const len = this.nodes[nodeIndex].value.length + 1;
+      //         this.caret.set(caret + (left ? -len : len), this.nodes);
       //       } else {
-      //         this.caret.set(caret + (left ? -1 : 1), this.oldnodes);
+      //         this.caret.set(caret + (left ? -1 : 1), this.nodes);
       //       }
       //     }
       //   }
       // }
 
-      // if (e.ctrlKey && isKeyCode(e, 90)) {
-      //   if (this.history.undo()) {
-      //     this.loadInstance();
-      //   }
-      // }
-      // if (e.ctrlKey && isKeyCode(e, 89)) {
-      //   if (this.history.redo()) {
-      //     this.loadInstance();
-      //   }
-      // }
-    });
-
-    this.ui.on('keyup', (e) => {
-      if (
-        (e.ctrlKey && isKeyCode(e, 65)) || // CTRL + A
-        isKeyCode(e, KEYCODES.LEFT) ||
-        isKeyCode(e, KEYCODES.RIGHT) ||
-        isKeyCode(e, KEYCODES.UP) ||
-        isKeyCode(e, KEYCODES.DOWN)
-      ) {
-        this.selection.update();
+      if (e.ctrlKey && isKeyCode(e, 90)) {
+        if (this.history.undo()) this.history.load();
       }
-      // if (
-      //   !(e.ctrlKey && isKeyCode(e, 90)) &&
-      //   !(e.ctrlKey && isKeyCode(e, 89))
-      // ) {
-      //   this.history.post(this.value, this.caret.stored, window.getSelection());
-      // }
+      if (e.ctrlKey && isKeyCode(e, 89)) {
+        if (this.history.redo()) this.history.load();
+      }
     });
 
-    // this.ui.on('cut', (e) => {
-    //   e.preventDefault();
-    //   if (window.getSelection().toString().length > 0) {
-    //     navigator.clipboard.writeText(window.getSelection().toString());
-    //     this.add();
-    //     this.render();
-    //   }
-    // });
+    this.ui.on('copy', (e) => {
+      e.preventDefault();
+      this.selection.update();
+      if (this.selection.hasSelection()) this.selection.copy();
+    });
 
-    // this.ui.on('paste', (e) => {
-    //   e.preventDefault();
-    //   const paste = e.originalEvent.clipboardData.getData('text/plain');
-    //   if (paste.length > 0) {
-    //     this.add(0, paste);
-    //     this.render();
-    //   }
-    // });
+    this.ui.on('cut', (e) => {
+      e.preventDefault();
+      this.selection.update();
+      if (this.selection.hasSelection()) {
+        this.selection.copy();
+        this.selection.remove();
+      }
+    });
+
+    this.ui.on('paste', (e) => {
+      e.preventDefault();
+      const paste = e.originalEvent.clipboardData.getData('text/plain');
+      this.selection.update();
+      if (paste.length > 0) {
+        if (this.selection.hasSelection()) this.selection.remove();
+        this.modify(0, paste);
+
+        const { nodeIndex } = this.getCurrentNode();
+        [...this.nodes[nodeIndex].value.split(/(\s+?)/g)]
+          .filter((v) => v !== '')
+          .reverse()
+          .forEach((word) => {
+            this.addNode(word, nodeIndex, false);
+          });
+        this.nodes[nodeIndex].value = '';
+        this.render();
+      }
+    });
 
     this.render();
-  }
-
-  loadInstance() {
-    // const data = this.history.get();
-    // this.previousValueLength = this.value.length;
-    // this.value = data.value;
-    // this.render();
-    // this.caret.set(data.caret, this.oldnodes);
-    // const range = new Range();
-    // const selection = window.getSelection();
-    // range.setStart(data.selection.start.node, data.selection.start.offset);
-    // range.setEnd(data.selection.end.node, data.selection.end.offset);
-    // selection.removeAllRanges();
-    // selection.addRange(range);
   }
 
   modify(modifier = 0, value = '') {
@@ -171,7 +165,7 @@ export default class ChatInput {
       this.nodes = [new ChatInputTextNode(this, element, '')];
     }
     const { nodeIndex, offset } = this.getCurrentNode();
-    if (value === ' ' && this.nodes[nodeIndex].type !== 'text') {
+    if (value === ' ' && !this.nodes[nodeIndex].isText()) {
       const element = $('<span>').insertAfter(this.nodes[nodeIndex].element);
       this.nodes.splice(
         nodeIndex + 1,
@@ -196,17 +190,22 @@ export default class ChatInput {
         value +
         this.value.substring(caret);
     }
-    this.checkCurrentWord();
+
+    if (value.length > 1) {
+      // check all words in node
+    } else {
+      this.checkCurrentWord();
+    }
   }
 
   checkValid(caret) {
     const { nodeIndex } = this.getCurrentNode(caret - 1);
-    if (this.nodes[nodeIndex].type === 'text') return;
+    if (this.nodes[nodeIndex].isText()) return;
 
     const valid = this.nodes[nodeIndex].isValid();
     if (!valid) {
       const { value } = this.nodes[nodeIndex];
-      if (nodeIndex === 0 || this.nodes[nodeIndex - 1].type !== 'text') {
+      if (nodeIndex === 0 || !this.nodes[nodeIndex - 1].isText()) {
         const element = $('<span>').insertBefore(this.nodes[nodeIndex].element);
         this.nodes.splice(
           nodeIndex,
@@ -225,20 +224,20 @@ export default class ChatInput {
     }
   }
 
-  checkCurrentWord() {
-    const { nodeIndex } = this.getCurrentNode();
-    const word = this.getCurrentWord();
-
-    if (!word || word === ' ' || this.nodes[nodeIndex].type !== 'text') {
-      this.render();
-      return;
-    }
+  addNode(word, nodeIndex, split = true) {
+    const element = $('<span>').insertAfter(this.nodes[nodeIndex].element);
 
     const emote = this.chat.emoteService.getEmote(word, false);
     if (emote) {
-      const element = $('<span>').insertAfter(this.nodes[nodeIndex].element);
-      this.insertNode(new ChatInputEmoteNode(this, element, emote.prefix));
-      this.render();
+      if (split) {
+        this.insertNode(new ChatInputEmoteNode(this, element, emote.prefix));
+      } else {
+        this.nodes.splice(
+          nodeIndex + 1,
+          0,
+          new ChatInputEmoteNode(this, element, emote.prefix)
+        );
+      }
       return;
     }
 
@@ -247,21 +246,46 @@ export default class ChatInput {
       : word.toLowerCase();
     const user = this.chat.users.get(username);
     if (user) {
-      const element = $('<span>').insertAfter(this.nodes[nodeIndex].element);
-      this.insertNode(new ChatInputUserNode(this, element, word));
-      this.render();
+      if (split) {
+        this.insertNode(new ChatInputUserNode(this, element, word));
+      } else {
+        this.nodes.splice(
+          nodeIndex + 1,
+          0,
+          new ChatInputUserNode(this, element, word)
+        );
+      }
       return;
     }
 
     const embed = this.embedregex.test(word);
     const url = this.urlregex.test(word);
     if (embed || url) {
-      const element = $('<span>').insertAfter(this.nodes[nodeIndex].element);
-      this.insertNode(new ChatInputLinkNode(this, element, word));
-      this.render();
+      if (split) {
+        this.insertNode(new ChatInputLinkNode(this, element, word));
+      } else {
+        this.nodes.splice(
+          nodeIndex + 1,
+          0,
+          new ChatInputLinkNode(this, element, word)
+        );
+      }
       return;
     }
 
+    if (!split) {
+      this.nodes.splice(
+        nodeIndex + 1,
+        0,
+        new ChatInputTextNode(this, element, word)
+      );
+    } else element.remove();
+  }
+
+  checkCurrentWord() {
+    const { nodeIndex } = this.getCurrentNode();
+    const word = this.getCurrentWord();
+    if (word && word !== ' ') this.addNode(word, nodeIndex);
     this.render();
   }
 
@@ -269,13 +293,9 @@ export default class ChatInput {
     if (index <= 0) return;
     const left = this.nodes[index - 1];
     const right = this.nodes[index];
-    if (left.type === 'text' && right.type === 'text') {
-      this.nodes[index - 1].modify(
-        this.nodes[index - 1].value.length,
-        0,
-        right.value
-      );
-
+    if (left.isText() && right.isText()) {
+      this.nodes[index - 1].value =
+        this.nodes[index - 1].value + this.nodes[index].value;
       this.nodes[index].element.remove();
       this.nodes.splice(index, 1);
     }
@@ -296,23 +316,31 @@ export default class ChatInput {
     this.nodes.splice(nodeIndex + 1, 0, node);
   }
 
-  // TODO: implement format over whole input.
   val(value = null) {
     if (!value) return this.value;
 
     this.value = value;
-    this.ui.empty();
     this.nodes = [];
+    this.ui.empty();
 
-    // if (value !== '') {
-    //   const words = [...this.value.split(' ')]
-    //     .filter((v) => v !== '')
-    //     .forEach((word) => {
-    //       console.log(word);
-    //     });
-    // }
+    if (value === '') {
+      this.render();
+      return this;
+    }
 
-    // this.render();
+    const element = $('<span>').appendTo(this.ui);
+    this.nodes = [new ChatInputTextNode(this, element, '')];
+    [...this.value.split(/(\s+?)/g)]
+      .filter((v) => v !== '')
+      .reverse()
+      .forEach((word) => {
+        this.addNode(word, 0, false);
+      });
+
+    this.render();
+
+    this.caret.setEnd();
+
     return this;
   }
 
@@ -321,6 +349,18 @@ export default class ChatInput {
   }
 
   set value(val) {
+    const caret = this.caret.get();
+    if (!this.loadHistory) {
+      this.history.set(
+        this.nodes,
+        this.value,
+        this.ui.html(),
+        caret,
+        this.selection.get()
+      );
+    } else {
+      this.loadHistory = true;
+    }
     this.oldInputValue = this.inputValue;
     this.inputValue = val;
   }
@@ -344,6 +384,7 @@ export default class ChatInput {
           this.nodes.splice(index, 1);
         }
       }
+
       this.joinTextNodes(this.nodes.length - 1);
 
       this.ui.toggleClass(

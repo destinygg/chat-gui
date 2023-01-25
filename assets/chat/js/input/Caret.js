@@ -98,35 +98,6 @@ export default class Caret {
     return index;
   }
 
-  getSelectionRange() {
-    const selection = window.getSelection();
-    const anchorIndex = this.getRawIndex(
-      selection.anchorNode,
-      selection.anchorOffset
-    );
-    const focusIndex = this.getRawIndex(
-      selection.focusNode,
-      selection.focusOffset
-    );
-    return { anchorIndex, focusIndex };
-  }
-
-  setSelectionRange(startIndex, endIndex, nodes) {
-    const start = this.getNodeIndex(startIndex, nodes);
-    const end = this.getNodeIndex(endIndex, nodes);
-
-    const startNode = this.getTextNode(this.ui[0].childNodes[start.nodeIndex]);
-    const endNode = this.getTextNode(this.ui[0].childNodes[end.nodeIndex]);
-
-    const range = new Range();
-    const selection = window.getSelection();
-
-    range.setStart(startNode, start.offset);
-    range.setEnd(endNode, end.offset);
-    selection.removeAllRanges();
-    selection.addRange(range);
-  }
-
   isAtStart() {
     return this.stored === 0;
   }

@@ -24,7 +24,7 @@ export default class EmbedUrlFormatter {
     else if (/\b(?:NSFW|SPOILERS?)\b/i.test(str)) extraclass = 'nsfw-link';
 
     return str.replace(
-      this.BIGSCREENREGEX,
+      this.bigscreenRegex,
       `$1<a class="externallink bookmarklink ${extraclass}" href="${this.url}$2" target="${target}">$2</a>`
     );
   }

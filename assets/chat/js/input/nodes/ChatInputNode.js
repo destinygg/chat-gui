@@ -70,4 +70,12 @@ export default class ChatInputNode {
       this.element.html(html);
     }
   }
+
+  isText() {
+    return this.type === 'text';
+  }
+
+  isEmote() {
+    return this.type === 'emote';
+  }
 }
