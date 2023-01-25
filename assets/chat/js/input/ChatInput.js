@@ -142,16 +142,6 @@ export default class ChatInput {
       if (paste.length > 0) {
         if (this.selection.hasSelection()) this.selection.remove();
         this.modify(0, paste);
-
-        const { nodeIndex } = this.getCurrentNode();
-        [...this.nodes[nodeIndex].value.split(/(\s+?)/g)]
-          .filter((v) => v !== '')
-          .reverse()
-          .forEach((word) => {
-            this.addNode(word, nodeIndex, false);
-          });
-        this.nodes[nodeIndex].value = '';
-        this.render();
       }
     });
 
@@ -192,7 +182,14 @@ export default class ChatInput {
     }
 
     if (value.length > 1) {
-      // check all words in node
+      [...this.nodes[nodeIndex].value.split(/(\s+?)/g)]
+        .filter((v) => v !== '')
+        .reverse()
+        .forEach((word) => {
+          this.addNode(word, nodeIndex, false);
+        });
+      this.nodes[nodeIndex].value = '';
+      this.render();
     } else {
       this.checkCurrentWord();
     }
