@@ -49,7 +49,7 @@ export default class PinnedMessage extends ChatUserMessage {
   unpin() {
     dismissPin(this.uuid);
 
-    this.ui.toggleClass('msg-pinned', false);
+    this.ui.classList.toggle('msg-pinned', false);
 
     document.getElementById('close-pin-btn')?.remove();
     document.getElementById('unpin-btn')?.remove();
@@ -64,8 +64,8 @@ export default class PinnedMessage extends ChatUserMessage {
    */
   pin(chat = null) {
     chat.mainwindow.lock();
-    this.ui.toggleClass('msg-pinned', true);
-    this.ui.find('span.features').toggleClass('hidden', true);
+    this.ui.classList.toggle('msg-pinned', true);
+    this.ui.querySelector('span.features').classList.toggle('hidden', true);
     chat.mainwindow.unlock();
 
     if (chat.user.hasModPowers()) {
