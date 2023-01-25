@@ -1324,12 +1324,8 @@ class Chat {
 
     if (checkIfPinWasDismissed(msg.uuid)) return;
 
-    // double check if the same PIN event exists in history so that we don't create a double
-    if (this.pinnedMessage?.uuid === msg.uuid) return;
-
     this.pinnedMessage?.unpin();
-    const usr =
-      this.users.get(msg.nick.toLowerCase()) ?? new ChatUser(msg.nick);
+    const usr = this.users.get(msg.nick.toLowerCase()) ?? new ChatUser(msg);
     this.pinnedMessage = MessageBuilder.pinned(
       msg.data,
       usr,
