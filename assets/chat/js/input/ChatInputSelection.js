@@ -18,6 +18,7 @@ export default class ChatInputSelection {
       this.text = '';
       this.nodes = [];
       this.input.val('');
+      this.update();
       return true;
     }
     return false;
@@ -55,6 +56,7 @@ export default class ChatInputSelection {
       this.input.value.substring(startIndex + this.text.length);
 
     this.input.render();
+    this.update();
   }
 
   update() {

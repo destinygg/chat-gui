@@ -5,19 +5,11 @@ import Trie from './Trie';
 const maxResults = 20;
 function sortResults(a, b) {
   if (!a || !b) return 0;
-
-  // order emotes second
   if (a.isEmote !== b.isEmote) return a.isEmote && !b.isEmote ? -1 : 1;
-
-  // order according to recency third
   if (a.weight !== b.weight) return a.weight > b.weight ? -1 : 1;
-
-  // order lexically fourth
   const lowerA = a.value.toLowerCase();
   const lowerB = b.value.toLowerCase();
-
   if (lowerA === lowerB) return 0;
-
   return lowerA > lowerB ? 1 : -1;
 }
 
@@ -27,15 +19,18 @@ class ChatAutoComplete {
     this.ui = this.chat.ui.find('#chat-auto-complete');
     this.input = this.chat.input;
 
+    this.trie = new Trie();
+
     this.timer = null;
+
     this.hasAt = false;
     this.hasColon = false;
-    this.rangeStart = 0;
-    this.rangeEnd = 0;
-    this.message = '';
-    this.trie = new Trie();
+
     this.results = [];
     this.tabIndex = -1;
+    this.nodeIndex = 0;
+
+    this.searchTerm = '';
 
     this.input.on('keypress', (e) => {
       const keycode = getKeyCode(e);
@@ -43,7 +38,10 @@ class ChatAutoComplete {
       if (char.length > 0) {
         this.tabIndex = -1;
         this.ui.css('left', 0);
-        this.search();
+        if (char !== ' ') {
+          this.checkAutocompleteNode();
+          this.search();
+        }
       }
     });
 
@@ -83,21 +81,49 @@ class ChatAutoComplete {
     });
   }
 
+  checkAutocompleteNode() {
+    const caret = this.input.caret.get();
+    const { nodeIndex } = this.input.getCurrentNode();
+    const word = this.input.getCurrentWord();
+    this.searchTerm = word;
+    this.nodeIndex = nodeIndex;
+    if (!this.input.nodes[nodeIndex].isAutocomplete()) {
+      const AutocompleteNodeIndex = this.input.nodes.findIndex((node) =>
+        node.isAutocomplete()
+      );
+
+      if (AutocompleteNodeIndex >= 0) {
+        this.input.addNode(
+          this.input.nodes[AutocompleteNodeIndex].value,
+          AutocompleteNodeIndex,
+          false
+        );
+        this.input.nodes[AutocompleteNodeIndex].value = '';
+      }
+
+      this.input.setAutocomplete(word, nodeIndex, caret);
+    }
+  }
+
   select(index) {
     this.position();
 
-    const pre = this.message.substring(0, this.rangeStart);
-    const post = this.message.substring(this.rangeEnd);
-    const atEnd = this.input.caret.isAtEnd(this.input.val());
-    this.input.val(
-      `${pre}${this.hasAt ? '@' : ''}${this.results[index].value}${
-        atEnd ? ' ' : ''
-      }${post}`
-    );
+    if (this.input.nodes[this.nodeIndex].isAutocomplete()) {
+      const item = this.results[index];
 
-    if (atEnd) this.input.caret.setEnd();
+      this.input.nodes[this.nodeIndex].value = item.value;
+      this.input.nodes[this.nodeIndex].render();
 
-    this.render();
+      const caretIndex = this.input.caret.getRawIndex(
+        this.input.nodes[this.nodeIndex].element,
+        item.value.length,
+        this.nodeIndex
+      );
+
+      this.input.caret.set(caretIndex, this.input.nodes);
+
+      this.render();
+    }
   }
 
   position() {
@@ -125,25 +151,6 @@ class ChatAutoComplete {
         this.ui.css('left', -left);
       }
     }
-  }
-
-  getWord(words) {
-    let len = 0;
-    for (let n = 0; n < words.length; n++) {
-      len += words[n].length;
-      if (this.input.caret.get() <= len) {
-        return {
-          wordIndex: n,
-          startIndex: this.input.caret.get() - words[n].length,
-          endIndex: this.input.caret.get(),
-        };
-      }
-    }
-    return {
-      wordIndex: 0,
-      startIndex: this.input.caret.get() - words[0].length,
-      endIndex: this.input.caret.get(),
-    };
   }
 
   search() {

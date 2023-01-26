@@ -86,4 +86,8 @@ export default class ChatInputNode {
   isEmote() {
     return this.type === 'emote';
   }
+
+  isAutocomplete() {
+    return this.type === 'autocomplete';
+  }
 }

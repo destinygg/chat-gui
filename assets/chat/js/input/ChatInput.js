@@ -9,6 +9,7 @@ import {
   ChatInputTextNode,
   ChatInputUserNode,
   ChatInputLinkNode,
+  ChatInputAutocompleteNode,
 } from './nodes';
 
 export default class ChatInput {
@@ -38,6 +39,7 @@ export default class ChatInput {
       if (!e.ctrlKey && !e.metaKey) {
         if (!isKeyCode(e, KEYCODES.ENTER)) {
           e.preventDefault();
+          this.selection.update();
           const keycode = getKeyCode(e);
           const char = String.fromCharCode(keycode) || '';
           if (this.selection.hasSelection()) this.selection.remove();
@@ -169,6 +171,10 @@ export default class ChatInput {
         0,
         new ChatInputTextNode(this, element, ' ')
       );
+      if (this.nodes[nodeIndex].isAutocomplete()) {
+        this.addNode(this.nodes[nodeIndex].value, nodeIndex, false);
+        this.nodes[nodeIndex].value = '';
+      }
     } else {
       this.nodes[nodeIndex].modify(offset, modifier, value);
     }
@@ -204,7 +210,11 @@ export default class ChatInput {
 
   checkValid(caret) {
     const { nodeIndex } = this.getCurrentNode(caret - 1);
-    if (this.nodes[nodeIndex].isText()) return;
+    if (
+      this.nodes[nodeIndex].isText() ||
+      this.nodes[nodeIndex].isAutocomplete()
+    )
+      return;
 
     const valid = this.nodes[nodeIndex].isValid();
     if (!valid) {
@@ -228,20 +238,34 @@ export default class ChatInput {
     }
   }
 
+  setAutocomplete(word, nodeIndex, caret) {
+    const element = $('<span>').insertAfter(this.nodes[nodeIndex].element);
+    this.addNodeSplit(
+      new ChatInputAutocompleteNode(this, element, word),
+      true,
+      nodeIndex
+    );
+    this.render(caret - 1);
+  }
+
+  addNodeSplit(node, split, nodeIndex) {
+    if (split) {
+      this.insertNode(node);
+    } else {
+      this.nodes.splice(nodeIndex + 1, 0, node);
+    }
+  }
+
   addNode(word, nodeIndex, split = true) {
     const element = $('<span>').insertAfter(this.nodes[nodeIndex].element);
 
     const emote = this.chat.emoteService.getEmote(word, false);
     if (emote) {
-      if (split) {
-        this.insertNode(new ChatInputEmoteNode(this, element, emote.prefix));
-      } else {
-        this.nodes.splice(
-          nodeIndex + 1,
-          0,
-          new ChatInputEmoteNode(this, element, emote.prefix)
-        );
-      }
+      this.addNodeSplit(
+        new ChatInputEmoteNode(this, element, emote.prefix),
+        split,
+        nodeIndex
+      );
       return;
     }
 
@@ -250,38 +274,30 @@ export default class ChatInput {
       : word.toLowerCase();
     const user = this.chat.users.get(username);
     if (user) {
-      if (split) {
-        this.insertNode(new ChatInputUserNode(this, element, word));
-      } else {
-        this.nodes.splice(
-          nodeIndex + 1,
-          0,
-          new ChatInputUserNode(this, element, word)
-        );
-      }
+      this.addNodeSplit(
+        new ChatInputUserNode(this, element, word),
+        split,
+        nodeIndex
+      );
       return;
     }
 
     const embed = this.embedregex.test(word);
     const url = this.urlregex.test(word);
     if (embed || url) {
-      if (split) {
-        this.insertNode(new ChatInputLinkNode(this, element, word));
-      } else {
-        this.nodes.splice(
-          nodeIndex + 1,
-          0,
-          new ChatInputLinkNode(this, element, word)
-        );
-      }
+      this.addNodeSplit(
+        new ChatInputLinkNode(this, element, word),
+        split,
+        nodeIndex
+      );
       return;
     }
 
     if (!split) {
-      this.nodes.splice(
-        nodeIndex + 1,
-        0,
-        new ChatInputTextNode(this, element, word)
+      this.addNodeSplit(
+        new ChatInputTextNode(this, element, word),
+        split,
+        nodeIndex
       );
     } else element.remove();
   }
@@ -403,7 +419,10 @@ export default class ChatInput {
 
     if (this.nodes.length > 0) {
       if (difference < 0) {
-        if (!this.nodes[nodeIndex].isText()) {
+        if (
+          !this.nodes[nodeIndex].isText() &&
+          !this.nodes[nodeIndex].isAutocomplete()
+        ) {
           this.nodes[nodeIndex + 1].value =
             this.nodes[nodeIndex].value + this.nodes[nodeIndex + 1].value;
           this.nodes[nodeIndex].value = '';

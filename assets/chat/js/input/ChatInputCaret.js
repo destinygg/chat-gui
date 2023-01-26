@@ -90,10 +90,15 @@ export default class ChatInputCaret {
     return this.getParent(node.parentElement, n + 1);
   }
 
-  getRawIndex(node, offset) {
+  getRawIndex(node, offset, nodeIndex = -1) {
     const childNodes = [...this.input.ui[0].childNodes];
     let index = offset;
-    for (let i = 0; i < childNodes.indexOf(node); i++) {
+
+    for (
+      let i = 0;
+      i < (nodeIndex >= 0 ? nodeIndex : childNodes.indexOf(node));
+      i++
+    ) {
       index += this.getTextNode(childNodes[i]).length;
     }
     return index;
@@ -103,7 +108,7 @@ export default class ChatInputCaret {
     return this.stored === 0;
   }
 
-  isAtEnd(string) {
-    return this.stored === string.length;
+  isAtEnd() {
+    return this.stored === this.input.value;
   }
 }
