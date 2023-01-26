@@ -24,13 +24,13 @@ class ChatAutoComplete {
     this.timer = null;
 
     this.hasAt = false;
-    this.hasColon = false;
 
     this.results = [];
     this.tabIndex = -1;
     this.nodeIndex = 0;
 
     this.searchTerm = '';
+    this.oldValue = '';
 
     this.input.on('keypress', (e) => {
       const keycode = getKeyCode(e);
@@ -86,6 +86,7 @@ class ChatAutoComplete {
     const { nodeIndex } = this.input.getCurrentNode();
     const word = this.input.getCurrentWord();
     this.searchTerm = word;
+    this.oldValue = word;
     this.nodeIndex = nodeIndex;
     if (!this.input.nodes[nodeIndex].isAutocomplete()) {
       const AutocompleteNodeIndex = this.input.nodes.findIndex((node) =>
@@ -109,16 +110,30 @@ class ChatAutoComplete {
     this.position();
 
     if (this.input.nodes[this.nodeIndex].isAutocomplete()) {
-      const item = this.results[index];
+      const value = this.hasAt
+        ? `@${this.results[index].value}`
+        : this.results[index].value;
 
-      this.input.nodes[this.nodeIndex].value = item.value;
+      this.input.nodes[this.nodeIndex].value = value;
       this.input.nodes[this.nodeIndex].render();
 
       const caretIndex = this.input.caret.getRawIndex(
-        this.input.nodes[this.nodeIndex].element,
-        item.value.length,
+        null,
+        value.length,
         this.nodeIndex
       );
+
+      if (this.oldValue !== value) {
+        this.input.value =
+          this.input.value.substring(0, caretIndex - value.length) +
+          value +
+          this.input.value.substring(
+            caretIndex - value.length + this.oldValue.length
+          );
+
+        this.input.ui.attr('data-input', this.input.value);
+        this.oldValue = value;
+      }
 
       this.input.caret.set(caretIndex, this.input.nodes);
 
@@ -158,21 +173,18 @@ class ChatAutoComplete {
     if (currentWord !== '') {
       if (currentWord.startsWith('@')) {
         this.hasAt = true;
-        this.hasColon = false;
         currentWord = currentWord.substring(1);
         this.results = this.trie
           .all(currentWord)
           .filter((data) => !data.isEmote);
       } else if (currentWord.startsWith(':')) {
         this.hasAt = false;
-        this.hasColon = true;
         currentWord = currentWord.substring(1);
         this.results = this.trie
           .all(currentWord)
           .filter((data) => data.isEmote);
       } else {
         this.hasAt = false;
-        this.hasColon = false;
         this.results = this.trie.all(currentWord);
       }
       this.results.sort(sortResults).slice(0, maxResults);
