@@ -15,12 +15,9 @@ export default class ChatInputSelection {
       this.nodes[this.nodes.length - 1].offset ===
         this.input.nodes[this.input.nodes.length - 1].value.length
     ) {
-      this.input.value = '';
-      this.input.nodes = [];
-      this.input.ui.empty();
       this.text = '';
       this.nodes = [];
-      this.input.render();
+      this.input.val('');
       return true;
     }
     return false;
@@ -67,12 +64,22 @@ export default class ChatInputSelection {
       this.all = this.text === this.input.value;
 
       const selection = window.getSelection();
+
+      const parentAnchor = this.input.caret.getParent(selection.anchorNode);
+      const parentFocus = this.input.caret.getParent(selection.focusNode);
+      if (!parentAnchor && !parentFocus) {
+        this.text = '';
+        this.nodes = [];
+        return;
+      }
+
       const anchorIndex = this.input.caret.getRawIndex(
-        selection.anchorNode.parentElement,
+        parentAnchor,
         selection.anchorOffset
       );
+
       const focusIndex = this.input.caret.getRawIndex(
-        selection.focusNode.parentElement,
+        parentFocus,
         selection.focusOffset
       );
 

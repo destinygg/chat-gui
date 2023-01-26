@@ -1,8 +1,8 @@
 import $ from 'jquery';
 import { KEYCODES, isKeyCode, getKeyCode } from '../const';
 import { BIGSCREENREGEX, LINKREGEX } from '../formatters';
-import Caret from './Caret';
-import ChatInputSelection from './Selection';
+import ChatInputCaret from './ChatInputCaret';
+import ChatInputSelection from './ChatInputSelection';
 import ChatInputInstanceHistory from './ChatInputInstanceHistory';
 import {
   ChatInputEmoteNode,
@@ -20,7 +20,7 @@ export default class ChatInput {
     this.urlregex = new RegExp(LINKREGEX, 'i');
     this.embedregex = new RegExp(BIGSCREENREGEX);
 
-    this.caret = new Caret(this.ui);
+    this.caret = new ChatInputCaret(this);
     this.selection = new ChatInputSelection(this);
     this.history = new ChatInputInstanceHistory(this);
     this.loadHistory = false;
@@ -336,7 +336,7 @@ export default class ChatInput {
   }
 
   val(value = null) {
-    if (!value) return this.value;
+    if (value === null) return this.value;
 
     this.value = value;
     this.nodes = [];

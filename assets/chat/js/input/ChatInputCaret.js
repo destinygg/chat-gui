@@ -1,6 +1,6 @@
-export default class Caret {
-  constructor(ui) {
-    this.ui = ui;
+export default class ChatInputCaret {
+  constructor(input) {
+    this.input = input;
     this.stored = 0;
   }
 
@@ -10,7 +10,7 @@ export default class Caret {
       const range = window.getSelection().getRangeAt(0);
       const preCaretRange = range.cloneRange();
 
-      preCaretRange.selectNodeContents(this.ui[0]);
+      preCaretRange.selectNodeContents(this.input.ui[0]);
       preCaretRange.setEnd(range.endContainer, range.endOffset);
 
       caretOffset = preCaretRange.toString().length;
@@ -22,7 +22,7 @@ export default class Caret {
 
   set(startIndex, nodes) {
     if (startIndex >= 0) {
-      if (this.ui[0].childNodes.length > 0) {
+      if (this.input.ui[0].childNodes.length > 0) {
         const range = new Range();
         const selection = window.getSelection();
 
@@ -31,7 +31,7 @@ export default class Caret {
           [...nodes].map((node) => node.value)
         );
 
-        const node = this.getTextNode(this.ui[0].childNodes[nodeIndex]);
+        const node = this.getTextNode(this.input.ui[0].childNodes[nodeIndex]);
 
         range.setStart(node, offset);
         range.collapse(true);
@@ -48,7 +48,8 @@ export default class Caret {
     const range = new Range();
     const selection = window.getSelection();
 
-    const lastNode = this.ui[0].childNodes[this.ui[0].childNodes.length - 1];
+    const lastNode =
+      this.input.ui[0].childNodes[this.input.ui[0].childNodes.length - 1];
     const node = this.getTextNode(lastNode);
 
     range.setStart(node, node.length);
@@ -83,8 +84,14 @@ export default class Caret {
     return null;
   }
 
+  getParent(node, n = 0) {
+    if (n === 5) return null;
+    if (node.parentElement.id === this.input.ui[0].id) return node;
+    return this.getParent(node.parentElement, n + 1);
+  }
+
   getRawIndex(node, offset) {
-    const childNodes = [...this.ui[0].childNodes];
+    const childNodes = [...this.input.ui[0].childNodes];
     let index = offset;
     for (let i = 0; i < childNodes.indexOf(node); i++) {
       index += this.getTextNode(childNodes[i]).length;
