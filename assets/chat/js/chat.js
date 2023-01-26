@@ -7,7 +7,12 @@ import { Notification } from './notification';
 import EventEmitter from './emitter';
 import ChatSource from './source';
 import ChatUser from './user';
-import { MessageBuilder, MessageTypes, ChatMessage } from './messages';
+import {
+  MessageBuilder,
+  MessageTypes,
+  ChatMessage,
+  checkIfPinWasDismissed,
+} from './messages';
 import {
   ChatMenu,
   ChatUserMenu,
@@ -325,6 +330,22 @@ const commandsinfo = new Map([
     },
   ],
   [
+    'pin',
+    {
+      desc: 'Pins a message to chat',
+      admin: true,
+      alias: ['motd'],
+    },
+  ],
+  [
+    'unpin',
+    {
+      desc: 'Unpins a message from chat',
+      admin: true,
+      alias: ['unmotd'],
+    },
+  ],
+  [
     'host',
     {
       desc: 'Hosts a livestream, video, or vod to bigscreen.',
@@ -369,9 +390,11 @@ class Chat {
     this.css = null;
     this.output = null;
     this.input = null;
+    this.subonlyicon = null;
     this.loginscrn = null;
     this.loadingscrn = null;
     this.showmotd = true;
+    this.subonly = false;
     this.authenticated = false;
     this.backlogloading = false;
     this.unresolved = [];
@@ -410,6 +433,7 @@ class Chat {
     this.source.on('DISPATCH', (data) => this.onDISPATCH(data));
     this.source.on('CLOSE', (data) => this.onCLOSE(data));
     this.source.on('NAMES', (data) => this.onNAMES(data));
+    this.source.on('PIN', (data) => this.onPIN(data));
     this.source.on('QUIT', (data) => this.onQUIT(data));
     this.source.on('MSG', (data) => this.onMSG(data));
     this.source.on('MUTE', (data) => this.onMUTE(data));
@@ -472,14 +496,18 @@ class Chat {
     this.control.on('M', (data) => this.cmdMENTIONS(data));
     this.control.on('STALK', (data) => this.cmdSTALK(data));
     this.control.on('S', (data) => this.cmdSTALK(data));
+    this.control.on('V', (data) => this.cmdVOTE(data, 'VOTE'));
     this.control.on('POLL', (data) => this.cmdPOLL(data, 'POLL'));
-    this.control.on('VOTE', (data) => this.cmdPOLL(data, 'POLL'));
-    this.control.on('V', (data) => this.cmdPOLL(data, 'POLL'));
+    this.control.on('VOTE', (data) => this.cmdVOTE(data, 'VOTE'));
     this.control.on('SPOLL', (data) => this.cmdPOLL(data, 'SPOLL'));
-    this.control.on('SVOTE', (data) => this.cmdPOLL(data, 'SPOLL'));
+    this.control.on('SVOTE', (data) => this.cmdVOTE(data, 'SVOTE'));
     this.control.on('POLLSTOP', (data) => this.cmdPOLLSTOP(data));
-    this.control.on('VOTESTOP', (data) => this.cmdPOLLSTOP(data));
-    this.control.on('VS', (data) => this.cmdPOLLSTOP(data));
+    this.control.on('VOTESTOP', (data) => this.cmdVOTESTOP(data));
+    this.control.on('VS', (data) => this.cmdVOTESTOP(data));
+    this.control.on('PIN', (data) => this.cmdPIN(data));
+    this.control.on('MOTD', (data) => this.cmdPIN(data));
+    this.control.on('UNPIN', () => this.cmdUNPIN());
+    this.control.on('UNMOTD', () => this.cmdUNPIN());
     this.control.on('HOST', (data) => this.cmdHOST(data));
     this.control.on('UNHOST', () => this.cmdUNHOST());
   }
@@ -545,6 +573,7 @@ class Chat {
     this.ishidden = (document.visibilityState || 'visible') !== 'visible';
     this.output = this.ui.find('#chat-output-frame');
     this.input = this.ui.find('#chat-input-control');
+    this.subonlyicon = this.ui.find('#chat-input-subonly');
     this.loginscrn = this.ui.find('#chat-login-screen');
     this.loadingscrn = this.ui.find('#chat-loading');
     this.windowselect = this.ui.find('#chat-windows-select');
@@ -553,6 +582,7 @@ class Chat {
     this.mainwindow = new ChatWindow('main').into(this);
     this.mutedtimer = new MutedTimer(this);
     this.chatpoll = new ChatPoll(this);
+    this.pinnedMessage = null;
 
     this.windowToFront('main');
 
@@ -1302,6 +1332,26 @@ class Chat {
     }
   }
 
+  onPIN(msg) {
+    if (!msg.data) {
+      this.pinnedMessage?.unpin();
+      return;
+    }
+
+    if (checkIfPinWasDismissed(msg.uuid)) return;
+
+    this.pinnedMessage?.unpin();
+    const usr = this.users.get(msg.nick.toLowerCase()) ?? new ChatUser(msg);
+    this.pinnedMessage = MessageBuilder.pinned(
+      msg.data,
+      usr,
+      msg.timestamp,
+      msg.uuid
+    )
+      .into(this)
+      .pin(this);
+  }
+
   onQUIT(data) {
     const normalized = data.nick.toLowerCase();
     if (this.users.has(normalized)) {
@@ -1478,11 +1528,18 @@ class Chat {
   }
 
   onSUBONLY(data) {
-    const submode = data.data === 'on' ? 'enabled' : 'disabled';
+    this.subonly = data.data === 'on';
     MessageBuilder.command(
-      `Subscriber only mode ${submode} by ${data.nick}.`,
+      `Subscriber only mode ${this.subonly ? 'enabled' : 'disabled'}${
+        data.nick ? ` by ${data.nick}` : ''
+      }.`,
       data.timestamp
     ).into(this);
+    if (this.subonly && !this.user.isSubscriber()) {
+      this.subonlyicon.show();
+    } else {
+      this.subonlyicon.hide();
+    }
   }
 
   onBROADCAST(data) {
@@ -1703,7 +1760,9 @@ class Chat {
   cmdHELP() {
     let str = `Available commands: \r`;
     commandsinfo.forEach((a, k) => {
-      str += ` /${k} - ${a.desc} \r`;
+      str += a.alias
+        ? ` /${k}, /${a.alias.join(', /')} - ${a.desc} \r`
+        : ` /${k} - ${a.desc} \r`;
     });
     MessageBuilder.info(str).into(this);
   }
@@ -2575,6 +2634,18 @@ class Chat {
           MessageBuilder.error(data.message).into(this);
         }
       });
+  }
+
+  cmdPIN(parts) {
+    if (!parts.length) {
+      MessageBuilder.error('No message provided - /pin <message>').into(this);
+      return;
+    }
+    this.source.send('PIN', { data: parts.join(' ') });
+  }
+
+  cmdUNPIN() {
+    this.source.send('PIN', { data: '' });
   }
 
   openConversation(nick) {

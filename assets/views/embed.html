@@ -17,7 +17,9 @@
     </div>
   </div>
 
-  <div id="chat-output-frame" data-scroll-notify></div>
+  <div id="chat-output-frame" data-scroll-notify>
+    <div id="chat-pinned-frame"></div>
+  </div>
 
   <div id="chat-input-frame">
     <div id="chat-input-wrap">
@@ -29,6 +31,9 @@
         autofocus
         spellcheck
       ></textarea>
+      <a id="chat-input-subonly" class="chat-tool-btn" title="Subonly mode">
+        <i class="btn-icon"></i>
+      </a>
     </div>
     <div id="chat-tools-wrap">
       <div class="chat-tools-group">

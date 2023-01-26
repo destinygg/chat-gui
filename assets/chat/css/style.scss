@@ -231,6 +231,29 @@ hr {
 #chat-input-control::placeholder {
   color: $color-chat-place;
 }
+#chat-input-subonly {
+  cursor: default;
+  display: none;
+  position: absolute;
+  top: $gutter-md;
+  right: $gutter-sm;
+  width: 1.5em;
+  height: 1.5em;
+  .btn-icon {
+    display: inline-block;
+    opacity: 0.75;
+    transition: opacity 150ms;
+    width: 100%;
+    height: 100%;
+    background: transparent url('../img/icon-subonly.svg') no-repeat center
+      center;
+    background-size: contain;
+    &:hover {
+      opacity: 1;
+    }
+  }
+}
+
 .chat-lines {
   font-family: $chat-lines-font;
   line-height: 1.65em;
@@ -308,6 +331,9 @@ hr {
     border-style: dashed;
     border-color: transparent transparent $color-underline-nsfl transparent;
     border-width: 1px 0 1px 0;
+  }
+  .hidden {
+    display: none !important;
   }
 }
 
@@ -515,6 +541,65 @@ hr {
 }
 .pref-taggedvisibility .msg-highlight {
   background-color: $color-chat-highlight;
+}
+
+/* Pinned Messages */
+#chat-pinned-frame {
+  display: none;
+  padding: 4px;
+  position: absolute;
+  width: 100%;
+  z-index: 9999;
+
+  &.active {
+    display: block;
+  }
+}
+
+.msg-pinned {
+  background-color: $color-chat-bg;
+  padding-top: $gutter-md;
+  padding-bottom: $gutter-md;
+  border-style: inset;
+  border-radius: 4px;
+  border-color: $color-chat-disabled;
+  time {
+    margin-right: $gutter-md;
+  }
+
+  .user {
+    text-shadow: none;
+  }
+
+  .chat-tool-btn {
+    width: 1.5em;
+    height: 1.5em;
+    cursor: pointer;
+    color: $color-chat-disabled;
+    position: relative;
+    text-decoration: none;
+    float: right;
+    .btn-icon {
+      opacity: 0.25;
+      transition: opacity 150ms;
+      width: 100%;
+      height: 100%;
+      display: inline-block;
+    }
+  }
+  .chat-tool-btn:hover .btn-icon,
+  .chat-tool-btn.active .btn-icon {
+    opacity: 1;
+  }
+
+  #close-pin-btn .btn-icon {
+    background: transparent url('../img/icon-close.svg') no-repeat center center;
+    background-size: contain;
+  }
+  #unpin-btn .btn-icon {
+    background: transparent url('../img/icon-unpin.svg') no-repeat center center;
+    background-size: contain;
+  }
 }
 
 /* Focus or highlight a line */
@@ -1529,6 +1614,9 @@ button.btn {
   #chat-output-frame {
     margin: 0;
   }
+  #chat-pinned-frame {
+    display: none !important;
+  }
 
   time,
   .time,
@@ -1549,6 +1637,22 @@ button.btn {
   .greentext,
   .combo {
     color: $text-color;
+  }
+
+  .msg-pinned {
+    position: unset;
+    text-shadow: unset;
+    background-color: unset;
+    font-size: unset;
+    font-weight: unset;
+    padding-top: unset;
+    padding-bottom: unset;
+    box-shadow: unset;
+    border-radius: unset;
+
+    .chat-tool-btn {
+      display: none !important;
+    }
   }
 
   .msg-chat {
