@@ -396,18 +396,17 @@ export default class ChatInput {
   render(prevCaret = this.caret.get()) {
     this.ui.attr('data-input', this.value);
     const difference = this.value.length - this.oldInputValue.length;
-    const { nodeIndex } = this.getCurrentNode();
-    const nextNodeIndex = this.caret.getNodeIndex(
+    const { nodeIndex } = this.caret.getNodeIndex(
       prevCaret + difference,
       this.nodes.map((node) => node.value)
-    ).nodeIndex;
+    );
 
     if (this.nodes.length > 0) {
       if (difference < 0) {
-        if (!this.nodes[nextNodeIndex].isText()) {
-          this.nodes[nodeIndex].value =
-            this.nodes[nextNodeIndex].value + this.nodes[nodeIndex].value;
-          this.nodes[nextNodeIndex].value = '';
+        if (!this.nodes[nodeIndex].isText()) {
+          this.nodes[nodeIndex + 1].value =
+            this.nodes[nodeIndex].value + this.nodes[nodeIndex + 1].value;
+          this.nodes[nodeIndex].value = '';
         }
       }
 
