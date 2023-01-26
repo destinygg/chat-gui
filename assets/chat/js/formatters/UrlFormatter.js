@@ -71,14 +71,22 @@ export default class UrlFormatter {
       const m = decodedUrl.match(self.linkregex);
       if (m) {
         let encodedUrl = self.encodeUrl(m[0]);
-        
+
         const extra = self.encodeUrl(decodedUrl.substring(m[0].length));
         const href = `${scheme ? '' : 'http://'}${encodedUrl}`;
 
-        if (encodedUrl.length > 40) {
-          encodedUrl = `${encodedUrl.substring(0, 39)}...`
+        const maxUrlLength = 90;
+
+        if (encodedUrl.length > maxUrlLength) {
+          const midpoint = Math.ceil(encodedUrl.length / 2);
+          const toRemove = encodedUrl.length - maxUrlLength;
+          const strip = Math.ceil(toRemove / 2);
+          encodedUrl = `${encodedUrl.substring(
+            0,
+            midpoint - strip
+          )}...${encodedUrl.substring(midpoint + strip)}`;
         }
-        
+
         return `<a target="_blank" class="externallink ${extraclass}" href="${href}" rel="nofollow">${encodedUrl}</a>${extra}`;
       }
       return url;
