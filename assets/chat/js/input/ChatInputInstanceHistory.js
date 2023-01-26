@@ -51,7 +51,9 @@ class ChatInputInstanceHistory {
   }
 
   empty() {
-    this.history = [{ value: '', caret: 0 }];
+    this.history = [
+      { nodes: [], value: '', html: '', caret: 0, selection: null },
+    ];
     this.index = 0;
   }
 }

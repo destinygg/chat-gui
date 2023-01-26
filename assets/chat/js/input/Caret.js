@@ -6,22 +6,14 @@ export default class Caret {
 
   get() {
     let caretOffset = 0;
+    if (window.getSelection().rangeCount > 0) {
+      const range = window.getSelection().getRangeAt(0);
+      const preCaretRange = range.cloneRange();
 
-    if (window.getSelection) {
-      const sel = window.getSelection();
-      if (sel.rangeCount > 0) {
-        const range = window.getSelection().getRangeAt(0);
-        const preCaretRange = range.cloneRange();
-        preCaretRange.selectNodeContents(this.ui[0]);
-        preCaretRange.setEnd(range.endContainer, range.endOffset);
-        caretOffset = preCaretRange.toString().length;
-      }
-    } else if (document.selection && document.selection.type !== 'Control') {
-      const textRange = document.selection.createRange();
-      const preCaretTextRange = document.body.createTextRange();
-      preCaretTextRange.moveToElementText(this.ui[0]);
-      preCaretTextRange.setEndPoint('EndToEnd', textRange);
-      caretOffset = preCaretTextRange.text.length;
+      preCaretRange.selectNodeContents(this.ui[0]);
+      preCaretRange.setEnd(range.endContainer, range.endOffset);
+
+      caretOffset = preCaretRange.toString().length;
     }
 
     this.stored = caretOffset;
@@ -38,7 +30,9 @@ export default class Caret {
           startIndex,
           [...nodes].map((node) => node.value)
         );
+
         const node = this.getTextNode(this.ui[0].childNodes[nodeIndex]);
+
         range.setStart(node, offset);
         range.collapse(true);
 

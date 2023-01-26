@@ -35,13 +35,18 @@ export default class ChatInput {
     });
 
     this.ui.on('keypress', (e) => {
-      if (!isKeyCode(e, KEYCODES.ENTER) && !e.ctrlKey && !e.metaKey) {
-        e.preventDefault();
-        const keycode = getKeyCode(e);
-        const char = String.fromCharCode(keycode) || '';
-        if (this.selection.hasSelection()) this.selection.remove();
-        if (char.length > 0) {
-          this.modify(0, char);
+      if (!e.ctrlKey && !e.metaKey) {
+        if (!isKeyCode(e, KEYCODES.ENTER)) {
+          e.preventDefault();
+          const keycode = getKeyCode(e);
+          const char = String.fromCharCode(keycode) || '';
+          if (this.selection.hasSelection()) this.selection.remove();
+          if (char.length > 0) this.modify(0, char);
+        } else if (!e.shiftKey) {
+          e.preventDefault();
+          this.chat.control.emit('SEND', this.value.trim());
+          this.val('').focus();
+          this.history.empty();
         }
       }
     });
@@ -61,56 +66,55 @@ export default class ChatInput {
 
       if (
         (e.ctrlKey && isKeyCode(e, 65)) || // CTRL + A
-        isKeyCode(e, KEYCODES.LEFT) ||
-        isKeyCode(e, KEYCODES.RIGHT) ||
         isKeyCode(e, KEYCODES.UP) ||
         isKeyCode(e, KEYCODES.DOWN)
       ) {
         this.selection.update();
       }
 
-      // const left = isKeyCode(e, KEYCODES.LEFT);
-      // const right = isKeyCode(e, KEYCODES.RIGHT);
-      // if (left || right) {
-      //   e.preventDefault();
-      //   const caret = this.caret.get();
-      //   if ((left && caret > 0) || (right && caret < this.value.length)) {
-      //     if (e.shiftKey) {
-      //       let { start, end } = this.caret.getSelectionRange(true);
-      //       if (start === end || this.selectBase === -1) {
-      //         if (left) {
-      //           this.selectBase = start;
-      //           start -= 1;
-      //         }
-      //         if (right) {
-      //           this.selectBase = end;
-      //           end += 1;
-      //         }
-      //       } else if (this.selectBase === start) {
-      //         if (left) end -= 1;
-      //         if (right) end += 1;
-      //       } else if (this.selectBase === end) {
-      //         if (left) start -= 1;
-      //         if (right) start += 1;
-      //       }
-      //       if (start < 0) start = 0;
-      //       if (end > this.value.length) end = this.value.length;
-      //       this.caret.setSelectionRange(start, end, this.nodes);
-      //     } else {
-      //       this.selectBase = -1;
-      //       const { nodeIndex } = this.caret.getNodeIndex(
-      //         caret + (left ? -1 : 1),
-      //         this.nodes
-      //       );
-      //       if (this.nodes[nodeIndex].isEmote()) {
-      //         const len = this.nodes[nodeIndex].value.length + 1;
-      //         this.caret.set(caret + (left ? -len : len), this.nodes);
-      //       } else {
-      //         this.caret.set(caret + (left ? -1 : 1), this.nodes);
-      //       }
-      //     }
-      //   }
-      // }
+      const left = isKeyCode(e, KEYCODES.LEFT);
+      const right = isKeyCode(e, KEYCODES.RIGHT);
+      if (left || right) {
+        e.preventDefault();
+        this.selection.update();
+        const caret = this.caret.get();
+        if ((left && caret > 0) || (right && caret < this.value.length)) {
+          if (e.shiftKey) {
+            // let { start, end } = this.caret.getSelectionRange(true);
+            // if (start === end || this.selectBase === -1) {
+            //   if (left) {
+            //     this.selectBase = start;
+            //     start -= 1;
+            //   }
+            //   if (right) {
+            //     this.selectBase = end;
+            //     end += 1;
+            //   }
+            // } else if (this.selectBase === start) {
+            //   if (left) end -= 1;
+            //   if (right) end += 1;
+            // } else if (this.selectBase === end) {
+            //   if (left) start -= 1;
+            //   if (right) start += 1;
+            // }
+            // if (start < 0) start = 0;
+            // if (end > this.value.length) end = this.value.length;
+            // this.caret.setSelectionRange(start, end, this.nodes);
+          } else {
+            this.selectBase = -1;
+            const { nodeIndex } = this.caret.getNodeIndex(
+              caret + (left ? -1 : 1),
+              this.nodes
+            );
+            if (this.nodes[nodeIndex].isEmote()) {
+              const len = this.nodes[nodeIndex].value.length + 1;
+              this.caret.set(caret + (left ? -len : len), this.nodes);
+            } else {
+              this.caret.set(caret + (left ? -1 : 1), this.nodes);
+            }
+          }
+        }
+      }
 
       if (e.ctrlKey && isKeyCode(e, 90)) {
         if (this.history.undo()) this.history.load();
@@ -191,7 +195,7 @@ export default class ChatInput {
       this.nodes[nodeIndex].value = '';
       this.render();
     } else {
-      this.checkCurrentWord();
+      this.checkCurrentWord(caret);
     }
   }
 
@@ -279,11 +283,11 @@ export default class ChatInput {
     } else element.remove();
   }
 
-  checkCurrentWord() {
-    const { nodeIndex } = this.getCurrentNode();
-    const word = this.getCurrentWord();
+  checkCurrentWord(caret = this.caret.get()) {
+    const { nodeIndex } = this.getCurrentNode(caret);
+    const word = this.getCurrentWord(caret);
     if (word && word !== ' ') this.addNode(word, nodeIndex);
-    this.render();
+    this.render(caret);
   }
 
   joinTextNodes(index) {
@@ -394,9 +398,11 @@ export default class ChatInput {
     }
 
     this.ui.attr('data-input', this.value);
+
     const difference = this.value.length - this.oldInputValue.length;
     this.caret.set(prevCaret + difference, this.nodes);
-    this.chat.adjustInputHeight();
+
+    this.adjustInputHeight();
   }
 
   getCurrentNode(caret = this.caret.get()) {
@@ -406,11 +412,30 @@ export default class ChatInput {
     );
   }
 
-  getCurrentWord() {
+  getCurrentWord(caret) {
     if (this.nodes.length === 0) return '';
-    const { nodeIndex, offset } = this.getCurrentNode();
+    const { nodeIndex, offset } = this.getCurrentNode(caret);
 
     return this.nodes[nodeIndex].getWord(offset);
+  }
+
+  adjustInputHeight() {
+    const maxHeightPixels = this.ui.css('maxHeight');
+    const maxHeight = parseInt(maxHeightPixels.slice(0, -2), 10);
+
+    const pinned = this.chat.getActiveWindow()?.scrollplugin?.isPinned();
+
+    this.ui.css('height', '');
+    const calculatedHeight = this.ui.prop('scrollHeight');
+
+    this.ui.css(
+      'overflow-y',
+      calculatedHeight >= maxHeight ? 'scroll' : 'hidden'
+    );
+
+    this.ui.css('height', calculatedHeight);
+
+    if (pinned !== undefined) this.chat.getActiveWindow().updateAndPin(pinned);
   }
 
   focus() {
@@ -419,20 +444,8 @@ export default class ChatInput {
     return this;
   }
 
-  // passthrough functions.
+  // passthrough on event.
   on(...args) {
     return this.ui.on(...args);
-  }
-
-  css(...args) {
-    return this.ui.css(...args);
-  }
-
-  prop(...args) {
-    return this.ui.prop(...args);
-  }
-
-  is(...args) {
-    return this.ui.is(...args);
   }
 }

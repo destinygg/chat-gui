@@ -606,24 +606,6 @@ class Chat {
       (a.alias || []).forEach((i) => this.autocomplete.add(`/${i}`));
     });
 
-    // Chat input
-    // Dynamically adjust input's height.
-    this.input.on('keydown input', this.adjustInputHeight.bind(this));
-
-    // Set initial height.
-    this.adjustInputHeight();
-
-    this.input.on('keypress', (e) => {
-      if (isKeyCode(e, KEYCODES.ENTER) && !e.shiftKey && !e.ctrlKey) {
-        e.preventDefault();
-        e.stopPropagation();
-        this.control.emit('SEND', this.input.val().toString().trim());
-        this.adjustInputHeight();
-        this.input.val('').focus();
-        this.input.history.empty();
-      }
-    });
-
     // Chat focus / menu close when clicking on some areas
     let downinoutput = false;
     this.output.on('mousedown', () => {
@@ -1214,27 +1196,6 @@ class Chat {
       ? `Write something ${this.user.username} ...`
       : `Write something ...`;
     this.input.placeholder = placeholderText;
-  }
-
-  adjustInputHeight() {
-    // Check if the input exists on the page and return if it doesn't.
-    if (!this.input) return;
-
-    const maxHeightPixels = this.input.css('maxHeight');
-    const maxHeight = parseInt(maxHeightPixels.slice(0, -2), 10);
-    const pinned = this.getActiveWindow().scrollplugin.isPinned();
-
-    this.input.css('height', '');
-    const calculatedHeight = this.input.prop('scrollHeight');
-
-    // Show scrollbars if the input's height exceeds the max.
-    this.input.css(
-      'overflow-y',
-      calculatedHeight >= maxHeight ? 'scroll' : 'hidden'
-    );
-
-    this.input.css('height', calculatedHeight);
-    this.getActiveWindow().updateAndPin(pinned);
   }
 
   /**
