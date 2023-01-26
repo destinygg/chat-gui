@@ -71,6 +71,10 @@ export default class ChatInputNode {
     }
   }
 
+  atEnd(offset) {
+    return offset === this.value.length;
+  }
+
   isText() {
     return this.type === 'text';
   }

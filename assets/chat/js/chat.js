@@ -1186,7 +1186,7 @@ class Chat {
     if (this.debounceFocus === undefined) {
       this.debounceFocus = debounce(10, false, (c) => c.input.focus());
     }
-    if (window.getSelection().isCollapsed && !this.input.is(':focus')) {
+    if (window.getSelection().isCollapsed && !this.input.isFocused()) {
       this.debounceFocus(this);
     }
   }

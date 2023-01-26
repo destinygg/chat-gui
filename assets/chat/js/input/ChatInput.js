@@ -159,7 +159,11 @@ export default class ChatInput {
       this.nodes = [new ChatInputTextNode(this, element, '')];
     }
     const { nodeIndex, offset } = this.getCurrentNode();
-    if (value === ' ' && !this.nodes[nodeIndex].isText()) {
+    if (
+      value === ' ' &&
+      !this.nodes[nodeIndex].isText() &&
+      this.nodes[nodeIndex].atEnd(offset)
+    ) {
       const element = $('<span>').insertAfter(this.nodes[nodeIndex].element);
       this.nodes.splice(
         nodeIndex + 1,
@@ -285,8 +289,10 @@ export default class ChatInput {
 
   checkCurrentWord(caret = this.caret.get()) {
     const { nodeIndex } = this.getCurrentNode(caret);
-    const word = this.getCurrentWord(caret);
-    if (word && word !== ' ') this.addNode(word, nodeIndex);
+    if (this.nodes[nodeIndex].isText()) {
+      const word = this.getCurrentWord(caret);
+      if (word && word !== ' ') this.addNode(word, nodeIndex);
+    }
     this.render(caret);
   }
 
@@ -315,6 +321,19 @@ export default class ChatInput {
       );
     }
     this.nodes.splice(nodeIndex + 1, 0, node);
+  }
+
+  getCurrentNode(caret = this.caret.get()) {
+    return this.caret.getNodeIndex(
+      caret,
+      [...this.nodes].map((node) => node.value)
+    );
+  }
+
+  getCurrentWord(caret) {
+    if (this.nodes.length === 0) return '';
+    const { nodeIndex, offset } = this.getCurrentNode(caret);
+    return this.nodes[nodeIndex].getWord(offset);
   }
 
   val(value = null) {
@@ -405,20 +424,6 @@ export default class ChatInput {
     this.adjustInputHeight();
   }
 
-  getCurrentNode(caret = this.caret.get()) {
-    return this.caret.getNodeIndex(
-      caret,
-      [...this.nodes].map((node) => node.value)
-    );
-  }
-
-  getCurrentWord(caret) {
-    if (this.nodes.length === 0) return '';
-    const { nodeIndex, offset } = this.getCurrentNode(caret);
-
-    return this.nodes[nodeIndex].getWord(offset);
-  }
-
   adjustInputHeight() {
     const maxHeightPixels = this.ui.css('maxHeight');
     const maxHeight = parseInt(maxHeightPixels.slice(0, -2), 10);
@@ -442,6 +447,10 @@ export default class ChatInput {
     this.ui.focus();
     this.caret.set(this.caret.stored, this.nodes);
     return this;
+  }
+
+  isFocused() {
+    return this.ui.is(':focus');
   }
 
   // passthrough on event.
