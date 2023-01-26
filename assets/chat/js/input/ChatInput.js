@@ -36,25 +36,35 @@ export default class ChatInput {
     });
 
     this.ui.on('keypress', (e) => {
-      if (!e.ctrlKey && !e.metaKey) {
-        if (!isKeyCode(e, KEYCODES.ENTER)) {
-          e.preventDefault();
-          this.selection.update();
-          const keycode = getKeyCode(e);
-          const char = String.fromCharCode(keycode) || '';
-          if (this.selection.hasSelection()) this.selection.remove();
-          if (char.length > 0) this.modify(0, char);
-        } else if (!e.shiftKey) {
-          e.preventDefault();
-          this.chat.control.emit('SEND', this.value.trim());
-          this.val('').focus();
-          this.history.empty();
-        }
+      if (!e.ctrlKey && !e.metaKey && !isKeyCode(e, KEYCODES.ENTER)) {
+        e.preventDefault();
+        this.selection.update();
+        const keycode = getKeyCode(e);
+        const char = String.fromCharCode(keycode) || '';
+        if (this.selection.hasSelection()) this.selection.remove();
+        if (char.length > 0) this.modify(0, char);
       }
     });
 
     this.ui.on('keydown', (e) => {
-      if (isKeyCode(e, KEYCODES.TAB)) e.preventDefault();
+      if (
+        isKeyCode(e, KEYCODES.TAB) ||
+        (e.shiftKey && isKeyCode(e, KEYCODES.ENTER))
+      ) {
+        e.preventDefault();
+      }
+
+      if (
+        !e.ctrlKey &&
+        !e.metaKey &&
+        !e.shiftKey &&
+        isKeyCode(e, KEYCODES.ENTER)
+      ) {
+        e.preventDefault();
+        this.chat.control.emit('SEND', this.value.trim());
+        this.val('').focus();
+        this.history.empty();
+      }
 
       if (isKeyCode(e, KEYCODES.BACKSPACE)) {
         e.preventDefault();
