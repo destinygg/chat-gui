@@ -7,7 +7,12 @@ import { Notification } from './notification';
 import EventEmitter from './emitter';
 import ChatSource from './source';
 import ChatUser from './user';
-import { MessageBuilder, MessageTypes, ChatMessage } from './messages';
+import {
+  MessageBuilder,
+  MessageTypes,
+  ChatMessage,
+  checkIfPinWasDismissed,
+} from './messages';
 import {
   ChatMenu,
   ChatUserMenu,
@@ -24,7 +29,7 @@ import ChatUserFocus from './focus';
 import ChatStore from './store';
 import Settings from './settings';
 import ChatWindow from './window';
-import { ChatVote, parseQuestionAndTime, VOTE_END_TIME } from './vote';
+import { ChatPoll, parseQuestionAndTime } from './poll';
 import { isMuteActive, MutedTimer } from './mutedtimer';
 import EmoteService from './emotes';
 import UserFeatures from './features';
@@ -69,6 +74,9 @@ const errorstrings = new Map([
   ],
   ['notfound', 'The user was not found'],
   ['notconnected', 'You have to be connected to use that'],
+  ['activepoll', 'Poll already started.'],
+  ['noactivepoll', 'No poll started.'],
+  ['alreadyvoted', 'You have already voted!'],
 ]);
 const hintstrings = new Map([
   [
@@ -302,21 +310,40 @@ const commandsinfo = new Map([
     },
   ],
   [
-    'vote',
+    'poll',
     {
-      desc: 'Start a vote.',
+      desc: 'Start a poll.',
+      alias: ['vote'],
     },
   ],
   [
-    'votestop',
+    'spoll',
     {
-      desc: 'Stop a vote you started.',
+      desc: 'Start a sub-weighted poll.',
+      alias: ['svote'],
     },
   ],
   [
-    'svote',
+    'pollstop',
     {
-      desc: 'Start a sub-weighted vote.',
+      desc: 'Stop a poll you started.',
+      alias: ['votestop'],
+    },
+  ],
+  [
+    'pin',
+    {
+      desc: 'Pins a message to chat',
+      admin: true,
+      alias: ['motd'],
+    },
+  ],
+  [
+    'unpin',
+    {
+      desc: 'Unpins a message from chat',
+      admin: true,
+      alias: ['unmotd'],
     },
   ],
   [
@@ -365,9 +392,11 @@ class Chat {
     this.output = null;
     this.autocomplete = null;
     this.input = null;
+    this.subonlyicon = null;
     this.loginscrn = null;
     this.loadingscrn = null;
     this.showmotd = true;
+    this.subonly = false;
     this.authenticated = false;
     this.backlogloading = false;
     this.unresolved = [];
@@ -405,6 +434,7 @@ class Chat {
     this.source.on('DISPATCH', (data) => this.onDISPATCH(data));
     this.source.on('CLOSE', (data) => this.onCLOSE(data));
     this.source.on('NAMES', (data) => this.onNAMES(data));
+    this.source.on('PIN', (data) => this.onPIN(data));
     this.source.on('QUIT', (data) => this.onQUIT(data));
     this.source.on('MSG', (data) => this.onMSG(data));
     this.source.on('MUTE', (data) => this.onMUTE(data));
@@ -417,8 +447,8 @@ class Chat {
     this.source.on('BROADCAST', (data) => this.onBROADCAST(data));
     this.source.on('PRIVMSGSENT', (data) => this.onPRIVMSGSENT(data));
     this.source.on('PRIVMSG', (data) => this.onPRIVMSG(data));
-    this.source.on('VOTE', (data) => this.onVOTE(data));
-    this.source.on('VOTESTOP', (data) => this.onVOTESTOP(data));
+    this.source.on('POLLSTART', (data) => this.onPOLLSTART(data));
+    this.source.on('POLLSTOP', (data) => this.onPOLLSTOP(data));
     this.source.on('VOTECAST', (data) => this.onVOTECAST(data));
 
     this.control.on('SEND', (data) => this.cmdSEND(data));
@@ -467,11 +497,18 @@ class Chat {
     this.control.on('M', (data) => this.cmdMENTIONS(data));
     this.control.on('STALK', (data) => this.cmdSTALK(data));
     this.control.on('S', (data) => this.cmdSTALK(data));
-    this.control.on('VOTE', (data) => this.cmdVOTE(data, 'VOTE'));
-    this.control.on('SVOTE', (data) => this.cmdVOTE(data, 'SVOTE'));
     this.control.on('V', (data) => this.cmdVOTE(data, 'VOTE'));
+    this.control.on('POLL', (data) => this.cmdPOLL(data, 'POLL'));
+    this.control.on('VOTE', (data) => this.cmdVOTE(data, 'VOTE'));
+    this.control.on('SPOLL', (data) => this.cmdPOLL(data, 'SPOLL'));
+    this.control.on('SVOTE', (data) => this.cmdVOTE(data, 'SVOTE'));
+    this.control.on('POLLSTOP', (data) => this.cmdPOLLSTOP(data));
     this.control.on('VOTESTOP', (data) => this.cmdVOTESTOP(data));
     this.control.on('VS', (data) => this.cmdVOTESTOP(data));
+    this.control.on('PIN', (data) => this.cmdPIN(data));
+    this.control.on('MOTD', (data) => this.cmdPIN(data));
+    this.control.on('UNPIN', () => this.cmdUNPIN());
+    this.control.on('UNMOTD', () => this.cmdUNPIN());
     this.control.on('HOST', (data) => this.cmdHOST(data));
     this.control.on('UNHOST', () => this.cmdUNHOST());
   }
@@ -536,6 +573,7 @@ class Chat {
 
     this.ishidden = (document.visibilityState || 'visible') !== 'visible';
     this.output = this.ui.find('#chat-output-frame');
+    this.subonlyicon = this.ui.find('#chat-input-subonly');
     this.loginscrn = this.ui.find('#chat-login-screen');
     this.loadingscrn = this.ui.find('#chat-loading');
     this.windowselect = this.ui.find('#chat-windows-select');
@@ -545,10 +583,8 @@ class Chat {
     this.userfocus = new ChatUserFocus(this, this.css);
     this.mainwindow = new ChatWindow('main').into(this);
     this.mutedtimer = new MutedTimer(this);
-
-    this.ui.find('#chat-vote-frame:first').each((i, e) => {
-      this.chatvote = new ChatVote(this, $(e));
-    });
+    this.chatpoll = new ChatPoll(this);
+    this.pinnedMessage = null;
 
     this.windowToFront('main');
 
@@ -1218,6 +1254,7 @@ class Chat {
   onCLOSE({ retryMilli }) {
     // https://www.iana.org/assignments/websocket/websocket.xml#close-code-number
     // const code = e.event.code || 1006
+    if (this.chatpoll.isPollStarted()) this.chatpoll.endPoll(); // end poll on disconnect so it is not there forever.
     if (retryMilli > 0)
       MessageBuilder.error(
         `Disconnected, retry in ${Math.round(retryMilli / 1000)} seconds ...`
@@ -1255,6 +1292,26 @@ class Chat {
     }
   }
 
+  onPIN(msg) {
+    if (!msg.data) {
+      this.pinnedMessage?.unpin();
+      return;
+    }
+
+    if (checkIfPinWasDismissed(msg.uuid)) return;
+
+    this.pinnedMessage?.unpin();
+    const usr = this.users.get(msg.nick.toLowerCase()) ?? new ChatUser(msg);
+    this.pinnedMessage = MessageBuilder.pinned(
+      msg.data,
+      usr,
+      msg.timestamp,
+      msg.uuid
+    )
+      .into(this)
+      .pin(this);
+  }
+
   onQUIT(data) {
     const normalized = data.nick.toLowerCase();
     if (this.users.has(normalized)) {
@@ -1266,35 +1323,6 @@ class Chat {
   onMSG(data) {
     const textonly = Chat.removeSlashCmdFromText(data.data);
     const usr = this.users.get(data.nick.toLowerCase());
-
-    // Voting is processed entirely in clients through messages with
-    // type `MSG`, but we emit `VOTE`, `VOTESTOP`, and `VOTECAST`
-    // events to mimic server involvement.
-    if (this.chatvote.canUserStartVote(usr)) {
-      if (this.chatvote.isMsgVoteStartFmt(data.data)) {
-        const now = new Date().getTime();
-        const question = parseQuestionAndTime(data.data);
-        if (now - data.timestamp < question.time + VOTE_END_TIME) {
-          this.source.emit('VOTE', data);
-        }
-        return;
-      }
-      if (
-        this.chatvote.isVoteStarted() &&
-        this.chatvote.isMsgVoteStopFmt(data.data)
-      ) {
-        this.source.emit('VOTESTOP', data);
-        return;
-      }
-    }
-    if (
-      this.chatvote.canCastVote(data.timestamp) &&
-      this.chatvote.isMsgVoteCastFmt(data.data)
-    ) {
-      this.source.emit(`VOTECAST`, data);
-      return;
-    }
-
     const win = this.mainwindow;
     if (
       win.lastmessage !== null &&
@@ -1314,41 +1342,29 @@ class Chat {
     }
   }
 
-  onVOTE(data) {
+  onPOLLSTART(data) {
     const usr = this.users.get(data.nick.toLowerCase());
-    if (this.chatvote.isVoteStarted() || !this.chatvote.canUserStartVote(usr)) {
+    if (this.chatpoll.isPollStarted() || !this.chatpoll.canUserStartPoll(usr)) {
       return;
     }
 
-    if (this.chatvote.startVote(data.data, usr, data.timestamp)) {
-      new ChatMessage(
-        this.chatvote.voteStartMessage(),
-        null,
-        MessageTypes.INFO,
-        true
-      ).into(this);
-    }
+    this.chatpoll.startPoll(data);
   }
 
-  onVOTESTOP(data) {
+  onPOLLSTOP(data) {
     const usr = this.users.get(data.nick.toLowerCase());
-    if (!this.chatvote.isVoteStarted() || !this.chatvote.canUserStopVote(usr)) {
+    if (!this.chatpoll.isPollStarted() || !this.chatpoll.canUserStopPoll(usr)) {
       return;
     }
 
-    this.chatvote.endVote(data.timestamp);
+    this.chatpoll.endPoll();
   }
 
   onVOTECAST(data) {
     const usr = this.users.get(data.nick.toLowerCase());
-    if (!this.chatvote.canVote(usr)) {
-      return;
-    }
-
-    // NOTE method returns false, if the GUI is hidden
-    if (this.chatvote.castVote(data.data, usr, data.timestamp)) {
-      if (data.nick === this.user.username) {
-        this.chatvote.markVote(data.data);
+    if (this.chatpoll.castVote(data, usr)) {
+      if (data.nick.toLowerCase() === this.user.nick.toLowerCase()) {
+        this.chatpoll.markVote(data.vote);
       }
     }
   }
@@ -1472,11 +1488,18 @@ class Chat {
   }
 
   onSUBONLY(data) {
-    const submode = data.data === 'on' ? 'enabled' : 'disabled';
+    this.subonly = data.data === 'on';
     MessageBuilder.command(
-      `Subscriber only mode ${submode} by ${data.nick}.`,
+      `Subscriber only mode ${this.subonly ? 'enabled' : 'disabled'}${
+        data.nick ? ` by ${data.nick}` : ''
+      }.`,
       data.timestamp
     ).into(this);
+    if (this.subonly && !this.user.isSubscriber()) {
+      this.subonlyicon.show();
+    } else {
+      this.subonlyicon.hide();
+    }
   }
 
   onBROADCAST(data) {
@@ -1600,12 +1623,12 @@ class Chat {
       }
       // VOTE
       else if (
-        this.chatvote.isVoteStarted() &&
-        this.chatvote.isMsgVoteCastFmt(textonly)
+        this.chatpoll.isPollStarted() &&
+        this.chatpoll.isMsgVoteCastFmt(textonly)
       ) {
-        if (this.chatvote.canVote(this.user)) {
+        if (this.chatpoll.poll.canVote) {
           MessageBuilder.info(`Your vote has been cast!`).into(this);
-          this.source.send('MSG', { data: raw });
+          this.source.send('CASTVOTE', { vote: raw });
           this.input.val('');
         } else {
           MessageBuilder.error(`You have already voted!`).into(this);
@@ -1638,7 +1661,7 @@ class Chat {
     }
   }
 
-  cmdVOTE(parts, command) {
+  cmdPOLL(parts, command) {
     const slashCommand = `/${command.toLowerCase()}`;
     const textOnly = parts.join(' ');
 
@@ -1652,35 +1675,40 @@ class Chat {
       return;
     }
 
-    if (this.chatvote.isVoteStarted()) {
-      MessageBuilder.error('Vote already started.').into(this);
+    if (this.chatpoll.isPollStarted()) {
+      MessageBuilder.error('Poll already started.').into(this);
       return;
     }
-    if (!this.chatvote.canUserStartVote(this.user)) {
-      MessageBuilder.error('You do not have permission to start a vote.').into(
+    if (!this.chatpoll.canUserStartPoll(this.user)) {
+      MessageBuilder.error('You do not have permission to start a poll.').into(
         this
       );
       return;
     }
 
-    this.source.send('MSG', { data: `${slashCommand} ${textOnly}` });
-    // TODO if the chat isn't connected, the user has no warning of this action failing
+    const { question, options, time } = parseQuestionAndTime(textOnly);
+    const dataOut = {
+      weighted: slashCommand === '/spoll',
+      time,
+      question,
+      options,
+    };
+    this.source.send('STARTPOLL', dataOut);
   }
 
-  cmdVOTESTOP() {
-    if (!this.chatvote.isVoteStarted()) {
-      MessageBuilder.error('No vote started.').into(this);
+  cmdPOLLSTOP() {
+    if (!this.chatpoll.isPollStarted()) {
+      MessageBuilder.error('No poll started.').into(this);
       return;
     }
-    if (!this.chatvote.canUserStopVote(this.user)) {
+    if (!this.chatpoll.canUserStopPoll(this.user)) {
       MessageBuilder.error(
-        'You do not have permission to stop this vote.'
+        'You do not have permission to stop this poll.'
       ).into(this);
       return;
     }
 
-    this.source.send('MSG', { data: '/votestop' });
-    // TODO if the chat isn't connected, the user has no warning of this action failing
+    this.source.send('STOPPOLL', {});
   }
 
   cmdEMOTES() {
@@ -1692,7 +1720,9 @@ class Chat {
   cmdHELP() {
     let str = `Available commands: \r`;
     commandsinfo.forEach((a, k) => {
-      str += ` /${k} - ${a.desc} \r`;
+      str += a.alias
+        ? ` /${k}, /${a.alias.join(', /')} - ${a.desc} \r`
+        : ` /${k} - ${a.desc} \r`;
     });
     MessageBuilder.info(str).into(this);
   }
@@ -2564,6 +2594,18 @@ class Chat {
           MessageBuilder.error(data.message).into(this);
         }
       });
+  }
+
+  cmdPIN(parts) {
+    if (!parts.length) {
+      MessageBuilder.error('No message provided - /pin <message>').into(this);
+      return;
+    }
+    this.source.send('PIN', { data: parts.join(' ') });
+  }
+
+  cmdUNPIN() {
+    this.source.send('PIN', { data: '' });
   }
 
   openConversation(nick) {
