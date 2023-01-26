@@ -18,14 +18,10 @@ export default class ChatInputUserNode extends ChatInputNode {
 
   render() {
     const colorFlair = this.getUsernameColor();
-
-    if (this.element[0].classList.length === 3) {
-      const last = this.element[0].classList.item(2);
-      this.element[0].classList.remove(last);
-    }
-
+    this.element.removeClass(
+      `noflair ${this.input.chat.flairs.map((flair) => flair.name).join(' ')}`
+    );
     this.element.addClass(colorFlair ? colorFlair.name : 'noflair');
-
     super.render();
   }
 

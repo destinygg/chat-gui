@@ -27,7 +27,6 @@ class ChatAutoComplete {
 
     this.results = [];
     this.tabIndex = -1;
-    this.nodeIndex = 0;
 
     this.searchTerm = '';
     this.oldValue = '';
@@ -38,8 +37,9 @@ class ChatAutoComplete {
       if (char.length > 0) {
         this.tabIndex = -1;
         this.ui.css('left', 0);
-        if (char !== ' ') {
-          this.checkAutocompleteNode();
+        if (char === ' ') {
+          this.reset();
+        } else {
           this.search();
         }
       }
@@ -58,11 +58,9 @@ class ChatAutoComplete {
       if (this.results.length > 0) {
         if (isKeyCode(e, KEYCODES.TAB)) {
           e.preventDefault();
-          if (this.tabIndex + 1 > this.results.length - 1) {
-            this.tabIndex = 0;
-          } else {
-            this.tabIndex += 1;
-          }
+          if (this.tabIndex + 1 > this.results.length - 1) this.tabIndex = 0;
+          else this.tabIndex += 1;
+          this.checkAutocompleteNode();
           this.select(this.tabIndex);
         }
       }
@@ -71,6 +69,7 @@ class ChatAutoComplete {
     this.ui.on('click', 'li', (e) => {
       const index = parseInt(e.currentTarget.getAttribute('data-index'), 10);
       this.tabIndex = index;
+      this.checkAutocompleteNode();
       this.select(index);
     });
 
@@ -85,10 +84,10 @@ class ChatAutoComplete {
     const caret = this.input.caret.get();
     const { nodeIndex } = this.input.getCurrentNode();
     const word = this.input.getCurrentWord();
-    this.searchTerm = word;
-    this.oldValue = word;
-    this.nodeIndex = nodeIndex;
     if (!this.input.nodes[nodeIndex].isAutocomplete()) {
+      this.oldValue = word;
+      this.searchTerm = word;
+
       const AutocompleteNodeIndex = this.input.nodes.findIndex((node) =>
         node.isAutocomplete()
       );
@@ -107,35 +106,32 @@ class ChatAutoComplete {
   }
 
   select(index) {
+    const value = `${
+      this.hasAt ? `@${this.results[index].value}` : this.results[index].value
+    } `;
+
     this.position();
 
-    if (this.input.nodes[this.nodeIndex].isAutocomplete()) {
-      const value = this.hasAt
-        ? `@${this.results[index].value}`
-        : this.results[index].value;
+    const { nodeIndex } = this.input.getCurrentNode();
 
-      this.input.nodes[this.nodeIndex].value = value;
-      this.input.nodes[this.nodeIndex].render();
+    if (this.input.nodes[nodeIndex].isAutocomplete()) {
+      this.input.nodes[nodeIndex].emote = this.results[index].isEmote;
+      this.input.nodes[nodeIndex].value = value;
+      this.input.nodes[nodeIndex].render();
 
-      const caretIndex = this.input.caret.getRawIndex(
-        null,
-        value.length,
-        this.nodeIndex
-      );
+      const caretIndex = this.input.caret.getRawIndex(null, 0, nodeIndex);
 
       if (this.oldValue !== value) {
         this.input.value =
-          this.input.value.substring(0, caretIndex - value.length) +
+          this.input.value.substring(0, caretIndex) +
           value +
-          this.input.value.substring(
-            caretIndex - value.length + this.oldValue.length
-          );
+          this.input.value.substring(caretIndex + this.oldValue.length);
 
         this.input.ui.attr('data-input', this.input.value);
         this.oldValue = value;
       }
 
-      this.input.caret.set(caretIndex, this.input.nodes);
+      this.input.caret.set(caretIndex + value.length, this.input.nodes);
 
       this.render();
     }

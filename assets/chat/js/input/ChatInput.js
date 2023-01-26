@@ -164,13 +164,21 @@ export default class ChatInput {
   }
 
   modify(modifier = 0, value = '') {
+    let autocomplete = false;
     const caret = this.caret.get();
     if (this.nodes.length === 0) {
       const element = $('<span>').appendTo(this.ui);
       this.nodes = [new ChatInputTextNode(this, element, '')];
     }
+
     const { nodeIndex, offset } = this.getCurrentNode();
-    if (
+
+    if (this.nodes[nodeIndex].isAutocomplete()) {
+      this.addNode(this.nodes[nodeIndex].value.trim(), nodeIndex, false);
+      this.nodes[nodeIndex].value = '';
+      this.addNode(` ${value}`, nodeIndex + 1, false);
+      autocomplete = true;
+    } else if (
       value === ' ' &&
       !this.nodes[nodeIndex].isText() &&
       this.nodes[nodeIndex].atEnd(offset)
@@ -181,10 +189,6 @@ export default class ChatInput {
         0,
         new ChatInputTextNode(this, element, ' ')
       );
-      if (this.nodes[nodeIndex].isAutocomplete()) {
-        this.addNode(this.nodes[nodeIndex].value, nodeIndex, false);
-        this.nodes[nodeIndex].value = '';
-      }
     } else {
       this.nodes[nodeIndex].modify(offset, modifier, value);
     }
@@ -204,7 +208,9 @@ export default class ChatInput {
         this.value.substring(caret);
     }
 
-    if (value.length > 1) {
+    if (autocomplete) {
+      this.render();
+    } else if (value.length > 1) {
       [...this.nodes[nodeIndex].value.split(/(\s+?)/g)]
         .filter((v) => v !== '')
         .reverse()
@@ -250,11 +256,7 @@ export default class ChatInput {
 
   setAutocomplete(word, nodeIndex, caret) {
     const element = $('<span>').insertAfter(this.nodes[nodeIndex].element);
-    this.addNodeSplit(
-      new ChatInputAutocompleteNode(this, element, word),
-      true,
-      nodeIndex
-    );
+    this.insertNode(new ChatInputAutocompleteNode(this, element, word));
     this.render(caret - 1);
   }
 
@@ -422,6 +424,7 @@ export default class ChatInput {
   render(prevCaret = this.caret.get()) {
     this.ui.attr('data-input', this.value);
     const difference = this.value.length - this.oldInputValue.length;
+
     const { nodeIndex } = this.caret.getNodeIndex(
       prevCaret + difference,
       this.nodes.map((node) => node.value)
