@@ -8,4 +8,5 @@ export default {
   CHAT: 'CHAT',
   USER: 'USER',
   EMOTE: 'EMOTE',
+  PINNED: 'PINNED',
 };

@@ -7,7 +7,12 @@ import { Notification } from './notification';
 import EventEmitter from './emitter';
 import ChatSource from './source';
 import ChatUser from './user';
-import { MessageBuilder, MessageTypes, ChatMessage } from './messages';
+import {
+  MessageBuilder,
+  MessageTypes,
+  ChatMessage,
+  checkIfPinWasDismissed,
+} from './messages';
 import {
   ChatMenu,
   ChatUserMenu,
@@ -319,6 +324,22 @@ const commandsinfo = new Map([
     },
   ],
   [
+    'pin',
+    {
+      desc: 'Pins a message to chat',
+      admin: true,
+      alias: ['motd'],
+    },
+  ],
+  [
+    'unpin',
+    {
+      desc: 'Unpins a message from chat',
+      admin: true,
+      alias: ['unmotd'],
+    },
+  ],
+  [
     'host',
     {
       desc: 'Hosts a livestream, video, or vod to bigscreen.',
@@ -406,6 +427,7 @@ class Chat {
     this.source.on('DISPATCH', (data) => this.onDISPATCH(data));
     this.source.on('CLOSE', (data) => this.onCLOSE(data));
     this.source.on('NAMES', (data) => this.onNAMES(data));
+    this.source.on('PIN', (data) => this.onPIN(data));
     this.source.on('QUIT', (data) => this.onQUIT(data));
     this.source.on('MSG', (data) => this.onMSG(data));
     this.source.on('MUTE', (data) => this.onMUTE(data));
@@ -473,6 +495,10 @@ class Chat {
     this.control.on('V', (data) => this.cmdVOTE(data, 'VOTE'));
     this.control.on('VOTESTOP', (data) => this.cmdVOTESTOP(data));
     this.control.on('VS', (data) => this.cmdVOTESTOP(data));
+    this.control.on('PIN', (data) => this.cmdPIN(data));
+    this.control.on('MOTD', (data) => this.cmdPIN(data));
+    this.control.on('UNPIN', () => this.cmdUNPIN());
+    this.control.on('UNMOTD', () => this.cmdUNPIN());
     this.control.on('HOST', (data) => this.cmdHOST(data));
     this.control.on('UNHOST', () => this.cmdUNHOST());
   }
@@ -546,6 +572,7 @@ class Chat {
     this.userfocus = new ChatUserFocus(this, this.css);
     this.mainwindow = new ChatWindow('main').into(this);
     this.mutedtimer = new MutedTimer(this);
+    this.pinnedMessage = null;
 
     this.ui.find('#chat-vote-frame:first').each((i, e) => {
       this.chatvote = new ChatVote(this, $(e));
@@ -1296,6 +1323,26 @@ class Chat {
       this.cmdHINT([Math.floor(Math.random() * hintstrings.size)]);
       this.showmotd = false;
     }
+  }
+
+  onPIN(msg) {
+    if (!msg.data) {
+      this.pinnedMessage?.unpin();
+      return;
+    }
+
+    if (checkIfPinWasDismissed(msg.uuid)) return;
+
+    this.pinnedMessage?.unpin();
+    const usr = this.users.get(msg.nick.toLowerCase()) ?? new ChatUser(msg);
+    this.pinnedMessage = MessageBuilder.pinned(
+      msg.data,
+      usr,
+      msg.timestamp,
+      msg.uuid
+    )
+      .into(this)
+      .pin(this);
   }
 
   onQUIT(data) {
@@ -2616,6 +2663,18 @@ class Chat {
           MessageBuilder.error(data.message).into(this);
         }
       });
+  }
+
+  cmdPIN(parts) {
+    if (!parts.length) {
+      MessageBuilder.error('No message provided - /pin <message>').into(this);
+      return;
+    }
+    this.source.send('PIN', { data: parts.join(' ') });
+  }
+
+  cmdUNPIN() {
+    this.source.send('PIN', { data: '' });
   }
 
   openConversation(nick) {
