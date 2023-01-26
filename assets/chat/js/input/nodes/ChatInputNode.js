@@ -71,6 +71,10 @@ export default class ChatInputNode {
     }
   }
 
+  atStart(offset) {
+    return offset === 0;
+  }
+
   atEnd(offset) {
     return offset === this.value.length;
   }

@@ -101,10 +101,9 @@ export default class ChatInput {
             // if (end > this.value.length) end = this.value.length;
             // this.caret.setSelectionRange(start, end, this.nodes);
           } else {
-            this.selectBase = -1;
             const { nodeIndex } = this.caret.getNodeIndex(
               caret + (left ? -1 : 1),
-              this.nodes
+              [...this.nodes].map((node) => node.value)
             );
             if (this.nodes[nodeIndex].isEmote()) {
               const len = this.nodes[nodeIndex].value.length + 1;
@@ -395,7 +394,23 @@ export default class ChatInput {
   }
 
   render(prevCaret = this.caret.get()) {
+    this.ui.attr('data-input', this.value);
+    const difference = this.value.length - this.oldInputValue.length;
+    const { nodeIndex } = this.getCurrentNode();
+    const nextNodeIndex = this.caret.getNodeIndex(
+      prevCaret + difference,
+      this.nodes.map((node) => node.value)
+    ).nodeIndex;
+
     if (this.nodes.length > 0) {
+      if (difference < 0) {
+        if (!this.nodes[nextNodeIndex].isText()) {
+          this.nodes[nodeIndex].value =
+            this.nodes[nextNodeIndex].value + this.nodes[nodeIndex].value;
+          this.nodes[nextNodeIndex].value = '';
+        }
+      }
+
       this.checkValid(prevCaret);
 
       for (let index = this.nodes.length - 1; index >= 0; index--) {
@@ -416,11 +431,7 @@ export default class ChatInput {
       [...this.nodes].forEach((node) => node.render());
     }
 
-    this.ui.attr('data-input', this.value);
-
-    const difference = this.value.length - this.oldInputValue.length;
     this.caret.set(prevCaret + difference, this.nodes);
-
     this.adjustInputHeight();
   }
 
