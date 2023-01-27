@@ -43,16 +43,24 @@ export default class PinnedMessage extends ChatUserMessage {
   }
 
   /**
+   * Shows/hides the current message.
+   * @param {?boolean} state
+   * @returns {null} null
+   */
+  toggleVisibility(state = null) {
+    this.ui.classList.toggle('hidden', !state);
+  }
+
+  /**
    * Unpins the current message.
    * @returns {null} null
    */
   unpin() {
     dismissPin(this.uuid);
 
-    document
-      .getElementById('chat-pinned-frame')
-      .classList.toggle('active', false);
-    document.getElementById('msg-pinned')?.remove();
+    const frame = document.getElementById('chat-pinned-frame');
+    frame.classList.toggle('active', false);
+    frame.replaceChildren();
 
     return null;
   }
@@ -60,12 +68,14 @@ export default class PinnedMessage extends ChatUserMessage {
   /**
    * Pins the current message.
    * @param {Chat} chat
+   * @param {?boolean} visibility
    * @returns {PinnedMessage} Pinned message.
    */
-  pin(chat = null) {
+  pin(chat = null, visibility = true) {
     chat.mainwindow.lock();
     this.ui.id = 'msg-pinned';
     this.ui.classList.toggle('msg-pinned', true);
+    this.toggleVisibility(visibility);
     this.ui.querySelector('span.features').classList.toggle('hidden', true);
     chat.mainwindow.unlock();
 
@@ -75,9 +85,9 @@ export default class PinnedMessage extends ChatUserMessage {
       unpinMessageIcon.classList.add('btn-icon');
       unpinMessage.append(unpinMessageIcon);
 
-      unpinMessage.setAttribute('id', 'unpin-btn');
+      unpinMessage.id = 'unpin-btn';
       unpinMessage.classList.add('chat-tool-btn');
-      unpinMessage.setAttribute('title', 'Unpin Message');
+      unpinMessage.title = 'Unpin Message';
 
       unpinMessage.addEventListener('click', () => {
         chat.cmdUNPIN();
@@ -86,17 +96,33 @@ export default class PinnedMessage extends ChatUserMessage {
       this.ui.prepend(unpinMessage);
     }
 
+    const showPin = document.createElement('div');
+    const showPinIcon = document.createElement('i');
+    showPinIcon.classList.add('btn-icon');
+    showPin.append(showPinIcon);
+
+    showPin.id = 'chat-pinned-show-btn';
+    showPin.classList.toggle('active', !visibility);
+    showPin.title = 'Show Pinned Message';
+
+    showPin.addEventListener('click', () => {
+      showPin.classList.toggle('active', false);
+      this.toggleVisibility(true);
+    });
+
     const closePin = document.createElement('a');
     const closePinIcon = document.createElement('i');
     closePinIcon.classList.add('btn-icon');
     closePin.append(closePinIcon);
 
-    closePin.setAttribute('id', 'close-pin-btn');
+    closePin.id = 'close-pin-btn';
     closePin.classList.add('chat-tool-btn');
-    closePin.setAttribute('title', 'Close Pinned Message');
+    closePin.title = 'Close Pinned Message';
 
     closePin.addEventListener('click', () => {
-      chat.pinnedMessage = this.unpin();
+      dismissPin(this.uuid);
+      showPin.classList.toggle('active', true);
+      this.toggleVisibility(false);
     });
 
     this.ui.prepend(closePin);
@@ -104,6 +130,7 @@ export default class PinnedMessage extends ChatUserMessage {
     const pinnedFrame = document.getElementById('chat-pinned-frame');
     pinnedFrame.classList.toggle('active', true);
     pinnedFrame.prepend(this.ui);
+    pinnedFrame.prepend(showPin);
 
     return this;
   }
