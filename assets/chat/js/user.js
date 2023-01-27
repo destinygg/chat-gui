@@ -5,7 +5,7 @@ class ChatUser {
     if (typeof args === 'string') {
       this.nick = args;
       this.username = args;
-      this.createdDate = args;
+      this.createdDate = '';
       this.features = [];
     } else {
       this.nick = args.nick || '';

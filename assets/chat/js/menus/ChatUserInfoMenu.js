@@ -270,7 +270,9 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
   }
 
   buildCreatedDate(nick) {
-    const user = this.chat.users.get(nick.toLowerCase());
+    const user =
+      this.chat.users.get(nick.toLowerCase()) ??
+      new ChatUser(nick.toLowerCase());
     if (user.createdDate === '') {
       return '';
     }
@@ -284,7 +286,7 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
   }
 
   buildFeatures(nick, messageFeatures) {
-    const user = this.chat.users.get(nick);
+    const user = this.chat.users.get(nick) ?? new ChatUser(nick);
     const messageFeaturesArray = messageFeatures
       .split(' ')
       .filter((e) => e !== 'user' && e !== 'subscriber');
