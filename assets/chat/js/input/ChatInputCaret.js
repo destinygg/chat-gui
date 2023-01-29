@@ -20,26 +20,28 @@ export default class ChatInputCaret {
     return caretOffset;
   }
 
-  set(startIndex, nodes) {
+  set(startIndex) {
     if (startIndex >= 0) {
       if (this.input.ui[0].childNodes.length > 0) {
         const range = new Range();
         const selection = window.getSelection();
 
-        const { nodeIndex, offset } = this.getNodeIndex(
-          startIndex,
-          [...nodes].map((node) => node.value)
+        const parent = this.getNodeIndex(startIndex);
+
+        const { node, offset } = this.getTextNode(
+          this.input.ui[0].childNodes[parent.nodeIndex],
+          parent.offset
         );
 
-        const node = this.getTextNode(this.input.ui[0].childNodes[nodeIndex]);
+        if (node) {
+          range.setStart(node, offset);
+          range.collapse(true);
 
-        range.setStart(node, offset);
-        range.collapse(true);
+          selection.removeAllRanges();
+          selection.addRange(range);
 
-        selection.removeAllRanges();
-        selection.addRange(range);
-
-        this.stored = startIndex;
+          this.stored = startIndex;
+        }
       }
     }
   }
@@ -61,7 +63,7 @@ export default class ChatInputCaret {
     this.get();
   }
 
-  getNodeIndex(index, nodes) {
+  getNodeIndex(index, nodes = [...this.input.nodes].map((node) => node.value)) {
     let previousLen = 0;
     let len = 0;
     for (let n = 0; n < nodes.length; n++) {
@@ -77,11 +79,23 @@ export default class ChatInputCaret {
     return { nodeIndex: 0, offset: 0 };
   }
 
-  getTextNode(node) {
-    if (!node) return null;
-    if (node.nodeName === '#text') return node;
-    if (node.childNodes.length > 0) return this.getTextNode(node.childNodes[0]);
-    return null;
+  getTextNode(node, index = 0) {
+    if (!node) return { node: null, offset: index };
+    if (node.nodeName === '#text') return { node, offset: index };
+    if (node.childNodes.length === 0) return { node: null, offset: index };
+    if (node.childNodes.length === 1)
+      return this.getTextNode(node.childNodes[0], index);
+    if (node.childNodes.length > 1) {
+      const { nodeIndex, offset } = this.getNodeIndex(
+        index,
+        [...node.childNodes].map((n) =>
+          n.nodeValue ? n.nodeValue : n.innerText
+        )
+      );
+      return this.getTextNode(node.childNodes[nodeIndex], offset);
+    }
+
+    return { node: null, offset: index };
   }
 
   getParent(node, n = 0) {

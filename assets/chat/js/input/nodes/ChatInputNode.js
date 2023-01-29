@@ -64,8 +64,7 @@ export default class ChatInputNode {
       const html = this.value
         .replace(/</gm, '&lt;')
         .replace(/>/gm, '&gt;')
-        .replace(/\s/gm, '&nbsp;')
-        .replace(/(&nbsp;)(?!&nbsp;|$)/gm, ' ');
+        .replace(/\s/gm, '&nbsp;');
 
       this.element.html(html);
     }

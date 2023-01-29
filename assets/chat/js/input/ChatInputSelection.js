@@ -85,14 +85,8 @@ export default class ChatInputSelection {
         selection.focusOffset
       );
 
-      const anchor = this.input.caret.getNodeIndex(
-        anchorIndex,
-        [...this.input.nodes].map((node) => node.value)
-      );
-      const focus = this.input.caret.getNodeIndex(
-        focusIndex,
-        [...this.input.nodes].map((node) => node.value)
-      );
+      const anchor = this.input.caret.getNodeIndex(anchorIndex);
+      const focus = this.input.caret.getNodeIndex(focusIndex);
 
       this.setDirection(anchor, focus);
 
@@ -176,12 +170,61 @@ export default class ChatInputSelection {
   set(selection) {
     if (selection) {
       const range = new Range();
-      const sel = window.getSelection();
       range.setStart(selection.start.node, selection.start.offset);
       range.setEnd(selection.end.node, selection.end.offset);
-      sel.removeAllRanges();
-      sel.addRange(range);
+      window.getSelection().removeAllRanges();
+      window.getSelection().addRange(range);
     }
+    this.update();
+  }
+
+  // FIX: Selection on the left side not working.
+  // Cannot set end to be less than start.
+
+  modify(selection, modify) {
+    // console.log('modify', modify);
+    // console.log(selection.start, selection.end);
+
+    const parent = this.input.caret.getParent(selection.end.node);
+    if (selection.end.offset + modify > selection.end.node.length) {
+      if (parent.nextSibling) {
+        const offset =
+          selection.end.offset + modify - selection.end.node.length;
+        selection.end.node = this.input.caret.getTextNode(parent.nextSibling);
+        selection.end.offset = offset;
+      }
+    } else if (selection.end.offset + modify < 0) {
+      if (parent.previousSibling) {
+        const offset = 0 - (selection.end.offset + modify);
+        selection.end.node = this.input.caret.getTextNode(
+          parent.previousSibling
+        );
+        selection.end.offset = selection.end.node.length - offset;
+      }
+    } else {
+      selection.end.offset += modify;
+    }
+    // console.log(selection.start, selection.end);
+    // console.log('----------------------');
+    this.set(selection);
+  }
+
+  extend(sel, left, length, caret) {
+    let selection = sel;
+
+    if (!selection) {
+      const { nodeIndex, offset } = this.input.caret.getNodeIndex(caret);
+      const caretTextNode = this.input.caret.getTextNode(
+        this.input.ui[0].childNodes[nodeIndex]
+      );
+
+      selection = {
+        start: { node: caretTextNode, offset },
+        end: { node: caretTextNode, offset },
+      };
+    }
+
+    this.modify(selection, left ? -length : length);
   }
 
   copy() {
@@ -191,6 +234,4 @@ export default class ChatInputSelection {
   hasSelection() {
     return this.text.length > 0;
   }
-
-  // extend(direction, length) {}
 }

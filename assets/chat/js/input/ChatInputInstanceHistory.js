@@ -10,17 +10,15 @@ class ChatInputInstanceHistory {
   undo() {
     if (this.index - 1 >= 0) {
       this.index -= 1;
-      return true;
+      this.load();
     }
-    return false;
   }
 
   redo() {
     if (this.index + 1 <= this.history.length - 1) {
       this.index += 1;
-      return true;
+      this.load();
     }
-    return false;
   }
 
   set(nodes, value, html, caret, selection) {
