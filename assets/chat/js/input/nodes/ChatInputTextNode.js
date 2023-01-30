@@ -6,6 +6,8 @@ export default class ChatInputTextNode extends ChatInputNode {
   }
 
   render() {
+    this.element.attr('data-value', this.value);
+
     const array = this.value
       .replace(/</gm, '&lt;')
       .replace(/>/gm, '&gt;')
@@ -22,9 +24,7 @@ export default class ChatInputTextNode extends ChatInputNode {
       }
     }
 
-    let newNodes = 0;
-    [...array].forEach((html, i) => {
-      const index = i + newNodes;
+    [...array].forEach((html, index) => {
       const el = this.element.children().eq(index);
       if (el.length === 0) {
         if (index === 0) {
@@ -35,7 +35,6 @@ export default class ChatInputTextNode extends ChatInputNode {
             .eq(index - 1)
             .after(html);
         }
-        newNodes += 1;
       } else if (el[0].outerHTML !== html) {
         el[0].outerHTML = html;
       }

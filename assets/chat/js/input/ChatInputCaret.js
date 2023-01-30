@@ -23,17 +23,16 @@ export default class ChatInputCaret {
   set(startIndex) {
     if (startIndex >= 0) {
       if (this.input.ui[0].childNodes.length > 0) {
-        const range = new Range();
-        const selection = window.getSelection();
-
         const parent = this.getNodeIndex(startIndex);
-
         const { node, offset } = this.getTextNode(
           this.input.ui[0].childNodes[parent.nodeIndex],
           parent.offset
         );
 
         if (node) {
+          const range = new Range();
+          const selection = window.getSelection();
+
           range.setStart(node, offset);
           range.collapse(true);
 
@@ -46,13 +45,19 @@ export default class ChatInputCaret {
     }
   }
 
+  getLastNode(node) {
+    if (!node) return null;
+    if (node.childNodes.length === 0) return node;
+    return this.getLastNode(node.childNodes[node.childNodes.length - 1]);
+  }
+
   setEnd() {
     const range = new Range();
     const selection = window.getSelection();
 
-    const lastNode =
-      this.input.ui[0].childNodes[this.input.ui[0].childNodes.length - 1];
-    const node = this.getTextNode(lastNode);
+    const node = this.getLastNode(
+      this.input.ui[0].childNodes[this.input.ui[0].childNodes.length - 1]
+    );
 
     range.setStart(node, node.length);
     range.collapse(true);
@@ -113,9 +118,26 @@ export default class ChatInputCaret {
       i < (nodeIndex >= 0 ? nodeIndex : childNodes.indexOf(node));
       i++
     ) {
-      index += this.getTextNode(childNodes[i]).length;
+      const len = this.totalLength(childNodes[i]);
+      index += len;
     }
     return index;
+  }
+
+  totalLength(node) {
+    if (!node) return 0;
+
+    let len = 0;
+    for (let i = 0; i < node.childNodes.length; i++) {
+      if (node.childNodes[i].nodeName === '#text') {
+        len += node.childNodes[i].length;
+      }
+      if (node.childNodes[i].childNodes.length > 0) {
+        len += this.totalLength(node.childNodes[i]);
+      }
+    }
+
+    return len;
   }
 
   isAtStart() {

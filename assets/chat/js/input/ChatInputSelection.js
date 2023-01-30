@@ -7,14 +7,7 @@ export default class ChatInputSelection {
   }
 
   removeAll() {
-    if (
-      this.nodes[0].nodeIndex === 0 &&
-      this.nodes[0].offset === 0 &&
-      this.nodes[this.nodes.length - 1].nodeIndex ===
-        this.input.nodes.length - 1 &&
-      this.nodes[this.nodes.length - 1].offset ===
-        this.input.nodes[this.input.nodes.length - 1].value.length
-    ) {
+    if (this.text === this.input.value) {
       this.text = '';
       this.nodes = [];
       this.input.val('');
@@ -175,7 +168,6 @@ export default class ChatInputSelection {
       window.getSelection().removeAllRanges();
       window.getSelection().addRange(range);
     }
-    this.update();
   }
 
   // FIX: Selection on the left side not working.
@@ -190,7 +182,9 @@ export default class ChatInputSelection {
       if (parent.nextSibling) {
         const offset =
           selection.end.offset + modify - selection.end.node.length;
-        selection.end.node = this.input.caret.getTextNode(parent.nextSibling);
+        selection.end.node = this.input.caret.getTextNode(
+          parent.nextSibling
+        ).node;
         selection.end.offset = offset;
       }
     } else if (selection.end.offset + modify < 0) {
@@ -198,7 +192,7 @@ export default class ChatInputSelection {
         const offset = 0 - (selection.end.offset + modify);
         selection.end.node = this.input.caret.getTextNode(
           parent.previousSibling
-        );
+        ).node;
         selection.end.offset = selection.end.node.length - offset;
       }
     } else {
@@ -207,6 +201,7 @@ export default class ChatInputSelection {
     // console.log(selection.start, selection.end);
     // console.log('----------------------');
     this.set(selection);
+    this.update();
   }
 
   extend(sel, left, length, caret) {
@@ -216,7 +211,7 @@ export default class ChatInputSelection {
       const { nodeIndex, offset } = this.input.caret.getNodeIndex(caret);
       const caretTextNode = this.input.caret.getTextNode(
         this.input.ui[0].childNodes[nodeIndex]
-      );
+      ).node;
 
       selection = {
         start: { node: caretTextNode, offset },
