@@ -6,8 +6,6 @@ export default class ChatInputTextNode extends ChatInputNode {
   }
 
   render() {
-    this.element.attr('data-value', this.value);
-
     const array = this.value
       .replace(/</gm, '&lt;')
       .replace(/>/gm, '&gt;')

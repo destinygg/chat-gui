@@ -177,8 +177,16 @@ export default class ChatInputSelection {
     // console.log('modify', modify);
     // console.log(selection.start, selection.end);
 
-    const parent = this.input.caret.getParent(selection.end.node);
+    const rawParent = this.input.caret.getParent(selection.end.node);
+    let parent = rawParent;
     if (selection.end.offset + modify > selection.end.node.length) {
+      if (
+        rawParent.attributes['data-type'].value === 'text' &&
+        selection.end.node.parentElement.nextSibling
+      ) {
+        parent = selection.end.node.parentElement;
+      }
+
       if (parent.nextSibling) {
         const offset =
           selection.end.offset + modify - selection.end.node.length;
@@ -188,12 +196,21 @@ export default class ChatInputSelection {
         selection.end.offset = offset;
       }
     } else if (selection.end.offset + modify < 0) {
+      if (
+        rawParent.attributes['data-type'].value === 'text' &&
+        selection.end.node.parentElement.previousSibling
+      ) {
+        parent = selection.end.node.parentElement;
+      }
+
       if (parent.previousSibling) {
-        const offset = 0 - (selection.end.offset + modify);
-        selection.end.node = this.input.caret.getTextNode(
-          parent.previousSibling
-        ).node;
-        selection.end.offset = selection.end.node.length - offset;
+        const { node, offset } = this.input.caret.getTextNode(
+          parent.previousSibling,
+          this.input.caret.totalLength(parent.previousSibling) -
+            (0 - (selection.end.offset + modify))
+        );
+        selection.end.node = node;
+        selection.end.offset = offset;
       }
     } else {
       selection.end.offset += modify;
