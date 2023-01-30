@@ -15,6 +15,8 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
 
     this.createdDateSubheader = this.ui.find('.user-info h5.date-subheader')[0];
 
+    this.tagSubheader = this.ui.find('.user-info h5.tag-subheader')[0];
+
     this.flairList = this.ui.find('.user-info .flairs');
     this.flairSubheader = this.ui.find('.user-info h5.flairs-subheader')[0];
 
@@ -220,6 +222,7 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
 
     const prettyNick = message.find('.user')[0].innerText;
     const nick = message.data('username');
+    const tagNote = this.chat.taggednotes.get(nick);
     const usernameFeatures = message.find('.user')[0].classList.value;
 
     const formattedDate = this.buildCreatedDate(nick);
@@ -231,6 +234,14 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     } else {
       this.createdDateSubheader.style.display = '';
       this.createdDateSubheader.replaceChildren('Joined on ', formattedDate);
+    }
+
+    if (tagNote) {
+      this.tagSubheader.style.display = '';
+      this.tagSubheader.replaceChildren('Tag: ', tagNote);
+    } else {
+      this.tagSubheader.style.display = 'none';
+      this.tagSubheader.replaceChildren();
     }
 
     const featuresList = this.buildFeatures(nick, usernameFeatures);
