@@ -1739,10 +1739,29 @@ body.pref-fontscale[data-fontscale='10'] {
     margin: 4px;
     color: $text-color;
     .poll-header {
-      display: flex;
-      margin: 0.5em 0.1em 0.75em 0.1em;
+      display: inline-block;
+      width: 100%;
+      margin: 0.25em 0.1em 0.75em 0.1em;
       .poll-question {
         font-weight: 700;
+      }
+      .poll-close {
+        width: 1em;
+        height: 1em;
+        opacity: 0.5;
+        font-size: 1.2em;
+        float: right;
+        background: transparent url('../img/icon-close.svg') no-repeat center
+          center;
+        background-size: contain;
+        cursor: pointer;
+        &:hover {
+          opacity: 1;
+        }
+      }
+      .poll-title {
+        display: block;
+        opacity: 0.5;
       }
     }
   }
@@ -1842,20 +1861,6 @@ body.pref-fontscale[data-fontscale='10'] {
     .opt.opt-marked .opt-info {
       background-color: $color-darkred;
       color: $text-color;
-    }
-  }
-  .poll-close {
-    width: 1em;
-    height: 1em;
-    opacity: 0.5;
-    font-size: 1.2em;
-    margin-left: auto;
-    display: inline-block;
-    background: transparent url('../img/icon-close.svg') no-repeat center center;
-    background-size: contain;
-    cursor: pointer;
-    &:hover {
-      opacity: 1;
     }
   }
 }

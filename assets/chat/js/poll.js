@@ -60,6 +60,7 @@ class ChatPoll {
   constructor(chat) {
     this.chat = chat;
     this.ui = this.chat.ui.find('#chat-poll-frame');
+    this.ui.title = this.ui.find('.poll-title');
     this.ui.question = this.ui.find('.poll-question');
     this.ui.options = this.ui.find('.poll-options');
     this.ui.timer = this.ui.find('.poll-timer-inner');
@@ -193,6 +194,11 @@ class ChatPoll {
     };
 
     this.reset();
+    this.ui.title.text(
+      `${
+        this.poll.type === PollType.Weighted ? 'Sub-weighted poll' : 'Poll'
+      } started by ${this.poll.user}`
+    );
     this.ui.question.text(this.poll.question);
     this.ui.options.html(
       this.poll.options
