@@ -56,77 +56,59 @@ export default class ChatInputSelection {
     this.nodes = [];
     this.text = window.getSelection().toString();
     if (window.getSelection().toString().length > 0) {
-      this.all = this.text === this.input.value;
-
       const selection = window.getSelection();
-
       const parentAnchor = this.input.caret.getParent(selection.anchorNode);
       const parentFocus = this.input.caret.getParent(selection.focusNode);
-      if (!parentAnchor && !parentFocus) {
+      if (parentAnchor && parentFocus) {
+        const anchorIndex = this.input.caret.getRawIndex(
+          selection.anchorNode,
+          selection.anchorOffset
+        );
+
+        const focusIndex = this.input.caret.getRawIndex(
+          selection.focusNode,
+          selection.focusOffset
+        );
+
+        const anchor = this.input.caret.getNodeIndex(anchorIndex);
+        const focus = this.input.caret.getNodeIndex(focusIndex);
+
+        this.setDirection(anchor, focus);
+
+        let middleNodes = [];
+        const middle = this.left
+          ? anchor.nodeIndex - focus.nodeIndex - 1
+          : focus.nodeIndex - anchor.nodeIndex - 1;
+
+        if (middle > 0) {
+          const offset = (this.left ? focus.nodeIndex : anchor.nodeIndex) + 1;
+          middleNodes = [...Array(middle).keys()].map((v) => v + offset);
+        }
+
+        if (
+          anchor.nodeIndex > focus.nodeIndex ||
+          (anchor.nodeIndex === focus.nodeIndex && anchor.offset > focus.offset)
+        ) {
+          this.nodes = [focus, ...middleNodes, anchor];
+        } else {
+          this.nodes = [anchor, ...middleNodes, focus];
+        }
+
+        this.nodes.forEach((node) => {
+          const index = node.nodeIndex !== undefined ? node.nodeIndex : node;
+          if (this.input.nodes[index].isEmote()) {
+            this.input.nodes[index].highlight = true;
+          }
+        });
+      } else {
         this.text = '';
         this.nodes = [];
-        return;
       }
-
-      const anchorIndex = this.input.caret.getRawIndex(
-        parentAnchor,
-        selection.anchorOffset
-      );
-
-      const focusIndex = this.input.caret.getRawIndex(
-        parentFocus,
-        selection.focusOffset
-      );
-
-      const anchor = this.input.caret.getNodeIndex(anchorIndex);
-      const focus = this.input.caret.getNodeIndex(focusIndex);
-
-      this.setDirection(anchor, focus);
-
-      let middleNodes = [];
-      const middle = this.left
-        ? anchor.nodeIndex - focus.nodeIndex - 1
-        : focus.nodeIndex - anchor.nodeIndex - 1;
-
-      if (middle > 0) {
-        const offset = (this.left ? focus.nodeIndex : anchor.nodeIndex) + 1;
-        middleNodes = [...Array(middle).keys()].map((v) => v + offset);
-      }
-
-      const anchorEmote = this.input.nodes[anchor.nodeIndex].isEmote();
-      const focusEmote = this.input.nodes[focus.nodeIndex].isEmote();
-      if (anchorEmote || focusEmote) {
-        if (anchorEmote) anchor.offset = 0;
-        if (focusEmote)
-          focus.offset = this.input.nodes[focus.nodeIndex].value.length;
-
-        // update selection
-        this.set({
-          start: { node: selection.anchorNode, offset: anchor.offset },
-          end: { node: selection.focusNode, offset: focus.offset },
-        });
-      }
-
-      if (
-        anchor.nodeIndex > focus.nodeIndex ||
-        (anchor.nodeIndex === focus.nodeIndex && anchor.offset > focus.offset)
-      ) {
-        this.nodes = [focus, ...middleNodes, anchor];
-      } else {
-        this.nodes = [anchor, ...middleNodes, focus];
-      }
-
-      this.nodes.forEach((node) => {
-        const index = node.nodeIndex !== undefined ? node.nodeIndex : node;
-        if (this.input.nodes[index].isEmote()) {
-          this.input.nodes[index].highlight = true;
-        }
-      });
     } else {
       this.input.nodes
-        .filter((node) => node.isEmote())
-        .forEach((node) => {
-          node.highlight = false;
+        .filter((n) => n.isEmote())
+        .forEach((n) => {
+          n.highlight = false;
         });
     }
   }
@@ -160,6 +142,38 @@ export default class ChatInputSelection {
     };
   }
 
+  // modify(left, ctrl) {
+
+  // TODO: IF ENDS IS EMOTE SELECT WHOLE THING.
+
+  // select whole emote text
+  // const anchorEmote = this.input.nodes[anchor.nodeIndex].isEmote();
+  // const focusEmote = this.input.nodes[focus.nodeIndex].isEmote();
+  // if (anchorEmote || focusEmote) {
+  //   if (anchorEmote) anchor.offset = 0;
+  //   if (focusEmote) focus.offset = selection.focusNode.length;
+
+  //   const anchorText = this.input.caret.getTextNode(
+  //     this.input.ui[0].childNodes[anchor.nodeIndex],
+  //     anchor.offset
+  //   );
+
+  //   const focusText = this.input.caret.getTextNode(
+  //     this.input.ui[0].childNodes[focus.nodeIndex],
+  //     focus.offset
+  //   );
+
+  // update selection
+  // this.set({
+  //   start: { node: anchorText.node, offset: anchorText.offset },
+  //   end: { node: focusText.node, offset: focusText.offset },
+  // });
+
+  // this.text = window.getSelection().toString();
+  // }
+
+  // }
+
   set(selection) {
     if (selection) {
       const range = new Range();
@@ -168,75 +182,6 @@ export default class ChatInputSelection {
       window.getSelection().removeAllRanges();
       window.getSelection().addRange(range);
     }
-  }
-
-  // FIX: Selection on the left side not working.
-  // Cannot set end to be less than start.
-
-  modify(selection, modify) {
-    // console.log('modify', modify);
-    // console.log(selection.start, selection.end);
-
-    const rawParent = this.input.caret.getParent(selection.end.node);
-    let parent = rawParent;
-    if (selection.end.offset + modify > selection.end.node.length) {
-      if (
-        rawParent.attributes['data-type'].value === 'text' &&
-        selection.end.node.parentElement.nextSibling
-      ) {
-        parent = selection.end.node.parentElement;
-      }
-
-      if (parent.nextSibling) {
-        const offset =
-          selection.end.offset + modify - selection.end.node.length;
-        selection.end.node = this.input.caret.getTextNode(
-          parent.nextSibling
-        ).node;
-        selection.end.offset = offset;
-      }
-    } else if (selection.end.offset + modify < 0) {
-      if (
-        rawParent.attributes['data-type'].value === 'text' &&
-        selection.end.node.parentElement.previousSibling
-      ) {
-        parent = selection.end.node.parentElement;
-      }
-
-      if (parent.previousSibling) {
-        const { node, offset } = this.input.caret.getTextNode(
-          parent.previousSibling,
-          this.input.caret.totalLength(parent.previousSibling) -
-            (0 - (selection.end.offset + modify))
-        );
-        selection.end.node = node;
-        selection.end.offset = offset;
-      }
-    } else {
-      selection.end.offset += modify;
-    }
-    // console.log(selection.start, selection.end);
-    // console.log('----------------------');
-    this.set(selection);
-    this.update();
-  }
-
-  extend(sel, left, length, caret) {
-    let selection = sel;
-
-    if (!selection) {
-      const { nodeIndex, offset } = this.input.caret.getNodeIndex(caret);
-      const caretTextNode = this.input.caret.getTextNode(
-        this.input.ui[0].childNodes[nodeIndex]
-      ).node;
-
-      selection = {
-        start: { node: caretTextNode, offset },
-        end: { node: caretTextNode, offset },
-      };
-    }
-
-    this.modify(selection, left ? -length : length);
   }
 
   copy() {

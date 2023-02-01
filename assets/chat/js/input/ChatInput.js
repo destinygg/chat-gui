@@ -88,22 +88,47 @@ export default class ChatInput {
       const right = isKeyCode(e, KEYCODES.RIGHT);
       if (left || right) {
         e.preventDefault();
-        this.selection.update();
         const caret = this.caret.get();
-        const selection = this.selection.get();
         if ((left && caret > 0) || (right && caret < this.value.length)) {
-          const { nodeIndex } = this.caret.getNodeIndex(
-            caret + (left ? -1 : 1)
-          );
-          if (this.nodes[nodeIndex].isEmote()) {
-            const len = this.nodes[nodeIndex].value.length + 1;
-            this.caret.set(caret + (left ? -len : len));
-          } else {
-            this.caret.set(caret + (left ? -1 : 1));
-          }
+          if (e.shiftKey) {
+            const selection = window.getSelection();
+            const direction = left ? 'backward' : 'forward';
+            let granularity = e.ctrlKey ? 'word' : 'character';
 
-          // TODO: ctrl + arrow (word selection);
-          if (e.shiftKey) this.selection.extend(selection, left, 1, caret);
+            // select whole emote
+            if (!e.ctrlKey) {
+              let type = null;
+              if (
+                direction === 'forward' &&
+                selection.focusNode.length === selection.focusOffset
+              ) {
+                type = 'getNextNode';
+              } else if (
+                direction === 'backward' &&
+                selection.focusOffset === 1
+              ) {
+                type = 'getPreviousNode';
+              }
+              if (type !== null) {
+                const node = this.caret[type](selection.focusNode);
+                const parent = this.caret.getParent(node);
+                if (parent.dataset.type === 'emote') granularity = 'word';
+              }
+            }
+
+            window.getSelection().modify('extend', direction, granularity);
+            this.selection.update();
+          } else {
+            const { nodeIndex } = this.caret.getNodeIndex(
+              caret + (left ? -1 : 1)
+            );
+            if (this.nodes[nodeIndex].isEmote()) {
+              const len = this.nodes[nodeIndex].value.length + 1;
+              this.caret.set(caret + (left ? -len : len));
+            } else {
+              this.caret.set(caret + (left ? -1 : 1));
+            }
+          }
         }
       }
 

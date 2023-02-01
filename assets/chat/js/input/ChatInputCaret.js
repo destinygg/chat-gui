@@ -45,12 +45,6 @@ export default class ChatInputCaret {
     }
   }
 
-  getLastNode(node) {
-    if (!node) return null;
-    if (node.childNodes.length === 0) return node;
-    return this.getLastNode(node.childNodes[node.childNodes.length - 1]);
-  }
-
   setEnd() {
     const range = new Range();
     const selection = window.getSelection();
@@ -109,19 +103,59 @@ export default class ChatInputCaret {
     return this.getParent(node.parentElement, n + 1);
   }
 
-  getRawIndex(node, offset, nodeIndex = -1) {
-    const childNodes = [...this.input.ui[0].childNodes];
-    let index = offset;
+  getNextNode(node) {
+    if (node.nextSibling) return this.getTextNode(node.nextSibling).node;
+    if (node.parentElement.id === this.input.ui[0].id) return null;
+    return this.getNextNode(node.parentElement);
+  }
 
-    for (
-      let i = 0;
-      i < (nodeIndex >= 0 ? nodeIndex : childNodes.indexOf(node));
-      i++
-    ) {
-      const len = this.totalLength(childNodes[i]);
-      index += len;
+  getPreviousNode(node) {
+    if (node.previousSibling)
+      return this.getTextNode(
+        node.previousSibling,
+        this.totalLength(node.previousSibling)
+      ).node;
+    if (node.parentElement.id === this.input.ui[0].id) return null;
+    return this.getPreviousNode(node.parentElement);
+  }
+
+  getRawIndex(node, offset) {
+    if (this.input.ui[0].childNodes.length > 0) {
+      let index = offset;
+      let next = this.getFirstNode(this.input.ui[0].childNodes[0]);
+
+      while (next) {
+        if (next === node) return index;
+        index += next.length;
+        next = this.getNextNode(next);
+      }
     }
-    return index;
+    return null;
+
+    // const childNodes = [...this.input.ui[0].childNodes];
+    // let index = offset;
+
+    // for (
+    //   let i = 0;
+    //   i < (nodeIndex >= 0 ? nodeIndex : childNodes.indexOf(node));
+    //   i++
+    // ) {
+    //   const len = this.totalLength(childNodes[i]);
+    //   index += len;
+    // }
+    // return index;
+  }
+
+  getLastNode(node) {
+    if (!node) return null;
+    if (node.childNodes.length === 0) return node;
+    return this.getLastNode(node.childNodes[node.childNodes.length - 1]);
+  }
+
+  getFirstNode(node) {
+    if (!node) return null;
+    if (node.childNodes.length === 0) return node;
+    return this.getFirstNode(node.childNodes[0]);
   }
 
   totalLength(node) {

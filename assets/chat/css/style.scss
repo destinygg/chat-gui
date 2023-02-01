@@ -244,6 +244,7 @@ hr {
     color: $color-green-text;
   }
 
+  .chat-input-node-autocomplete.msg-chat,
   .chat-input-node-emote {
     display: inline;
     padding: 0 !important;

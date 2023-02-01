@@ -112,14 +112,19 @@ class ChatAutoComplete {
 
     this.position();
 
-    const { nodeIndex } = this.input.getCurrentNode();
+    const { nodeIndex, offset } = this.input.getCurrentNode();
 
     if (this.input.nodes[nodeIndex].isAutocomplete()) {
       this.input.nodes[nodeIndex].emote = this.results[index].isEmote;
       this.input.nodes[nodeIndex].value = value;
       this.input.nodes[nodeIndex].render();
 
-      const caretIndex = this.input.caret.getRawIndex(null, 0, nodeIndex);
+      const textNode = this.input.caret.getTextNode(
+        this.input.nodes[nodeIndex].element[0],
+        offset
+      ).node;
+
+      const caretIndex = this.input.caret.getRawIndex(textNode, 0);
 
       if (this.oldValue !== value) {
         this.input.value =
