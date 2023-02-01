@@ -44,11 +44,14 @@ export default class PinnedMessage extends ChatUserMessage {
 
   /**
    * Shows/hides the current message.
-   * @param {?boolean} state
+   * @param {boolean} state
    * @returns {null} null
    */
-  toggleVisibility(state = null) {
+  set visible(state) {
     this.ui.classList.toggle('hidden', !state);
+    document
+      .getElementById('chat-pinned-show-btn')
+      ?.classList.toggle('active', !state);
   }
 
   /**
@@ -75,7 +78,7 @@ export default class PinnedMessage extends ChatUserMessage {
     chat.mainwindow.lock();
     this.ui.id = 'msg-pinned';
     this.ui.classList.toggle('msg-pinned', true);
-    this.toggleVisibility(visibility);
+    this.visible = visibility;
     this.ui.querySelector('span.features').classList.toggle('hidden', true);
     chat.mainwindow.unlock();
 
@@ -106,8 +109,7 @@ export default class PinnedMessage extends ChatUserMessage {
     showPin.title = 'Show Pinned Message';
 
     showPin.addEventListener('click', () => {
-      showPin.classList.toggle('active', false);
-      this.toggleVisibility(true);
+      this.visible = true;
     });
 
     const closePin = document.createElement('a');
@@ -121,8 +123,7 @@ export default class PinnedMessage extends ChatUserMessage {
 
     closePin.addEventListener('click', () => {
       dismissPin(this.uuid);
-      showPin.classList.toggle('active', true);
-      this.toggleVisibility(false);
+      this.visible = false;
     });
 
     this.ui.prepend(closePin);
