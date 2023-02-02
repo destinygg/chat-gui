@@ -1798,39 +1798,32 @@ body.pref-fontscale[data-fontscale='10'] {
     }
   }
   .opt {
-    display: flex;
+    display: block;
     align-items: center;
-  }
-  .opt:first-child:nth-last-child(n + 10) .opt-info,
-  .opt:first-child:nth-last-child(n + 10) ~ .opt .opt-info {
-    min-width: 1.7em;
+    margin-bottom: $gutter-md;
+    background-color: $color-surface-dark3;
+    border-radius: 6px;
+    padding: 4px;
   }
   .opt-info {
-    text-align: right;
-    border-radius: 4px;
-    margin-right: 0.25em;
-    padding: 0 0.25em;
-  }
-  .opt-bar {
-    background-color: $color-surface-dark3;
-    overflow: hidden;
-    padding: 4px 4px 0 4px;
-    flex: 1;
+    display: flex;
+    .opt-vote-number {
+      height: fit-content;
+      text-align: right;
+      border-radius: 4px;
+      margin-right: 0.25em;
+      padding: 0 0.25em;
+    }
+    .opt-bar-option {
+      margin-bottom: $gutter-xs;
+      display: flex;
+      flex-grow: 1;
+    }
   }
   .opt:hover,
   .opt:active {
     cursor: pointer;
-  }
-  .opt:hover .opt-bar,
-  .opt:active .opt-bar {
     background-color: $color-surface-dark2;
-  }
-  .opt:first-child .opt-bar {
-    border-radius: 6px 6px 0 0;
-  }
-  .opt:last-child .opt-bar {
-    border-radius: 0 0 6px 6px;
-    padding: 4px;
   }
   .poll-footer {
     color: $text-color1;
@@ -1850,29 +1843,35 @@ body.pref-fontscale[data-fontscale='10'] {
       }
     }
   }
-  .opt-bar-inner {
-    display: flex;
-    min-height: 1.4em;
-    box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
-    transition: all 750ms;
-    background-color: $color-darkred;
-    border-radius: 4px;
+  .opt-bar {
+    flex: 1;
+    overflow: hidden;
     font-weight: 500;
     font-size: 0.85em;
     color: $text-color;
-    padding: 0 0.25em;
-    .opt-bar-value {
-      position: absolute;
-      right: $gutter-lg * 2;
+    background-color: $color-surface-dark2;
+    border-radius: 4px;
+    .opt-bar-inner {
+      padding: 0 0.25em;
+      min-height: 1.4em;
+      box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+      transition: all 750ms;
+      background-color: $color-darkred;
+      border-radius: 4px;
+      .opt-bar-value {
+        white-space: nowrap;
+        margin-right: $gutter-sm;
+        float: right;
+      }
     }
   }
-  .opt-marked .opt-info {
+  .opt-marked .opt-info .opt-vote-number {
     background-color: $color-darkred;
     color: $text-color;
   }
   &.poll-completed {
     .opt {
-      .opt-info {
+      .opt-info .opt-vote-number {
         color: $text-color2;
       }
       .opt-bar-inner {
@@ -1881,7 +1880,7 @@ body.pref-fontscale[data-fontscale='10'] {
       }
     }
     .opt.opt-winner {
-      .opt-info {
+      .opt-info .opt-vote-number {
         color: $text-color1;
       }
       .opt-bar-inner {
@@ -1890,7 +1889,7 @@ body.pref-fontscale[data-fontscale='10'] {
         color: $text-color;
       }
     }
-    .opt.opt-marked .opt-info {
+    .opt.opt-marked .opt-info .opt-vote-number {
       background-color: $color-darkred;
       color: $text-color;
     }

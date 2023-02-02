@@ -206,12 +206,14 @@ class ChatPoll {
           (option, i) => `
         <div class="opt" title="Vote ${option}">
           <div class="opt-info">
-            <strong>${i + 1}</strong>
+            <span class="opt-vote-number">
+              <strong>${i + 1}</strong>
+            </span>
+            <span class="opt-bar-option">${option}</span>
           </div>
           <div class="opt-bar">
             <div class="opt-bar-inner" style="width: 0;">
-              <span class="opt-bar-option">${option}</span>
-              <span class="opt-bar-value">0</span>
+              <span class="opt-bar-value"></span>
             </div>
           </div>
         </div>
