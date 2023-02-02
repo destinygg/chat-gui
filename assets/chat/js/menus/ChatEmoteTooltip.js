@@ -9,7 +9,7 @@ export default class ChatEmoteTooltip extends ChatMenuFloating {
     this.name = this.ui.find('.emote-info .name');
     this.creator = this.ui.find('.emote-info .creator');
 
-    this.chat.output.on('click', '.msg-chat .text .emote', (e) => {
+    this.chat.output.on('contextmenu', '.msg-chat .text .emote', (e) => {
       const emote = $(e.currentTarget).closest('.emote')[0].innerText;
 
       this.name.text(emote);
@@ -18,6 +18,7 @@ export default class ChatEmoteTooltip extends ChatMenuFloating {
 
       this.position(e);
       this.show();
+      return false;
     });
 
     this.emote.on('click', '.emote', (e) => {
