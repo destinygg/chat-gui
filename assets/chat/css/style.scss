@@ -554,6 +554,34 @@ hr {
   &.active {
     display: block;
   }
+
+  #chat-pinned-show-btn {
+    display: none;
+    width: 1.3em;
+    height: 1.3em;
+    cursor: pointer;
+    color: $color-chat-disabled;
+    position: absolute;
+    text-decoration: none;
+    right: 0;
+    margin-top: 2px;
+    margin-right: $gutter-md;
+    &.active {
+      display: block;
+    }
+    .btn-icon {
+      opacity: 0.25;
+      transition: opacity 150ms;
+      width: 100%;
+      height: 100%;
+      display: inline-block;
+      background: transparent url('../img/icon-pin.svg') no-repeat center center;
+      background-size: contain;
+    }
+    &:hover .btn-icon {
+      opacity: 1;
+    }
+  }
 }
 
 .msg-pinned {
@@ -599,6 +627,10 @@ hr {
   #unpin-btn .btn-icon {
     background: transparent url('../img/icon-unpin.svg') no-repeat center center;
     background-size: contain;
+  }
+
+  &.hidden {
+    display: none;
   }
 }
 

@@ -1338,8 +1338,6 @@ class Chat {
       return;
     }
 
-    if (checkIfPinWasDismissed(msg.uuid)) return;
-
     this.pinnedMessage?.unpin();
     const usr = this.users.get(msg.nick.toLowerCase()) ?? new ChatUser(msg);
     this.pinnedMessage = MessageBuilder.pinned(
@@ -1349,7 +1347,7 @@ class Chat {
       msg.uuid
     )
       .into(this)
-      .pin(this);
+      .pin(this, !checkIfPinWasDismissed(msg.uuid));
   }
 
   onQUIT(data) {
