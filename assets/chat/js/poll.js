@@ -197,7 +197,9 @@ class ChatPoll {
     this.ui.title.text(
       `${
         this.poll.type === PollType.Weighted ? 'Sub-weighted poll' : 'Poll'
-      } started by ${this.poll.user}`
+      } started by ${this.poll.user} for ${Math.floor(
+        this.poll.time / 1000
+      )} seconds.`
     );
     this.ui.question.text(this.poll.question);
     this.ui.options.html(
@@ -308,11 +310,7 @@ class ChatPoll {
           .children()
           .eq(i)
           .find('.opt-bar-value')
-          .text(
-            percent > 0
-              ? `(${this.poll.totals[i]}) ${Math.round(percent)}%`
-              : ''
-          );
+          .text(`${Math.round(percent)}% (${this.poll.totals[i]} votes)`);
       });
     }
   }

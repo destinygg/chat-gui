@@ -1782,11 +1782,13 @@ body.pref-fontscale[data-fontscale='10'] {
         height: 1em;
         opacity: 0.5;
         font-size: 1.2em;
-        float: right;
         background: transparent url('../img/icon-close.svg') no-repeat center
           center;
         background-size: contain;
         cursor: pointer;
+        position: absolute;
+        top: $gutter-lg;
+        right: $gutter-lg;
         &:hover {
           opacity: 1;
         }
@@ -1811,11 +1813,14 @@ body.pref-fontscale[data-fontscale='10'] {
       height: fit-content;
       text-align: right;
       border-radius: 4px;
-      margin-right: 0.25em;
       padding: 0 0.25em;
+      margin: 0 0.25em 0.25em 0;
     }
     .opt-bar-option {
-      margin-bottom: $gutter-xs;
+      font-weight: 500;
+      font-size: 0.85em;
+      color: $text-color;
+      margin: 0.1em 0em 0.25em 0;
       display: flex;
       flex-grow: 1;
     }
@@ -1846,9 +1851,6 @@ body.pref-fontscale[data-fontscale='10'] {
   .opt-bar {
     flex: 1;
     overflow: hidden;
-    font-weight: 500;
-    font-size: 0.85em;
-    color: $text-color;
     background-color: $color-surface-dark2;
     border-radius: 4px;
     .opt-bar-inner {
@@ -1859,9 +1861,13 @@ body.pref-fontscale[data-fontscale='10'] {
       background-color: $color-darkred;
       border-radius: 4px;
       .opt-bar-value {
+        font-weight: 500;
+        font-size: 0.85em;
+        color: $text-color;
         white-space: nowrap;
-        margin-right: $gutter-sm;
-        float: right;
+        position: absolute;
+        right: 0;
+        margin: 0.15em 2em 0 0;
       }
     }
   }
