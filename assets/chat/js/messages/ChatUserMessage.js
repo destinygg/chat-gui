@@ -22,9 +22,7 @@ export default class ChatUserMessage extends ChatMessage {
 
     if (this.id) attr['data-id'] = this.id;
     if (this.user && this.user.username) {
-      if (this.user.features && this.user.features.length > 0) {
-        classes.push(this.user.features.join(' '));
-      }
+      classes.push(...this.user.features);
       attr['data-username'] = this.user.username.toLowerCase();
     }
     if (this.mentioned && this.mentioned.length > 0)
