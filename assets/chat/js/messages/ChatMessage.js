@@ -66,7 +66,8 @@ export default class ChatMessage extends ChatUIMessage {
 
   buildTime() {
     const datetime = this.timestamp.format(DATE_FORMATS.FULL);
+    const unixtime = this.timestamp.valueOf();
     const label = this.timestamp.format(DATE_FORMATS.TIME);
-    return `<time class="time" title="${datetime}">${label}</time>`;
+    return `<time class="time" title="${datetime}" data-unixtimestamp="${unixtime}">${label}</time>`;
   }
 }
