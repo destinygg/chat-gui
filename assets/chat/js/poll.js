@@ -331,7 +331,7 @@ class ChatPoll {
   pollEndMessage(winner, winnerPercentage) {
     let message = `The poll has ended. Option ${winner} won!`;
     if (winnerPercentage > 0) {
-      message = `The poll has ended. Option ${winner} won with ${winnerPercentage}% of the vote.`;
+      message = `The poll has ended. Option ${winner} won with ${Math.floor(winnerPercentage)}% of the vote.`;
     }
 
     MessageBuilder.info(message).into(this.chat);
