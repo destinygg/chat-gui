@@ -24,6 +24,10 @@ class ChatScrollPlugin {
         },
       },
       {
+        overflow: {
+          x: 'hidden',
+          y: 'scroll',
+        },
         scrollbars: {
           theme: 'dgg-scroller-theme',
           autoHide: isTouchDevice ? 'never' : 'move',
