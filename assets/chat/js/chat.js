@@ -496,14 +496,14 @@ class Chat {
     this.control.on('M', (data) => this.cmdMENTIONS(data));
     this.control.on('STALK', (data) => this.cmdSTALK(data));
     this.control.on('S', (data) => this.cmdSTALK(data));
-    this.control.on('V', (data) => this.cmdVOTE(data, 'VOTE'));
+    this.control.on('V', (data) => this.cmdPOLL(data, 'POLL'));
     this.control.on('POLL', (data) => this.cmdPOLL(data, 'POLL'));
-    this.control.on('VOTE', (data) => this.cmdVOTE(data, 'VOTE'));
+    this.control.on('VOTE', (data) => this.cmdPOLL(data, 'POLL'));
     this.control.on('SPOLL', (data) => this.cmdPOLL(data, 'SPOLL'));
-    this.control.on('SVOTE', (data) => this.cmdVOTE(data, 'SVOTE'));
+    this.control.on('SVOTE', (data) => this.cmdPOLL(data, 'SPOLL'));
     this.control.on('POLLSTOP', (data) => this.cmdPOLLSTOP(data));
-    this.control.on('VOTESTOP', (data) => this.cmdVOTESTOP(data));
-    this.control.on('VS', (data) => this.cmdVOTESTOP(data));
+    this.control.on('VOTESTOP', (data) => this.cmdPOLLSTOP(data));
+    this.control.on('VS', (data) => this.cmdPOLLSTOP(data));
     this.control.on('PIN', (data) => this.cmdPIN(data));
     this.control.on('MOTD', (data) => this.cmdPIN(data));
     this.control.on('UNPIN', () => this.cmdUNPIN());
@@ -1338,8 +1338,6 @@ class Chat {
       return;
     }
 
-    if (checkIfPinWasDismissed(msg.uuid)) return;
-
     this.pinnedMessage?.unpin();
     const usr = this.users.get(msg.nick.toLowerCase()) ?? new ChatUser(msg);
     this.pinnedMessage = MessageBuilder.pinned(
@@ -1349,7 +1347,7 @@ class Chat {
       msg.uuid
     )
       .into(this)
-      .pin(this);
+      .pin(this, !checkIfPinWasDismissed(msg.uuid));
   }
 
   onQUIT(data) {
