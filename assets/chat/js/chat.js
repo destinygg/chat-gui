@@ -2201,8 +2201,12 @@ class Chat {
             break;
           case 'www.youtube.com':
           case 'youtube.com': {
-            const params = new URLSearchParams(match[7]);
-            location.href = `${noEmbedUrl}#youtube/${params.get('v')}`;
+            if (match[5] === '/live') {
+              location.href = `${noEmbedUrl}#youtube/${match[6]}`;
+            } else {
+              const params = new URLSearchParams(match[7]);
+              location.href = `${noEmbedUrl}#youtube/${params.get('v')}`;
+            }
             break;
           }
           case 'www.youtu.be':
@@ -2286,8 +2290,12 @@ class Chat {
             break;
           case 'www.youtube.com':
           case 'youtube.com': {
-            const params = new URLSearchParams(match[7]);
-            msg = `#youtube/${params.get('v')}`;
+            if (match[5] === '/live') {
+              msg = `#youtube/${match[6]}`;
+            } else {
+              const params = new URLSearchParams(match[7]);
+              msg = `#youtube/${params.get('v')}`;
+            }
             this.source.send('MSG', { data: `${msg} ${moreMsg}` });
             break;
           }
