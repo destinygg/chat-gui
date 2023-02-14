@@ -40,6 +40,6 @@ describe('Valid embeds', () => {
     ],
   ])('%s', (_, url, expectedHash) => {
     const formatter = new EmbedHashFormatter();
-    expect(formatter.format(url)).toBe(expectedHash);
+    expect(formatter.format(null, '', url)).toBe(expectedHash);
   });
 });

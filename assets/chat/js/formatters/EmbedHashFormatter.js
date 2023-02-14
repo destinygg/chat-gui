@@ -1,3 +1,5 @@
+import { MessageBuilder } from '../messages';
+
 export default class EmbedHashFormatter {
   constructor() {
     this.hasHttp = /^http[s]?:\/{0,2}/;
@@ -7,7 +9,7 @@ export default class EmbedHashFormatter {
     this.rumbleEmbedRegex = /^embed\/([a-z0-9]+)\/?$/;
   }
 
-  format(urlString) {
+  format(chat, invalidLinkMessage, urlString) {
     const url = new URL(
       urlString.match(this.hasHttp) ? urlString : `https://${urlString}`
     );
@@ -43,8 +45,16 @@ export default class EmbedHashFormatter {
         if (match) {
           return `#rumble/${match[1]}`;
         }
+        MessageBuilder.error(
+          'Rumble links have to be embed links - https://rumble.com/embed/<id>'
+        ).into(chat);
         return null;
+
       default:
+        MessageBuilder.error(`Invalid link - ${invalidLinkMessage}`).into(chat);
+        MessageBuilder.info(
+          'Valid links: Twitch Streams, Twitch VODs, Twitch Clips, Youtube Videos, Vimeo Videos, Rumble Videos.'
+        ).into(chat);
         return null;
     }
   }
