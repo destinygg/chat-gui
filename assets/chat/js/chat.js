@@ -2194,7 +2194,7 @@ class Chat {
             'Valid links: Twitch Streams, Twitch VODs, Twitch Clips, Youtube Videos, Rumble Videos.'
           ).into(this);
         } else {
-          MessageBuilder.error(error.message);
+          MessageBuilder.error(error.message).into(this);
         }
       }
     }
@@ -2235,7 +2235,7 @@ class Chat {
             'Valid links: Twitch Streams, Twitch VODs, Twitch Clips, Youtube Videos, Rumble Videos.'
           ).into(this);
         } else {
-          MessageBuilder.error(error.message);
+          MessageBuilder.error(error.message).into(this);
         }
       }
     }
