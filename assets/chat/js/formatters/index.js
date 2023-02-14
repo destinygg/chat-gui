@@ -7,3 +7,4 @@ export { default as EmbedUrlFormatter } from './EmbedUrlFormatter';
 export { default as BadWordsCensorshipFormatter } from './BadWordsCensorshipFormatter';
 export { default as AmazonAssociatesTagInjector } from './AmazonAssociatesTagInjector';
 export { default as SuspostFormatter } from './SuspostFormatter';
+export { default as EmbedHashFormatter } from './EmbedHashFormatter';
