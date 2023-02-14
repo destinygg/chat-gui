@@ -22,6 +22,7 @@ import {
   ChatSettingsMenu,
   ChatUserInfoMenu,
 } from './menus';
+import { EmbedHashFormatter } from './formatters';
 import ChatAutoComplete from './autocomplete';
 import ChatInputHistory from './history';
 import ChatUserFocus from './focus';
@@ -425,6 +426,8 @@ class Chat {
 
     // The websocket connection, emits events from the chat server
     this.source = new ChatSource();
+
+    this.embedhashformatter = new EmbedHashFormatter();
 
     this.source.on('REFRESH', () => window.location.reload(false));
     this.source.on('PING', (data) => this.source.send('PONG', data));
@@ -2163,8 +2166,6 @@ class Chat {
   cmdEMBED(parts) {
     const { location } = window.top || window.parent || window;
     const noEmbedUrl = location.href.split('#')[0];
-    const urlCheck =
-      /^((http[s]?|ftp):\/)?\/?([^:/\s]+)((\/\w+)*\/)([\w-.]+[^#?\s]+)(.*)?(#[\w-]+)?$/gm;
     if (!parts[0]) {
       MessageBuilder.error(
         'No argument provided - /embed <link> OR /e <link>'
@@ -2180,67 +2181,13 @@ class Chat {
         'Valid links: Twitch Streams, Twitch VODs, Twitch Clips, Youtube Videos, Vimeo Videos, Rumble Videos.'
       ).into(this);
     } else {
-      const matchedHost = parts[0].matchAll(urlCheck);
-      const match = [...matchedHost][0];
-      if (match) {
-        switch (match[3]) {
-          case 'www.twitch.tv':
-          case 'twitch.tv':
-            if (match[5] === '/videos') {
-              location.href = `${noEmbedUrl}#twitch-vod/${match[6]}`;
-            } else if (match[5] === '/clip') {
-              location.href = `${noEmbedUrl}#twitch-clip/${match[6]}`;
-            } else {
-              location.href = `${noEmbedUrl}#twitch/${match[6]}`;
-            }
-            break;
-          case 'clips.twitch.tv':
-            location.href = `${noEmbedUrl}#twitch-clip/${match[6]}`;
-            break;
-          case 'www.youtube.com':
-          case 'youtube.com': {
-            if (match[5] === '/live') {
-              location.href = `${noEmbedUrl}#youtube/${match[6]}`;
-            } else {
-              const params = new URLSearchParams(match[7]);
-              location.href = `${noEmbedUrl}#youtube/${params.get('v')}`;
-            }
-            break;
-          }
-          case 'www.youtu.be':
-          case 'youtu.be':
-            location.href = `${noEmbedUrl}#youtube/${match[6]}`;
-            break;
-          case 'www.vimeo.com':
-          case 'vimeo.com':
-            location.href = `${noEmbedUrl}#vimeo/${match[6]}`;
-            break;
-          case 'www.rumble.com':
-          case 'rumble.com':
-            if (match[5] === '/embed') {
-              location.href = `${noEmbedUrl}#rumble/${match[6].split('/')[0]}`;
-            } else {
-              MessageBuilder.error(
-                'Rumble links have to be embed links - https://rumble.com/embed/<id>'
-              ).into(this);
-            }
-            break;
-          default:
-            MessageBuilder.error(
-              'Invalid link - /embed <link> OR /e <link>'
-            ).into(this);
-            MessageBuilder.info(
-              'Valid links: Twitch Streams, Twitch VODs, Twitch Clips, Youtube Videos, Vimeo Videos, Rumble Videos.'
-            ).into(this);
-            break;
-        }
-      } else {
-        MessageBuilder.error('Invalid link - /embed <link> OR /e <link>').into(
-          this
-        );
-        MessageBuilder.info(
-          'Valid links: Twitch Streams, Twitch VODs, Twitch Clips, Youtube Videos, Vimeo Videos, Rumble Videos.'
-        ).into(this);
+      const hashLink = this.embedhashformatter.format(
+        this,
+        '/embed <link> OR /e <link>',
+        parts[0]
+      );
+      if (hashLink) {
+        location.href = `${noEmbedUrl}${hashLink}`;
       }
     }
   }
@@ -2248,8 +2195,6 @@ class Chat {
   cmdPOSTEMBED(parts) {
     const { location } = window.top || window.parent || window;
     const EmbedSplit = location.href.split('#');
-    const urlCheck =
-      /^((http[s]?|ftp):\/)?\/?([^:/\s]+)((\/\w+)*\/)([\w-.]+[^#?\s]+)(.*)?(#[\w-]+)?$/gm;
     if (!parts[0] && EmbedSplit[1]) {
       this.source.send('MSG', { data: `#${EmbedSplit[1]}` });
     } else if (!parts[0] && !EmbedSplit[1]) {
@@ -2260,85 +2205,23 @@ class Chat {
         'Valid links: Twitch Streams, Twitch VODs, Twitch Clips, Youtube Videos, Vimeo Videos, Rumble Videos.'
       ).into(this);
     } else {
-      const matchedHost = parts[0].matchAll(urlCheck);
-      const match = [...matchedHost][0];
-      let msg = '';
+      const hashLink = this.embedhashformatter.format(
+        this,
+        '/postembed OR /pe OR /postembed <link> [<message>] OR /pe <link> [<message>]',
+        parts[0]
+      );
       let moreMsg = '';
-      if (match) {
+      if (hashLink) {
         if (parts[1]) {
           parts.shift();
           moreMsg = parts.join(' ');
         }
-        switch (match[3]) {
-          case 'www.twitch.tv':
-          case 'twitch.tv':
-            if (match[5] === '/videos') {
-              msg = `#twitch-vod/${match[6]}`;
-            } else if (match[5] === '/clip') {
-              msg = `#twitch-clip/${match[6]}`;
-            } else {
-              msg = `#twitch/${match[6]}`;
-            }
-
-            this.source.send('MSG', { data: `${msg} ${moreMsg}` });
-            break;
-          case 'clips.twitch.tv':
-            msg = `#twitch-clip/${match[6]}`;
-            this.source.send('MSG', { data: `${msg} ${moreMsg}` });
-            break;
-          case 'www.youtube.com':
-          case 'youtube.com': {
-            if (match[5] === '/live') {
-              msg = `#youtube/${match[6]}`;
-            } else {
-              const params = new URLSearchParams(match[7]);
-              msg = `#youtube/${params.get('v')}`;
-            }
-            this.source.send('MSG', { data: `${msg} ${moreMsg}` });
-            break;
-          }
-          case 'www.youtu.be':
-          case 'youtu.be':
-            msg = `#youtube/${match[6]}`;
-            this.source.send('MSG', { data: `${msg} ${moreMsg}` });
-            break;
-          case 'www.vimeo.com':
-          case 'vimeo.com':
-            msg = `#vimeo/${match[6]}`;
-            this.source.send('MSG', { data: `${msg} ${moreMsg}` });
-            break;
-          case 'www.rumble.com':
-          case 'rumble.com':
-            if (match[5] === '/embed') {
-              msg = `#rumble/${match[6].split('/')[0]}`;
-              this.source.send('MSG', { data: `${msg} ${moreMsg}` });
-            } else {
-              MessageBuilder.error(
-                'Rumble links have to be embed links - https://rumble.com/embed/<id>'
-              ).into(this);
-            }
-            break;
-          default:
-            MessageBuilder.error(
-              'Invalid link - /postembed OR /pe OR /postembed <link> [<message>] OR /pe <link> [<message>]'
-            ).into(this);
-            MessageBuilder.info(
-              'Valid links: Twitch Streams, Twitch VODs, Twitch Clips, Youtube Videos, Vimeo Videos, Rumble Videos.'
-            ).into(this);
-            break;
-        }
-      } else if (!match && EmbedSplit[1]) {
+        this.source.send('MSG', { data: `${hashLink} ${moreMsg}` });
+      } else if (!hashLink && EmbedSplit[1]) {
         if (parts[0]) {
           moreMsg = parts.join(' ');
         }
         this.source.send('MSG', { data: `#${EmbedSplit[1]} ${moreMsg}` });
-      } else {
-        MessageBuilder.error(
-          'Invalid link - /postembed OR /pe OR /postembed <link> [<message>] OR /pe <link> [<message>]'
-        ).into(this);
-        MessageBuilder.info(
-          'Valid links: Twitch Streams, Twitch VODs, Twitch Clips, Youtube Videos, Vimeo Videos, Rumble Videos.'
-        ).into(this);
       }
     }
   }
