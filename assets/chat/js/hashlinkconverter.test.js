@@ -38,9 +38,9 @@ describe('Valid embeds', () => {
       'https://rumble.com/embed/v26pcdc/?pub=4',
       '#rumble/v26pcdc',
     ],
-  ])('%s', (_, url, expectedHash) => {
-    const hasher = new HashLinkConverter();
-    expect(hasher.convert(url)).toBe(expectedHash);
+  ])('%s', (_, url, expectedHashLink) => {
+    const hlc = new HashLinkConverter();
+    expect(hlc.convert(url)).toBe(expectedHashLink);
   });
 });
 
@@ -63,10 +63,15 @@ describe('Invalid embeds', () => {
       'https://www.yoütübe.com/watch?v=0EqSXDwTq6U',
       errors.invalidLink,
     ],
+    [
+      'Youtube link missing video id parameter',
+      'https://www.youtube.com/tZ_gn0E87Qo',
+      errors.invalidLink,
+    ],
   ])('%s', (_, url, expectedError) => {
-    const hasher = new HashLinkConverter();
+    const hlc = new HashLinkConverter();
     try {
-      hasher.convert(url);
+      hlc.convert(url);
       expect(true).toBe(false);
     } catch (error) {
       expect(error.message).toBe(expectedError);
