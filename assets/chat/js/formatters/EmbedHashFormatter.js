@@ -1,7 +1,8 @@
 import { MessageBuilder } from '../messages';
 
 export default class EmbedHashFormatter {
-  constructor() {
+  constructor(chat) {
+    this.chat = chat;
     this.hasHttp = /^http[s]?:\/{0,2}/;
     this.youtubeLiveRegex = /^live\/([a-zA-z0-9_]{11})$/;
     this.twitchClipRegex = /^[^/]+\/clip\/([a-zA-z0-9-]*)$/;
@@ -9,7 +10,7 @@ export default class EmbedHashFormatter {
     this.rumbleEmbedRegex = /^embed\/([a-z0-9]+)\/?$/;
   }
 
-  format(chat, invalidLinkMessage, urlString) {
+  format(invalidLinkMessage, urlString) {
     const url = new URL(
       urlString.match(this.hasHttp) ? urlString : `https://${urlString}`
     );
@@ -45,16 +46,23 @@ export default class EmbedHashFormatter {
         if (match) {
           return `#rumble/${match[1]}`;
         }
-        MessageBuilder.error(
-          'Rumble links have to be embed links - https://rumble.com/embed/<id>'
-        ).into(chat);
+        if (this.chat) {
+          MessageBuilder.error(
+            'Rumble links have to be embed links - https://rumble.com/embed/<id>'
+          ).into(this.chat);
+        }
+
         return null;
 
       default:
-        MessageBuilder.error(`Invalid link - ${invalidLinkMessage}`).into(chat);
-        MessageBuilder.info(
-          'Valid links: Twitch Streams, Twitch VODs, Twitch Clips, Youtube Videos, Vimeo Videos, Rumble Videos.'
-        ).into(chat);
+        if (this.chat) {
+          MessageBuilder.error(`Invalid link - ${invalidLinkMessage}`).into(
+            this.chat
+          );
+          MessageBuilder.info(
+            'Valid links: Twitch Streams, Twitch VODs, Twitch Clips, Youtube Videos, Vimeo Videos, Rumble Videos.'
+          ).into(this.chat);
+        }
         return null;
     }
   }

@@ -39,7 +39,26 @@ describe('Valid embeds', () => {
       '#rumble/v26pcdc',
     ],
   ])('%s', (_, url, expectedHash) => {
-    const formatter = new EmbedHashFormatter();
-    expect(formatter.format(null, '', url)).toBe(expectedHash);
+    const formatter = new EmbedHashFormatter(null);
+    expect(formatter.format('', url)).toBe(expectedHash);
+  });
+});
+
+describe('Invalid embeds', () => {
+  test.each([
+    ['Bad twitch link', 'witch.tv/xqc', null],
+    [
+      'Rumble non-embed link',
+      'https://rumble.com/v29b9py-mirror-2023-02-13.html',
+      null,
+    ],
+    [
+      'Sussy fake youtube link',
+      'https://www.yoütübe.com/watch?v=0EqSXDwTq6U',
+      null,
+    ],
+  ])('%s', (_, url, expectedHash) => {
+    const formatter = new EmbedHashFormatter(null);
+    expect(formatter.format('', url)).toBe(expectedHash);
   });
 });
