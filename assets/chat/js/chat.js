@@ -427,7 +427,7 @@ class Chat {
     // The websocket connection, emits events from the chat server
     this.source = new ChatSource();
 
-    this.embedhashformatter = new EmbedHashFormatter(this);
+    this.embedhashformatter = new EmbedHashFormatter(this, MessageBuilder);
 
     this.source.on('REFRESH', () => window.location.reload(false));
     this.source.on('PING', (data) => this.source.send('PONG', data));
