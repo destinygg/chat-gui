@@ -14,6 +14,7 @@ export default class HashLinkConverter {
     );
     const pathname = url.pathname.slice(1);
     let match;
+    let videoId;
     switch (url.hostname) {
       case 'www.twitch.tv':
       case 'twitch.tv':
@@ -34,7 +35,11 @@ export default class HashLinkConverter {
         if (match) {
           return `#youtube/${match[1]}`;
         }
-        return `#youtube/${url.searchParams.get('v')}`;
+        videoId = url.searchParams.get('v');
+        if (!videoId) {
+          throw new Error('Invalid link');
+        }
+        return `#youtube/${videoId}`;
       case 'www.youtu.be':
       case 'youtu.be':
         return `#youtube/${pathname}`;
