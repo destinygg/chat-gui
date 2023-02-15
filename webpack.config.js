@@ -84,13 +84,13 @@ module.exports = {
       },
       {
         test: /\.(png|jpg|gif|svg)$/,
-        loader: 'file-loader',
-        options: { name: 'img/[name].[ext]' },
+        type: 'asset/resource',
+        generator: { filename: 'img/[name][ext]' },
       },
       {
         test: /\.(ttf)$/,
-        loader: 'file-loader',
-        options: { name: 'font/[name].[ext]' },
+        type: 'asset/resource',
+        generator: { filename: 'font/[name][ext]' },
       },
       {
         test: /\.(html)$/,
