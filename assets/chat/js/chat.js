@@ -33,7 +33,7 @@ import { isMuteActive, MutedTimer } from './mutedtimer';
 import EmoteService from './emotes';
 import UserFeatures from './features';
 import makeSafeForRegex from './regex';
-import HashLinkConverter from './hashlinkconverter';
+import { HashLinkConverter } from './hashlinkconverter';
 
 const regexslashcmd = /^\/([a-z0-9]+)[\s]?/i;
 const regextime = /(\d+(?:\.\d*)?)([a-z]+)?/gi;
