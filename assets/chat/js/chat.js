@@ -33,7 +33,7 @@ import { isMuteActive, MutedTimer } from './mutedtimer';
 import EmoteService from './emotes';
 import UserFeatures from './features';
 import makeSafeForRegex from './regex';
-import { HashLinkConverter } from './hashlinkconverter';
+import { HashLinkConverter, MISSING_ARG_ERROR } from './hashlinkconverter';
 
 const regexslashcmd = /^\/([a-z0-9]+)[\s]?/i;
 const regextime = /(\d+(?:\.\d*)?)([a-z]+)?/gi;
@@ -2167,76 +2167,43 @@ class Chat {
   cmdEMBED(parts) {
     const { location } = window.top || window.parent || window;
     const noEmbedUrl = location.href.split('#')[0];
-    if (!parts[0]) {
-      MessageBuilder.error(
-        'No argument provided - /embed <link> OR /e <link>'
-      ).into(this);
+    try {
+      const hashLink = this.hashLinkConverter.convert(parts[0]);
+      location.href = `${noEmbedUrl}${hashLink}`;
+    } catch (error) {
+      MessageBuilder.error(error.message).into(this);
       MessageBuilder.info(
-        'Valid links: Twitch Streams, Twitch VODs, Twitch Clips, Youtube Videos, Rumble Videos.'
+        'Usage: /embed <link> OR /e <link> (Valid links: Twitch streams, VODs, clips, Youtube, Rumble)'
       ).into(this);
-    } else if (parts.length > 1) {
-      MessageBuilder.error(
-        'More than one argument provided - /embed <link> OR /e <link>'
-      ).into(this);
-      MessageBuilder.info(
-        'Valid links: Twitch Streams, Twitch VODs, Twitch Clips, Youtube Videos, Rumble Videos.'
-      ).into(this);
-    } else {
-      try {
-        const hashLink = this.hashLinkConverter.convert(parts[0]);
-        location.href = `${noEmbedUrl}${hashLink}`;
-      } catch (error) {
-        if (error.message === 'Invalid link') {
-          MessageBuilder.error(
-            'Invalid link - /embed <link> OR /e <link>'
-          ).into(this);
-          MessageBuilder.info(
-            'Valid links: Twitch Streams, Twitch VODs, Twitch Clips, Youtube Videos, Rumble Videos.'
-          ).into(this);
-        } else {
-          MessageBuilder.error(error.message).into(this);
-        }
-      }
     }
   }
 
   cmdPOSTEMBED(parts) {
     const { location } = window.top || window.parent || window;
     const EmbedSplit = location.href.split('#');
-    if (!parts[0] && EmbedSplit[1]) {
-      this.source.send('MSG', { data: `#${EmbedSplit[1]}` });
-    } else if (!parts[0] && !EmbedSplit[1]) {
-      MessageBuilder.error(
-        'Nothing embedded - /postembed OR /pe OR /postembed <link> [<message>] OR /pe <link> [<message>]'
-      ).into(this);
-      MessageBuilder.info(
-        'Valid links: Twitch Streams, Twitch VODs, Twitch Clips, Youtube Videos, Rumble Videos.'
-      ).into(this);
-    } else {
-      let moreMsg = '';
-      try {
-        const hashLink = this.hashLinkConverter.convert(parts[0]);
-        if (parts[1]) {
-          parts.shift();
+    let moreMsg = '';
+    try {
+      const hashLink = this.hashLinkConverter.convert(parts[0]);
+      if (parts[1]) {
+        parts.shift();
+        moreMsg = parts.join(' ');
+      }
+      this.source.send('MSG', { data: `${hashLink} ${moreMsg}` });
+    } catch (error) {
+      if (EmbedSplit[1]) {
+        if (parts[0]) {
           moreMsg = parts.join(' ');
         }
-        this.source.send('MSG', { data: `${hashLink} ${moreMsg}` });
-      } catch (error) {
-        if (EmbedSplit[1]) {
-          if (parts[0]) {
-            moreMsg = parts.join(' ');
-          }
-          this.source.send('MSG', { data: `#${EmbedSplit[1]} ${moreMsg}` });
-        } else if (error.message === 'Invalid link') {
-          MessageBuilder.error(
-            'Invalid link - /postembed OR /pe OR /postembed <link> [<message>] OR /pe <link> [<message>]'
-          ).into(this);
-          MessageBuilder.info(
-            'Valid links: Twitch Streams, Twitch VODs, Twitch Clips, Youtube Videos, Rumble Videos.'
-          ).into(this);
+        this.source.send('MSG', { data: `#${EmbedSplit[1]} ${moreMsg}` });
+      } else {
+        if (error.message === MISSING_ARG_ERROR) {
+          MessageBuilder.error('Nothing embedded').into(this);
         } else {
           MessageBuilder.error(error.message).into(this);
         }
+        MessageBuilder.info(
+          'Usage: /postembed OR /pe OR /postembed <link> [<message>] OR /pe <link> [<message>] (Valid links: Twitch streams, VODs, clips, Youtube, Rumble)'
+        ).into(this);
       }
     }
   }
