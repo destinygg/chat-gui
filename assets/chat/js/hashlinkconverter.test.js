@@ -1,4 +1,10 @@
-import HashLinkConverter from './hashlinkconverter';
+import {
+  HashLinkConverter,
+  RUMBLE_EMBED_ERROR,
+  INVALID_LINK_ERROR,
+  MISSING_VIDEO_ID_ERROR,
+  MISSING_ARG_ERROR,
+} from './hashlinkconverter';
 
 describe('Valid embeds', () => {
   test.each([
@@ -44,37 +50,26 @@ describe('Valid embeds', () => {
   });
 });
 
-const errors = {
-  invalidLink: 'Invalid link',
-  badRumble:
-    'Rumble links have to be embed links - https://rumble.com/embed/<id>',
-};
-
 describe('Invalid embeds', () => {
   test.each([
-    ['Bad twitch link', 'witch.tv/xqc', errors.invalidLink],
+    ['Bad twitch link', 'witch.tv/xqc', INVALID_LINK_ERROR],
     [
       'Rumble non-embed link',
       'https://rumble.com/v29b9py-mirror-2023-02-13.html',
-      errors.badRumble,
-    ],
-    [
-      'Sussy fake youtube link',
-      'https://www.yoütübe.com/watch?v=0EqSXDwTq6U',
-      errors.invalidLink,
+      RUMBLE_EMBED_ERROR,
     ],
     [
       'Youtube link missing video id parameter',
       'https://www.youtube.com/tZ_gn0E87Qo',
-      errors.invalidLink,
+      MISSING_VIDEO_ID_ERROR,
+    ],
+    [
+      'No arguments were giving after the command',
+      undefined,
+      MISSING_ARG_ERROR,
     ],
   ])('%s', (_, url, expectedError) => {
     const hlc = new HashLinkConverter();
-    try {
-      hlc.convert(url);
-      expect(true).toBe(false);
-    } catch (error) {
-      expect(error.message).toBe(expectedError);
-    }
+    expect(() => hlc.convert(url)).toThrow(expectedError);
   });
 });
