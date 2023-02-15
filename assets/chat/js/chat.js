@@ -2166,10 +2166,8 @@ class Chat {
 
   cmdEMBED(parts) {
     const { location } = window.top || window.parent || window;
-    const noEmbedUrl = location.href.split('#')[0];
     try {
-      const hashLink = this.hashLinkConverter.convert(parts[0]);
-      location.href = `${noEmbedUrl}${hashLink}`;
+      location.hash = this.hashLinkConverter.convert(parts[0]);
     } catch (error) {
       MessageBuilder.error(error.message).into(this);
       MessageBuilder.info(
@@ -2180,21 +2178,16 @@ class Chat {
 
   cmdPOSTEMBED(parts) {
     const { location } = window.top || window.parent || window;
-    const EmbedSplit = location.href.split('#');
-    let moreMsg = '';
     try {
       const hashLink = this.hashLinkConverter.convert(parts[0]);
-      if (parts[1]) {
-        parts.shift();
-        moreMsg = parts.join(' ');
-      }
-      this.source.send('MSG', { data: `${hashLink} ${moreMsg}` });
+      this.source.send('MSG', {
+        data: `${hashLink} ${parts.slice(1).join(' ')}`,
+      });
     } catch (error) {
-      if (EmbedSplit[1]) {
-        if (parts[0]) {
-          moreMsg = parts.join(' ');
-        }
-        this.source.send('MSG', { data: `#${EmbedSplit[1]} ${moreMsg}` });
+      if (location.hash) {
+        this.source.send('MSG', {
+          data: `${location.hash} ${parts.join(' ')}`,
+        });
       } else {
         if (error.message === MISSING_ARG_ERROR) {
           MessageBuilder.error('Nothing embedded').into(this);
@@ -2202,7 +2195,7 @@ class Chat {
           MessageBuilder.error(error.message).into(this);
         }
         MessageBuilder.info(
-          'Usage: /postembed OR /pe OR /postembed <link> [<message>] OR /pe <link> [<message>] (Valid links: Twitch streams, VODs, clips, Youtube, Rumble)'
+          'Usage: /postembed [<link>] [<message>] (Alias: /pe) (Valid links: Twitch streams, VODs, clips, Youtube, Rumble)'
         ).into(this);
       }
     }
