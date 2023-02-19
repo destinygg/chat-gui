@@ -2005,17 +2005,15 @@ class Chat {
         )} (the default is 'HH:mm', for more info: http://momentjs.com/docs/#/displaying/format/)`
       ).into(this);
     } else {
-      const format = parts.slice(1, parts.length);
+      const format = parts.join(' ');
       if (!/^[a-z :.,-\\*]+$/i.test(format)) {
         MessageBuilder.error(
           'Invalid format, see: http://momentjs.com/docs/#/displaying/format/'
         ).into(this);
       } else {
-        MessageBuilder.info(
-          `New format: ${this.settings.get('timestampformat')}.`
-        ).into(this);
         this.settings.set('timestampformat', format);
         this.applySettings();
+        MessageBuilder.info(`New format: ${format}.`).into(this);
       }
     }
   }
