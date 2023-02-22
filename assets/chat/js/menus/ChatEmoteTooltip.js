@@ -8,12 +8,21 @@ export default class ChatEmoteTooltip extends ChatMenuFloating {
     this.emote = this.ui.find('.emote-image');
     this.name = this.ui.find('.emote-info .name');
     this.creator = this.ui.find('.emote-info .creator');
+    this.tier = this.ui.find('.emote-info .tier');
 
     this.chat.output.on('contextmenu', '.msg-chat .text .emote', (e) => {
       const emote = $(e.currentTarget).closest('.emote')[0].innerText;
+      const { creator, minimumSubTier } =
+        this.chat.emoteService.getEmote(emote) ?? {};
 
       this.name.text(emote);
-      this.setCreator(emote);
+
+      this.creator.text(creator);
+      this.creator[creator ? 'show' : 'hide']();
+
+      this.tier.text(`Tier ${minimumSubTier}`);
+      this.tier[minimumSubTier > 0 ? 'show' : 'hide']();
+
       this.emote.html(`<div class="emote ${emote}">${emote}</div>`);
 
       this.position(e);
@@ -29,11 +38,5 @@ export default class ChatEmoteTooltip extends ChatMenuFloating {
         )
         .focus();
     });
-  }
-
-  setCreator(emote) {
-    const { creator } = this.chat.emoteService.getEmote(emote) ?? {};
-    this.creator.text(creator);
-    this.creator[creator ? 'show' : 'hide']();
   }
 }
