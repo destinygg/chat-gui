@@ -4,6 +4,8 @@ import ChatMessage from './ChatMessage';
 import ChatUserMessage from './ChatUserMessage';
 import ChatEmoteMessage from './ChatEmoteMessage';
 import PinnedMessage from './PinnedMessage';
+import ChatDonationMessage from './ChatDonationMessage';
+import ChatSubscriptionMessage from './ChatSubscriptionMessage';
 
 export default class MessageBuilder {
   static element(message, classes = []) {
@@ -53,5 +55,27 @@ export default class MessageBuilder {
 
   static pinned(message, user, timestamp, uuid) {
     return new PinnedMessage(message, user, timestamp, uuid);
+  }
+
+  static donation(message, user, currency, timestamp = null) {
+    return new ChatDonationMessage(message, user, currency, timestamp);
+  }
+
+  static subscription(
+    message,
+    user,
+    tier,
+    tierLabel,
+    timestamp = null,
+    details = null
+  ) {
+    return new ChatSubscriptionMessage(
+      message,
+      user,
+      tier,
+      tierLabel,
+      timestamp,
+      details
+    );
   }
 }

@@ -449,6 +449,8 @@ class Chat {
     this.source.on('POLLSTART', (data) => this.onPOLLSTART(data));
     this.source.on('POLLSTOP', (data) => this.onPOLLSTOP(data));
     this.source.on('VOTECAST', (data) => this.onVOTECAST(data));
+    this.source.on('SUBSCRIPTION', (data) => this.onSUBSCRIPTION(data));
+    this.source.on('DONATION', (data) => this.onDONATION(data));
 
     this.control.on('SEND', (data) => this.cmdSEND(data));
     this.control.on('HINT', (data) => this.cmdHINT(data));
@@ -732,7 +734,7 @@ class Chat {
 
     // Censored
     this.output.on('click', '.censored', (e) => {
-      const nick = $(e.currentTarget).closest('.msg-user').data('username');
+      const nick = $(e.currentTarget).closest('.msg-chat').data('username');
       this.getActiveWindow()
         .getlines(`.censored[data-username="${nick}"]`)
         .forEach((line) => line.classList.remove('censored'));
@@ -1553,6 +1555,29 @@ class Chat {
     } else {
       MessageBuilder.broadcast(data.data, data.timestamp).into(this);
     }
+  }
+
+  onSUBSCRIPTION(data) {
+    const user = this.users.get(data.nick) ?? new ChatUser(data.nick);
+    MessageBuilder.subscription(
+      data.data,
+      user,
+      data.tier,
+      data.tierlabel,
+      data.timestamp,
+      {
+        streak: data.streak,
+        giftee: data.giftee,
+        quantity: data.quantity,
+      }
+    ).into(this);
+  }
+
+  onDONATION(data) {
+    const user = this.users.get(data.nick) ?? new ChatUser(data.nick);
+    MessageBuilder.donation(data.data, user, data.amount, data.timestamp).into(
+      this
+    );
   }
 
   onPRIVMSGSENT() {

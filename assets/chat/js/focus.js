@@ -18,7 +18,7 @@ class ChatUserFocus {
       if (!this.chat.settings.get('focusmentioned'))
         this.toggleFocus(t.closest('.msg-user').data('username'), false, true);
       this.toggleFocus(t.text());
-    } else if (t.hasClass('user')) {
+    } else if (t.hasClass('user') && !t.hasClass('tier')) {
       this.toggleFocus(t.text());
     } else if (t.hasClass('flair')) {
       this.toggleFocus(t.data('flair'), true);
@@ -44,11 +44,28 @@ class ChatUserFocus {
   addCssRule(value, isFlair) {
     let rule;
     if (isFlair) {
-      rule = `.msg-pinned:has(.features .flair.${value}),.msg-user:has(.features .flair.${value}){opacity:1 !important;}`;
+      rule = `
+        .msg-subscription:has(.features .flair.${value}), .msg-donation:has(.features .flair.${value}),
+        .msg-pinned:has(.features .flair.${value}), .msg-user:has(.features .flair.${value}) {
+          opacity:1 !important;
+        }
+      `;
     } else if (this.chat.settings.get('focusmentioned')) {
-      rule = `.msg-pinned[data-username="${value}"],.msg-pinned[data-mentioned~="${value}"],.msg-user[data-username="${value}"],.msg-user[data-mentioned~="${value}"]{opacity:1 !important;}`;
+      rule = `
+        .msg-subscription[data-username="${value}"], .msg-subscription[data-mentioned~="${value}"], .msg-subscription[data-giftee="${value}"],
+        .msg-donation[data-username="${value}"], .msg-donation[data-mentioned~="${value}"],
+        .msg-pinned[data-username="${value}"], .msg-pinned[data-mentioned~="${value}"],
+        .msg-user[data-username="${value}"], .msg-user[data-mentioned~="${value}"] {
+          opacity:1 !important;
+        }
+      `;
     } else {
-      rule = `.msg-pinned[data-username="${value}"],.msg-user[data-username="${value}"]{opacity:1 !important;}`;
+      rule = `
+        .msg-subscription[data-username="${value}"], .msg-subscription[data-giftee="${value}"], .msg-donation[data-username="${value}"],
+        .msg-pinned[data-username="${value}"], .msg-user[data-username="${value}"] {
+          opacity:1 !important;
+        }
+      `;
     }
     this.css.insertRule(rule, this.focused.length); // max 4294967295
     this.focused.push(value);

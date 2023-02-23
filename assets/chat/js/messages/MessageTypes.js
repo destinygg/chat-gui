@@ -9,4 +9,6 @@ export default {
   USER: 'USER',
   EMOTE: 'EMOTE',
   PINNED: 'PINNED',
+  SUBSCRIPTION: 'SUBSCRIPTION',
+  DONATION: 'DONATION',
 };
