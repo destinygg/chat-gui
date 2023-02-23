@@ -44,12 +44,7 @@ class ChatUserFocus {
   addCssRule(value, isFlair) {
     let rule;
     if (isFlair) {
-      rule = `
-        .msg-subscription:has(.features .flair.${value}), .msg-donation:has(.features .flair.${value}),
-        .msg-pinned:has(.features .flair.${value}), .msg-user:has(.features .flair.${value}) {
-          opacity:1 !important;
-        }
-      `;
+      rule = `.msg-user.${value}{opacity:1 !important;}`;
     } else if (this.chat.settings.get('focusmentioned')) {
       rule = `
         .msg-subscription[data-username="${value}"], .msg-subscription[data-mentioned~="${value}"], .msg-subscription[data-giftee="${value}"],

@@ -197,7 +197,9 @@ class ChatPoll {
     this.ui.title.text(
       `${
         this.poll.type === PollType.Weighted ? 'Sub-weighted poll' : 'Poll'
-      } started by ${this.poll.user}`
+      } started by ${this.poll.user} for ${Math.floor(
+        this.poll.time / 1000
+      )} seconds.`
     );
     this.ui.question.text(this.poll.question);
     this.ui.options.html(
@@ -206,12 +208,14 @@ class ChatPoll {
           (option, i) => `
         <div class="opt" title="Vote ${option}">
           <div class="opt-info">
-            <strong>${i + 1}</strong>
+            <span class="opt-vote-number">
+              <strong>${i + 1}</strong>
+            </span>
+            <span class="opt-bar-option">${option}</span>
           </div>
           <div class="opt-bar">
             <div class="opt-bar-inner" style="width: 0;">
-              <span class="opt-bar-option">${option}</span>
-              <span class="opt-bar-value">0</span>
+              <span class="opt-bar-value"></span>
             </div>
           </div>
         </div>
@@ -306,11 +310,7 @@ class ChatPoll {
           .children()
           .eq(i)
           .find('.opt-bar-value')
-          .text(
-            percent > 0
-              ? `(${this.poll.totals[i]}) ${Math.round(percent)}%`
-              : ''
-          );
+          .text(`${Math.round(percent)}% (${this.poll.totals[i]} votes)`);
       });
     }
   }
@@ -331,7 +331,9 @@ class ChatPoll {
   pollEndMessage(winner, winnerPercentage) {
     let message = `The poll has ended. Option ${winner} won!`;
     if (winnerPercentage > 0) {
-      message = `The poll has ended. Option ${winner} won with ${winnerPercentage}% of the vote.`;
+      message = `The poll has ended. Option ${winner} won with ${Math.round(
+        winnerPercentage
+      )}% of the vote.`;
     }
 
     MessageBuilder.info(message).into(this.chat);
