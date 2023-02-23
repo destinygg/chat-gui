@@ -8,13 +8,14 @@ const isTouchDevice =
   navigator.maxTouchPoints; // works on IE10/11 and Surface
 
 class ChatScrollPlugin {
-  constructor(viewport, target = undefined) {
+  constructor(viewport, target = undefined, win = undefined) {
     this.viewportEl = $(viewport).get(0);
     if (!this.viewportEl) return;
 
     this.previousPosition = 0;
+    this.previousDirection = 'same';
 
-    const targetEl = target !== undefined ? $(target) : $(viewport);
+    const targetEl = $(target) ?? $(viewport);
 
     this.scroller = OverlayScrollbars(
       {
@@ -35,44 +36,45 @@ class ChatScrollPlugin {
         },
       }
     );
-    this.viewport = this.scroller.elements().viewport;
+
     if (targetEl.find('.chat-scroll-notify').length > 0) {
       this.scroller.on('scroll', () => {
-        const direction = this.getScrollDirection();
-        this.previousPosition = this.viewportEl.scrollTop;
-        if (direction !== 'same') {
-          targetEl.toggleClass('chat-unpinned', !this.isPinned());
+        const direction = this.scrollDirection;
+        if (direction !== this.previousDirection) {
+          win.waspinned = this.pinned;
+          targetEl.toggleClass('chat-unpinned', !win.waspinned);
         }
+        this.previousDirection = direction;
+        this.previousPosition = this.viewportEl.scrollTop;
       });
+
       targetEl.on('click', '.chat-scroll-notify', () => {
-        this.updateAndPin(true);
+        this.scrollBottom();
         return false;
       });
     }
   }
 
-  getScrollDirection() {
-    if (this.viewportEl.scrollTop > this.previousPosition) {
-      return 'down';
+  get scrollDirection() {
+    if (
+      this.viewportEl.scrollHeight -
+        this.viewportEl.clientHeight -
+        this.viewportEl.scrollTop <
+      30
+    ) {
+      return 'pinned';
     }
-    if (this.viewportEl.scrollTop < this.previousPosition) {
-      return 'up';
-    }
-    return 'same';
+    return this.viewportEl.scrollTop > this.previousPosition ? 'down' : 'up';
   }
 
-  isPinned() {
+  get pinned() {
     // 30 is used to allow the scrollbar to be just offset, but still count as scrolled to bottom
-    const { scrollTop, scrollHeight, clientHeight } = this.viewport;
+    const { scrollTop, scrollHeight, clientHeight } = this.viewportEl;
     return scrollTop >= scrollHeight - clientHeight - 30;
   }
 
-  updateAndPin(pin) {
-    if (pin) this.scrollBottom();
-  }
-
   scrollBottom() {
-    this.viewport.scrollTo(0, this.viewport.scrollHeight);
+    this.viewportEl.scrollTo(0, this.viewportEl.scrollHeight);
   }
 
   reset() {

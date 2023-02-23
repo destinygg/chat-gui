@@ -47,7 +47,8 @@ class ChatWindow extends EventEmitter {
     this.maxlines = chat.settings.get('maxlines');
     this.scrollplugin = new ChatScrollPlugin(
       this.lines,
-      this.lines.parentElement
+      this.lines.parentElement,
+      this
     );
     this.tag =
       chat.taggednicks.get(normalized) ||
@@ -94,28 +95,14 @@ class ChatWindow extends EventEmitter {
     });
   }
 
-  locked() {
-    return this.locks > 0;
-  }
-
-  lock() {
-    this.locks += 1;
-    if (this.locks === 1) {
-      this.waspinned = this.scrollplugin.isPinned();
-    }
-  }
-
-  unlock() {
-    this.locks -= 1;
-    if (this.locks === 0) {
-      this.scrollplugin.updateAndPin(this.waspinned);
-    }
+  update(forcePin) {
+    if (this.waspinned || forcePin) this.scrollplugin.scrollBottom();
   }
 
   // Rid excess chat lines if the chat is pinned
   // Get the scroll position before adding the new line / removing old lines
   cleanup() {
-    if (this.scrollplugin.isPinned() || this.waspinned) {
+    if (this.scrollplugin.pinned || this.waspinned) {
       const lines = [...this.lines.children];
       if (lines.length >= this.maxlines) {
         const remove = lines.slice(0, lines.length - this.maxlines);
@@ -128,10 +115,6 @@ class ChatWindow extends EventEmitter {
   }
 
   cleanupThrottle = throttle(50, this.cleanup);
-
-  updateAndPin(pin = true) {
-    this.scrollplugin.updateAndPin(pin);
-  }
 }
 
 export default ChatWindow;
