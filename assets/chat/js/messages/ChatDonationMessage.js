@@ -30,16 +30,43 @@ export default class ChatDonationMessage extends ChatUserMessage {
       attr['data-mentioned'] = this.mentioned.join(' ').toLowerCase();
 
     const colorFlair = usernameColorFlair(chat.flairs, this.user);
-    const user = `<a title="${this.title}" class="user ${colorFlair?.name}">${this.user.username}</a>`;
-    const donation = `<span class="donation">${user} donated ${(
-      this.amount / 100
-    ).toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</span>`;
-    const donationInfo = `<div class="donation-info">${donation}</div>`;
+
+    const user = document.createElement('a');
+    user.title = this.title;
+    user.classList.add('user', colorFlair?.name);
+    user.innerText = this.user.username;
+
+    const donation = document.createElement('span');
+    donation.append(user);
+    donation.append(
+      ` donated ${(this.amount / 100).toLocaleString('en-US', {
+        style: 'currency',
+        currency: 'USD',
+      })}`
+    );
+
+    const donationTier = this.selectDonationTier(this.amount);
+
+    const donationWrapper = document.createElement('span');
+    donationWrapper.classList.add('donation-wrapper');
+    donationWrapper.append(donation);
+
+    const donationIconWrapper = document.createElement('a');
+    donationIconWrapper.classList.add('icon-wrapper');
+    const donationIcon = document.createElement('i');
+    donationIcon.classList.add('donation-icon', donationTier[0]);
+    donationIconWrapper.append(donationIcon);
+
+    const donationInfo = document.createElement('div');
+    donationInfo.classList.add('donation-info');
+    donationInfo.append(donationWrapper);
+    donationInfo.append(donationIconWrapper);
+
     return this.wrap(
-      `${donationInfo}<span class="text-wrapper">${this.buildMessageTxt(
-        chat
-      )}</span>`,
-      this.selectDonationTier(this.amount),
+      `${
+        donationInfo.outerHTML
+      }<span class="text-wrapper">${this.buildMessageTxt(chat)}</span>`,
+      donationTier,
       attr
     );
   }

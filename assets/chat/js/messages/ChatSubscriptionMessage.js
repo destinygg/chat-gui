@@ -33,14 +33,11 @@ export default class ChatSubscriptionMessage extends ChatUserMessage {
     const tierColor = tierInfo?.color;
 
     const tierClass = tierInfo?.rainbowColor ? `user ${tierFlair}` : '';
-    const tierStyle = tierInfo?.rainbowColor
-      ? ''
-      : `style="color: ${tierColor};"`;
 
     return {
       rainbowColor: tierInfo?.rainbowColor,
       tierClass,
-      tierStyle,
+      tierColor: tierInfo?.rainbowColor ? '' : tierColor,
       attrStyle: tierColor ? `border-color: ${tierColor};` : '',
     };
   }
@@ -54,7 +51,7 @@ export default class ChatSubscriptionMessage extends ChatUserMessage {
     if (this.mentioned && this.mentioned.length > 0)
       attr['data-mentioned'] = this.mentioned.join(' ').toLowerCase();
 
-    const { rainbowColor, tierClass, tierStyle, attrStyle } =
+    const { rainbowColor, tierClass, tierColor, attrStyle } =
       this.getTierStyles(chat);
 
     attr.style = attrStyle;
@@ -62,19 +59,53 @@ export default class ChatSubscriptionMessage extends ChatUserMessage {
 
     const colorFlair = usernameColorFlair(chat.flairs, this.user);
 
-    const user = `<a title="${this.title}" class="user ${colorFlair?.name}">${this.user.username}</a>`;
-    const tierLabel = this.tierLabel ?? `Tier ${this.tier}`;
-    const tier = `<a class="tier ${tierClass}" ${tierStyle}>${tierLabel}</a>`;
+    const user = document.createElement('a');
+    user.title = this.title;
+    user.classList.add('user', colorFlair?.name);
+    user.innerText = this.user.username;
 
-    let subscriptionInfo = '';
+    const tierLabel = this.tierLabel ?? `Tier ${this.tier}`;
+
+    const tier = document.createElement('a');
+    tier.classList.add('tier');
+    if (tierClass)
+      tierClass.split(' ').forEach((element) => tier.classList.add(element));
+    tier.style.color = tierColor;
+    tier.innerText = tierLabel;
+
+    const subscriptionInfo = document.createElement('div');
+    subscriptionInfo.classList.add('subscription-info');
+
+    const subscriptionWrapper = document.createElement('span');
+    subscriptionWrapper.classList.add('subscription-wrapper');
+
+    const subscriptionIconWrapper = document.createElement('a');
+    subscriptionIconWrapper.classList.add('icon-wrapper');
+    const subscriptionIcon = document.createElement('i');
+    subscriptionIcon.classList.add('subscription-icon');
+    subscriptionIconWrapper.append(subscriptionIcon);
+
+    const subscription = document.createElement('span');
+    subscription.classList.add('subscription');
+    subscription.append(subscriptionWrapper);
+    subscription.append(subscriptionIconWrapper);
+
+    subscriptionInfo.append(subscription);
+
     switch (this.subscriptionType) {
       case SubTypes.REGULAR: {
-        const subNotifyMessage = `${user} is now a ${tier} subscriber`;
-        const streak = this.streak
-          ? `<span class="streak">They're currently on a ${this.streak} month streak</span>`
-          : '';
-        const subscription = `<span class="subscription">${subNotifyMessage}</span>`;
-        subscriptionInfo = `<div class="subscription-info">${subscription}${streak}</div>`;
+        const subNotifyMessage = `${user.outerHTML} is now a ${tier.outerHTML} subscriber`;
+        subscriptionWrapper.innerHTML = subNotifyMessage;
+
+        subscriptionIcon.classList.add('regular');
+
+        if (this.streak) {
+          const streak = document.createElement('span');
+          streak.classList.add('streak');
+          streak.innerText = `They're currently on a ${this.streak} month streak`;
+          subscriptionInfo.append(streak);
+        }
+
         break;
       }
       case SubTypes.GIFT: {
@@ -82,18 +113,27 @@ export default class ChatSubscriptionMessage extends ChatUserMessage {
           chat.users.get(this.giftee.toLowerCase()) ??
           new ChatUser(this.giftee);
         const gifteeColorFlair = usernameColorFlair(chat.flairs, gifteeUser);
-        const giftee = `<a class="user ${gifteeColorFlair?.name}">${gifteeUser.username}</a>`;
-        const subNotifyMessage = `${user} gifted ${giftee} a ${tier} subscription`;
-        const subscription = `<span class="subscription">${subNotifyMessage}</span>`;
+        const giftee = document.createElement('a');
+        giftee.classList.add('user', gifteeColorFlair?.name);
+        giftee.innerText = gifteeUser.username;
+
+        const subNotifyMessage = `${user.outerHTML} gifted ${giftee.outerHTML} a ${tier.outerHTML} subscription`;
+        subscriptionWrapper.innerHTML = subNotifyMessage;
+
+        subscriptionIcon.classList.add('gift');
+
         if (!this.message) classes.push('mass-gift');
-        subscriptionInfo = `<div class="subscription-info">${subscription}</div>`;
+
         break;
       }
       case SubTypes.MASSGIFT: {
-        const subNotifyMessage = `${user} gifted ${this.quantity} ${tier} subs to the community`;
-        const subscription = `<span class="subscription">${subNotifyMessage}</span>`;
+        const subNotifyMessage = `${user.outerHTML} gifted ${this.quantity} ${tier.outerHTML} subs to the community`;
+        subscriptionWrapper.innerHTML = subNotifyMessage;
+
+        subscriptionIcon.classList.add('mass-gift');
+
         if (!this.message) classes.push('mass-gift');
-        subscriptionInfo = `<div class="subscription-info">${subscription}</div>`;
+
         break;
       }
       default:
@@ -101,10 +141,10 @@ export default class ChatSubscriptionMessage extends ChatUserMessage {
     }
 
     const message = this.message
-      ? `${subscriptionInfo}<span class="text-wrapper">${this.buildMessageTxt(
-          chat
-        )}</span>`
-      : subscriptionInfo;
+      ? `${
+          subscriptionInfo.outerHTML
+        }<span class="text-wrapper">${this.buildMessageTxt(chat)}</span>`
+      : subscriptionInfo.outerHTML;
 
     return this.wrap(message, classes, attr);
   }

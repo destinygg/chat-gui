@@ -558,6 +558,57 @@ hr {
     border-radius: 10px 10px 0 0;
     padding: $gutter-xs $gutter-md * 2 $gutter-xs $gutter-md;
     background-color: $color-chat-emphasize;
+    justify-content: space-between;
+    align-items: center;
+
+    .icon-wrapper {
+      width: 2.25em;
+      height: 2.25em;
+      color: $color-chat-disabled;
+      position: relative;
+      text-decoration: none;
+      display: inline-block;
+      border: 0.25em solid transparent;
+      flex-shrink: 0;
+
+      .donation-icon {
+        opacity: 0.75;
+        width: 100%;
+        height: 100%;
+        display: inline-block;
+
+        &.amount-5 {
+          background: transparent url('../img/donation-amount-5.png') no-repeat
+            center center;
+          background-size: contain;
+          filter: invert(100%);
+        }
+        &.amount-10 {
+          background: transparent url('../img/donation-amount-10.png') no-repeat
+            center center;
+          background-size: contain;
+          filter: invert(100%);
+        }
+        &.amount-25 {
+          background: transparent url('../img/donation-amount-25.png') no-repeat
+            center center;
+          background-size: contain;
+          filter: invert(100%);
+        }
+        &.amount-50 {
+          background: transparent url('../img/donation-amount-50.png') no-repeat
+            center center;
+          background-size: contain;
+          filter: invert(100%);
+        }
+        &.amount-100 {
+          background: transparent url('../img/donation-amount-100.png')
+            no-repeat center center;
+          background-size: contain;
+          filter: invert(100%);
+        }
+      }
+    }
   }
 
   &.amount-0 {
@@ -619,6 +670,48 @@ hr {
     padding: $gutter-xs $gutter-md * 2 $gutter-xs $gutter-md;
     border-radius: 10px 10px 0 0;
     background-color: $color-chat-emphasize;
+
+    .subscription {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      .icon-wrapper {
+        width: 2.25em;
+        height: 2.25em;
+        color: $color-chat-disabled;
+        position: relative;
+        text-decoration: none;
+        display: inline-block;
+        border: 0.25em solid transparent;
+        flex-shrink: 0;
+
+        .subscription-icon {
+          opacity: 0.75;
+          width: 100%;
+          height: 100%;
+          display: inline-block;
+
+          &.regular {
+            background: transparent url('../img/sub-regular.svg') no-repeat
+              center center;
+            background-size: contain;
+          }
+          &.gift {
+            background: transparent url('../img/sub-gift.png') no-repeat center
+              center;
+            background-size: contain;
+            filter: invert(100%);
+          }
+          &.mass-gift {
+            background: transparent url('../img/sub-mass-gift.png') no-repeat
+              center center;
+            background-size: contain;
+            filter: invert(100%);
+          }
+        }
+      }
+    }
   }
 
   .text-wrapper {
