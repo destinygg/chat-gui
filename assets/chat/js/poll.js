@@ -60,7 +60,8 @@ class ChatPoll {
   constructor(chat) {
     this.chat = chat;
     this.ui = this.chat.ui.find('#chat-poll-frame');
-    this.ui.title = this.ui.find('.poll-title');
+    this.ui.title = this.ui.find('.poll-info');
+    this.ui.votes = this.ui.find('.poll-votes');
     this.ui.question = this.ui.find('.poll-question');
     this.ui.options = this.ui.find('.poll-options');
     this.ui.timer = this.ui.find('.poll-timer-inner');
@@ -143,7 +144,6 @@ class ChatPoll {
       this.poll.totals[data.vote - 1] += votes;
       this.poll.votesCast += votes;
       this.throttleVoteCast(data.vote);
-      if (!this.voting) this.markWinner();
       return true;
     }
     return false;
@@ -212,11 +212,10 @@ class ChatPoll {
               <strong>${i + 1}</strong>
             </span>
             <span class="opt-bar-option">${option}</span>
+            <span class="opt-bar-value"></span>
           </div>
           <div class="opt-bar">
-            <div class="opt-bar-inner" style="width: 0;">
-              <span class="opt-bar-value"></span>
-            </div>
+            <div class="opt-bar-inner" style="width: 0;"></div>
           </div>
         </div>
       `
@@ -313,6 +312,8 @@ class ChatPoll {
           .text(`${Math.round(percent)}% (${this.poll.totals[i]} votes)`);
       });
     }
+
+    this.ui.votes.text(`${this.poll.votesCast} votes`);
   }
 
   pollStartMessage() {
@@ -320,7 +321,7 @@ class ChatPoll {
       .map((_, i) => i + 1)
       .join(' or ')} in chat to participate.`;
     if (this.poll.type === PollType.Weighted) {
-      message = `A sub-weighted poll has been started. <strong>The value of your vote depends on your subscription tier.</strong> Type ${this.poll.totals
+      message = `A sub-weighted poll has been started. The value of your vote depends on your subscription tier. Type ${this.poll.totals
         .map((_, i) => i + 1)
         .join(' or ')} in chat to participate.`;
     }
