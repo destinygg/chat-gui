@@ -1890,6 +1890,11 @@ body.pref-fontscale[data-fontscale='10'] {
         $color-surface-dark3 50%,
         $color-surface-dark1 50%
       );
+      &.opt-marked {
+        .opt-vote-number {
+          background: $color-surface-dark3;
+        }
+      }
     }
     .opt.opt-winner {
       background-image: linear-gradient(
@@ -1897,6 +1902,11 @@ body.pref-fontscale[data-fontscale='10'] {
         $color-darkgreen 50%,
         $color-surface-dark2 50%
       );
+      &.opt-marked {
+        .opt-vote-number {
+          background: $color-darkgreen;
+        }
+      }
     }
   }
 }

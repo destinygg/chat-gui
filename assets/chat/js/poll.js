@@ -319,7 +319,7 @@ class ChatPoll {
       .map((_, i) => i + 1)
       .join(' or ')} in chat to participate.`;
     if (this.poll.type === PollType.Weighted) {
-      message = `A sub-weighted poll has been started. <strong>The value of your vote depends on your subscription tier.</strong> Type ${this.poll.totals
+      message = `A sub-weighted poll has been started. The value of your vote depends on your subscription tier. Type ${this.poll.totals
         .map((_, i) => i + 1)
         .join(' or ')} in chat to participate.`;
     }
