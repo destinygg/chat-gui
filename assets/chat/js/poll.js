@@ -60,7 +60,8 @@ class ChatPoll {
   constructor(chat) {
     this.chat = chat;
     this.ui = this.chat.ui.find('#chat-poll-frame');
-    this.ui.title = this.ui.find('.poll-title');
+    this.ui.title = this.ui.find('.poll-info');
+    this.ui.votes = this.ui.find('.poll-votes');
     this.ui.question = this.ui.find('.poll-question');
     this.ui.options = this.ui.find('.poll-options');
     this.ui.timer = this.ui.find('.poll-timer-inner');
@@ -81,7 +82,7 @@ class ChatPoll {
         }
       }
     });
-    this.throttleVoteCast = throttle(100, false, () => {
+    this.throttleVoteCast = throttle(50, false, () => {
       this.updateBars();
     });
   }
@@ -143,7 +144,6 @@ class ChatPoll {
       this.poll.totals[data.vote - 1] += votes;
       this.poll.votesCast += votes;
       this.throttleVoteCast(data.vote);
-      if (!this.voting) this.markWinner();
       return true;
     }
     return false;
@@ -206,16 +206,14 @@ class ChatPoll {
       this.poll.options
         .map(
           (option, i) => `
-        <div class="opt" title="Vote ${option}">
+        <div class="opt">
           <div class="opt-info">
-            <span class="opt-vote-number">
-              <strong>${i + 1}</strong>
-            </span>
-            <span class="opt-bar-option">${option}</span>
-          </div>
-          <div class="opt-bar">
-            <div class="opt-bar-inner" style="width: 0;">
-              <span class="opt-bar-value"></span>
+            <div class="left">
+              <span class="opt-vote-number"><strong>${i + 1}</strong></span>
+              <span class="opt-bar-option">${option}</span>
+            </div>
+            <div class="right">
+              <span class="opt-bar-value">0% (0 votes)</span>
             </div>
           </div>
         </div>
@@ -303,8 +301,7 @@ class ChatPoll {
         this.ui.options
           .children()
           .eq(i)
-          .find('.opt-bar-inner')
-          .css('width', `${percent}%`);
+          .css('background-position-x', `${100 - percent}%`);
 
         this.ui.options
           .children()
@@ -312,6 +309,8 @@ class ChatPoll {
           .find('.opt-bar-value')
           .text(`${Math.round(percent)}% (${this.poll.totals[i]} votes)`);
       });
+
+      this.ui.votes.text(`${this.poll.votesCast} votes`);
     }
   }
 

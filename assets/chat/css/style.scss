@@ -1795,110 +1795,108 @@ body.pref-fontscale[data-fontscale='10'] {
         }
       }
       .poll-title {
-        display: block;
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
         opacity: 0.5;
+        .poll-votes {
+          margin-right: $gutter-sm;
+        }
       }
     }
-  }
-  .opt {
-    display: block;
-    align-items: center;
-    margin-bottom: $gutter-md;
-    background-color: $color-surface-dark3;
-    border-radius: 6px;
-    padding: 4px;
-  }
-  .opt-info {
-    display: flex;
-    .opt-vote-number {
-      height: fit-content;
-      text-align: right;
-      border-radius: 4px;
-      padding: 0 0.25em;
-      margin: 0 0.25em 0.25em 0;
-    }
-    .opt-bar-option {
-      font-weight: 500;
-      font-size: 0.85em;
-      color: $text-color;
-      margin: 0.1em 0em 0.25em 0;
+    .opt {
       display: flex;
-      flex-grow: 1;
-    }
-  }
-  .opt:hover,
-  .opt:active {
-    cursor: pointer;
-    background-color: $color-surface-dark2;
-  }
-  .poll-footer {
-    color: $text-color1;
-    margin: 0.75em 0 0.5em 0;
-    display: flex;
-    .poll-timer {
-      background-color: $color-surface-dark3;
-      overflow: hidden;
-      padding: 3px;
-      flex: 1;
+      align-items: center;
+      margin-bottom: 0.4em;
       border-radius: 6px;
-      .poll-timer-inner {
-        min-height: 0.3em;
-        box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
-        background-color: $color-blue;
-        border-radius: 4px;
-      }
-    }
-  }
-  .opt-bar {
-    flex: 1;
-    overflow: hidden;
-    background-color: $color-surface-dark2;
-    border-radius: 4px;
-    .opt-bar-inner {
-      padding: 0 0.25em;
-      min-height: 1.4em;
-      box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+      padding: 3px;
+      background-image: linear-gradient(
+        to right,
+        $color-darkred 50%,
+        $color-surface-dark2 50%
+      );
+      background-position-x: 100%;
+      background-size: 200%;
       transition: all 750ms;
-      background-color: $color-darkred;
-      border-radius: 4px;
-      .opt-bar-value {
-        font-weight: 500;
-        font-size: 0.85em;
-        color: $text-color;
-        white-space: nowrap;
-        position: absolute;
-        right: 0;
-        margin: 0.15em 2em 0 0;
+      .opt-info {
+        width: 100%;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        .left,
+        .right {
+          align-items: center;
+          flex-direction: row;
+          display: flex;
+        }
+        .right {
+          margin-right: $gutter-sm;
+        }
+        .opt-vote-number {
+          background: $color-surface-dark3;
+          border-radius: 4px;
+          padding: 0 $gutter-sm;
+          margin-right: $gutter-sm;
+        }
+        .opt-bar-option,
+        .opt-bar-value {
+          font-weight: 500;
+          font-size: 0.85em;
+          color: $text-color;
+        }
+        .opt-bar-value {
+          white-space: nowrap;
+        }
+      }
+      &.opt-marked {
+        .opt-vote-number {
+          background: $color-darkred;
+        }
+      }
+    }
+    .poll-footer {
+      color: $text-color1;
+      margin: 0.75em 0 0.5em 0;
+      display: flex;
+      .poll-timer {
+        background-color: $color-surface-dark2;
+        overflow: hidden;
+        padding: 3px;
+        flex: 1;
+        border-radius: 6px;
+        .poll-timer-inner {
+          min-height: 0.3em;
+          box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+          background-color: $color-blue;
+          border-radius: 4px;
+        }
       }
     }
   }
-  .opt-marked .opt-info .opt-vote-number {
-    background-color: $color-darkred;
-    color: $text-color;
+  &:not(.poll-completed) {
+    .opt:hover {
+      cursor: pointer;
+      background-image: linear-gradient(
+        to right,
+        $color-darkred 50%,
+        $color-surface-dark3 50%
+      );
+    }
   }
   &.poll-completed {
     .opt {
-      .opt-info .opt-vote-number {
-        color: $text-color2;
-      }
-      .opt-bar-inner {
-        background-color: $color-surface-dark4;
-        color: $text-color2;
-      }
+      background-image: linear-gradient(
+        to right,
+        $color-surface-dark3 50%,
+        $color-surface-dark1 50%
+      );
     }
     .opt.opt-winner {
-      .opt-info .opt-vote-number {
-        color: $text-color1;
-      }
-      .opt-bar-inner {
-        transition: background-color 750ms;
-        background-color: $color-blue;
-        color: $text-color;
-      }
-    }
-    .opt.opt-marked .opt-info .opt-vote-number {
-      background-color: $color-darkred;
-      color: $text-color;
+      background-image: linear-gradient(
+        to right,
+        $color-darkgreen 50%,
+        $color-surface-dark2 50%
+      );
     }
   }
 }
