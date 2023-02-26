@@ -139,14 +139,10 @@ class ChatPoll {
   }
 
   castVote(data, user) {
-    if (!this.hidden) {
-      const votes = this.votesForUser(user);
-      this.poll.totals[data.vote - 1] += votes;
-      this.poll.votesCast += votes;
-      this.throttleVoteCast(data.vote);
-      return true;
-    }
-    return false;
+    const votes = this.votesForUser(user);
+    this.poll.totals[data.vote - 1] += votes;
+    this.poll.votesCast += votes;
+    this.throttleVoteCast(data.vote);
   }
 
   votesForUser(user) {
