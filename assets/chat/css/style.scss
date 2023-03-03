@@ -1245,7 +1245,8 @@ hr {
         font-weight: 500;
         color: $text-color;
       }
-      &.author {
+      &.tier,
+      &.creator {
         color: $text-color1;
       }
     }
