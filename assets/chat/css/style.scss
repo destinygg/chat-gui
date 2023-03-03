@@ -1691,7 +1691,10 @@ button.btn {
   .msg-chat {
     margin: 0;
     padding: 1px 20px 1px 5px;
-    filter: drop-shadow(1px 1px 1px black);
+    filter: drop-shadow(-1px -1px 0 rgba(black, 0.5))
+      drop-shadow(1px -1px 0 rgba(black, 0.5))
+      drop-shadow(-1px 1px 0 rgba(black, 0.5))
+      drop-shadow(1px 1px 0 rgba(black, 0.5));
     letter-spacing: 0.03em;
   }
 
