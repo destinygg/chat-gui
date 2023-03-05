@@ -310,6 +310,13 @@ const commandsinfo = new Map([
     },
   ],
   [
+    'showpoll',
+    {
+      desc: 'Show last poll.',
+      alias: ['showvote'],
+    },
+  ],
+  [
     'poll',
     {
       desc: 'Start a poll.',
@@ -500,6 +507,8 @@ class Chat {
     this.control.on('M', (data) => this.cmdMENTIONS(data));
     this.control.on('STALK', (data) => this.cmdSTALK(data));
     this.control.on('S', (data) => this.cmdSTALK(data));
+    this.control.on('SHOWPOLL', () => this.cmdSHOWPOLL());
+    this.control.on('SHOWVOTE', () => this.cmdSHOWPOLL());
     this.control.on('V', (data) => this.cmdPOLL(data, 'POLL'));
     this.control.on('POLL', (data) => this.cmdPOLL(data, 'POLL'));
     this.control.on('VOTE', (data) => this.cmdPOLL(data, 'POLL'));
@@ -1404,10 +1413,9 @@ class Chat {
 
   onVOTECAST(data) {
     const usr = this.users.get(data.nick.toLowerCase());
-    if (this.chatpoll.castVote(data, usr)) {
-      if (data.nick.toLowerCase() === this.user.nick.toLowerCase()) {
-        this.chatpoll.markVote(data.vote);
-      }
+    this.chatpoll.castVote(data, usr);
+    if (data.nick.toLowerCase() === this.user.nick.toLowerCase()) {
+      this.chatpoll.markVote(data.vote);
     }
   }
 
@@ -1700,6 +1708,14 @@ class Chat {
         this.inputhistory.add(raw);
         this.input.val('');
       }
+    }
+  }
+
+  cmdSHOWPOLL() {
+    if (this.chatpoll.poll) {
+      this.chatpoll.show();
+    } else {
+      MessageBuilder.error("There hasn't been a poll yet.").into(this);
     }
   }
 
