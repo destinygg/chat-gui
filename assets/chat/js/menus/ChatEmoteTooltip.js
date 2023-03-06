@@ -23,13 +23,11 @@ export default class ChatEmoteTooltip extends ChatMenuFloating {
 
     this.emote.on('click', '.emote', (e) => {
       const value = this.chat.input.val().toString().trim();
-      if (this.chat.emoteService.canUserUseEmote(this.chat.user, value)) {
-        this.chat.input
-          .val(
-            `${value + (value === '' ? '' : ' ') + e.currentTarget.innerText} `
-          )
-          .focus();
-      }
+      this.chat.input
+        .val(
+          `${value + (value === '' ? '' : ' ') + e.currentTarget.innerText} `
+        )
+        .focus();
     });
   }
 

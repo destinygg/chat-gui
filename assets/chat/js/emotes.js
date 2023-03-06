@@ -1,31 +1,35 @@
 export default class EmoteService {
-  emotes = new Map();
+  tiers = new Set();
+
+  emotesMapped = new Map();
+
+  emotes = [];
 
   regexForEmotes(emotes) {
-    const prefixes = [...emotes].map((e) => e.prefix);
+    const prefixes = emotes.map((e) => e.prefix);
     return new RegExp(`(^|\\s)(${prefixes.join('|')})(?=$|\\s)`, 'gm');
   }
 
   emoteRegexForUser(user) {
-    if (user.isPrivileged()) return this.regexForEmotes(this.emotes.values());
+    if (user.isPrivileged()) return this.regexForEmotes(this.emotes);
 
-    let emotes = [...this.emotes.values()].filter(
+    let emotes = this.emotes.filter(
       (e) => e.minimumSubTier <= user.subTier && !e.twitch
     );
 
     if (user.isTwitchSub()) {
-      emotes = emotes.concat([...this.emotes.values()].filter((e) => e.twitch));
+      emotes = emotes.concat(this.emotes.filter((e) => e.twitch));
     }
 
     return this.regexForEmotes(emotes);
   }
 
   get prefixes() {
-    return [...this.emotes.keys()];
+    return this.emotes.map((e) => e.prefix);
   }
 
   get systemEmoteRegex() {
-    return this.regexForEmotes(this.emotes.values());
+    return this.regexForEmotes(this.emotes);
   }
 
   get twitchEmotePrefixes() {
@@ -33,18 +37,20 @@ export default class EmoteService {
   }
 
   getEmote(emote) {
-    if (this.emotes.has(emote)) return this.emotes.get(emote);
-    return null;
+    return this.emotesMapped.get(emote);
   }
 
   setEmotes(emotes) {
+    this.emotes = emotes;
     emotes.forEach((e) => {
-      this.emotes.set(e.prefix, e);
+      this.tiers.add(e.minimumSubTier);
+      this.emotesMapped.set(e.prefix, e);
     });
+    this.tiers.sort((a, b) => a - b);
   }
 
   emotePrefixesForTier(tier) {
-    return [...this.emotes.values()]
+    return this.emotes
       .filter((e) => e.minimumSubTier === tier && !e.twitch)
       .map((e) => e.prefix);
   }
