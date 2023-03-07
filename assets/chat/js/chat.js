@@ -864,7 +864,7 @@ class Chat {
     }
   }
 
-  async setEmotes(emotes) {
+  setEmotes(emotes) {
     this.emoteService.setEmotes(emotes);
     this.emoteService
       .emotesForUser(this.user)
