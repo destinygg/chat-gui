@@ -75,6 +75,11 @@ class ChatSource extends EventEmitter {
   }
 
   onClose(e) {
+    // 1001 is the Going Away code, since it happens frequently when CloudFlare servers update, we just instantly reconnect silently
+    if (e.code === 1001) {
+      this.connect(this.url);
+      return;
+    }
     let retryMilli = 0;
     if (this.retryOnDisconnect) {
       // If a disconnect is experienced after the last attempt was successful, the retry timeout is very short, else its longer
@@ -84,7 +89,7 @@ class ChatSource extends EventEmitter {
           : Math.floor(Math.random() * (30000 - 5000 + 1)) + 5000;
       this.retryTimer = setTimeout(() => this.connect(this.url), retryMilli);
     }
-    this.emit('CLOSE', { code: e.code || 1006, retryMilli });
+    this.emit('CLOSE', retryMilli);
   }
 
   onMsg(e) {
