@@ -11,7 +11,12 @@ export default class EmoteService {
   }
 
   emoteRegexForUser(user) {
-    if (user.isPrivileged()) return this.regexForEmotes(this.emotes);
+    const emotes = this.emotesForUser(user);
+    return this.regexForEmotes(emotes);
+  }
+
+  emotesForUser(user) {
+    if (user.isPrivileged()) return this.emotes;
 
     let emotes = this.emotes.filter(
       (e) => e.minimumSubTier <= user.subTier && !e.twitch
@@ -21,7 +26,7 @@ export default class EmoteService {
       emotes = emotes.concat(this.emotes.filter((e) => e.twitch));
     }
 
-    return this.regexForEmotes(emotes);
+    return emotes;
   }
 
   get prefixes() {
@@ -46,7 +51,7 @@ export default class EmoteService {
       this.tiers.add(e.minimumSubTier);
       this.emotesMapped.set(e.prefix, e);
     });
-    this.tiers.sort((a, b) => a - b);
+    this.tiers = Array.from(this.tiers).sort((a, b) => a - b);
   }
 
   emotePrefixesForTier(tier) {

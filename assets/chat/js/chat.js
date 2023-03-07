@@ -864,9 +864,12 @@ class Chat {
     }
   }
 
-  setEmotes(emotes) {
+  async setEmotes(emotes) {
     this.emoteService.setEmotes(emotes);
-    this.emoteService.prefixes.forEach((e) => this.autocomplete.add(e, true));
+    this.emoteService
+      .emotesForUser(this.user)
+      .map((e) => e.prefix)
+      .forEach((e) => this.autocomplete.add(e, true));
     return this;
   }
 
