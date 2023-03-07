@@ -29,14 +29,18 @@
 
   <div id="chat-input-frame">
     <div id="chat-input-wrap">
-      <textarea
+      <div id="chat-auto-complete">
+        <ul></ul>
+      </div>
+      <div
         id="chat-input-control"
         placeholder="Getting things ready ..."
         autocomplete="off"
         tabindex="1"
         autofocus
         spellcheck
-      ></textarea>
+        contenteditable
+      ></div>
       <a id="chat-input-subonly" class="chat-tool-btn" title="Subonly mode">
         <i class="btn-icon"></i>
       </a>

@@ -23,6 +23,7 @@ import {
   ChatUserInfoMenu,
 } from './menus';
 import ChatAutoComplete from './autocomplete';
+import { ChatInput } from './input';
 import ChatInputHistory from './history';
 import ChatUserFocus from './focus';
 import ChatStore from './store';
@@ -397,6 +398,7 @@ class Chat {
     this.ui = null;
     this.css = null;
     this.output = null;
+    this.autocomplete = null;
     this.input = null;
     this.subonlyicon = null;
     this.loginscrn = null;
@@ -416,7 +418,6 @@ class Chat {
     this.whispers = new Map();
     this.windows = new Map();
     this.settings = new Map(settingsdefault);
-    this.autocomplete = new ChatAutoComplete();
     this.menus = new Map();
     this.taggednicks = new Map();
     this.taggednotes = new Map();
@@ -585,11 +586,12 @@ class Chat {
 
     this.ishidden = (document.visibilityState || 'visible') !== 'visible';
     this.output = this.ui.find('#chat-output-frame');
-    this.input = this.ui.find('#chat-input-control');
     this.subonlyicon = this.ui.find('#chat-input-subonly');
     this.loginscrn = this.ui.find('#chat-login-screen');
     this.loadingscrn = this.ui.find('#chat-loading');
     this.windowselect = this.ui.find('#chat-windows-select');
+    this.input = new ChatInput(this);
+    this.autocomplete = new ChatAutoComplete(this);
     this.inputhistory = new ChatInputHistory(this);
     this.userfocus = new ChatUserFocus(this, this.css);
     this.mainwindow = new ChatWindow('main').into(this);
@@ -651,25 +653,6 @@ class Chat {
     commandsinfo.forEach((a, k) => {
       this.autocomplete.add(`/${k}`);
       (a.alias || []).forEach((i) => this.autocomplete.add(`/${i}`));
-    });
-
-    this.autocomplete.bind(this);
-
-    // Chat input
-    // Dynamically adjust input's height.
-    this.input.on('keydown input', this.adjustInputHeight.bind(this));
-
-    // Set initial height.
-    this.adjustInputHeight();
-
-    this.input.on('keypress', (e) => {
-      if (isKeyCode(e, KEYCODES.ENTER) && !e.shiftKey && !e.ctrlKey) {
-        e.preventDefault();
-        e.stopPropagation();
-        this.control.emit('SEND', this.input.val().toString().trim());
-        this.adjustInputHeight();
-        this.input.focus();
-      }
     });
 
     // Chat focus / menu close when clicking on some areas
@@ -1252,7 +1235,7 @@ class Chat {
     if (this.debounceFocus === undefined) {
       this.debounceFocus = debounce(10, false, (c) => c.input.focus());
     }
-    if (window.getSelection().isCollapsed && !this.input.is(':focus')) {
+    if (window.getSelection().isCollapsed && !this.input.isFocused()) {
       this.debounceFocus(this);
     }
   }
@@ -1261,30 +1244,7 @@ class Chat {
     const placeholderText = this.authenticated
       ? `Write something ${this.user.username} ...`
       : `Write something ...`;
-    this.input.attr('placeholder', placeholderText);
-  }
-
-  adjustInputHeight() {
-    // Check if the input exists on the page and return if it doesn't.
-    if (this.input.length === 0) {
-      return;
-    }
-
-    const maxHeightPixels = this.input.css('maxHeight');
-    const maxHeight = parseInt(maxHeightPixels.slice(0, -2), 10);
-    const pinned = this.getActiveWindow().scrollplugin.isPinned();
-
-    this.input.css('height', '');
-    const calculatedHeight = this.input.prop('scrollHeight');
-
-    // Show scrollbars if the input's height exceeds the max.
-    this.input.css(
-      'overflow-y',
-      calculatedHeight >= maxHeight ? 'scroll' : 'hidden'
-    );
-
-    this.input.css('height', calculatedHeight);
-    this.getActiveWindow().updateAndPin(pinned);
+    this.input.placeholder = placeholderText;
   }
 
   /**
@@ -1367,7 +1327,7 @@ class Chat {
     const normalized = data.nick.toLowerCase();
     if (this.users.has(normalized)) {
       this.users.delete(normalized);
-      this.autocomplete.remove(data.nick, true);
+      this.autocomplete.remove(data.nick);
     }
   }
 
