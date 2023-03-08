@@ -38,7 +38,7 @@ export default class ChatSettingsMenu extends ChatMenu {
       switch (name) {
         case 'profilesettings':
           if (!val && this.chat.authenticated)
-            fetch(`${this.config.api.base}/api/chat/me/settings`, {
+            fetch(`${this.chat.config.api.base}/api/chat/me/settings`, {
               credentials: 'include',
               method: 'DELETE',
             }).catch();

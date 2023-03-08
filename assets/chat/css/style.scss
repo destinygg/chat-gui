@@ -1495,7 +1495,8 @@ hr {
         font-weight: 500;
         color: $text-color;
       }
-      &.author {
+      &.tier,
+      &.creator {
         color: $text-color1;
       }
     }
@@ -1976,7 +1977,10 @@ button.btn {
   .msg-chat {
     margin: 0;
     padding: 1px 20px 1px 5px;
-    filter: drop-shadow(1px 1px 1px black);
+    filter: drop-shadow(-1px -1px 0 rgba(black, 0.5))
+      drop-shadow(1px -1px 0 rgba(black, 0.5))
+      drop-shadow(-1px 1px 0 rgba(black, 0.5))
+      drop-shadow(1px 1px 0 rgba(black, 0.5));
     letter-spacing: 0.03em;
   }
 
@@ -2057,133 +2061,137 @@ body.pref-fontscale[data-fontscale='10'] {
     margin: 4px;
     color: $text-color;
     .poll-header {
-      display: inline-block;
+      display: flex;
+      flex-direction: column;
       width: 100%;
       margin: 0.25em 0.1em 0.75em 0.1em;
-      .poll-question {
-        font-weight: 700;
-      }
-      .poll-close {
-        width: 1em;
-        height: 1em;
-        opacity: 0.5;
-        font-size: 1.2em;
-        background: transparent url('../img/icon-close.svg') no-repeat center
-          center;
-        background-size: contain;
-        cursor: pointer;
-        position: absolute;
-        top: $gutter-lg;
-        right: $gutter-lg;
-        &:hover {
-          opacity: 1;
+      .poll-top {
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+        .poll-question {
+          font-weight: 700;
+        }
+        .poll-close {
+          width: 2em;
+          height: 1em;
+          opacity: 0.5;
+          font-size: 1.2em;
+          background: transparent url('../img/icon-close.svg') no-repeat center
+            center;
+          background-size: contain;
+          cursor: pointer;
+          &:hover {
+            opacity: 1;
+          }
         }
       }
       .poll-title {
-        display: block;
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
         opacity: 0.5;
+        .poll-votes {
+          margin-right: $gutter-sm;
+        }
       }
     }
-  }
-  .opt {
-    display: block;
-    align-items: center;
-    margin-bottom: $gutter-md;
-    background-color: $color-surface-dark3;
-    border-radius: 6px;
-    padding: 4px;
-  }
-  .opt-info {
-    display: flex;
-    .opt-vote-number {
-      height: fit-content;
-      text-align: right;
-      border-radius: 4px;
-      padding: 0 0.25em;
-      margin: 0 0.25em 0.25em 0;
-    }
-    .opt-bar-option {
-      font-weight: 500;
-      font-size: 0.85em;
-      color: $text-color;
-      margin: 0.1em 0em 0.25em 0;
-      display: flex;
-      flex-grow: 1;
-    }
-  }
-  .opt:hover,
-  .opt:active {
-    cursor: pointer;
-    background-color: $color-surface-dark2;
-  }
-  .poll-footer {
-    color: $text-color1;
-    margin: 0.75em 0 0.5em 0;
-    display: flex;
-    .poll-timer {
+    .opt {
+      display: block;
+      align-items: center;
+      margin-bottom: $gutter-md;
       background-color: $color-surface-dark3;
-      overflow: hidden;
-      padding: 3px;
-      flex: 1;
       border-radius: 6px;
-      .poll-timer-inner {
-        min-height: 0.3em;
-        box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
-        background-color: $color-blue;
+      padding: 4px;
+      .opt-info {
+        display: flex;
+        .opt-vote-number {
+          height: fit-content;
+          border-radius: 4px;
+          padding: 0 0.3em 0 0.3em;
+          margin: 0 0.3em 0.3em 0;
+        }
+        .opt-bar-option {
+          font-weight: 500;
+          font-size: 0.85em;
+          color: $text-color;
+          margin: 0.1em 0em 0.25em 0;
+          display: flex;
+          flex-grow: 1;
+        }
+        .opt-bar-value {
+          font-weight: 500;
+          font-size: 0.85em;
+          margin-right: $gutter-sm;
+          color: $text-color;
+          white-space: nowrap;
+        }
+      }
+      .opt-bar {
+        flex: 1;
+        overflow: hidden;
+        background-color: $color-surface-dark2;
         border-radius: 4px;
+        max-height: 0.75em;
+        .opt-bar-inner {
+          padding: 0 0.25em;
+          min-height: 1.4em;
+          box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+          transition: all 750ms;
+          background-color: $color-darkred;
+          border-radius: 4px;
+        }
       }
-    }
-  }
-  .opt-bar {
-    flex: 1;
-    overflow: hidden;
-    background-color: $color-surface-dark2;
-    border-radius: 4px;
-    .opt-bar-inner {
-      padding: 0 0.25em;
-      min-height: 1.4em;
-      box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
-      transition: all 750ms;
-      background-color: $color-darkred;
-      border-radius: 4px;
-      .opt-bar-value {
-        font-weight: 500;
-        font-size: 0.85em;
+      &.opt-marked .opt-info .opt-vote-number {
+        background-color: $color-darkred;
         color: $text-color;
-        white-space: nowrap;
-        position: absolute;
-        right: 0;
-        margin: 0.15em 2em 0 0;
+      }
+    }
+    .poll-footer {
+      color: $text-color1;
+      margin: 0.75em 0 0.5em 0;
+      display: flex;
+      .poll-timer {
+        background-color: $color-surface-dark3;
+        overflow: hidden;
+        padding: 3px;
+        flex: 1;
+        border-radius: 6px;
+        .poll-timer-inner {
+          min-height: 0.3em;
+          box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+          background-color: $color-blue;
+          border-radius: 4px;
+        }
       }
     }
   }
-  .opt-marked .opt-info .opt-vote-number {
-    background-color: $color-darkred;
-    color: $text-color;
+  &:not(.poll-completed) {
+    .opt:hover {
+      cursor: pointer;
+      background-color: $color-surface-dark2;
+    }
   }
   &.poll-completed {
-    .opt {
-      .opt-info .opt-vote-number {
-        color: $text-color2;
-      }
+    .opt:not(.opt-winner) {
       .opt-bar-inner {
-        background-color: $color-surface-dark4;
-        color: $text-color2;
+        background-color: $color-surface-dark4 !important;
+      }
+      &.opt-marked {
+        .opt-info .opt-vote-number {
+          background-color: $color-surface-dark4;
+        }
       }
     }
-    .opt.opt-winner {
-      .opt-info .opt-vote-number {
-        color: $text-color1;
-      }
+    .opt-winner {
       .opt-bar-inner {
-        transition: background-color 750ms;
-        background-color: $color-blue;
-        color: $text-color;
+        background-color: $color-darkgreen !important;
       }
-    }
-    .opt.opt-marked .opt-info .opt-vote-number {
-      background-color: $color-darkred;
-      color: $text-color;
+      &.opt-marked {
+        .opt-info .opt-vote-number {
+          background-color: $color-darkgreen !important;
+        }
+      }
     }
   }
 }
