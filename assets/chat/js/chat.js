@@ -1776,13 +1776,17 @@ class Chat {
   }
 
   cmdHELP() {
-    let str = `Available commands: \r`;
-    commandsinfo.forEach((a, k) => {
-      str += a.alias
-        ? ` /${k}, /${a.alias.join(', /')} - ${a.desc} \r`
-        : ` /${k} - ${a.desc} \r`;
-    });
-    MessageBuilder.info(str).into(this);
+    const userCommands = Chat.generateHelpStrings(
+      'Available commands: \r',
+      [...commandsinfo].filter(([, command]) => !command.admin)
+    );
+    const adminCommands = Chat.generateHelpStrings(
+      'Available admin commands: \r',
+      [...commandsinfo].filter(([, command]) => command.admin)
+    );
+    MessageBuilder.info(userCommands.join('')).into(this);
+    if (this.user.hasModPowers())
+      MessageBuilder.info(adminCommands.join('')).into(this);
   }
 
   cmdHINT(parts) {
@@ -2596,6 +2600,20 @@ class Chat {
     win.on('hide', () => {
       conv.open = false;
     });
+  }
+
+  static generateHelpStrings(header, commandArray) {
+    return [header].concat(
+      commandArray
+        .sort()
+        .map(([key, command]) => Chat.formatHelpString(key, command))
+    );
+  }
+
+  static formatHelpString(key, command) {
+    return command.alias
+      ? ` /${key}, /${command.alias.join(', /')} - ${command.desc} \r`
+      : ` /${key} - ${command.desc} \r`;
   }
 
   static removeSlashCmdFromText(msg) {
