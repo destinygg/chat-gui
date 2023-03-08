@@ -709,7 +709,6 @@ class Chat {
     let resizing = false;
     const onresizecomplete = debounce(100, false, () => {
       resizing = false;
-      this.getActiveWindow().unlock();
       this.focusIfNothingSelected();
     });
     const onresize = () => {
@@ -722,7 +721,6 @@ class Chat {
       if (!resizing) {
         resizing = true;
         ChatMenu.closeMenus(this);
-        this.getActiveWindow().lock();
       }
       onresizecomplete();
     };
@@ -784,7 +782,7 @@ class Chat {
     });
 
     this.loadingscrn.fadeOut(250, () => this.loadingscrn.remove());
-    this.mainwindow.updateAndPin();
+    this.mainwindow.update(true);
 
     this.setDefaultPlaceholderText();
     MessageBuilder.status(this.config.welcomeMessage).into(this);
@@ -892,7 +890,7 @@ class Chat {
       history.forEach((line) => this.source.parseAndDispatch({ data: line }));
       this.backlogloading = false;
       MessageBuilder.element('<hr/>').into(this);
-      this.mainwindow.updateAndPin();
+      this.mainwindow.update(true);
     }
     return this;
   }
@@ -1005,7 +1003,6 @@ class Chat {
 
     // eslint-disable-next-line no-param-reassign
     if (win === null) win = this.mainwindow;
-    win.lock();
 
     // Break the current combo if this message is not an emote
     // We don't need to check what type the current message is, we just know that its a new message, so the combo is invalid.
@@ -1081,7 +1078,7 @@ class Chat {
       );
     }
 
-    win.unlock();
+    win.update();
   }
 
   resolveMessage(nick, str) {
@@ -1098,24 +1095,20 @@ class Chat {
   }
 
   removeMessageByNick(nick) {
-    this.mainwindow.lock();
     this.mainwindow.removelines(
       `.msg-chat[data-username="${nick.toLowerCase()}"]`
     );
-    this.mainwindow.unlock();
+    this.mainwindow.update();
   }
 
   windowToFront(name) {
     const win = this.windows.get(name);
     if (win !== null && win !== this.getActiveWindow()) {
       this.windows.forEach((w) => {
-        if (w.visible) {
-          if (!w.locked()) w.lock();
-          w.hide();
-        }
+        if (w.visible) w.hide();
       });
       win.show();
-      if (win.locked()) win.unlock();
+      win.update();
       this.redrawWindowIndicators();
     }
 
@@ -1181,16 +1174,13 @@ class Chat {
         }
       });
     }
-    // null check on main window, since main window calls this during initialization
-    if (this.mainwindow !== null) this.mainwindow.lock();
 
     this.windowselect.toggle(this.windows.size > 1);
 
-    if (this.mainwindow !== null) this.mainwindow.unlock();
+    if (this.mainwindow !== null) this.mainwindow.update();
   }
 
   censor(nick) {
-    this.mainwindow.lock();
     const c = this.mainwindow.getlines(
       `.msg-chat[data-username="${nick.toLowerCase()}"]`
     );
@@ -1205,7 +1195,7 @@ class Chat {
       default:
         break;
     }
-    this.mainwindow.unlock();
+    this.mainwindow.update();
   }
 
   ignored(nick, text = null) {
@@ -1272,7 +1262,6 @@ class Chat {
 
     const maxHeightPixels = this.input.css('maxHeight');
     const maxHeight = parseInt(maxHeightPixels.slice(0, -2), 10);
-    const pinned = this.getActiveWindow().scrollplugin.isPinned();
 
     this.input.css('height', '');
     const calculatedHeight = this.input.prop('scrollHeight');
@@ -1284,7 +1273,7 @@ class Chat {
     );
 
     this.input.css('height', calculatedHeight);
-    this.getActiveWindow().updateAndPin(pinned);
+    this.getActiveWindow().update();
   }
 
   /**
@@ -1381,9 +1370,8 @@ class Chat {
       Chat.removeSlashCmdFromText(win.lastmessage.message) === textonly
     ) {
       if (win.lastmessage.type === MessageTypes.EMOTE) {
-        this.mainwindow.lock();
         win.lastmessage.incEmoteCount();
-        this.mainwindow.unlock();
+        this.mainwindow.update();
       } else {
         win.lastmessage.ui.remove();
         MessageBuilder.emote(textonly, data.timestamp, 2).into(this);

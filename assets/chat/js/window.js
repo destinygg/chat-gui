@@ -22,7 +22,6 @@ class ChatWindow extends EventEmitter {
     this.maxlines = 0;
     this.linecount = 0;
     this.locks = 0;
-    this.waspinned = true;
     this.scrollplugin = null;
     this.visible = false;
     this.tag = null;
@@ -94,28 +93,14 @@ class ChatWindow extends EventEmitter {
     });
   }
 
-  locked() {
-    return this.locks > 0;
-  }
-
-  lock() {
-    this.locks += 1;
-    if (this.locks === 1) {
-      this.waspinned = this.scrollplugin.isPinned();
-    }
-  }
-
-  unlock() {
-    this.locks -= 1;
-    if (this.locks === 0) {
-      this.scrollplugin.updateAndPin(this.waspinned);
-    }
+  update(forcePin) {
+    this.scrollplugin.update(forcePin);
   }
 
   // Rid excess chat lines if the chat is pinned
   // Get the scroll position before adding the new line / removing old lines
   cleanup() {
-    if (this.scrollplugin.isPinned() || this.waspinned) {
+    if (this.scrollplugin.wasPinned) {
       const lines = [...this.lines.children];
       if (lines.length >= this.maxlines) {
         const remove = lines.slice(0, lines.length - this.maxlines);
@@ -128,10 +113,6 @@ class ChatWindow extends EventEmitter {
   }
 
   cleanupThrottle = throttle(50, this.cleanup);
-
-  updateAndPin(pin = true) {
-    this.scrollplugin.updateAndPin(pin);
-  }
 }
 
 export default ChatWindow;

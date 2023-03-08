@@ -90,18 +90,16 @@ class ChatPoll {
   hide() {
     if (!this.hidden) {
       this.hidden = true;
-      this.chat.mainwindow.lock();
       this.ui.removeClass('active');
-      this.chat.mainwindow.unlock();
+      this.chat.mainwindow.update();
     }
   }
 
   show() {
     if (this.hidden) {
       this.hidden = false;
-      this.chat.mainwindow.lock();
       this.ui.addClass('active');
-      this.chat.mainwindow.unlock();
+      this.chat.mainwindow.update();
     }
   }
 
