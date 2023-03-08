@@ -1883,7 +1883,7 @@ button.btn {
 
   #chat,
   .msg-chat,
-  .msg-chat:before,
+  .msg-chat:not(.rainbow-border):before,
   .greentext {
     background: none !important;
   }
@@ -1899,6 +1899,41 @@ button.btn {
   }
   #chat-pinned-frame {
     display: none !important;
+  }
+
+  // Donations and subs
+  .msg-donation,
+  .msg-subscription {
+    text-shadow: none;
+    padding: 0;
+    border-style: none none none solid;
+    border-width: 6px;
+    border-radius: 0;
+
+    .donation-info,
+    .subscription-info,
+    .text-wrapper {
+      padding: 0 0 0 $gutter-md;
+      background: none;
+    }
+
+    &.rainbow-border {
+      &:before {
+        content: '';
+        position: absolute;
+        top: unset;
+        right: 100%;
+        bottom: unset;
+        left: unset;
+        z-index: -1;
+        margin: -1px 0 0 0;
+        border-radius: inherit;
+        background: var(--rainbow-gradient);
+        aspect-ratio: 1/1;
+        height: 100%;
+        transform: rotate(90deg);
+      }
+    }
   }
 
   time,
