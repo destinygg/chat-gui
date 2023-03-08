@@ -698,10 +698,8 @@ class Chat {
 
     // Resize
     let resizing = false;
-    let wasPinned = true;
     const onresizecomplete = debounce(100, false, () => {
       resizing = false;
-      this.getActiveWindow().update(wasPinned);
       this.focusIfNothingSelected();
     });
     const onresize = () => {
@@ -714,7 +712,6 @@ class Chat {
       if (!resizing) {
         resizing = true;
         ChatMenu.closeMenus(this);
-        wasPinned = this.getActiveWindow().waspinned;
       }
       onresizecomplete();
     };
