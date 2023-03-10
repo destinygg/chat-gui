@@ -75,9 +75,11 @@ export default class UrlFormatter {
         let urlText = encodedUrl;
         if (encodedUrl.length > maxUrlLength) {
           const middleIndex = Math.floor(maxUrlLength / 2);
-          const start = encodedUrl.slice(0, middleIndex);
-          const end = encodedUrl.slice(-middleIndex - 10);
-          urlText = `${start}...${end}`;
+          urlText = `${encodedUrl.slice(
+            0,
+            middleIndex - 3
+          )}...${encodedUrl.slice(middleIndex + 4 - (encodedUrl.length % 2))}`;
+          urlText = `${urlText.slice(0, 40)}...${urlText.slice(-40)}`;
         }
         const extra = self.encodeUrl(decodedUrl.substring(m[0].length));
         const href = `${scheme ? '' : 'http://'}${encodedUrl}`;
