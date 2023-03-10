@@ -71,9 +71,17 @@ export default class UrlFormatter {
       const m = decodedUrl.match(self.linkregex);
       if (m) {
         const encodedUrl = self.encodeUrl(m[0]);
+        const maxUrlLength = 90;
+        let urlText = encodedUrl;
+        if (encodedUrl.length > maxUrlLength) {
+          const middleIndex = Math.floor(maxUrlLength / 2);
+          const start = encodedUrl.slice(0, middleIndex);
+          const end = encodedUrl.slice(-middleIndex - 10);
+          urlText = `${start}...${end}`;
+        }
         const extra = self.encodeUrl(decodedUrl.substring(m[0].length));
         const href = `${scheme ? '' : 'http://'}${encodedUrl}`;
-        return `<a target="_blank" class="externallink ${extraclass}" href="${href}" rel="nofollow">${encodedUrl}</a>${extra}`;
+        return `<a target="_blank" class="externallink ${extraclass}" href="${href}" rel="nofollow">${urlText}</a>${extra}`;
       }
       return url;
     });
