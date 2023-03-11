@@ -539,9 +539,10 @@ hr {
   border-radius: 10px;
   border-style: solid;
   border-color: unset;
+  border-width: 3px;
   display: flex;
   flex-direction: column;
-  margin: $gutter-sm $gutter-md * 2 $gutter-sm 0;
+  margin: $gutter-sm $gutter-md * 2 $gutter-sm $gutter-sm;
 
   .user {
     margin-left: unset;
@@ -655,9 +656,10 @@ hr {
   border-radius: 10px;
   border-style: solid;
   border-color: unset;
+  border-width: 3px;
   display: flex;
   flex-direction: column;
-  margin: $gutter-sm $gutter-md * 2 $gutter-sm 0;
+  margin: $gutter-sm $gutter-md * 2 $gutter-sm $gutter-sm;
 
   .user {
     margin-left: unset;
