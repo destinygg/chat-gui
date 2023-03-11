@@ -56,6 +56,7 @@ export default class ChatSubscriptionMessage extends ChatUserMessage {
 
     attr.style = attrStyle;
     const classes = rainbowColor ? ['rainbow-border'] : [];
+    if (!this.message) classes.push('no-message');
 
     const colorFlair = usernameColorFlair(chat.flairs, this.user);
 
@@ -122,17 +123,15 @@ export default class ChatSubscriptionMessage extends ChatUserMessage {
 
         subscriptionIcon.classList.add('gift');
 
-        if (!this.message) classes.push('mass-gift');
-
         break;
       }
       case SubTypes.MASSGIFT: {
-        const subNotifyMessage = `${user.outerHTML} gifted ${this.quantity} ${tier.outerHTML} subs to the community`;
+        const subNotifyMessage = `${user.outerHTML} gifted ${this.quantity} ${
+          tier.outerHTML
+        } ${this.quantity > 1 ? 'subs' : 'sub'} to the community`;
         subscriptionWrapper.innerHTML = subNotifyMessage;
 
         subscriptionIcon.classList.add('mass-gift');
-
-        if (!this.message) classes.push('mass-gift');
 
         break;
       }

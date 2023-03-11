@@ -45,7 +45,8 @@ export default class ChatDonationMessage extends ChatUserMessage {
       })}`
     );
 
-    const donationTier = this.selectDonationTier(this.amount);
+    const classes = this.selectDonationTier(this.amount);
+    if (!this.message) classes.push('no-message');
 
     const donationWrapper = document.createElement('span');
     donationWrapper.classList.add('donation-wrapper');
@@ -54,7 +55,7 @@ export default class ChatDonationMessage extends ChatUserMessage {
     const donationIconWrapper = document.createElement('a');
     donationIconWrapper.classList.add('icon-wrapper');
     const donationIcon = document.createElement('i');
-    donationIcon.classList.add('donation-icon', donationTier[0]);
+    donationIcon.classList.add('donation-icon', classes[0]);
     donationIconWrapper.append(donationIcon);
 
     const donationInfo = document.createElement('div');
@@ -62,12 +63,12 @@ export default class ChatDonationMessage extends ChatUserMessage {
     donationInfo.append(donationWrapper);
     donationInfo.append(donationIconWrapper);
 
-    return this.wrap(
-      `${
-        donationInfo.outerHTML
-      }<span class="text-wrapper">${this.buildMessageTxt(chat)}</span>`,
-      donationTier,
-      attr
-    );
+    const message = this.message
+      ? `${
+          donationInfo.outerHTML
+        }<span class="text-wrapper">${this.buildMessageTxt(chat)}</span>`
+      : donationInfo.outerHTML;
+
+    return this.wrap(message, classes, attr);
   }
 }

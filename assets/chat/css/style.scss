@@ -631,6 +631,12 @@ hr {
     border-color: #e62117;
   }
 
+  &.no-message {
+    .donation-info {
+      border-radius: 10px;
+    }
+  }
+
   &.censored {
     .text {
       display: none;
@@ -742,7 +748,7 @@ hr {
     }
   }
 
-  &.mass-gift {
+  &.no-message {
     .subscription-info {
       border-radius: 10px;
     }
