@@ -74,11 +74,6 @@ export default class UrlFormatter {
         const maxUrlLength = 90;
         let urlText = encodedUrl;
         if (urlText.length > maxUrlLength) {
-          const middleIndex = Math.floor(maxUrlLength / 2);
-          urlText = `${encodedUrl.slice(
-            0,
-            middleIndex - 3
-          )}...${encodedUrl.slice(middleIndex + 4 - (encodedUrl.length % 2))}`;
           urlText = `${urlText.slice(0, 40)}...${urlText.slice(-40)}`;
         }
         const extra = self.encodeUrl(decodedUrl.substring(m[0].length));
