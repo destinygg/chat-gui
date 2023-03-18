@@ -2212,13 +2212,16 @@ class Chat {
         }
         const b = { ...banstruct, ...data };
         const by = b.username ? b.username : 'Chat';
-        const start = moment(b.starttimestamp).format(DATE_FORMATS.FULL);
+        const start = moment
+          .utc(b.starttimestamp)
+          .local()
+          .format(DATE_FORMATS.FULL);
         if (!b.endtimestamp) {
           MessageBuilder.info(
             `Permanent ban by ${by} started on ${start}.`
           ).into(this);
         } else {
-          const end = moment(b.endtimestamp).calendar();
+          const end = moment.utc(b.endtimestamp).local().calendar();
           MessageBuilder.info(
             `Temporary ban by ${by} started on ${start} and ending by ${end}.`
           ).into(this);
