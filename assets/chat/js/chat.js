@@ -880,8 +880,11 @@ class Chat {
   }
 
   setEmotes(emotes) {
-    this.emoteService.emotes = emotes;
-    this.emoteService.prefixes.forEach((e) => this.autocomplete.add(e, true));
+    this.emoteService.setEmotes(emotes);
+    this.emoteService
+      .emotesForUser(this.user)
+      .map((e) => e.prefix)
+      .forEach((e) => this.autocomplete.add(e, true));
     return this;
   }
 
@@ -1376,7 +1379,7 @@ class Chat {
     const win = this.mainwindow;
     if (
       win.lastmessage !== null &&
-      this.emoteService.prefixes.includes(textonly) &&
+      this.emoteService.canUserUseEmote(usr, textonly) &&
       Chat.removeSlashCmdFromText(win.lastmessage.message) === textonly
     ) {
       if (win.lastmessage.type === MessageTypes.EMOTE) {
@@ -1686,7 +1689,7 @@ class Chat {
       // EMOTE SPAM
       else if (
         this.source.isConnected() &&
-        this.emoteService.prefixes.includes(textonly)
+        this.emoteService.getEmote(textonly)
       ) {
         // Its easier to deal with combos with the this.unresolved flow
         this.source.send('MSG', { data: raw });

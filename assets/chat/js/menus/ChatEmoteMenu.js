@@ -37,13 +37,7 @@ export default class ChatEmoteMenu extends ChatMenu {
   buildEmoteMenu() {
     this.emoteMenuContent.empty();
 
-    const tiers = new Set(
-      this.chat.emoteService.emotes
-        .map((emote) => emote.minimumSubTier)
-        .sort((a, b) => a - b)
-    );
-
-    tiers.forEach((tier) => {
+    this.chat.emoteService.tiers.forEach((tier) => {
       const emotes = this.chat.emoteService.emotePrefixesForTier(tier);
       if (!emotes.length) return;
 
