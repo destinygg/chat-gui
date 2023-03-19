@@ -697,20 +697,28 @@ class Chat {
     // Visibility
     document.addEventListener(
       'visibilitychange',
-      debounce(100, false, () => {
-        this.ishidden = (document.visibilityState || 'visible') !== 'visible';
-        if (!this.ishidden) this.focusIfNothingSelected();
-        else ChatMenu.closeMenus(this);
-      }),
+      debounce(
+        100,
+        () => {
+          this.ishidden = (document.visibilityState || 'visible') !== 'visible';
+          if (!this.ishidden) this.focusIfNothingSelected();
+          else ChatMenu.closeMenus(this);
+        },
+        { atBegin: false }
+      ),
       true
     );
 
     // Resize
     let resizing = false;
-    const onresizecomplete = debounce(100, false, () => {
-      resizing = false;
-      this.focusIfNothingSelected();
-    });
+    const onresizecomplete = debounce(
+      100,
+      () => {
+        resizing = false;
+        this.focusIfNothingSelected();
+      },
+      { atBegin: false }
+    );
     const onresize = () => {
       // If this is a mobile screen, don't close menus.
       // The virtual keyboard triggers a 'resize' event, and menus shouldn't be closed whenever the virtual keyboard is opened
@@ -915,7 +923,9 @@ class Chat {
   // De-bounced saveSettings
   commitSettings() {
     if (!this.debouncedsave) {
-      this.debouncedsave = debounce(1000, false, () => this.saveSettings());
+      this.debouncedsave = debounce(1000, () => this.saveSettings(), {
+        atBegin: false,
+      });
     }
     this.debouncedsave();
   }
@@ -1240,7 +1250,9 @@ class Chat {
     }
 
     if (this.debounceFocus === undefined) {
-      this.debounceFocus = debounce(10, false, (c) => c.input.focus());
+      this.debounceFocus = debounce(10, (c) => c.input.focus(), {
+        atBegin: false,
+      });
     }
     if (window.getSelection().isCollapsed && !this.input.is(':focus')) {
       this.debounceFocus(this);

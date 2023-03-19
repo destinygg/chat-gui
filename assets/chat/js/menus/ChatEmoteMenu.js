@@ -17,10 +17,14 @@ export default class ChatEmoteMenu extends ChatMenu {
     });
     this.searchinput.on(
       'keyup',
-      debounce(100, false, () => {
-        this.searchterm = this.searchinput.val();
-        this.buildEmoteMenu();
-      })
+      debounce(
+        100,
+        () => {
+          this.searchterm = this.searchinput.val();
+          this.buildEmoteMenu();
+        },
+        { atBegin: false }
+      )
     );
   }
 

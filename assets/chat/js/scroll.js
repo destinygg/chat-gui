@@ -53,10 +53,14 @@ class ChatScrollPlugin {
   setupResize() {
     let resizing = false;
     let pinnedBeforeResize = this.wasPinned;
-    const onResizeComplete = debounce(100, false, () => {
-      resizing = false;
-      this.update(pinnedBeforeResize);
-    });
+    const onResizeComplete = debounce(
+      100,
+      () => {
+        resizing = false;
+        this.update(pinnedBeforeResize);
+      },
+      { atBegin: false }
+    );
     this.resizeObserver = new ResizeObserver(() => {
       if (!resizing) {
         resizing = true;
