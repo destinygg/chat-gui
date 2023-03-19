@@ -82,7 +82,7 @@ class ChatPoll {
         }
       }
     });
-    this.throttleVoteCast = throttle(100, false, () => {
+    this.throttleVoteCast = throttle(100, () => {
       this.updateBars();
     });
   }
