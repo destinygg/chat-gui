@@ -34,6 +34,7 @@ import EmoteService from './emotes';
 import UserFeatures from './features';
 import makeSafeForRegex from './regex';
 import { HashLinkConverter, MISSING_ARG_ERROR } from './hashlinkconverter';
+import ChatCommands, { CHAT_COMMANDS } from './commands';
 
 const regexslashcmd = /^\/([a-z0-9]+)[\s]?/i;
 const regextime = /(\d+(?:\.\d*)?)([a-z]+)?/gi;
@@ -140,234 +141,6 @@ const settingsdefault = new Map([
   ['fontscale', 'auto'],
   ['censorbadwords', false],
 ]);
-const commandsinfo = new Map([
-  [
-    'help',
-    {
-      desc: 'List all chat commands.',
-    },
-  ],
-  [
-    'emotes',
-    {
-      desc: 'Return all emotes in text form.',
-    },
-  ],
-  [
-    'me',
-    {
-      desc: 'Send an action message in italics.',
-    },
-  ],
-  [
-    'message',
-    {
-      desc: 'Send a whisper to <nick>.',
-      alias: ['msg', 'whisper', 'w', 'tell', 't', 'notify'],
-    },
-  ],
-  [
-    'ignore',
-    {
-      desc: 'Stop showing messages from <nick>.',
-    },
-  ],
-  [
-    'unignore',
-    {
-      desc: 'Remove <nick> from your ignore list.',
-    },
-  ],
-  [
-    'unignoreall',
-    {
-      desc: 'Remove all users from your ignore list.',
-    },
-  ],
-  [
-    'highlight',
-    {
-      desc: 'Highlight messages from <nick> for easier visibility.',
-    },
-  ],
-  [
-    'unhighlight',
-    {
-      desc: 'Unhighlight <nick>.',
-    },
-  ],
-  [
-    'maxlines',
-    {
-      desc: 'Set the maximum number of <lines> the chat will store.',
-    },
-  ],
-  [
-    'mute',
-    {
-      desc: 'Stop <nick> from sending messages.',
-      admin: true,
-    },
-  ],
-  [
-    'unmute',
-    {
-      desc: 'Unmute <nick>.',
-      admin: true,
-    },
-  ],
-  [
-    'subonly',
-    {
-      desc: 'Turn the subscribers-only chat mode <on> or <off>.',
-      admin: true,
-    },
-  ],
-  [
-    'ban',
-    {
-      desc: 'Stop <nick> from connecting to the chat.',
-      admin: true,
-    },
-  ],
-  [
-    'unban',
-    {
-      desc: 'Unban <nick>.',
-      admin: true,
-    },
-  ],
-  [
-    'baninfo',
-    {
-      desc: 'Check your ban status.',
-    },
-  ],
-  [
-    'timestampformat',
-    {
-      desc: 'Set the time format of the chat.',
-    },
-  ],
-  [
-    'tag',
-    {
-      desc: "Mark <nick>'s messages.",
-    },
-  ],
-  [
-    'untag',
-    {
-      desc: 'Untags <nick>.',
-    },
-  ],
-  [
-    'embed',
-    {
-      desc: 'Embed a video to bigscreen.',
-      alias: ['e'],
-    },
-  ],
-  [
-    'postembed',
-    {
-      desc: 'Post a video embed in chat.',
-      alias: ['pe'],
-    },
-  ],
-  [
-    'open',
-    {
-      desc: 'Open a conversation with a user.',
-      alias: ['o'],
-    },
-  ],
-  [
-    'exit',
-    {
-      desc: 'Exit the conversation you have open.',
-    },
-  ],
-  [
-    'reply',
-    {
-      desc: 'Reply to the last whisper you received.',
-      alias: ['r'],
-    },
-  ],
-  [
-    'stalk',
-    {
-      desc: 'Return a list of messages from <nick>.',
-      alias: ['s'],
-    },
-  ],
-  [
-    'mentions',
-    {
-      desc: 'Return a list of messages where <nick> is mentioned.',
-      alias: ['m'],
-    },
-  ],
-  [
-    'showpoll',
-    {
-      desc: 'Show last poll.',
-      alias: ['showvote'],
-    },
-  ],
-  [
-    'poll',
-    {
-      desc: 'Start a poll.',
-      alias: ['vote'],
-    },
-  ],
-  [
-    'spoll',
-    {
-      desc: 'Start a sub-weighted poll.',
-      alias: ['svote'],
-    },
-  ],
-  [
-    'pollstop',
-    {
-      desc: 'Stop a poll you started.',
-      alias: ['votestop'],
-    },
-  ],
-  [
-    'pin',
-    {
-      desc: 'Pins a message to chat',
-      admin: true,
-      alias: ['motd'],
-    },
-  ],
-  [
-    'unpin',
-    {
-      desc: 'Unpins a message from chat',
-      admin: true,
-      alias: ['unmotd'],
-    },
-  ],
-  [
-    'host',
-    {
-      desc: 'Hosts a livestream, video, or vod to bigscreen.',
-      admin: true,
-    },
-  ],
-  [
-    'unhost',
-    {
-      desc: 'Removes hosted content from bigscreen.',
-      admin: true,
-    },
-  ],
-]);
 const banstruct = {
   id: 0,
   userid: 0,
@@ -416,6 +189,7 @@ class Chat {
     this.whispers = new Map();
     this.windows = new Map();
     this.settings = new Map(settingsdefault);
+    this.commands = new ChatCommands();
     this.autocomplete = new ChatAutoComplete();
     this.menus = new Map();
     this.taggednicks = new Map();
@@ -648,11 +422,9 @@ class Chat {
       )
     );
 
-    commandsinfo.forEach((a, k) => {
-      this.autocomplete.add(`/${k}`);
-      (a.alias || []).forEach((i) => this.autocomplete.add(`/${i}`));
-    });
-
+    this.commands
+      .generateAutocomplete(CHAT_COMMANDS, this.user.hasModPowers())
+      .forEach((command) => this.autocomplete.add(command));
     this.autocomplete.bind(this);
 
     // Chat input
@@ -1776,17 +1548,11 @@ class Chat {
   }
 
   cmdHELP() {
-    const userCommands = Chat.generateHelpStrings(
-      'Available commands: \r',
-      [...commandsinfo].filter(([, command]) => !command.admin)
-    );
-    const adminCommands = Chat.generateHelpStrings(
-      'Available admin commands: \r',
-      [...commandsinfo].filter(([, command]) => command.admin)
-    );
-    MessageBuilder.info(userCommands.join('')).into(this);
-    if (this.user.hasModPowers())
-      MessageBuilder.info(adminCommands.join('')).into(this);
+    const helpStrings = this.commands.generateHelpStrings(CHAT_COMMANDS);
+    MessageBuilder.info(helpStrings.user.join('')).into(this);
+    if (this.user.hasModPowers()) {
+      MessageBuilder.info(helpStrings.admin.join('')).into(this);
+    }
   }
 
   cmdHINT(parts) {
@@ -2600,20 +2366,6 @@ class Chat {
     win.on('hide', () => {
       conv.open = false;
     });
-  }
-
-  static generateHelpStrings(header, commandArray) {
-    return [header].concat(
-      commandArray
-        .sort()
-        .map(([key, command]) => Chat.formatHelpString(key, command))
-    );
-  }
-
-  static formatHelpString(key, command) {
-    return command.alias
-      ? ` /${key}, /${command.alias.join(', /')} - ${command.desc} \r`
-      : ` /${key} - ${command.desc} \r`;
   }
 
   static removeSlashCmdFromText(msg) {
