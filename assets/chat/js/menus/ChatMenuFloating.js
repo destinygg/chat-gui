@@ -25,8 +25,12 @@ export default class ChatMenuFloating extends ChatMenu {
         this.x1 = e.clientX;
         this.y1 = e.clientY;
       });
-      this.chat.output.on('mousemove', (e) => {this.drag(e)});
-      this.ui.on('mousemove', (e) => {this.drag(e)});
+      this.chat.output.on('mousemove', (e) => {
+        this.drag(e);
+      });
+      this.ui.on('mousemove', (e) => {
+        this.drag(e);
+      });
     }
   }
 
