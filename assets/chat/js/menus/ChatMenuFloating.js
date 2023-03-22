@@ -15,6 +15,7 @@ export default class ChatMenuFloating extends ChatMenu {
 
     if (draggable) {
       this.draggable = this.ui.find(draggable);
+      this.draggable[0].style.cursor = 'grab';
       this.draggable.on('mouseup', (e) => {
         e.preventDefault();
         this.mousedown = false;
@@ -41,8 +42,11 @@ export default class ChatMenuFloating extends ChatMenu {
       this.x1 = e.clientX;
       this.y1 = e.clientY;
 
+      this.draggable[0].style.cursor = 'grabbing';
       this.ui[0].style.left = `${this.ui[0].offsetLeft - this.x2}px`;
       this.ui[0].style.top = `${this.ui[0].offsetTop - this.y2}px`;
+    } else {
+      this.draggable[0].style.cursor = 'grab';
     }
   }
 
