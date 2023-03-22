@@ -3,6 +3,7 @@ import ChatUIMessage from './ChatUIMessage';
 import ChatMessage from './ChatMessage';
 import ChatUserMessage from './ChatUserMessage';
 import ChatEmoteMessage from './ChatEmoteMessage';
+import PinnedMessage from './PinnedMessage';
 
 export default class MessageBuilder {
   static element(message, classes = []) {
@@ -48,5 +49,9 @@ export default class MessageBuilder {
     const m = new ChatUserMessage(message, user, timestamp);
     m.historical = true;
     return m;
+  }
+
+  static pinned(message, user, timestamp, uuid) {
+    return new PinnedMessage(message, user, timestamp, uuid);
   }
 }

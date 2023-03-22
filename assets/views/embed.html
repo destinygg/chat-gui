@@ -1,9 +1,31 @@
 <div id="chat" class="chat">
   <div id="chat-windows-select"></div>
 
-  <div id="chat-vote-frame"></div>
+  <div id="chat-poll-frame">
+    <div class="poll-frame">
+      <div class="poll-header">
+        <div class="poll-top">
+          <span class="poll-question"></span>
+          <span class="poll-close" title="Close poll"></span>
+        </div>
+        <div class="poll-title">
+          <span class="poll-info"></span>
+          <span class="poll-votes"></span>
+        </div>
+      </div>
+      <div class="poll-options"></div>
+      <div class="poll-footer">
+        <div class="poll-timer">
+          <div class="poll-timer-inner"></div>
+        </div>
+        <span class="poll-end"></span>
+      </div>
+    </div>
+  </div>
 
-  <div id="chat-output-frame" data-scroll-notify></div>
+  <div id="chat-output-frame" data-scroll-notify>
+    <div id="chat-pinned-frame"></div>
+  </div>
 
   <div id="chat-input-frame">
     <div id="chat-input-wrap">
@@ -15,6 +37,9 @@
         autofocus
         spellcheck
       ></textarea>
+      <a id="chat-input-subonly" class="chat-tool-btn" title="Subonly mode">
+        <i class="btn-icon"></i>
+      </a>
     </div>
     <div id="chat-tools-wrap">
       <div class="chat-tools-group">
@@ -41,8 +66,8 @@
       <div class="toolbar">
         <h5><span>Settings</span> <i class="chat-menu-close"></i></h5>
       </div>
-      <div class="scrollable nano">
-        <div class="content nano-content">
+      <div class="scrollable">
+        <div class="content">
           <div id="chat-settings-form">
             <div class="form-group checkbox">
               <label title="Persistent profile settings">
@@ -198,8 +223,8 @@
       <div class="toolbar">
         <h5><span>Users</span> <i class="chat-menu-close"></i></h5>
       </div>
-      <div class="scrollable nano">
-        <div class="content nano-content"></div>
+      <div class="scrollable">
+        <div class="content"></div>
       </div>
       <div id="chat-user-list-search">
         <input
@@ -219,12 +244,13 @@
       </div>
       <div class="user-info">
         <h5 class="date-subheader"></h5>
+        <h5 class="tag-subheader"></h5>
         <h5 class="flairs-subheader">Flairs:</h5>
         <div class="flairs"></div>
         <h5 class="stalk-subheader">Selected messages:</h5>
         <div class="stalk">
-          <div class="scrollable nano">
-            <div class="content nano-content"></div>
+          <div class="scrollable">
+            <div class="content"></div>
           </div>
         </div>
       </div>
@@ -258,8 +284,9 @@
     <div class="chat-menu-inner floating-window">
       <div class="emote-image"></div>
       <div class="emote-info">
-        <div class="name"></div>
-        <div class="creator"></div>
+        <div class="name" title="Emote name"></div>
+        <div class="creator" title="Emote creator"></div>
+        <div class="tier" title="Emote tier"></div>
       </div>
     </div>
   </div>
@@ -269,8 +296,8 @@
       <div class="toolbar">
         <h5><span>Emotes</span> <i class="chat-menu-close"></i></h5>
       </div>
-      <div class="scrollable nano">
-        <div class="content nano-content"></div>
+      <div class="scrollable">
+        <div class="content"></div>
       </div>
       <div id="chat-emote-list-search">
         <input
@@ -288,8 +315,8 @@
       <div class="toolbar">
         <h5><span>Whispers</span> <i class="chat-menu-close"></i></h5>
       </div>
-      <div class="scrollable nano">
-        <div class="content nano-content">
+      <div class="scrollable">
+        <div class="content">
           <ul></ul>
         </div>
       </div>

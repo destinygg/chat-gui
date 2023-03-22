@@ -7,7 +7,12 @@ import { Notification } from './notification';
 import EventEmitter from './emitter';
 import ChatSource from './source';
 import ChatUser from './user';
-import { MessageBuilder, MessageTypes, ChatMessage } from './messages';
+import {
+  MessageBuilder,
+  MessageTypes,
+  ChatMessage,
+  checkIfPinWasDismissed,
+} from './messages';
 import {
   ChatMenu,
   ChatUserMenu,
@@ -23,11 +28,12 @@ import ChatUserFocus from './focus';
 import ChatStore from './store';
 import Settings from './settings';
 import ChatWindow from './window';
-import { ChatVote, parseQuestionAndTime, VOTE_END_TIME } from './vote';
+import { ChatPoll, parseQuestionAndTime } from './poll';
 import { isMuteActive, MutedTimer } from './mutedtimer';
 import EmoteService from './emotes';
 import UserFeatures from './features';
 import makeSafeForRegex from './regex';
+import { HashLinkConverter, MISSING_ARG_ERROR } from './hashlinkconverter';
 
 const regexslashcmd = /^\/([a-z0-9]+)[\s]?/i;
 const regextime = /(\d+(?:\.\d*)?)([a-z]+)?/gi;
@@ -68,6 +74,9 @@ const errorstrings = new Map([
   ],
   ['notfound', 'The user was not found'],
   ['notconnected', 'You have to be connected to use that'],
+  ['activepoll', 'Poll already started.'],
+  ['noactivepoll', 'No poll started.'],
+  ['alreadyvoted', 'You have already voted!'],
 ]);
 const hintstrings = new Map([
   [
@@ -301,21 +310,47 @@ const commandsinfo = new Map([
     },
   ],
   [
-    'vote',
+    'showpoll',
     {
-      desc: 'Start a vote.',
+      desc: 'Show last poll.',
+      alias: ['showvote'],
     },
   ],
   [
-    'votestop',
+    'poll',
     {
-      desc: 'Stop a vote you started.',
+      desc: 'Start a poll.',
+      alias: ['vote'],
     },
   ],
   [
-    'svote',
+    'spoll',
     {
-      desc: 'Start a sub-weighted vote.',
+      desc: 'Start a sub-weighted poll.',
+      alias: ['svote'],
+    },
+  ],
+  [
+    'pollstop',
+    {
+      desc: 'Stop a poll you started.',
+      alias: ['votestop'],
+    },
+  ],
+  [
+    'pin',
+    {
+      desc: 'Pins a message to chat',
+      admin: true,
+      alias: ['motd'],
+    },
+  ],
+  [
+    'unpin',
+    {
+      desc: 'Unpins a message from chat',
+      admin: true,
+      alias: ['unmotd'],
     },
   ],
   [
@@ -363,14 +398,16 @@ class Chat {
     this.css = null;
     this.output = null;
     this.input = null;
+    this.subonlyicon = null;
     this.loginscrn = null;
     this.loadingscrn = null;
     this.showmotd = true;
+    this.subonly = false;
     this.authenticated = false;
     this.backlogloading = false;
     this.unresolved = [];
 
-    this.flairs = new Set();
+    this.flairs = [];
     this.flairsMap = new Map();
     this.emoteService = new EmoteService();
 
@@ -394,6 +431,9 @@ class Chat {
     // e.g. control.emit('CONNECT', 'ws://localhost:9001') is essentially chat.cmdCONNECT('ws://localhost:9001')
     this.control = new EventEmitter(this);
 
+    // A converter to convert URLs into an embed hash link
+    this.hashLinkConverter = new HashLinkConverter();
+
     // The websocket connection, emits events from the chat server
     this.source = new ChatSource();
 
@@ -404,6 +444,7 @@ class Chat {
     this.source.on('DISPATCH', (data) => this.onDISPATCH(data));
     this.source.on('CLOSE', (data) => this.onCLOSE(data));
     this.source.on('NAMES', (data) => this.onNAMES(data));
+    this.source.on('PIN', (data) => this.onPIN(data));
     this.source.on('QUIT', (data) => this.onQUIT(data));
     this.source.on('MSG', (data) => this.onMSG(data));
     this.source.on('MUTE', (data) => this.onMUTE(data));
@@ -416,8 +457,8 @@ class Chat {
     this.source.on('BROADCAST', (data) => this.onBROADCAST(data));
     this.source.on('PRIVMSGSENT', (data) => this.onPRIVMSGSENT(data));
     this.source.on('PRIVMSG', (data) => this.onPRIVMSG(data));
-    this.source.on('VOTE', (data) => this.onVOTE(data));
-    this.source.on('VOTESTOP', (data) => this.onVOTESTOP(data));
+    this.source.on('POLLSTART', (data) => this.onPOLLSTART(data));
+    this.source.on('POLLSTOP', (data) => this.onPOLLSTOP(data));
     this.source.on('VOTECAST', (data) => this.onVOTECAST(data));
 
     this.control.on('SEND', (data) => this.cmdSEND(data));
@@ -466,11 +507,20 @@ class Chat {
     this.control.on('M', (data) => this.cmdMENTIONS(data));
     this.control.on('STALK', (data) => this.cmdSTALK(data));
     this.control.on('S', (data) => this.cmdSTALK(data));
-    this.control.on('VOTE', (data) => this.cmdVOTE(data, 'VOTE'));
-    this.control.on('SVOTE', (data) => this.cmdVOTE(data, 'SVOTE'));
-    this.control.on('V', (data) => this.cmdVOTE(data, 'VOTE'));
-    this.control.on('VOTESTOP', (data) => this.cmdVOTESTOP(data));
-    this.control.on('VS', (data) => this.cmdVOTESTOP(data));
+    this.control.on('SHOWPOLL', () => this.cmdSHOWPOLL());
+    this.control.on('SHOWVOTE', () => this.cmdSHOWPOLL());
+    this.control.on('V', (data) => this.cmdPOLL(data, 'POLL'));
+    this.control.on('POLL', (data) => this.cmdPOLL(data, 'POLL'));
+    this.control.on('VOTE', (data) => this.cmdPOLL(data, 'POLL'));
+    this.control.on('SPOLL', (data) => this.cmdPOLL(data, 'SPOLL'));
+    this.control.on('SVOTE', (data) => this.cmdPOLL(data, 'SPOLL'));
+    this.control.on('POLLSTOP', (data) => this.cmdPOLLSTOP(data));
+    this.control.on('VOTESTOP', (data) => this.cmdPOLLSTOP(data));
+    this.control.on('VS', (data) => this.cmdPOLLSTOP(data));
+    this.control.on('PIN', (data) => this.cmdPIN(data));
+    this.control.on('MOTD', (data) => this.cmdPIN(data));
+    this.control.on('UNPIN', () => this.cmdUNPIN());
+    this.control.on('UNMOTD', () => this.cmdUNPIN());
     this.control.on('HOST', (data) => this.cmdHOST(data));
     this.control.on('UNHOST', () => this.cmdUNHOST());
   }
@@ -536,6 +586,7 @@ class Chat {
     this.ishidden = (document.visibilityState || 'visible') !== 'visible';
     this.output = this.ui.find('#chat-output-frame');
     this.input = this.ui.find('#chat-input-control');
+    this.subonlyicon = this.ui.find('#chat-input-subonly');
     this.loginscrn = this.ui.find('#chat-login-screen');
     this.loadingscrn = this.ui.find('#chat-loading');
     this.windowselect = this.ui.find('#chat-windows-select');
@@ -543,10 +594,8 @@ class Chat {
     this.userfocus = new ChatUserFocus(this, this.css);
     this.mainwindow = new ChatWindow('main').into(this);
     this.mutedtimer = new MutedTimer(this);
-
-    this.ui.find('#chat-vote-frame:first').each((i, e) => {
-      this.chatvote = new ChatVote(this, $(e));
-    });
+    this.chatpoll = new ChatPoll(this);
+    this.pinnedMessage = null;
 
     this.windowToFront('main');
 
@@ -648,26 +697,38 @@ class Chat {
     // Visibility
     document.addEventListener(
       'visibilitychange',
-      debounce(100, false, () => {
-        this.ishidden = (document.visibilityState || 'visible') !== 'visible';
-        if (!this.ishidden) this.focusIfNothingSelected();
-        else ChatMenu.closeMenus(this);
-      }),
+      debounce(
+        100,
+        () => {
+          this.ishidden = (document.visibilityState || 'visible') !== 'visible';
+          if (!this.ishidden) this.focusIfNothingSelected();
+          else ChatMenu.closeMenus(this);
+        },
+        { atBegin: false }
+      ),
       true
     );
 
     // Resize
     let resizing = false;
-    const onresizecomplete = debounce(100, false, () => {
-      resizing = false;
-      this.getActiveWindow().unlock();
-      this.focusIfNothingSelected();
-    });
+    const onresizecomplete = debounce(
+      100,
+      () => {
+        resizing = false;
+        this.focusIfNothingSelected();
+      },
+      { atBegin: false }
+    );
     const onresize = () => {
+      // If this is a mobile screen, don't close menus.
+      // The virtual keyboard triggers a 'resize' event, and menus shouldn't be closed whenever the virtual keyboard is opened
+      if (window.screen.width <= 768) {
+        return;
+      }
+
       if (!resizing) {
         resizing = true;
         ChatMenu.closeMenus(this);
-        this.getActiveWindow().lock();
       }
       onresizecomplete();
     };
@@ -693,7 +754,7 @@ class Chat {
       const nick = $(e.currentTarget).closest('.msg-user').data('username');
       this.getActiveWindow()
         .getlines(`.censored[data-username="${nick}"]`)
-        .removeClass('censored');
+        .forEach((line) => line.classList.remove('censored'));
       return false;
     });
 
@@ -729,7 +790,7 @@ class Chat {
     });
 
     this.loadingscrn.fadeOut(250, () => this.loadingscrn.remove());
-    this.mainwindow.updateAndPin();
+    this.mainwindow.update(true);
 
     this.setDefaultPlaceholderText();
     MessageBuilder.status(this.config.welcomeMessage).into(this);
@@ -808,7 +869,7 @@ class Chat {
             this.whispers.set(e.username.toLowerCase(), {
               id: e.messageid,
               nick: e.username,
-              unread: e.unread,
+              unread: Number(e.unread),
               open: false,
             })
           );
@@ -819,8 +880,11 @@ class Chat {
   }
 
   setEmotes(emotes) {
-    this.emoteService.emotes = emotes;
-    this.emoteService.prefixes.forEach((e) => this.autocomplete.add(e, true));
+    this.emoteService.setEmotes(emotes);
+    this.emoteService
+      .emotesForUser(this.user)
+      .map((e) => e.prefix)
+      .forEach((e) => this.autocomplete.add(e, true));
     return this;
   }
 
@@ -837,7 +901,7 @@ class Chat {
       history.forEach((line) => this.source.parseAndDispatch({ data: line }));
       this.backlogloading = false;
       MessageBuilder.element('<hr/>').into(this);
-      this.mainwindow.updateAndPin();
+      this.mainwindow.update(true);
     }
     return this;
   }
@@ -862,7 +926,9 @@ class Chat {
   // De-bounced saveSettings
   commitSettings() {
     if (!this.debouncedsave) {
-      this.debouncedsave = debounce(1000, false, () => this.saveSettings());
+      this.debouncedsave = debounce(1000, () => this.saveSettings(), {
+        atBegin: false,
+      });
     }
     this.debouncedsave();
   }
@@ -950,7 +1016,6 @@ class Chat {
 
     // eslint-disable-next-line no-param-reassign
     if (win === null) win = this.mainwindow;
-    win.lock();
 
     // Break the current combo if this message is not an emote
     // We don't need to check what type the current message is, we just know that its a new message, so the combo is invalid.
@@ -1026,7 +1091,7 @@ class Chat {
       );
     }
 
-    win.unlock();
+    win.update();
   }
 
   resolveMessage(nick, str) {
@@ -1043,24 +1108,20 @@ class Chat {
   }
 
   removeMessageByNick(nick) {
-    this.mainwindow.lock();
     this.mainwindow.removelines(
       `.msg-chat[data-username="${nick.toLowerCase()}"]`
     );
-    this.mainwindow.unlock();
+    this.mainwindow.update();
   }
 
   windowToFront(name) {
     const win = this.windows.get(name);
     if (win !== null && win !== this.getActiveWindow()) {
       this.windows.forEach((w) => {
-        if (w.visible) {
-          if (!w.locked()) w.lock();
-          w.hide();
-        }
+        if (w.visible) w.hide();
       });
       win.show();
-      if (win.locked()) win.unlock();
+      win.update();
       this.redrawWindowIndicators();
     }
 
@@ -1126,31 +1187,28 @@ class Chat {
         }
       });
     }
-    // null check on main window, since main window calls this during initialization
-    if (this.mainwindow !== null) this.mainwindow.lock();
 
     this.windowselect.toggle(this.windows.size > 1);
 
-    if (this.mainwindow !== null) this.mainwindow.unlock();
+    if (this.mainwindow !== null) this.mainwindow.update();
   }
 
   censor(nick) {
-    this.mainwindow.lock();
     const c = this.mainwindow.getlines(
       `.msg-chat[data-username="${nick.toLowerCase()}"]`
     );
     switch (parseInt(this.settings.get('showremoved') || 1, 10)) {
       case 0: // remove
-        c.remove();
+        c.forEach((line) => line.remove());
         break;
       case 1: // censor
-        c.addClass('censored');
+        c.forEach((line) => line.classList.add('censored'));
         break;
       case 2: // do nothing
       default:
         break;
     }
-    this.mainwindow.unlock();
+    this.mainwindow.update();
   }
 
   ignored(nick, text = null) {
@@ -1195,7 +1253,9 @@ class Chat {
     }
 
     if (this.debounceFocus === undefined) {
-      this.debounceFocus = debounce(10, false, (c) => c.input.focus());
+      this.debounceFocus = debounce(10, (c) => c.input.focus(), {
+        atBegin: false,
+      });
     }
     if (window.getSelection().isCollapsed && !this.input.is(':focus')) {
       this.debounceFocus(this);
@@ -1217,7 +1277,6 @@ class Chat {
 
     const maxHeightPixels = this.input.css('maxHeight');
     const maxHeight = parseInt(maxHeightPixels.slice(0, -2), 10);
-    const pinned = this.getActiveWindow().scrollplugin.isPinned();
 
     this.input.css('height', '');
     const calculatedHeight = this.input.prop('scrollHeight');
@@ -1229,7 +1288,7 @@ class Chat {
     );
 
     this.input.css('height', calculatedHeight);
-    this.getActiveWindow().updateAndPin(pinned);
+    this.getActiveWindow().update();
   }
 
   /**
@@ -1249,9 +1308,8 @@ class Chat {
     }
   }
 
-  onCLOSE({ retryMilli }) {
-    // https://www.iana.org/assignments/websocket/websocket.xml#close-code-number
-    // const code = e.event.code || 1006
+  onCLOSE(retryMilli) {
+    if (this.chatpoll.isPollStarted()) this.chatpoll.endPoll(); // end poll on disconnect so it is not there forever.
     if (retryMilli > 0)
       MessageBuilder.error(
         `Disconnected, retry in ${Math.round(retryMilli / 1000)} seconds ...`
@@ -1289,6 +1347,24 @@ class Chat {
     }
   }
 
+  onPIN(msg) {
+    if (!msg.data) {
+      this.pinnedMessage?.unpin();
+      return;
+    }
+
+    this.pinnedMessage?.unpin();
+    const usr = this.users.get(msg.nick.toLowerCase()) ?? new ChatUser(msg);
+    this.pinnedMessage = MessageBuilder.pinned(
+      msg.data,
+      usr,
+      msg.timestamp,
+      msg.uuid
+    )
+      .into(this)
+      .pin(this, !checkIfPinWasDismissed(msg.uuid));
+  }
+
   onQUIT(data) {
     const normalized = data.nick.toLowerCase();
     if (this.users.has(normalized)) {
@@ -1300,45 +1376,15 @@ class Chat {
   onMSG(data) {
     const textonly = Chat.removeSlashCmdFromText(data.data);
     const usr = this.users.get(data.nick.toLowerCase());
-
-    // Voting is processed entirely in clients through messages with
-    // type `MSG`, but we emit `VOTE`, `VOTESTOP`, and `VOTECAST`
-    // events to mimic server involvement.
-    if (this.chatvote.canUserStartVote(usr)) {
-      if (this.chatvote.isMsgVoteStartFmt(data.data)) {
-        const now = new Date().getTime();
-        const question = parseQuestionAndTime(data.data);
-        if (now - data.timestamp < question.time + VOTE_END_TIME) {
-          this.source.emit('VOTE', data);
-        }
-        return;
-      }
-      if (
-        this.chatvote.isVoteStarted() &&
-        this.chatvote.isMsgVoteStopFmt(data.data)
-      ) {
-        this.source.emit('VOTESTOP', data);
-        return;
-      }
-    }
-    if (
-      this.chatvote.canCastVote(data.timestamp) &&
-      this.chatvote.isMsgVoteCastFmt(data.data)
-    ) {
-      this.source.emit(`VOTECAST`, data);
-      return;
-    }
-
     const win = this.mainwindow;
     if (
       win.lastmessage !== null &&
-      this.emoteService.prefixes.includes(textonly) &&
+      this.emoteService.canUserUseEmote(usr, textonly) &&
       Chat.removeSlashCmdFromText(win.lastmessage.message) === textonly
     ) {
       if (win.lastmessage.type === MessageTypes.EMOTE) {
-        this.mainwindow.lock();
         win.lastmessage.incEmoteCount();
-        this.mainwindow.unlock();
+        this.mainwindow.update();
       } else {
         win.lastmessage.ui.remove();
         MessageBuilder.emote(textonly, data.timestamp, 2).into(this);
@@ -1348,42 +1394,29 @@ class Chat {
     }
   }
 
-  onVOTE(data) {
+  onPOLLSTART(data) {
     const usr = this.users.get(data.nick.toLowerCase());
-    if (this.chatvote.isVoteStarted() || !this.chatvote.canUserStartVote(usr)) {
+    if (this.chatpoll.isPollStarted() || !this.chatpoll.canUserStartPoll(usr)) {
       return;
     }
 
-    if (this.chatvote.startVote(data.data, usr, data.timestamp)) {
-      new ChatMessage(
-        this.chatvote.voteStartMessage(),
-        null,
-        MessageTypes.INFO,
-        true
-      ).into(this);
-    }
+    this.chatpoll.startPoll(data);
   }
 
-  onVOTESTOP(data) {
+  onPOLLSTOP(data) {
     const usr = this.users.get(data.nick.toLowerCase());
-    if (!this.chatvote.isVoteStarted() || !this.chatvote.canUserStopVote(usr)) {
+    if (!this.chatpoll.isPollStarted() || !this.chatpoll.canUserStopPoll(usr)) {
       return;
     }
 
-    this.chatvote.endVote(data.timestamp);
+    this.chatpoll.endPoll();
   }
 
   onVOTECAST(data) {
     const usr = this.users.get(data.nick.toLowerCase());
-    if (!this.chatvote.canVote(usr)) {
-      return;
-    }
-
-    // NOTE method returns false, if the GUI is hidden
-    if (this.chatvote.castVote(data.data, usr, data.timestamp)) {
-      if (data.nick === this.user.username) {
-        this.chatvote.markVote(data.data);
-      }
+    this.chatpoll.castVote(data, usr);
+    if (data.nick.toLowerCase() === this.user.nick.toLowerCase()) {
+      this.chatpoll.markVote(data.vote);
     }
   }
 
@@ -1506,11 +1539,18 @@ class Chat {
   }
 
   onSUBONLY(data) {
-    const submode = data.data === 'on' ? 'enabled' : 'disabled';
+    this.subonly = data.data === 'on';
     MessageBuilder.command(
-      `Subscriber only mode ${submode} by ${data.nick}.`,
+      `Subscriber only mode ${this.subonly ? 'enabled' : 'disabled'}${
+        data.nick ? ` by ${data.nick}` : ''
+      }.`,
       data.timestamp
     ).into(this);
+    if (this.subonly && !this.user.isSubscriber()) {
+      this.subonlyicon.show();
+    } else {
+      this.subonlyicon.hide();
+    }
   }
 
   onBROADCAST(data) {
@@ -1634,12 +1674,12 @@ class Chat {
       }
       // VOTE
       else if (
-        this.chatvote.isVoteStarted() &&
-        this.chatvote.isMsgVoteCastFmt(textonly)
+        this.chatpoll.isPollStarted() &&
+        this.chatpoll.isMsgVoteCastFmt(textonly)
       ) {
-        if (this.chatvote.canVote(this.user)) {
+        if (this.chatpoll.poll.canVote) {
           MessageBuilder.info(`Your vote has been cast!`).into(this);
-          this.source.send('MSG', { data: raw });
+          this.source.send('CASTVOTE', { vote: raw });
           this.input.val('');
         } else {
           MessageBuilder.error(`You have already voted!`).into(this);
@@ -1649,7 +1689,7 @@ class Chat {
       // EMOTE SPAM
       else if (
         this.source.isConnected() &&
-        this.emoteService.prefixes.includes(textonly)
+        this.emoteService.getEmote(textonly)
       ) {
         // Its easier to deal with combos with the this.unresolved flow
         this.source.send('MSG', { data: raw });
@@ -1672,7 +1712,15 @@ class Chat {
     }
   }
 
-  cmdVOTE(parts, command) {
+  cmdSHOWPOLL() {
+    if (this.chatpoll.poll) {
+      this.chatpoll.show();
+    } else {
+      MessageBuilder.error("There hasn't been a poll yet.").into(this);
+    }
+  }
+
+  cmdPOLL(parts, command) {
     const slashCommand = `/${command.toLowerCase()}`;
     const textOnly = parts.join(' ');
 
@@ -1686,35 +1734,40 @@ class Chat {
       return;
     }
 
-    if (this.chatvote.isVoteStarted()) {
-      MessageBuilder.error('Vote already started.').into(this);
+    if (this.chatpoll.isPollStarted()) {
+      MessageBuilder.error('Poll already started.').into(this);
       return;
     }
-    if (!this.chatvote.canUserStartVote(this.user)) {
-      MessageBuilder.error('You do not have permission to start a vote.').into(
+    if (!this.chatpoll.canUserStartPoll(this.user)) {
+      MessageBuilder.error('You do not have permission to start a poll.').into(
         this
       );
       return;
     }
 
-    this.source.send('MSG', { data: `${slashCommand} ${textOnly}` });
-    // TODO if the chat isn't connected, the user has no warning of this action failing
+    const { question, options, time } = parseQuestionAndTime(textOnly);
+    const dataOut = {
+      weighted: slashCommand === '/spoll',
+      time,
+      question,
+      options,
+    };
+    this.source.send('STARTPOLL', dataOut);
   }
 
-  cmdVOTESTOP() {
-    if (!this.chatvote.isVoteStarted()) {
-      MessageBuilder.error('No vote started.').into(this);
+  cmdPOLLSTOP() {
+    if (!this.chatpoll.isPollStarted()) {
+      MessageBuilder.error('No poll started.').into(this);
       return;
     }
-    if (!this.chatvote.canUserStopVote(this.user)) {
+    if (!this.chatpoll.canUserStopPoll(this.user)) {
       MessageBuilder.error(
-        'You do not have permission to stop this vote.'
+        'You do not have permission to stop this poll.'
       ).into(this);
       return;
     }
 
-    this.source.send('MSG', { data: '/votestop' });
-    // TODO if the chat isn't connected, the user has no warning of this action failing
+    this.source.send('STOPPOLL', {});
   }
 
   cmdEMOTES() {
@@ -1726,7 +1779,9 @@ class Chat {
   cmdHELP() {
     let str = `Available commands: \r`;
     commandsinfo.forEach((a, k) => {
-      str += ` /${k} - ${a.desc} \r`;
+      str += a.alias
+        ? ` /${k}, /${a.alias.join(', /')} - ${a.desc} \r`
+        : ` /${k} - ${a.desc} \r`;
     });
     MessageBuilder.info(str).into(this);
   }
@@ -1760,6 +1815,14 @@ class Chat {
           ).join(', ')}.`
         ).into(this);
       }
+    } else if (
+      parts.some(
+        (username) => username.toLowerCase() === this.user.nick.toLowerCase()
+      )
+    ) {
+      MessageBuilder.info("You can't add yourself to your ignore list.").into(
+        this
+      );
     } else {
       // this is a little ugly, but it allows us to not ignore anything if there's an invalid nick in there
       // think that's less confusing/nicer compared to partially ignoring
@@ -1959,17 +2022,15 @@ class Chat {
         )} (the default is 'HH:mm', for more info: http://momentjs.com/docs/#/displaying/format/)`
       ).into(this);
     } else {
-      const format = parts.slice(1, parts.length);
+      const format = parts.join(' ');
       if (!/^[a-z :.,-\\*]+$/i.test(format)) {
         MessageBuilder.error(
           'Invalid format, see: http://momentjs.com/docs/#/displaying/format/'
         ).into(this);
       } else {
-        MessageBuilder.info(
-          `New format: ${this.settings.get('timestampformat')}.`
-        ).into(this);
         this.settings.set('timestampformat', format);
         this.applySettings();
+        MessageBuilder.info(`New format: ${format}.`).into(this);
       }
     }
   }
@@ -2050,10 +2111,19 @@ class Chat {
 
     this.mainwindow
       .getlines(`.msg-user[data-username="${n}"]`)
-      .removeClass(Chat.removeClasses('msg-tagged'))
-      .addClass(`msg-tagged msg-tagged-${color}`)
-      .find('.user')
-      .attr('title', note);
+      .forEach((line) => {
+        const classesToRemove = Chat.removeClasses(
+          'msg-tagged',
+          line.classList.value
+        );
+        classesToRemove.forEach((className) =>
+          line.classList.remove(className)
+        );
+        ['msg-tagged', `msg-tagged-${color}`].forEach((tag) =>
+          line.classList.add(tag)
+        );
+        line.querySelector('.user').title = note;
+      });
 
     this.taggednicks.set(n, color);
     this.taggednotes.set(n, note);
@@ -2089,10 +2159,17 @@ class Chat {
     const n = parts[0].toLowerCase();
 
     this.mainwindow
-      .getlines(`.msg-chat[data-username="${n}"]`)
-      .removeClass(Chat.removeClasses('msg-tagged'))
-      .find('.user')
-      .removeAttr('title');
+      .getlines(`.msg-user[data-username="${n}"]`)
+      .forEach((line) => {
+        const classesToRemove = Chat.removeClasses(
+          'msg-tagged',
+          line.classList.value
+        );
+        classesToRemove.forEach((className) =>
+          line.classList.remove(className)
+        );
+        line.querySelector('.user').removeAttribute('title');
+      });
 
     this.taggednicks.delete(n);
     this.taggednotes.delete(n);
@@ -2104,153 +2181,36 @@ class Chat {
 
   cmdEMBED(parts) {
     const { location } = window.top || window.parent || window;
-    const noEmbedUrl = location.href.split('#')[0];
-    const urlCheck =
-      /^((http[s]?|ftp):\/)?\/?([^:/\s]+)((\/\w+)*\/)([\w-.]+[^#?\s]+)(.*)?(#[\w-]+)?$/gm;
-    if (!parts[0]) {
-      MessageBuilder.error(
-        'No argument provided - /embed <link> OR /e <link>'
-      ).into(this);
+    try {
+      location.hash = this.hashLinkConverter.convert(parts[0]);
+    } catch (error) {
+      MessageBuilder.error(error.message).into(this);
       MessageBuilder.info(
-        'Valid links: Twitch Streams, Twitch VODs, Twitch Clips, Youtube Videos, Vimeo Videos.'
+        'Usage: /embed <link> OR /e <link> (Valid links: Twitch streams, VODs, clips, Youtube, Rumble)'
       ).into(this);
-    } else if (parts.length > 1) {
-      MessageBuilder.error(
-        'More than one argument provided - /embed <link> OR /e <link>'
-      ).into(this);
-      MessageBuilder.info(
-        'Valid links: Twitch Streams, Twitch VODs, Twitch Clips, Youtube Videos, Vimeo Videos.'
-      ).into(this);
-    } else {
-      const matchedHost = parts[0].matchAll(urlCheck);
-      const match = [...matchedHost][0];
-      if (match) {
-        switch (match[3]) {
-          case 'www.twitch.tv':
-          case 'twitch.tv':
-            if (match[5] === '/videos') {
-              location.href = `${noEmbedUrl}#twitch-vod/${match[6]}`;
-            } else if (match[5] === '/clip') {
-              location.href = `${noEmbedUrl}#twitch-clip/${match[6]}`;
-            } else {
-              location.href = `${noEmbedUrl}#twitch/${match[6]}`;
-            }
-            break;
-          case 'clips.twitch.tv':
-            location.href = `${noEmbedUrl}#twitch-clip/${match[6]}`;
-            break;
-          case 'www.youtube.com':
-          case 'youtube.com': {
-            const params = new URLSearchParams(match[7]);
-            location.href = `${noEmbedUrl}#youtube/${params.get('v')}`;
-            break;
-          }
-          case 'www.youtu.be':
-          case 'youtu.be':
-            location.href = `${noEmbedUrl}#youtube/${match[6]}`;
-            break;
-          case 'www.vimeo.com':
-          case 'vimeo.com':
-            location.href = `${noEmbedUrl}#vimeo/${match[6]}`;
-            break;
-          default:
-            MessageBuilder.error(
-              'Invalid link - /embed <link> OR /e <link>'
-            ).into(this);
-            MessageBuilder.info(
-              'Valid links: Twitch Streams, Twitch VODs, Twitch Clips, Youtube Videos, Vimeo Videos.'
-            ).into(this);
-            break;
-        }
-      } else {
-        MessageBuilder.error('Invalid link - /embed <link> OR /e <link>').into(
-          this
-        );
-        MessageBuilder.info(
-          'Valid links: Twitch Streams, Twitch VODs, Twitch Clips, Youtube Videos, Vimeo Videos.'
-        ).into(this);
-      }
     }
   }
 
   cmdPOSTEMBED(parts) {
     const { location } = window.top || window.parent || window;
-    const EmbedSplit = location.href.split('#');
-    const urlCheck =
-      /^((http[s]?|ftp):\/)?\/?([^:/\s]+)((\/\w+)*\/)([\w-.]+[^#?\s]+)(.*)?(#[\w-]+)?$/gm;
-    if (!parts[0] && EmbedSplit[1]) {
-      this.source.send('MSG', { data: `#${EmbedSplit[1]}` });
-    } else if (!parts[0] && !EmbedSplit[1]) {
-      MessageBuilder.error(
-        'Nothing embedded - /postembed OR /pe OR /postembed <link> [<message>] OR /pe <link> [<message>]'
-      ).into(this);
-      MessageBuilder.info(
-        'Valid links: Twitch Streams, Twitch VODs, Twitch Clips, Youtube Videos, Vimeo Video.'
-      ).into(this);
-    } else {
-      const matchedHost = parts[0].matchAll(urlCheck);
-      const match = [...matchedHost][0];
-      let msg = '';
-      let moreMsg = '';
-      if (match) {
-        if (parts[1]) {
-          parts.shift();
-          moreMsg = parts.join(' ');
-        }
-        switch (match[3]) {
-          case 'www.twitch.tv':
-          case 'twitch.tv':
-            if (match[5] === '/videos') {
-              msg = `#twitch-vod/${match[6]}`;
-            } else if (match[5] === '/clip') {
-              msg = `#twitch-clip/${match[6]}`;
-            } else {
-              msg = `#twitch/${match[6]}`;
-            }
-
-            this.source.send('MSG', { data: `${msg} ${moreMsg}` });
-            break;
-          case 'clips.twitch.tv':
-            msg = `#twitch-clip/${match[6]}`;
-            this.source.send('MSG', { data: `${msg} ${moreMsg}` });
-            break;
-          case 'www.youtube.com':
-          case 'youtube.com': {
-            const params = new URLSearchParams(match[7]);
-            msg = `#youtube/${params.get('v')}`;
-            this.source.send('MSG', { data: `${msg} ${moreMsg}` });
-            break;
-          }
-          case 'www.youtu.be':
-          case 'youtu.be':
-            msg = `#youtube/${match[6]}`;
-            this.source.send('MSG', { data: `${msg} ${moreMsg}` });
-            break;
-          case 'www.vimeo.com':
-          case 'vimeo.com':
-            msg = `#vimeo/${match[6]}`;
-            this.source.send('MSG', { data: `${msg} ${moreMsg}` });
-            break;
-          default:
-            MessageBuilder.error(
-              'Invalid link - /postembed OR /pe OR /postembed <link> [<message>] OR /pe <link> [<message>]'
-            ).into(this);
-            MessageBuilder.info(
-              'Valid links: Twitch Streams, Twitch VODs, Twitch Clips, Youtube Videos, Vimeo Videos.'
-            ).into(this);
-            break;
-        }
-      } else if (!match && EmbedSplit[1]) {
-        if (parts[0]) {
-          moreMsg = parts.join(' ');
-        }
-        this.source.send('MSG', { data: `#${EmbedSplit[1]} ${moreMsg}` });
+    try {
+      const hashLink = this.hashLinkConverter.convert(parts[0]);
+      this.source.send('MSG', {
+        data: `${hashLink} ${parts.slice(1).join(' ')}`,
+      });
+    } catch (error) {
+      if (location.hash) {
+        this.source.send('MSG', {
+          data: `${location.hash} ${parts.join(' ')}`,
+        });
       } else {
-        MessageBuilder.error(
-          'Invalid link - /postembed OR /pe OR /postembed <link> [<message>] OR /pe <link> [<message>]'
-        ).into(this);
+        if (error.message === MISSING_ARG_ERROR) {
+          MessageBuilder.error('Nothing embedded').into(this);
+        } else {
+          MessageBuilder.error(error.message).into(this);
+        }
         MessageBuilder.info(
-          'Valid links: Twitch Streams, Twitch VODs, Twitch Clips, Youtube Videos, Vimeo Videos.'
+          'Usage: /postembed [<link>] [<message>] (Alias: /pe) (Valid links: Twitch streams, VODs, clips, Youtube, Rumble)'
         ).into(this);
       }
     }
@@ -2555,6 +2515,18 @@ class Chat {
       });
   }
 
+  cmdPIN(parts) {
+    if (!parts.length) {
+      MessageBuilder.error('No message provided - /pin <message>').into(this);
+      return;
+    }
+    this.source.send('PIN', { data: parts.join(' ') });
+  }
+
+  cmdUNPIN() {
+    this.source.send('PIN', { data: '' });
+  }
+
   openConversation(nick) {
     const normalized = nick.toLowerCase();
     const conv = this.whispers.get(normalized);
@@ -2636,9 +2608,10 @@ class Chat {
     return [...uniqueNicks];
   }
 
-  static removeClasses(search) {
-    return (i, c) =>
-      (c.match(new RegExp(`\\b${search}(?:[A-z-]+)?\\b`, 'g')) || []).join(' ');
+  static removeClasses(search, classList) {
+    return (
+      classList.match(new RegExp(`\\b${search}(?:[A-z-]+)?\\b`, 'g')) || []
+    );
   }
 
   static isArraysEqual(a, b) {
