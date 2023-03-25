@@ -1348,12 +1348,10 @@ class Chat {
   }
 
   onPIN(msg) {
-    if (!msg.data) {
-      this.pinnedMessage?.unpin();
-      return;
-    }
-
+    if (this.pinnedMessage?.uuid === msg.uuid) return;
     this.pinnedMessage?.unpin();
+    if (!msg.data) return;
+
     const usr = this.users.get(msg.nick.toLowerCase()) ?? new ChatUser(msg);
     this.pinnedMessage = MessageBuilder.pinned(
       msg.data,
