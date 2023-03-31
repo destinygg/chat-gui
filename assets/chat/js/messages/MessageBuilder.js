@@ -5,7 +5,9 @@ import ChatUserMessage from './ChatUserMessage';
 import ChatEmoteMessage from './ChatEmoteMessage';
 import PinnedMessage from './PinnedMessage';
 import ChatDonationMessage from './ChatDonationMessage';
-import ChatSubscriptionMessage from './ChatSubscriptionMessage';
+import ChatRegularSubscriptionMessage from './subscriptions/ChatRegularSubscriptionMessage';
+import ChatGiftedSubscriptionMessage from './subscriptions/ChatGiftedSubscriptionMessage';
+import ChatMassSubscriptionMessage from './subscriptions/ChatMassSubscriptionMessage';
 
 export default class MessageBuilder {
   static element(message, classes = []) {
@@ -57,25 +59,47 @@ export default class MessageBuilder {
     return new PinnedMessage(message, user, timestamp, uuid);
   }
 
-  static donation(message, user, currency, timestamp = null) {
-    return new ChatDonationMessage(message, user, currency, timestamp);
-  }
-
   static subscription(
     message,
     user,
     tier,
     tierLabel,
-    timestamp = null,
-    details = null
+    streak,
+    timestamp = null
   ) {
-    return new ChatSubscriptionMessage(
+    return new ChatRegularSubscriptionMessage(
       message,
       user,
       tier,
       tierLabel,
-      timestamp,
-      details
+      streak,
+      timestamp
     );
+  }
+
+  static gift(message, user, tier, tierLabel, giftee, timestamp = null) {
+    return new ChatGiftedSubscriptionMessage(
+      message,
+      user,
+      tier,
+      tierLabel,
+      giftee,
+      timestamp
+    );
+  }
+
+  static massgift(message, user, tier, tierLabel, quantity, timestamp = null) {
+    return new ChatMassSubscriptionMessage(
+      message,
+      user,
+      tier,
+      tierLabel,
+      quantity,
+      timestamp
+    );
+  }
+
+  static donation(message, user, currency, timestamp = null) {
+    return new ChatDonationMessage(message, user, currency, timestamp);
   }
 }

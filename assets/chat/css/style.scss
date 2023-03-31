@@ -653,7 +653,9 @@ hr {
 }
 
 /* Subscriptions */
-.msg-subscription {
+.msg-subscription,
+.msg-giftsub,
+.msg-massgift {
   position: relative;
   text-shadow: 1px 1px 3px rgba(0, 0, 0, 1);
   font-size: 1.1em;
@@ -1912,7 +1914,9 @@ button.btn {
 
   // Donations and subs
   .msg-donation,
-  .msg-subscription {
+  .msg-subscription,
+  .msg-giftsub,
+  .msg-massgift {
     text-shadow: none;
     padding: 0;
     border-style: none none none solid;

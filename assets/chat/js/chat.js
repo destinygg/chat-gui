@@ -461,6 +461,8 @@ class Chat {
     this.source.on('POLLSTOP', (data) => this.onPOLLSTOP(data));
     this.source.on('VOTECAST', (data) => this.onVOTECAST(data));
     this.source.on('SUBSCRIPTION', (data) => this.onSUBSCRIPTION(data));
+    this.source.on('GIFTSUB', (data) => this.onGIFTSUB(data));
+    this.source.on('MASSGIFT', (data) => this.onMASSGIFT(data));
     this.source.on('DONATION', (data) => this.onDONATION(data));
 
     this.control.on('SEND', (data) => this.cmdSEND(data));
@@ -1576,12 +1578,32 @@ class Chat {
       user,
       data.tier,
       data.tierlabel,
-      data.timestamp,
-      {
-        streak: data.streak,
-        giftee: data.giftee,
-        quantity: data.quantity,
-      }
+      data.streak,
+      data.timestamp
+    ).into(this);
+  }
+
+  onGIFTSUB(data) {
+    const user = this.users.get(data.nick) ?? new ChatUser(data.nick);
+    MessageBuilder.gift(
+      data.data,
+      user,
+      data.tier,
+      data.tierlabel,
+      data.giftee,
+      data.timestamp
+    ).into(this);
+  }
+
+  onMASSGIFT(data) {
+    const user = this.users.get(data.nick) ?? new ChatUser(data.nick);
+    MessageBuilder.massgift(
+      data.data,
+      user,
+      data.tier,
+      data.tierlabel,
+      data.quantity,
+      data.timestamp
     ).into(this);
   }
 

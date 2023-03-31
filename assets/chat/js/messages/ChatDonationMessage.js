@@ -31,14 +31,17 @@ export default class ChatDonationMessage extends ChatUserMessage {
 
     const colorFlair = usernameColorFlair(chat.flairs, this.user);
 
-    const user = document.createElement('a');
+    /** @type DocumentFragment */
+    const message = document
+      .querySelector('#donation-template')
+      ?.content.cloneNode(true);
+
+    const user = message.querySelector('.user');
     user.title = this.title;
-    user.classList.add('user', colorFlair?.name);
+    user.classList.add(colorFlair?.name);
     user.innerText = this.user.username;
 
-    const donation = document.createElement('span');
-    donation.append(user);
-    donation.append(
+    message.querySelector('.donation-wrapper span').append(
       ` donated ${(this.amount / 100).toLocaleString('en-US', {
         style: 'currency',
         currency: 'USD',
@@ -46,29 +49,17 @@ export default class ChatDonationMessage extends ChatUserMessage {
     );
 
     const classes = this.selectDonationTier(this.amount);
-    if (!this.message) classes.push('no-message');
 
-    const donationWrapper = document.createElement('span');
-    donationWrapper.classList.add('donation-wrapper');
-    donationWrapper.append(donation);
+    if (this.message) {
+      message.querySelector('.text-wrapper').innerHTML =
+        this.buildMessageTxt(chat);
+    } else {
+      message.querySelector('.text-wrapper').remove();
+      classes.push('no-message');
+    }
 
-    const donationIconWrapper = document.createElement('a');
-    donationIconWrapper.classList.add('icon-wrapper');
-    const donationIcon = document.createElement('i');
-    donationIcon.classList.add('donation-icon', classes[0]);
-    donationIconWrapper.append(donationIcon);
+    message.querySelector('.donation-icon').classList.add(classes[0]);
 
-    const donationInfo = document.createElement('div');
-    donationInfo.classList.add('donation-info');
-    donationInfo.append(donationWrapper);
-    donationInfo.append(donationIconWrapper);
-
-    const message = this.message
-      ? `${
-          donationInfo.outerHTML
-        }<span class="text-wrapper">${this.buildMessageTxt(chat)}</span>`
-      : donationInfo.outerHTML;
-
-    return this.wrap(message, classes, attr);
+    return this.wrap(message.firstElementChild.innerHTML, classes, attr);
   }
 }

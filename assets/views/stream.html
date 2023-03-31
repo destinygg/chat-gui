@@ -4,3 +4,73 @@
     <div id="chat-pinned-frame"></div>
   </div>
 </div>
+
+<template id="donation-template">
+  <div>
+    <div class="donation-info">
+      <span class="donation-wrapper">
+        <span>
+          <a class="user"></a>
+        </span>
+      </span>
+      <a class="icon-wrapper">
+        <i class="donation-icon"></i>
+      </a>
+    </div>
+    <span class="text-wrapper"> </span>
+  </div>
+</template>
+
+<template id="regular-subscription-template">
+  <div>
+    <div class="subscription-info">
+      <span class="subscription">
+        <span class="subscription-wrapper">
+          <a class="user"></a> is now a <a class="tier"></a> subscriber
+        </span>
+        <a class="icon-wrapper">
+          <i class="subscription-icon regular"></i>
+        </a>
+      </span>
+      <span class="streak">
+        They're currently on a <span class="streak-number"></span> month streak
+      </span>
+    </div>
+    <span class="text-wrapper"> </span>
+  </div>
+</template>
+
+<template id="gift-subscription-template">
+  <div>
+    <div class="subscription-info">
+      <span class="subscription">
+        <span class="subscription-wrapper">
+          <a class="user"></a> gifted <a class="giftee user"></a> a
+          <a class="tier"></a> subscription
+        </span>
+        <a class="icon-wrapper">
+          <i class="subscription-icon gift"></i>
+        </a>
+      </span>
+    </div>
+    <span class="text-wrapper"> </span>
+  </div>
+</template>
+
+<template id="mass-subscription-template">
+  <div>
+    <div class="subscription-info">
+      <span class="subscription">
+        <span class="subscription-wrapper">
+          <a class="user"></a> gifted <span class="quantity"></span>
+          <a class="tier"></a> <span class="subs-or-sub"></span> to the
+          community
+        </span>
+        <a class="icon-wrapper">
+          <i class="subscription-icon mass-gift"></i>
+        </a>
+      </span>
+    </div>
+    <span class="text-wrapper"> </span>
+  </div>
+</template>
