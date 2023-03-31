@@ -1,7 +1,11 @@
+const NAME_MISSING_ERROR = 'The provided command is missing a command name';
+const DESCRIPTION_MISSING_ERROR =
+  'The provided command is missing a description';
+
 /**
  * @typedef {Object} Command
  * @property {string} name
- * @property {string} descriptionription
+ * @property {string} description
  * @property {string | string[]} [alias]
  * @property {boolean} [admin]
  */
@@ -81,7 +85,7 @@ const CHAT_COMMANDS = [
   },
   {
     name: 'pin',
-    description: 'Pin a message to chat',
+    description: 'Pin a message to chat.',
     alias: ['motd'],
     admin: true,
   },
@@ -162,7 +166,7 @@ const CHAT_COMMANDS = [
   },
   {
     name: 'unpin',
-    description: 'Unpin a message from chat',
+    description: 'Unpin a message from chat.',
     alias: ['unmotd'],
     admin: true,
   },
@@ -220,6 +224,12 @@ export default class ChatCommands {
    * @returns {string}
    */
   formatHelpString(command) {
+    if (!command.name) {
+      throw new Error(NAME_MISSING_ERROR);
+    }
+    if (!command.description) {
+      throw new Error(DESCRIPTION_MISSING_ERROR);
+    }
     return command.alias
       ? ` /${command.name}, /${command.alias.join(', /')} - ${
           command.description
@@ -228,4 +238,4 @@ export default class ChatCommands {
   }
 }
 
-export { CHAT_COMMANDS };
+export { CHAT_COMMANDS, NAME_MISSING_ERROR, DESCRIPTION_MISSING_ERROR };
