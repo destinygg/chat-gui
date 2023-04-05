@@ -1393,20 +1393,10 @@ class Chat {
   }
 
   onPOLLSTART(data) {
-    const usr = this.users.get(data.nick.toLowerCase());
-    if (this.chatpoll.isPollStarted() || !this.chatpoll.canUserStartPoll(usr)) {
-      return;
-    }
-
     this.chatpoll.startPoll(data);
   }
 
-  onPOLLSTOP(data) {
-    const usr = this.users.get(data.nick.toLowerCase());
-    if (!this.chatpoll.isPollStarted() || !this.chatpoll.canUserStopPoll(usr)) {
-      return;
-    }
-
+  onPOLLSTOP() {
     this.chatpoll.endPoll();
   }
 
@@ -1736,7 +1726,8 @@ class Chat {
       MessageBuilder.error('Poll already started.').into(this);
       return;
     }
-    if (!this.chatpoll.canUserStartPoll(this.user)) {
+
+    if (!this.chatpoll.hasPermission(this.user)) {
       MessageBuilder.error('You do not have permission to start a poll.').into(
         this
       );
@@ -1758,7 +1749,7 @@ class Chat {
       MessageBuilder.error('No poll started.').into(this);
       return;
     }
-    if (!this.chatpoll.canUserStopPoll(this.user)) {
+    if (!this.chatpoll.hasPermission(this.user)) {
       MessageBuilder.error(
         'You do not have permission to stop this poll.'
       ).into(this);

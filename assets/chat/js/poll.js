@@ -3,8 +3,6 @@ import { throttle } from 'throttle-debounce';
 import UserFeatures from './features';
 import { MessageBuilder } from './messages';
 
-const POLL_START = /^\/(vote|svote|poll|spoll) /i;
-const POLL_STOP = /^\/(votestop|pollstop)/i;
 const POLL_CONJUNCTION = /\bor\b/i;
 const POLL_INTERROGATIVE = /^(how|why|when|what|where)\b/i;
 const POLL_TIME = /\b([0-9]+(?:m|s))$/i;
@@ -107,25 +105,8 @@ class ChatPoll {
     return this.voting;
   }
 
-  canUserStartPoll(user) {
-    return user.hasAnyFeatures(
-      UserFeatures.ADMIN,
-      UserFeatures.BOT,
-      UserFeatures.MODERATOR
-    );
-  }
-
-  canUserStopPoll(user) {
-    // A user can only stop their own poll.
-    return this.canUserStartPoll(user) && this.poll.user === user.nick;
-  }
-
-  isMsgPollStopFmt(txt) {
-    return txt.match(POLL_STOP);
-  }
-
-  isMsgPollStartFmt(txt) {
-    return txt.match(POLL_START);
+  hasPermission(user) {
+    return user.hasFeature(UserFeatures.POLLS);
   }
 
   isMsgVoteCastFmt(txt) {
