@@ -1,7 +1,7 @@
 import ChatMenu from './ChatMenu';
 
 export default class ChatMenuFloating extends ChatMenu {
-  constructor(ui, btn, chat, draggable = null) {
+  constructor(ui, btn, chat, draggable = false) {
     super(ui, btn, chat);
     this.ui = ui;
     this.btn = btn;
