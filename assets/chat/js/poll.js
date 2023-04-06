@@ -106,7 +106,11 @@ class ChatPoll {
   }
 
   hasPermission(user) {
-    return user.hasFeature(UserFeatures.POLLS);
+    return user.hasAnyFeatures(
+      UserFeatures.ADMIN,
+      UserFeatures.BOT,
+      UserFeatures.MODERATOR
+    );
   }
 
   isMsgVoteCastFmt(txt) {
