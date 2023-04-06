@@ -6,7 +6,7 @@ const DESCRIPTION_MISSING_ERROR =
  * @typedef {Object} Command
  * @property {string} name
  * @property {string} description
- * @property {string | string[]} [alias]
+ * @property {string[]} [alias]
  * @property {boolean} [admin]
  */
 
