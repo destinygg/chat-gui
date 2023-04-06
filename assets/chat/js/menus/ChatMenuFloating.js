@@ -6,6 +6,7 @@ export default class ChatMenuFloating extends ChatMenu {
     this.ui = ui;
     this.btn = btn;
     this.chat = chat;
+    this.draggable = draggable;
 
     this.mousedown = false;
     this.x1 = 0;
@@ -13,8 +14,7 @@ export default class ChatMenuFloating extends ChatMenu {
     this.y1 = 0;
     this.y2 = 0;
 
-    if (draggable) {
-      this.draggable = this.ui.find(draggable);
+    if (this.draggable?.length) {
       this.draggable[0].style.cursor = 'grab';
       this.draggable.on('mouseup', (e) => {
         e.preventDefault();
