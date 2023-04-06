@@ -1,6 +1,5 @@
-const NAME_MISSING_ERROR = 'The provided command is missing a command name';
-const DESCRIPTION_MISSING_ERROR =
-  'The provided command is missing a description';
+const REGULAR_HELP_HEADER = 'Available commands: \n';
+const ADMIN_HELP_HEADER = 'Available admin commands: \n';
 
 /**
  * @typedef {Object} Command
@@ -177,19 +176,12 @@ const CHAT_COMMANDS = [
 ];
 
 export default class ChatCommands {
-  constructor() {
-    this.regularHeader = 'Available commands: \r';
-    this.adminHeader = 'Available admin commands: \r';
-  }
-
   /**
-   * @param {CommandList} commands
    * @param {boolean} [admin]
    * @returns {string[]}
    */
-  generateAutocomplete(commands, admin = null) {
-    return commands
-      .filter((command) => admin || !command.admin)
+  generateAutocomplete(admin = null) {
+    return CHAT_COMMANDS.filter((command) => admin || !command.admin)
       .map((command) => [
         `/${command.name}`,
         ...(command.alias || []).map((alias) => `/${alias}`),
@@ -198,44 +190,36 @@ export default class ChatCommands {
   }
 
   /**
-   * @param {CommandList} commands
    * @returns {{user: string[], admin: string[]}}
    */
-  generateHelpStrings(commands) {
+  generateHelpStrings() {
     return {
       user: [
-        this.regularHeader,
-        ...commands
-          .filter((command) => !command.admin)
-          .map((command) => this.formatHelpString(command)),
+        REGULAR_HELP_HEADER,
+        ...CHAT_COMMANDS.filter((command) => !command.admin).map((command) =>
+          this.formatHelpString(command)
+        ),
       ],
       admin: [
-        this.adminHeader,
-        ...commands
-          .filter((command) => command.admin)
-          .map((command) => this.formatHelpString(command)),
+        ADMIN_HELP_HEADER,
+        ...CHAT_COMMANDS.filter((command) => command.admin).map((command) =>
+          this.formatHelpString(command)
+        ),
       ],
     };
   }
 
   /**
-   *
    * @param {Command} command
    * @returns {string}
    */
   formatHelpString(command) {
-    if (!command.name) {
-      throw new Error(NAME_MISSING_ERROR);
-    }
-    if (!command.description) {
-      throw new Error(DESCRIPTION_MISSING_ERROR);
-    }
     return command.alias
       ? ` /${command.name}, /${command.alias.join(', /')} - ${
           command.description
-        } \r`
-      : ` /${command.name} - ${command.description} \r`;
+        } \n`
+      : ` /${command.name} - ${command.description} \n`;
   }
 }
 
-export { CHAT_COMMANDS, NAME_MISSING_ERROR, DESCRIPTION_MISSING_ERROR };
+export { CHAT_COMMANDS };

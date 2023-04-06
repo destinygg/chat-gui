@@ -34,7 +34,7 @@ import EmoteService from './emotes';
 import UserFeatures from './features';
 import makeSafeForRegex from './regex';
 import { HashLinkConverter, MISSING_ARG_ERROR } from './hashlinkconverter';
-import ChatCommands, { CHAT_COMMANDS } from './commands';
+import ChatCommands from './commands';
 
 const regexslashcmd = /^\/([a-z0-9]+)[\s]?/i;
 const regextime = /(\d+(?:\.\d*)?)([a-z]+)?/gi;
@@ -423,7 +423,7 @@ class Chat {
     );
 
     this.commands
-      .generateAutocomplete(CHAT_COMMANDS, this.user.hasModPowers())
+      .generateAutocomplete(this.user.hasModPowers())
       .forEach((command) => this.autocomplete.add(command));
     this.autocomplete.bind(this);
 
@@ -1548,7 +1548,7 @@ class Chat {
   }
 
   cmdHELP() {
-    const helpStrings = this.commands.generateHelpStrings(CHAT_COMMANDS);
+    const helpStrings = this.commands.generateHelpStrings();
     MessageBuilder.info(helpStrings.user.join('')).into(this);
     if (this.user.hasModPowers()) {
       MessageBuilder.info(helpStrings.admin.join('')).into(this);
