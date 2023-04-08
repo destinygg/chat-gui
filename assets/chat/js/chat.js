@@ -446,6 +446,7 @@ class Chat {
     this.source.on('NAMES', (data) => this.onNAMES(data));
     this.source.on('PIN', (data) => this.onPIN(data));
     this.source.on('QUIT', (data) => this.onQUIT(data));
+    this.source.on('JOIN', (data) => this.onJOIN(data));
     this.source.on('MSG', (data) => this.onMSG(data));
     this.source.on('MUTE', (data) => this.onMUTE(data));
     this.source.on('UNMUTE', (data) => this.onUNMUTE(data));
@@ -460,7 +461,6 @@ class Chat {
     this.source.on('POLLSTART', (data) => this.onPOLLSTART(data));
     this.source.on('POLLSTOP', (data) => this.onPOLLSTOP(data));
     this.source.on('VOTECAST', (data) => this.onVOTECAST(data));
-
     this.control.on('SEND', (data) => this.cmdSEND(data));
     this.control.on('HINT', (data) => this.cmdHINT(data));
     this.control.on('EMOTES', (data) => this.cmdEMOTES(data));
@@ -527,12 +527,12 @@ class Chat {
 
   setUser(user) {
     if (!user || user.username === '') {
-      this.user = this.addUser({
+      this.user = this.getChatUser({
         nick: `User${Math.floor(Math.random() * (99999 - 10000 + 1))}${10000}`,
       });
       this.authenticated = false;
     } else {
-      this.user = this.addUser(user);
+      this.user = this.getChatUser(user);
       this.authenticated = true;
     }
     this.setDefaultPlaceholderText();
@@ -982,7 +982,7 @@ class Chat {
     return Promise.resolve(this);
   }
 
-  addUser(data) {
+  getChatUser(data) {
     if (!data) return null;
     const normalized = data.nick.toLowerCase();
     let user = this.users.get(normalized);
@@ -1291,21 +1291,33 @@ class Chat {
     this.getActiveWindow().update();
   }
 
+  addUser(userObject) {
+    if (typeof userObject === 'object') {
+      let users = [];
+      const now = Date.now();
+      if (Object.hasOwn(userObject, 'nick')) users.push(this.getChatUser(userObject));
+      if (Object.hasOwn(userObject, 'users'))
+        users = users.concat(
+          Array.from(userObject.users).map((d) => this.getChatUser(d))
+        );
+      users.forEach((u) => this.autocomplete.add(u.nick, false, now));
+    }
+  }
+
+  removeUser(userObject) {
+    const normalized = userObject.nick.toLowerCase();
+    if (this.users.has(normalized)) {
+      this.users.delete(normalized);
+      this.autocomplete.remove(userObject.nick, true);
+    }
+  }
+
   /**
    * EVENTS
    */
 
   onDISPATCH({ data }) {
-    if (typeof data === 'object') {
-      let users = [];
-      const now = Date.now();
-      if (Object.hasOwn(data, 'nick')) users.push(this.addUser(data));
-      if (Object.hasOwn(data, 'users'))
-        users = users.concat(
-          Array.from(data.users).map((d) => this.addUser(d))
-        );
-      users.forEach((u) => this.autocomplete.add(u.nick, false, now));
-    }
+    this.addUser(data);
   }
 
   onCLOSE(retryMilli) {
@@ -1364,11 +1376,11 @@ class Chat {
   }
 
   onQUIT(data) {
-    const normalized = data.nick.toLowerCase();
-    if (this.users.has(normalized)) {
-      this.users.delete(normalized);
-      this.autocomplete.remove(data.nick, true);
-    }
+    this.removeUser(data);
+  }
+
+  onJOIN(data) {
+    this.addUser(data);
   }
 
   onMSG(data) {
