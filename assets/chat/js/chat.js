@@ -1548,10 +1548,9 @@ class Chat {
   }
 
   cmdHELP() {
-    const helpStrings = this.commands.generateHelpStrings();
-    MessageBuilder.info(helpStrings.user.join('')).into(this);
+    MessageBuilder.info(this.commands.generateUserHelpStrings()).into(this);
     if (this.user.hasModPowers()) {
-      MessageBuilder.info(helpStrings.admin.join('')).into(this);
+      MessageBuilder.info(this.commands.generateAdminHelpStrings()).into(this);
     }
   }
 

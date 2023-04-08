@@ -190,23 +190,27 @@ export default class ChatCommands {
   }
 
   /**
-   * @returns {{user: string[], admin: string[]}}
+   * @returns {string}
    */
-  generateHelpStrings() {
-    return {
-      user: [
-        REGULAR_HELP_HEADER,
-        ...CHAT_COMMANDS.filter((command) => !command.admin).map((command) =>
-          this.formatHelpString(command)
-        ),
-      ],
-      admin: [
-        ADMIN_HELP_HEADER,
-        ...CHAT_COMMANDS.filter((command) => command.admin).map((command) =>
-          this.formatHelpString(command)
-        ),
-      ],
-    };
+  generateUserHelpStrings() {
+    return [
+      REGULAR_HELP_HEADER,
+      ...CHAT_COMMANDS.filter((command) => !command.admin).map((command) =>
+        this.formatHelpString(command)
+      ),
+    ].join('');
+  }
+
+  /**
+   * @returns {string}
+   */
+  generateAdminHelpStrings() {
+    return [
+      ADMIN_HELP_HEADER,
+      ...CHAT_COMMANDS.filter((command) => command.admin).map((command) =>
+        this.formatHelpString(command)
+      ),
+    ].join('');
   }
 
   /**
