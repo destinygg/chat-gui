@@ -37,6 +37,10 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
 
     this.configureButtons();
 
+    this.chat.output.on('DOMSubtreeModified', (e) => {
+      this.updateContent(e);
+    });
+
     this.chat.output.on('contextmenu', '.msg-user .user', (e) => {
       const user = $(e.currentTarget).closest('.msg-user');
       this.showUser(e, user);
@@ -218,7 +222,9 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
   }
 
   addContent(message, userlist) {
-    this.messageArray = userlist ? [] : [message];
+    this.messageArray = userlist
+      ? []
+      : this.chat.output.find(`[data-username='${this.clickedNick}']`);
 
     const prettyNick = message.find('.user')[0].innerText;
     const nick = message.data('username');
@@ -280,6 +286,40 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     this.redraw();
   }
 
+  updateContent(e) {
+    if (this.messageArray.length > 0 && this.messagesList) {
+      const newMessagesSet = this.chat.output.find(
+        `[data-username='${this.clickedNick}']`
+      );
+      const isNewFirstMessage =
+        this.messageArray
+          .first()
+          .find('[data-unixtimestamp]')
+          .data('unixtimestamp') <
+        newMessagesSet
+          .first()
+          .find('[data-unixtimestamp]')
+          .data('unixtimestamp');
+
+      const isNewLastMessage =
+        e.target &&
+        e.target.lastChild &&
+        e.target.lastChild.nodeType === Node.ELEMENT_NODE
+          ? e.target.lastChild.getAttribute('data-username') ===
+            this.clickedNick
+          : false;
+
+      if (isNewFirstMessage || isNewLastMessage) {
+        this.messageArray = newMessagesSet;
+        const messageList = this.createMessages(false);
+        this.messagesContainer.empty();
+        messageList.forEach((element) => {
+          this.messagesContainer.append(element);
+        });
+      }
+    }
+  }
+
   buildCreatedDate(nick) {
     const user = this.chat.users.get(nick.toLowerCase());
     if (user.createdDate === '') {
@@ -311,15 +351,21 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
   createMessages(userlist) {
     const displayedMessages = [];
     if (this.messageArray.length > 0) {
-      let nextMsg = this.messageArray[0].next('.msg-continue');
-      while (nextMsg.length > 0) {
-        this.messageArray.push(nextMsg);
-        nextMsg = nextMsg.next('.msg-continue');
-      }
-      this.messageArray.forEach((element) => {
-        const text = element.find('.text')[0].innerText;
-        const nick = element.data('username');
-        const msg = MessageBuilder.message(text, new ChatUser(nick));
+      const sortedMessageArray = this.messageArray.sort((a, b) => {
+        const aTimestamp = $(a)
+          .find('[data-unixtimestamp]')
+          .data('unixtimestamp');
+        const bTimestamp = $(b)
+          .find('[data-unixtimestamp]')
+          .data('unixtimestamp');
+        return bTimestamp - aTimestamp;
+      });
+      sortedMessageArray.toArray().forEach((element) => {
+        const text = element.innerText.split(':')[1];
+        const msg = MessageBuilder.message(
+          text,
+          new ChatUser(this.clickedNick)
+        );
         displayedMessages.push(msg.html(this.chat));
       });
     } else if (!userlist) {
