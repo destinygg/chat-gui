@@ -287,6 +287,12 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
   }
 
   updateContent(e) {
+    const chatMenuIsOpen = this.chat.menus
+      .get('user-info')
+      .ui[0].className.includes('active');
+
+    if (!chatMenuIsOpen) return;
+
     if (this.messageArray.length > 0 && this.messagesList) {
       const newMessagesSet = this.chat.output.find(
         `[data-username='${this.clickedNick}']`
@@ -358,10 +364,10 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
         const bTimestamp = $(b)
           .find('[data-unixtimestamp]')
           .data('unixtimestamp');
-        return bTimestamp - aTimestamp;
+        return aTimestamp - bTimestamp;
       });
       sortedMessageArray.toArray().forEach((element) => {
-        const text = element.innerText.split(':')[1];
+        const text = element.getElementsByClassName('text')[0].innerText;
         const msg = MessageBuilder.message(
           text,
           new ChatUser(this.clickedNick)
