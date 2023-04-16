@@ -130,10 +130,10 @@ class ChatAutoComplete {
       } else if (char.length > 0) {
         this.promoteIfSelected();
         const str = this.input.val().toString();
-        const offset = this.input[0].selectionStart + 1;
+        const offset = this.input[0].selectionStart;
         const pre = str.substring(0, offset);
         const post = str.substring(offset);
-        const criteria = buildSearchCriteria(pre + char + post, offset);
+        const criteria = buildSearchCriteria(pre + char + post, offset + 1);
         this.search(criteria);
         // If the first result is exact, highlight it.
         if (this.results.length > 0 && this.results[0].data === criteria.word) {
