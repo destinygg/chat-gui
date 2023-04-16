@@ -60,6 +60,8 @@ const errorstrings = new Map([
   ['nopermission', 'You do not have the required permissions to use that'],
   ['protocolerror', 'Invalid or badly formatted'],
   ['needlogin', 'You have to be logged in to use that'],
+  ['msgempty', 'Message cannot be empty'],
+  ['msgtoolong', 'Message cannot be longer than 512 characters'],
   ['invalidmsg', 'The message was invalid'],
   ['throttled', 'Throttled! You were trying to send messages too fast'],
   ['duplicate', 'The message is identical to the last one you sent'],
