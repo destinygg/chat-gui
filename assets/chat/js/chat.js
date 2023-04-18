@@ -1105,6 +1105,9 @@ class Chat {
       this.setUser(data);
       this.loadUserAndSettings();
       this.loadWhispers();
+    } else {
+      this.setUser(null);
+      this.setSettings();
     }
   }
 
