@@ -180,6 +180,7 @@ class Chat {
     this.subonly = false;
     this.authenticated = false;
     this.backlogloading = false;
+    this.connectUser = true;
     this.unresolved = [];
 
     this.flairs = [];
@@ -216,6 +217,7 @@ class Chat {
     this.source.on('REFRESH', () => window.location.reload(false));
     this.source.on('PING', (data) => this.source.send('PONG', data));
     this.source.on('CONNECTING', (data) => this.onCONNECTING(data));
+    this.source.on('CONNECTED', (data) => this.onCONNECTED(data));
     this.source.on('OPEN', (data) => this.onOPEN(data));
     this.source.on('DISPATCH', (data) => this.onDISPATCH(data));
     this.source.on('CLOSE', (data) => this.onCLOSE(data));
@@ -571,22 +573,25 @@ class Chat {
     return Promise.resolve(this);
   }
 
-  connect() {
+  connect(connectUser = true) {
+    this.connectUser = connectUser;
     this.source.connect(this.config.url);
   }
 
   async loadUserAndSettings() {
-    return fetch(`${this.config.api.base}/api/chat/me`, {
+    fetch(`${this.config.api.base}/api/chat/me`, {
       credentials: 'include',
     })
       .then((res) => res.json())
       .then((data) => {
         this.setUser(data);
         this.setSettings(new Map(data.settings));
+        this.getActiveWindow().update(true);
       })
       .catch(() => {
         this.setUser(null);
         this.setSettings();
+        this.getActiveWindow().update(true);
       });
   }
 
@@ -633,24 +638,22 @@ class Chat {
   }
 
   async loadWhispers() {
-    if (this.authenticated) {
-      fetch(`${this.config.api.base}/api/messages/unread`, {
-        credentials: 'include',
+    fetch(`${this.config.api.base}/api/messages/unread`, {
+      credentials: 'include',
+    })
+      .then((res) => res.json())
+      .then((d) => {
+        d.forEach((e) =>
+          this.whispers.set(e.username.toLowerCase(), {
+            id: e.messageid,
+            nick: e.username,
+            unread: Number(e.unread),
+            open: false,
+          })
+        );
       })
-        .then((res) => res.json())
-        .then((d) => {
-          d.forEach((e) =>
-            this.whispers.set(e.username.toLowerCase(), {
-              id: e.messageid,
-              nick: e.username,
-              unread: Number(e.unread),
-              open: false,
-            })
-          );
-        })
-        .then(() => this.menus.get('whisper-users').redraw())
-        .catch(() => {});
-    }
+      .then(() => this.menus.get('whisper-users').redraw())
+      .catch(() => {});
   }
 
   setEmotes(emotes) {
@@ -1092,16 +1095,16 @@ class Chat {
   }
 
   onCONNECTING(url) {
-    if (this.authenticated) {
-      MessageBuilder.status(
-        `Connecting as ${this.user.username} to ${Chat.extractHostname(
-          url
-        )} ...`
-      ).into(this);
-    } else {
-      MessageBuilder.status(
-        `Connecting to ${Chat.extractHostname(url)} ...`
-      ).into(this);
+    MessageBuilder.status(
+      `Connecting to ${Chat.extractHostname(url)} ...`
+    ).into(this);
+  }
+
+  onCONNECTED(data) {
+    if (data.type === 'User' && this.connectUser) {
+      this.setUser(data);
+      this.loadUserAndSettings();
+      this.loadWhispers();
     }
   }
 
@@ -1111,7 +1114,9 @@ class Chat {
 
   onNAMES(data) {
     MessageBuilder.status(
-      `Connected. Serving ${data.connectioncount || 0} connections and ${
+      `Connected as ${
+        this.authenticated ? this.user.username : 'Guest'
+      }. Serving ${data.connectioncount || 0} connections and ${
         data.users.length
       } users.`
     ).into(this);
