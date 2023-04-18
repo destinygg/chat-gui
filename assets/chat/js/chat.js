@@ -639,15 +639,6 @@ class Chat {
       })
         .then((res) => res.json())
         .then((data) => {
-          data.push({
-            id: '9812128',
-            message: 'Testing lmao',
-            read: '5',
-            timestamp: '2023-04-16T02:18:34+0000',
-            unread: '3',
-            user: 'Testing',
-            userid: '9123295',
-          });
           data.forEach((e) =>
             this.whispers.set(e.user.toLowerCase(), {
               id: e.id,
