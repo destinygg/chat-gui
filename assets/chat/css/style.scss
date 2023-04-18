@@ -1082,66 +1082,84 @@ hr {
 }
 
 #chat-whisper-users {
-  .content > ul {
-    margin: 0;
-    padding: $gutter-md 0;
-  }
-  .conversation {
-    list-style: none;
-    position: relative;
-    cursor: pointer;
-    padding-left: $gutter-md;
-    display: flex;
-    align-items: center;
-    .user {
-      color: $color-accent;
-      display: block;
-    }
-    .user:hover {
-      color: $color-accent-light;
-      .badge {
-        color: $color-chat-text1;
+  .section {
+    margin: 1.5em 0em 0.5em;
+    .title {
+      padding: 0em 0em 0.2em 1em;
+      font-weight: 600;
+      border-bottom: 1px solid;
+      .features {
+        float: right;
+        display: inline-flex;
+        vertical-align: text-top;
+        align-items: center;
+        margin-right: $gutter-md;
+        .flair {
+          cursor: pointer;
+          margin-right: $gutter-xs;
+        }
       }
     }
-    .badge {
-      font-size: 0.8em;
-      padding: 0 $gutter-md;
-      display: inline-block;
-      background: $color-surface-dark4;
-      border-radius: 50%;
-      margin: $gutter-xs 0;
-      color: $color-chat-text2;
-    }
-    .badge,
-    .remove {
-      float: right;
-      margin-right: $gutter-md;
-    }
-    .remove {
-      opacity: 0.25;
-      background: transparent url(../img/icon-close.svg) no-repeat center center;
-      background-size: contain;
-      display: inline-block;
+    .user-entry {
+      margin: 0;
+      cursor: pointer;
+      padding: 0 $gutter-lg;
       text-decoration: none;
-      text-align: center;
-      line-height: 1.3em;
-      width: 1.3em;
-      height: 1.3em;
-    }
-    .remove:hover {
-      opacity: 1;
+      visibility: visible;
+      align-items: center;
+      display: flex;
+      .right {
+        position: absolute;
+        right: $gutter-md;
+        .unread {
+          font-size: 0.8em;
+          padding: 0 $gutter-md;
+          display: inline-block;
+          background: $color-surface-dark4;
+          border-radius: 1em;
+          margin: $gutter-xs 0;
+          color: $color-chat-text2;
+          margin-right: $gutter-md;
+        }
+      }
+      &:hover {
+        background: #282828;
+      }
+      &::before {
+        content: '';
+        width: 8px;
+        height: 8px;
+        margin-right: $gutter-sm;
+        -moz-border-radius: 7.5px;
+        -webkit-border-radius: 7.5px;
+        border-radius: 7.5px;
+      }
+      &.online::before {
+        background-color: $color-green;
+      }
+      &.offline::before {
+        background-color: $color-black;
+      }
     }
   }
-  .unread-0 .badge {
+  .content {
+    margin-top: -$gutter-md;
+    padding-bottom: $gutter-lg;
+  }
+  .scrollable {
+    max-height: calc(100% - 3em);
+  }
+  &.search-in .user-entry {
     display: none;
   }
-  .unread-0 .user,
-  .unread-0 .user:hover {
-    color: $text-color1;
+  &.search-in .user-entry.found {
+    display: flex;
   }
-  .empty {
-    color: $text-color1;
-    margin: $gutter-lg;
+  input {
+    padding: $gutter-lg $gutter-lg;
+    border: none;
+    background: none;
+    border-radius: 0;
   }
 }
 

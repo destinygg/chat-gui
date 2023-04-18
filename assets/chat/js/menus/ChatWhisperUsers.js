@@ -1,21 +1,64 @@
-import $ from 'jquery';
+import moment from 'moment';
+import { debounce } from 'throttle-debounce';
 import ChatMenu from './ChatMenu';
-import ChatUser from '../user';
 
 export default class ChatWhisperUsers extends ChatMenu {
   constructor(ui, btn, chat) {
     super(ui, btn, chat);
     this.unread = 0;
-    this.empty = $(`<span class="empty">No new whispers :(</span>`);
-    this.notif = $(`<span id="chat-whisper-unread-indicator"></span>`);
-    this.btn.append(this.notif);
-    this.usersEl = ui.find('ul:first');
-    this.usersEl.on('click', '.user', (e) =>
-      chat.openConversation(e.target.getAttribute('data-username'))
+    this.searchterm = '';
+    this.notif = this.chat.ui.find('#chat-whisper-unread-indicator');
+    this.unreadEl = this.ui.find('.whispers-unread .whispers');
+    this.readEl = this.ui.find('.whispers-read .whispers');
+    this.searchinput = this.ui.find(
+      '#chat-whisper-users-search .form-control:first'
     );
-    this.usersEl.on('click', '.remove', (e) =>
-      this.removeConversation(e.target.getAttribute('data-username'))
+    this.ui.on('click', '.user-entry', (e) =>
+      chat.openConversation(e.currentTarget.getAttribute('data-username'))
     );
+    this.chat.source.on('JOIN', (data) => this.online(data.nick));
+    this.chat.source.on('QUIT', (data) => this.offline(data.nick));
+    this.chat.source.on('NAMES', (data) => {
+      data.users.forEach((user) => this.online(user.nick));
+    });
+    this.searchinput.on(
+      'keyup',
+      debounce(
+        100,
+        () => {
+          this.searchterm = this.searchinput.val();
+          this.filter();
+          this.redraw();
+        },
+        { atBegin: false }
+      )
+    );
+  }
+
+  filter() {
+    [...this.chat.whispers.values()].forEach((whisper) => {
+      if (
+        whisper.nick.toLowerCase().indexOf(this.searchterm.toLowerCase()) >= 0
+      ) {
+        whisper.found = true;
+      } else {
+        whisper.found = false;
+      }
+    });
+  }
+
+  online(nick) {
+    if (this.chat.whispers.has(nick.toLowerCase())) {
+      this.chat.whispers.get(nick.toLowerCase()).online = true;
+      this.redraw();
+    }
+  }
+
+  offline(nick) {
+    if (this.chat.whispers.has(nick.toLowerCase())) {
+      this.chat.whispers.get(nick.toLowerCase()).online = false;
+      this.redraw();
+    }
   }
 
   removeConversation(nick) {
@@ -27,8 +70,8 @@ export default class ChatWhisperUsers extends ChatMenu {
 
   updateNotification() {
     const wasunread = this.unread;
-    this.unread = [...this.chat.whispers.entries()]
-      .map((e) => parseInt(e[1].unread, 10))
+    this.unread = [...this.chat.whispers.values()]
+      .map((e) => parseInt(e.unread, 10))
       .reduce((a, b) => a + b, 0);
     if (wasunread < this.unread) {
       this.btn.addClass('ping');
@@ -46,33 +89,35 @@ export default class ChatWhisperUsers extends ChatMenu {
 
   redraw() {
     this.updateNotification(); // its always visible
-    if (this.visible) {
-      this.usersEl.empty();
-      if (this.chat.whispers.size === 0) {
-        this.usersEl.append(this.empty);
-      } else {
-        [...this.chat.whispers.entries()]
-          .sort((a, b) => {
-            if (a[1].unread === 0) return 1;
-            if (b[1].unread === 0) return -1;
-            return 0;
-          })
-          .forEach((e) => this.addConversation(e[0], e[1].unread));
-      }
+    this.unreadEl.empty();
+    this.readEl.empty();
+    if (this.chat.whispers.size > 0) {
+      [...this.chat.whispers.values()]
+        .sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())
+        .forEach((whisper) => this.addConversation(whisper));
     }
+    this.ui.toggleClass('search-in', this.searchterm.length > 0);
     super.redraw();
   }
 
-  addConversation(nick, unread) {
-    const user = this.chat.users.get(nick.toLowerCase()) || new ChatUser(nick);
-    this.usersEl.append(`
-            <li class="conversation unread-${unread}">
-                <a style="flex: 1;" data-username="${user.nick.toLowerCase()}" class="user">${
-      user.nick
-    }</a>
-                <span class="badge">${unread}</span>
-                <a data-username="${user.nick.toLowerCase()}" title="Hide" class="remove"></a>
-            </li>
-        `);
+  addConversation(whisper) {
+    const time = moment.utc(whisper.time).local();
+    const found = whisper.found ? ' found' : '';
+    (whisper.unread > 0 ? this.unreadEl : this.readEl).append(`
+    <div class="user-entry ${whisper.online ? 'online' : 'offline'}${
+      this.searchterm.length > 0 ? found : ''
+    }" title="${
+      whisper.online ? 'online' : 'offline'
+    }" data-username="${whisper.nick.toLowerCase()}">
+      <span class="user">${whisper.nick}</span>
+      <div class="right">
+        ${
+          whisper.unread > 0
+            ? `<span class="unread">${whisper.unread} new</span>`
+            : ''
+        }
+        <span class="time">${time.format('DD/MM/YY')}</span>
+      </div>
+    </div>`);
   }
 }
