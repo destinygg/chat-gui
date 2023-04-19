@@ -217,7 +217,7 @@ class Chat {
     this.source.on('REFRESH', () => window.location.reload(false));
     this.source.on('PING', (data) => this.source.send('PONG', data));
     this.source.on('CONNECTING', (data) => this.onCONNECTING(data));
-    this.source.on('CONNECTED', (data) => this.onCONNECTED(data));
+    this.source.on('ME', (data) => this.onME(data));
     this.source.on('OPEN', (data) => this.onOPEN(data));
     this.source.on('DISPATCH', (data) => this.onDISPATCH(data));
     this.source.on('CLOSE', (data) => this.onCLOSE(data));
@@ -578,18 +578,18 @@ class Chat {
     this.source.connect(this.config.url);
   }
 
-  async loadUserAndSettings() {
-    fetch(`${this.config.api.base}/api/chat/me`, {
+  async loadSettings() {
+    fetch(`${this.config.api.base}/api/chat/me/settings`, {
       credentials: 'include',
     })
       .then((res) => res.json())
       .then((data) => {
-        this.setUser(data);
-        this.setSettings(new Map(data.settings));
+        // Set user settings.
+        this.setSettings(new Map(data));
         this.getActiveWindow().update(true);
       })
       .catch(() => {
-        this.setUser(null);
+        // Set default settings.
         this.setSettings();
         this.getActiveWindow().update(true);
       });
@@ -1100,13 +1100,14 @@ class Chat {
     ).into(this);
   }
 
-  onCONNECTED(data) {
-    if (data.type === 'User' && this.connectUser) {
-      this.setUser(data);
-      this.loadUserAndSettings();
+  onME(data) {
+    this.setUser(data);
+    if (data && this.connectUser) {
+      // If is a logged in user.
+      this.loadSettings();
       this.loadWhispers();
     } else {
-      this.setUser(null);
+      // If guest load default settings.
       this.setSettings();
     }
   }
