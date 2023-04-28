@@ -180,7 +180,6 @@ class Chat {
     this.subonly = false;
     this.authenticated = false;
     this.backlogloading = false;
-    this.connectUser = true;
     this.unresolved = [];
 
     this.flairs = [];
@@ -573,8 +572,7 @@ class Chat {
     return Promise.resolve(this);
   }
 
-  connect(connectUser = true) {
-    this.connectUser = connectUser;
+  connect() {
     this.source.connect(this.config.url);
   }
 
@@ -1102,7 +1100,7 @@ class Chat {
 
   onME(data) {
     this.setUser(data);
-    if (data && this.connectUser) {
+    if (data) {
       // If is a logged in user.
       this.loadSettings();
       this.loadWhispers();

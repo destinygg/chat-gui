@@ -30,7 +30,7 @@ switch ((Chat.reqParam('t') || 'embed').toUpperCase()) {
       })
       .then(() => chat.loadEmotesAndFlairs())
       .then(() => chat.loadHistory())
-      .then(() => chat.connect(false));
+      .then(() => chat.connect());
     break;
 
   case 'VOTE':
@@ -44,7 +44,7 @@ switch ((Chat.reqParam('t') || 'embed').toUpperCase()) {
                 </div>
             `
       )
-      .then(() => chat.connect(false));
+      .then(() => chat.connect());
     break;
 
   case 'EMBED':
@@ -53,6 +53,6 @@ switch ((Chat.reqParam('t') || 'embed').toUpperCase()) {
       .withGui(embedHtml)
       .then(() => chat.loadEmotesAndFlairs())
       .then(() => chat.loadHistory())
-      .then(() => chat.connect(true));
+      .then(() => chat.connect());
     break;
 }
