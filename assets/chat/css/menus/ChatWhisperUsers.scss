@@ -1,0 +1,86 @@
+#chat-whisper-users {
+  .content > ul {
+    margin: 0;
+    padding: $gutter-md 0;
+  }
+
+  .conversation {
+    list-style: none;
+    position: relative;
+    cursor: pointer;
+    padding-left: $gutter-md;
+    display: flex;
+    align-items: center;
+
+    .user {
+      color: $color-accent;
+      display: block;
+
+      &:hover {
+        color: $color-accent-light;
+
+        .badge {
+          color: $color-chat-text1;
+        }
+      }
+    }
+
+    .badge {
+      font-size: 0.8em;
+      padding: 0 $gutter-md;
+      display: inline-block;
+      background: $color-surface-dark4;
+      border-radius: 50%;
+      margin: $gutter-xs 0;
+      color: $color-chat-text2;
+    }
+
+    .badge,
+    .remove {
+      float: right;
+      margin-right: $gutter-md;
+    }
+
+    .remove {
+      opacity: 0.25;
+      background: transparent url(../img/icon-close.svg) no-repeat center center;
+      background-size: contain;
+      display: inline-block;
+      text-decoration: none;
+      text-align: center;
+      line-height: 1.3em;
+      width: 1.3em;
+      height: 1.3em;
+
+      &:hover {
+        opacity: 1;
+      }
+    }
+  }
+
+  .unread-0 {
+    .badge {
+      display: none;
+    }
+
+    .user,
+    .user:hover {
+      color: $text-color1;
+    }
+  }
+
+  .empty {
+    color: $text-color1;
+    margin: $gutter-lg;
+  }
+}
+
+#chat-whisper-unread-indicator {
+  left: 100%;
+  color: $color-light;
+  font-size: 0.75em;
+  position: absolute;
+  vertical-align: text-bottom;
+  margin-left: 0.5em;
+  top: 6px;
+}

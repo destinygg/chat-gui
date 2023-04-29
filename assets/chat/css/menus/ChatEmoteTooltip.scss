@@ -1,0 +1,32 @@
+#chat-emote-tooltip {
+  height: fit-content;
+  width: fit-content;
+  min-width: 75px;
+  max-width: 250px;
+
+  .emote-image {
+    display: flex;
+    justify-content: center;
+    padding: $gutter-md;
+  }
+
+  .emote-info {
+    border-top: 1px solid $color-surface-dark4;
+    padding: $gutter-sm;
+
+    div {
+      display: flex;
+      justify-content: center;
+
+      &.name {
+        font-weight: 500;
+        color: $text-color;
+      }
+
+      &.tier,
+      &.creator {
+        color: $text-color1;
+      }
+    }
+  }
+}

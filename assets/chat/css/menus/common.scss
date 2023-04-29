@@ -1,0 +1,27 @@
+.form-control {
+  color: $color-chat-text2;
+  background: $color-surface-dark1;
+  border: 1px solid lighten($color-surface-dark1, 9);
+
+  &:focus {
+    color: $color-chat-text1;
+    background: $color-surface-dark1;
+    border: 1px solid lighten($color-surface-dark1, 15);
+    box-shadow: none;
+    outline: none;
+  }
+
+  &[disabled],
+  &[readonly],
+  &::placeholder {
+    color: $color-chat-place;
+  }
+
+  &[type='text'] {
+    width: 100%;
+  }
+}
+
+textarea.form-control {
+  width: 100%;
+}

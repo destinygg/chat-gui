@@ -1,0 +1,120 @@
+/* Base ChatUserMessage */
+.msg-user .features {
+  display: inline-flex;
+  vertical-align: text-top;
+  align-items: center;
+  margin-left: -$gutter-xs;
+
+  .flair {
+    cursor: pointer;
+    margin-left: $gutter-xs;
+  }
+}
+
+/* Own messages */
+.msg-own {
+  background-color: $color-chat-emphasize;
+  color: $color-chat-text1;
+}
+
+/* /me messages */
+.msg-me .text {
+  font-style: italic;
+}
+
+/* Historical messages */
+.msg-historical {
+  color: $text-color1;
+
+  &:before {
+    background: none !important;
+  }
+
+  .time {
+    display: inline !important;
+  }
+}
+
+.chat-output:not(.chat-win-main) {
+  .msg-historical {
+    background-color: $color-chat-emphasize;
+    color: $color-chat-text1;
+  }
+  .msg-historical.msg-own {
+    background: none !important;
+    color: $color-chat-text2;
+  }
+}
+
+/* Highlighted messages */
+.msg-highlight {
+  color: $color-chat-text1;
+  background-color: $color-chat-highlight;
+
+  time,
+  .continue {
+    color: $color-chat-text3;
+  }
+
+  .pref-taggedvisibility & {
+    background-color: $color-chat-highlight;
+  }
+}
+
+/* Tagged messages */
+.msg-tagged {
+  position: relative;
+
+  &:before {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    min-width: 0.45em;
+    display: block;
+    background: $color-black;
+    content: '';
+  }
+
+  .pref-taggedvisibility & {
+    background-color: $color-chat-tagged;
+  }
+}
+
+$tag-colors: (
+  'green': $color-green,
+  'yellow': $color-yellow,
+  'orange': $color-orange,
+  'red': $color-red,
+  'purple': $color-purple,
+  'blue': $color-blue,
+  'sky': $color-sky,
+  'lime': $color-lime,
+  'pink': $color-pink,
+  'black': $color-black,
+);
+
+@each $name, $value in $tag-colors {
+  .msg-tagged-#{$name}:before {
+    background-color: $value;
+  }
+}
+
+/* Whispers */
+.msg-whisper {
+  background-color: $color-chat-emphasize;
+
+  a.user {
+    background: $color-accent;
+    padding: $gutter-xs $gutter-md $gutter-xs $gutter-md;
+    border-radius: $bradius;
+    font-weight: normal;
+    color: white;
+
+    &:hover {
+      text-decoration: none;
+      color: $color-accent;
+      background: white;
+    }
+  }
+}

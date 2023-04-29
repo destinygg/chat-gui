@@ -1,0 +1,123 @@
+#chat-settings {
+  #chat-settings-form {
+    margin: $gutter-lg 0;
+  }
+
+  .form-group {
+    margin: $gutter-lg $gutter-lg;
+    display: block;
+    position: relative;
+  }
+
+  h4 {
+    font-size: 0.9em;
+    margin-top: $gutter-lg * 2;
+    margin-bottom: $gutter-lg;
+    padding-left: $gutter-lg;
+    color: $text-color-disabled;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+
+  label {
+    display: inline-block;
+    font-weight: normal;
+    max-width: 100%;
+    margin-bottom: $gutter-md;
+  }
+
+  .checkbox {
+    label {
+      margin-bottom: 0;
+      font-weight: 400;
+      max-width: 100%;
+      cursor: pointer;
+      display: flex;
+      justify-items: center;
+      align-items: center;
+    }
+
+    input {
+      margin: 0 $gutter-sm 0 0;
+      line-height: normal;
+      box-sizing: border-box;
+      padding: 0;
+    }
+  }
+
+  select {
+    border-radius: $bradius;
+    padding: $gutter-sm;
+    width: 100%;
+  }
+}
+
+.pref-showtime .time {
+  display: inline;
+}
+
+.pref-hideflairicons .features {
+  display: none;
+}
+
+.pref-autocompletehelper #chat-auto-complete.active {
+  display: block;
+}
+
+/* Small screen, non-retina */
+@media only screen and (min-width: 320px) {
+  body:not(.pref-fontscale) {
+    font-size: 13px;
+  }
+}
+
+/* Small screen, retina, stuff to override above media query */
+@media only screen and (min-device-pixel-ratio: 2) and (min-width: 320px),
+  only screen and (min-resolution: 192dpi) and (min-width: 320px),
+  only screen and (min-resolution: 2dppx) and (min-width: 320px) {
+  body:not(.pref-fontscale) {
+    font-size: 13px;
+  }
+}
+
+/* Medium screen, non-retina */
+@media only screen and (min-width: 700px) {
+  body:not(.pref-fontscale) {
+    font-size: 14px;
+  }
+}
+
+/* Medium screen, retina, stuff to override above media query */
+@media only screen and (min-device-pixel-ratio: 2) and (min-width: 700px),
+  only screen and (min-resolution: 192dpi) and (min-width: 700px),
+  only screen and (min-resolution: 2dppx) and (min-width: 700px) {
+  body:not(.pref-fontscale) {
+    font-size: 15px;
+  }
+}
+
+/* Large screen, non-retina */
+@media only screen and (min-width: 1300px) {
+  body:not(.pref-fontscale) {
+    font-size: 16px;
+  }
+}
+
+/* Large screen, retina, stuff to override above media query */
+@media only screen and (min-device-pixel-ratio: 2) and (min-width: 1300px),
+  only screen and (min-resolution: 192dpi) and (min-width: 1300px),
+  only screen and (min-resolution: 2dppx) and (min-width: 1300px) {
+  body:not(.pref-fontscale) {
+    font-size: 16px;
+  }
+}
+
+body.pref-fontscale[data-fontscale='small'] {
+  font-size: 14px;
+}
+body.pref-fontscale[data-fontscale='medium'] {
+  font-size: 15px;
+}
+body.pref-fontscale[data-fontscale='large'] {
+  font-size: 16px;
+}
