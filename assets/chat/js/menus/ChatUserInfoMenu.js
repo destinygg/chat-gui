@@ -12,6 +12,7 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     this.messageArray = [];
 
     this.header = this.ui.find('.toolbar span');
+    this.targetNode = document.getElementById('chat-win-main');
 
     this.createdDateSubheader = this.ui.find('.user-info h5.date-subheader')[0];
 
@@ -35,6 +36,13 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     this.muteDurations = ['1m', '10m', '1h', '1d'];
     this.banDurations = ['1d', '7d', '30d', 'Perm'];
 
+    this.observer = new MutationObserver(this.handleMutations.bind(this));
+    this.observer.observe(this.targetNode, {
+      attributes: true,
+      childList: true,
+      subtree: true,
+    });
+
     this.configureButtons();
 
     this.chat.output.on('contextmenu', '.msg-user .user', (e) => {
@@ -49,10 +57,14 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     this.chat.output.on('mouseup', '.msg-user .user', (e) => {
       e.stopPropagation();
     });
+  }
 
-    this.chat.output.on('DOMSubtreeModified', (e) => {
-      this.updateContent(e);
-    });
+  handleMutations(mutationsList) {
+    for (const mutation of mutationsList) {
+      if (mutation.target.classList.contains('chat-lines')) {
+        this.updateContent(mutation.target);
+      }
+    }
   }
 
   showUser(e, user, userlist = false) {
@@ -286,7 +298,7 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     this.redraw();
   }
 
-  updateContent(e) {
+  updateContent(target) {
     const chatMenuIsOpen = this.chat.menus
       .get('user-info')
       .ui[0].className.includes('active');
@@ -308,11 +320,10 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
           .data('unixtimestamp');
 
       const isNewLastMessage =
-        e.target &&
-        e.target.lastChild &&
-        e.target.lastChild.nodeType === Node.ELEMENT_NODE
-          ? e.target.lastChild.getAttribute('data-username') ===
-            this.clickedNick
+        target &&
+        target.lastChild &&
+        target.lastChild.nodeType === Node.ELEMENT_NODE
+          ? target.lastChild.getAttribute('data-username') === this.clickedNick
           : false;
 
       if (isNewFirstMessage || isNewLastMessage) {
