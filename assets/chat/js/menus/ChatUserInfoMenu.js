@@ -12,7 +12,6 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     this.messageArray = [];
 
     this.header = this.ui.find('.toolbar span');
-    this.targetNode = document.getElementById('chat-win-main');
 
     this.createdDateSubheader = this.ui.find('.user-info h5.date-subheader')[0];
 
@@ -37,7 +36,7 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     this.banDurations = ['1d', '7d', '30d', 'Perm'];
 
     this.observer = new MutationObserver(this.handleMutations.bind(this));
-    this.observer.observe(this.targetNode, {
+    this.observer.observe(this.chat.output[0], {
       attributes: true,
       childList: true,
       subtree: true,
@@ -234,9 +233,15 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
   }
 
   addContent(message) {
-    this.messageArray = this.chat.output.find(
-      `[data-username='${this.clickedNick.toLowerCase()}']`
-    );
+    if (this.chat.output.find('.chat-output-whisper').length) {
+      this.messageArray = this.chat.output
+        .find('.chat-output-whisper')
+        .find(`[data-username='${this.clickedNick.toLowerCase()}']`);
+    } else {
+      this.messageArray = this.chat.output
+        .find('.chat-output')
+        .find(`[data-username='${this.clickedNick.toLowerCase()}']`);
+    }
 
     const prettyNick = message.find('.user')[0].innerText;
     const nick = message.data('username');
@@ -306,9 +311,17 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     if (!chatMenuIsOpen) return;
 
     if (this.messageArray.length > 0 && this.messagesList) {
-      const newMessagesSet = this.chat.output.find(
-        `[data-username='${this.clickedNick}']`
-      );
+      let newMessagesSet = null;
+      if (this.chat.output.find('.chat-output-whisper').length) {
+        newMessagesSet = this.chat.output
+          .find('.chat-output-whisper')
+          .find(`[data-username='${this.clickedNick.toLowerCase()}']`);
+      } else {
+        newMessagesSet = this.chat.output
+          .find('.chat-output')
+          .find(`[data-username='${this.clickedNick.toLowerCase()}']`);
+      }
+
       const isNewFirstMessage =
         this.messageArray
           .first()
@@ -387,7 +400,7 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
       });
     } else {
       const msg = MessageBuilder.error(
-        "Wasn't able to grab the clicked message"
+        'Unable to find messages for selected user'
       );
       displayedMessages.push(msg.html(this.chat));
     }
