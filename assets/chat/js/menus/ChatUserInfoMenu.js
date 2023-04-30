@@ -67,11 +67,11 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     }
   }
 
-  showUser(e, user, userlist = false) {
+  showUser(e, user) {
     this.clickedNick = user.data('username');
 
     this.setActionsVisibility();
-    this.addContent(user, userlist);
+    this.addContent(user);
 
     this.position(e);
     this.show();
@@ -233,10 +233,10 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     this.hide();
   }
 
-  addContent(message, userlist) {
-    this.messageArray = userlist
-      ? []
-      : this.chat.output.find(`[data-username='${this.clickedNick}']`);
+  addContent(message) {
+    this.messageArray = this.chat.output.find(
+      `[data-username='${this.clickedNick.toLowerCase()}']`
+    );
 
     const prettyNick = message.find('.user')[0].innerText;
     const nick = message.data('username');
@@ -271,7 +271,7 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
       this.flairSubheader.style.display = '';
     }
 
-    const messageList = this.createMessages(userlist);
+    const messageList = this.createMessages();
     if (messageList.length === 0) {
       this.messagesList.toggleClass('hidden', true);
       this.messagesSubheader.style.display = 'none';
@@ -365,7 +365,7 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     return features !== '' ? `<span class="features">${features}</span>` : '';
   }
 
-  createMessages(userlist) {
+  createMessages() {
     const displayedMessages = [];
     if (this.messageArray.length > 0) {
       const sortedMessageArray = this.messageArray.sort((a, b) => {
@@ -385,7 +385,7 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
         );
         displayedMessages.push(msg.html(this.chat));
       });
-    } else if (!userlist) {
+    } else {
       const msg = MessageBuilder.error(
         "Wasn't able to grab the clicked message"
       );
