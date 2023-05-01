@@ -34,6 +34,7 @@ import EmoteService from './emotes';
 import UserFeatures from './features';
 import makeSafeForRegex from './regex';
 import { HashLinkConverter, MISSING_ARG_ERROR } from './hashlinkconverter';
+import MessageTemplateHTML from '../../views/templates.html';
 
 const regexslashcmd = /^\/([a-z0-9]+)[\s]?/i;
 const regextime = /(\d+(?:\.\d*)?)([a-z]+)?/gi;
@@ -577,6 +578,7 @@ class Chat {
   withGui(template, appendTo = null) {
     this.ui = $(template);
     this.ui.prependTo(appendTo || 'body');
+    $(MessageTemplateHTML).prependTo('body');
 
     // We use this style sheet to apply GUI updates via css (e.g. user focus)
     this.css = (() => {
