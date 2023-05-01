@@ -2100,12 +2100,6 @@ class Chat {
       MessageBuilder.error(`Still busy stalking ${[parts[0]]} ...`).into(this);
       return;
     }
-    if (this.nextallowedstalk && this.nextallowedstalk.isAfter(new Date())) {
-      MessageBuilder.error(
-        `Next allowed stalk ${this.nextallowedstalk.fromNow()}`
-      ).into(this);
-      return;
-    }
     this.busystalk = true;
     const limit = parts[1] ? parseInt(parts[1], 10) : 3;
     MessageBuilder.info(`Getting messages from ${[parts[0]]} ...`).into(this);
@@ -2143,7 +2137,6 @@ class Chat {
         ).into(this)
       )
       .then(() => {
-        this.nextallowedstalk = moment().add(10, 'seconds');
         this.busystalk = false;
       });
   }
@@ -2169,15 +2162,6 @@ class Chat {
       MessageBuilder.error(`Still busy getting ${[parts[0]]}'s mentions`).into(
         this
       );
-      return;
-    }
-    if (
-      this.nextallowedmentions &&
-      this.nextallowedmentions.isAfter(new Date())
-    ) {
-      MessageBuilder.error(
-        `Next allowed mentions ${this.nextallowedmentions.fromNow()}`
-      ).into(this);
       return;
     }
     this.busymentions = true;
@@ -2216,7 +2200,6 @@ class Chat {
         ).into(this)
       )
       .then(() => {
-        this.nextallowedmentions = moment().add(10, 'seconds');
         this.busymentions = false;
       });
   }
