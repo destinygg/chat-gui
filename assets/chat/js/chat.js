@@ -2314,6 +2314,11 @@ class Chat {
         )
           .then((res) => res.json())
           .then((data) => {
+            if (data.error) {
+              MessageBuilder.error(data.error).into(this, win);
+              return;
+            }
+
             if (data.length > 0) {
               const date = moment(data[0].timestamp).format(DATE_FORMATS.FULL);
               MessageBuilder.info(`Last message ${date}.`).into(this, win);
