@@ -51,10 +51,8 @@ switch ((Chat.reqParam('t') || 'embed').toUpperCase()) {
   default:
     chat
       .withGui(embedHtml)
-      .then(() => chat.loadUserAndSettings())
       .then(() => chat.loadEmotesAndFlairs())
       .then(() => chat.loadHistory())
-      .then(() => chat.loadWhispers())
       .then(() => chat.connect());
     break;
 }

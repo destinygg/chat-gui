@@ -34,6 +34,7 @@ import EmoteService from './emotes';
 import UserFeatures from './features';
 import makeSafeForRegex from './regex';
 import { HashLinkConverter, MISSING_ARG_ERROR } from './hashlinkconverter';
+import ChatCommands from './commands';
 import MessageTemplateHTML from '../../views/templates.html';
 
 const regexslashcmd = /^\/([a-z0-9]+)[\s]?/i;
@@ -60,6 +61,8 @@ const errorstrings = new Map([
   ['nopermission', 'You do not have the required permissions to use that'],
   ['protocolerror', 'Invalid or badly formatted'],
   ['needlogin', 'You have to be logged in to use that'],
+  ['msgempty', 'Message cannot be empty'],
+  ['msgtoolong', 'Message cannot be longer than 512 characters'],
   ['invalidmsg', 'The message was invalid'],
   ['throttled', 'Throttled! You were trying to send messages too fast'],
   ['duplicate', 'The message is identical to the last one you sent'],
@@ -141,234 +144,6 @@ const settingsdefault = new Map([
   ['fontscale', 'auto'],
   ['censorbadwords', false],
 ]);
-const commandsinfo = new Map([
-  [
-    'help',
-    {
-      desc: 'List all chat commands.',
-    },
-  ],
-  [
-    'emotes',
-    {
-      desc: 'Return all emotes in text form.',
-    },
-  ],
-  [
-    'me',
-    {
-      desc: 'Send an action message in italics.',
-    },
-  ],
-  [
-    'message',
-    {
-      desc: 'Send a whisper to <nick>.',
-      alias: ['msg', 'whisper', 'w', 'tell', 't', 'notify'],
-    },
-  ],
-  [
-    'ignore',
-    {
-      desc: 'Stop showing messages from <nick>.',
-    },
-  ],
-  [
-    'unignore',
-    {
-      desc: 'Remove <nick> from your ignore list.',
-    },
-  ],
-  [
-    'unignoreall',
-    {
-      desc: 'Remove all users from your ignore list.',
-    },
-  ],
-  [
-    'highlight',
-    {
-      desc: 'Highlight messages from <nick> for easier visibility.',
-    },
-  ],
-  [
-    'unhighlight',
-    {
-      desc: 'Unhighlight <nick>.',
-    },
-  ],
-  [
-    'maxlines',
-    {
-      desc: 'Set the maximum number of <lines> the chat will store.',
-    },
-  ],
-  [
-    'mute',
-    {
-      desc: 'Stop <nick> from sending messages.',
-      admin: true,
-    },
-  ],
-  [
-    'unmute',
-    {
-      desc: 'Unmute <nick>.',
-      admin: true,
-    },
-  ],
-  [
-    'subonly',
-    {
-      desc: 'Turn the subscribers-only chat mode <on> or <off>.',
-      admin: true,
-    },
-  ],
-  [
-    'ban',
-    {
-      desc: 'Stop <nick> from connecting to the chat.',
-      admin: true,
-    },
-  ],
-  [
-    'unban',
-    {
-      desc: 'Unban <nick>.',
-      admin: true,
-    },
-  ],
-  [
-    'baninfo',
-    {
-      desc: 'Check your ban status.',
-    },
-  ],
-  [
-    'timestampformat',
-    {
-      desc: 'Set the time format of the chat.',
-    },
-  ],
-  [
-    'tag',
-    {
-      desc: "Mark <nick>'s messages.",
-    },
-  ],
-  [
-    'untag',
-    {
-      desc: 'Untags <nick>.',
-    },
-  ],
-  [
-    'embed',
-    {
-      desc: 'Embed a video to bigscreen.',
-      alias: ['e'],
-    },
-  ],
-  [
-    'postembed',
-    {
-      desc: 'Post a video embed in chat.',
-      alias: ['pe'],
-    },
-  ],
-  [
-    'open',
-    {
-      desc: 'Open a conversation with a user.',
-      alias: ['o'],
-    },
-  ],
-  [
-    'exit',
-    {
-      desc: 'Exit the conversation you have open.',
-    },
-  ],
-  [
-    'reply',
-    {
-      desc: 'Reply to the last whisper you received.',
-      alias: ['r'],
-    },
-  ],
-  [
-    'stalk',
-    {
-      desc: 'Return a list of messages from <nick>.',
-      alias: ['s'],
-    },
-  ],
-  [
-    'mentions',
-    {
-      desc: 'Return a list of messages where <nick> is mentioned.',
-      alias: ['m'],
-    },
-  ],
-  [
-    'showpoll',
-    {
-      desc: 'Show last poll.',
-      alias: ['showvote'],
-    },
-  ],
-  [
-    'poll',
-    {
-      desc: 'Start a poll.',
-      alias: ['vote'],
-    },
-  ],
-  [
-    'spoll',
-    {
-      desc: 'Start a sub-weighted poll.',
-      alias: ['svote'],
-    },
-  ],
-  [
-    'pollstop',
-    {
-      desc: 'Stop a poll you started.',
-      alias: ['votestop'],
-    },
-  ],
-  [
-    'pin',
-    {
-      desc: 'Pins a message to chat',
-      admin: true,
-      alias: ['motd'],
-    },
-  ],
-  [
-    'unpin',
-    {
-      desc: 'Unpins a message from chat',
-      admin: true,
-      alias: ['unmotd'],
-    },
-  ],
-  [
-    'host',
-    {
-      desc: 'Hosts a livestream, video, or vod to bigscreen.',
-      admin: true,
-    },
-  ],
-  [
-    'unhost',
-    {
-      desc: 'Removes hosted content from bigscreen.',
-      admin: true,
-    },
-  ],
-]);
 const banstruct = {
   id: 0,
   userid: 0,
@@ -417,6 +192,7 @@ class Chat {
     this.whispers = new Map();
     this.windows = new Map();
     this.settings = new Map(settingsdefault);
+    this.commands = new ChatCommands();
     this.autocomplete = new ChatAutoComplete();
     this.menus = new Map();
     this.taggednicks = new Map();
@@ -441,6 +217,7 @@ class Chat {
     this.source.on('REFRESH', () => window.location.reload(false));
     this.source.on('PING', (data) => this.source.send('PONG', data));
     this.source.on('CONNECTING', (data) => this.onCONNECTING(data));
+    this.source.on('ME', (data) => this.onME(data));
     this.source.on('OPEN', (data) => this.onOPEN(data));
     this.source.on('DISPATCH', (data) => this.onDISPATCH(data));
     this.source.on('CLOSE', (data) => this.onCLOSE(data));
@@ -654,11 +431,9 @@ class Chat {
       )
     );
 
-    commandsinfo.forEach((a, k) => {
-      this.autocomplete.add(`/${k}`);
-      (a.alias || []).forEach((i) => this.autocomplete.add(`/${i}`));
-    });
-
+    this.commands
+      .generateAutocomplete(this.user.hasModPowers())
+      .forEach((command) => this.autocomplete.add(command));
     this.autocomplete.bind(this);
 
     // Chat input
@@ -703,21 +478,28 @@ class Chat {
     // Visibility
     document.addEventListener(
       'visibilitychange',
-      debounce(100, false, () => {
-        this.ishidden = (document.visibilityState || 'visible') !== 'visible';
-        if (!this.ishidden) this.focusIfNothingSelected();
-        else ChatMenu.closeMenus(this);
-      }),
+      debounce(
+        100,
+        () => {
+          this.ishidden = (document.visibilityState || 'visible') !== 'visible';
+          if (!this.ishidden) this.focusIfNothingSelected();
+          else ChatMenu.closeMenus(this);
+        },
+        { atBegin: false }
+      ),
       true
     );
 
     // Resize
     let resizing = false;
-    const onresizecomplete = debounce(100, false, () => {
-      resizing = false;
-      this.getActiveWindow().unlock();
-      this.focusIfNothingSelected();
-    });
+    const onresizecomplete = debounce(
+      100,
+      () => {
+        resizing = false;
+        this.focusIfNothingSelected();
+      },
+      { atBegin: false }
+    );
     const onresize = () => {
       // If this is a mobile screen, don't close menus.
       // The virtual keyboard triggers a 'resize' event, and menus shouldn't be closed whenever the virtual keyboard is opened
@@ -728,7 +510,6 @@ class Chat {
       if (!resizing) {
         resizing = true;
         ChatMenu.closeMenus(this);
-        this.getActiveWindow().lock();
       }
       onresizecomplete();
     };
@@ -790,7 +571,7 @@ class Chat {
     });
 
     this.loadingscrn.fadeOut(250, () => this.loadingscrn.remove());
-    this.mainwindow.updateAndPin();
+    this.mainwindow.update(true);
 
     this.setDefaultPlaceholderText();
     MessageBuilder.status(this.config.welcomeMessage).into(this);
@@ -801,18 +582,20 @@ class Chat {
     this.source.connect(this.config.url);
   }
 
-  async loadUserAndSettings() {
-    return fetch(`${this.config.api.base}/api/chat/me`, {
+  async loadSettings() {
+    fetch(`${this.config.api.base}/api/chat/me/settings`, {
       credentials: 'include',
     })
       .then((res) => res.json())
       .then((data) => {
-        this.setUser(data);
-        this.setSettings(new Map(data.settings));
+        // Set user settings.
+        this.setSettings(new Map(data));
+        this.getActiveWindow().update(true);
       })
       .catch(() => {
-        this.setUser(null);
+        // Set default settings.
         this.setSettings();
+        this.getActiveWindow().update(true);
       });
   }
 
@@ -859,29 +642,30 @@ class Chat {
   }
 
   async loadWhispers() {
-    if (this.authenticated) {
-      fetch(`${this.config.api.base}/api/messages/unread`, {
-        credentials: 'include',
+    fetch(`${this.config.api.base}/api/messages/unread`, {
+      credentials: 'include',
+    })
+      .then((res) => res.json())
+      .then((d) => {
+        d.forEach((e) =>
+          this.whispers.set(e.username.toLowerCase(), {
+            id: e.messageid,
+            nick: e.username,
+            unread: Number(e.unread),
+            open: false,
+          })
+        );
       })
-        .then((res) => res.json())
-        .then((d) => {
-          d.forEach((e) =>
-            this.whispers.set(e.username.toLowerCase(), {
-              id: e.messageid,
-              nick: e.username,
-              unread: Number(e.unread),
-              open: false,
-            })
-          );
-        })
-        .then(() => this.menus.get('whisper-users').redraw())
-        .catch(() => {});
-    }
+      .then(() => this.menus.get('whisper-users').redraw())
+      .catch(() => {});
   }
 
   setEmotes(emotes) {
-    this.emoteService.emotes = emotes;
-    this.emoteService.prefixes.forEach((e) => this.autocomplete.add(e, true));
+    this.emoteService.setEmotes(emotes);
+    this.emoteService
+      .emotesForUser(this.user)
+      .map((e) => e.prefix)
+      .forEach((e) => this.autocomplete.add(e, true));
     return this;
   }
 
@@ -898,7 +682,7 @@ class Chat {
       history.forEach((line) => this.source.parseAndDispatch({ data: line }));
       this.backlogloading = false;
       MessageBuilder.element('<hr/>').into(this);
-      this.mainwindow.updateAndPin();
+      this.mainwindow.update(true);
     }
     return this;
   }
@@ -923,7 +707,9 @@ class Chat {
   // De-bounced saveSettings
   commitSettings() {
     if (!this.debouncedsave) {
-      this.debouncedsave = debounce(1000, false, () => this.saveSettings());
+      this.debouncedsave = debounce(1000, () => this.saveSettings(), {
+        atBegin: false,
+      });
     }
     this.debouncedsave();
   }
@@ -1011,7 +797,6 @@ class Chat {
 
     // eslint-disable-next-line no-param-reassign
     if (win === null) win = this.mainwindow;
-    win.lock();
 
     // Break the current combo if this message is not an emote
     // We don't need to check what type the current message is, we just know that its a new message, so the combo is invalid.
@@ -1087,7 +872,7 @@ class Chat {
       );
     }
 
-    win.unlock();
+    win.update();
   }
 
   resolveMessage(nick, str) {
@@ -1104,24 +889,20 @@ class Chat {
   }
 
   removeMessageByNick(nick) {
-    this.mainwindow.lock();
     this.mainwindow.removelines(
       `.msg-chat[data-username="${nick.toLowerCase()}"]`
     );
-    this.mainwindow.unlock();
+    this.mainwindow.update();
   }
 
   windowToFront(name) {
     const win = this.windows.get(name);
     if (win !== null && win !== this.getActiveWindow()) {
       this.windows.forEach((w) => {
-        if (w.visible) {
-          if (!w.locked()) w.lock();
-          w.hide();
-        }
+        if (w.visible) w.hide();
       });
       win.show();
-      if (win.locked()) win.unlock();
+      win.update();
       this.redrawWindowIndicators();
     }
 
@@ -1187,16 +968,13 @@ class Chat {
         }
       });
     }
-    // null check on main window, since main window calls this during initialization
-    if (this.mainwindow !== null) this.mainwindow.lock();
 
     this.windowselect.toggle(this.windows.size > 1);
 
-    if (this.mainwindow !== null) this.mainwindow.unlock();
+    if (this.mainwindow !== null) this.mainwindow.update();
   }
 
   censor(nick) {
-    this.mainwindow.lock();
     const c = this.mainwindow.getlines(
       `.msg-chat[data-username="${nick.toLowerCase()}"]`
     );
@@ -1211,7 +989,7 @@ class Chat {
       default:
         break;
     }
-    this.mainwindow.unlock();
+    this.mainwindow.update();
   }
 
   ignored(nick, text = null) {
@@ -1256,7 +1034,9 @@ class Chat {
     }
 
     if (this.debounceFocus === undefined) {
-      this.debounceFocus = debounce(10, false, (c) => c.input.focus());
+      this.debounceFocus = debounce(10, (c) => c.input.focus(), {
+        atBegin: false,
+      });
     }
     if (window.getSelection().isCollapsed && !this.input.is(':focus')) {
       this.debounceFocus(this);
@@ -1278,7 +1058,6 @@ class Chat {
 
     const maxHeightPixels = this.input.css('maxHeight');
     const maxHeight = parseInt(maxHeightPixels.slice(0, -2), 10);
-    const pinned = this.getActiveWindow().scrollplugin.isPinned();
 
     this.input.css('height', '');
     const calculatedHeight = this.input.prop('scrollHeight');
@@ -1290,7 +1069,7 @@ class Chat {
     );
 
     this.input.css('height', calculatedHeight);
-    this.getActiveWindow().updateAndPin(pinned);
+    this.getActiveWindow().update();
   }
 
   /**
@@ -1298,7 +1077,7 @@ class Chat {
    */
 
   onDISPATCH({ data }) {
-    if (typeof data === 'object') {
+    if (data && typeof data === 'object') {
       let users = [];
       const now = Date.now();
       if (Object.hasOwn(data, 'nick')) users.push(this.addUser(data));
@@ -1310,9 +1089,7 @@ class Chat {
     }
   }
 
-  onCLOSE({ retryMilli }) {
-    // https://www.iana.org/assignments/websocket/websocket.xml#close-code-number
-    // const code = e.event.code || 1006
+  onCLOSE(retryMilli) {
     if (this.chatpoll.isPollStarted()) this.chatpoll.endPoll(); // end poll on disconnect so it is not there forever.
     if (retryMilli > 0)
       MessageBuilder.error(
@@ -1322,16 +1099,20 @@ class Chat {
   }
 
   onCONNECTING(url) {
-    if (this.authenticated) {
-      MessageBuilder.status(
-        `Connecting as ${this.user.username} to ${Chat.extractHostname(
-          url
-        )} ...`
-      ).into(this);
+    MessageBuilder.status(
+      `Connecting to ${Chat.extractHostname(url)} ...`
+    ).into(this);
+  }
+
+  onME(data) {
+    this.setUser(data);
+    if (data) {
+      // If is a logged in user.
+      this.loadSettings();
+      this.loadWhispers();
     } else {
-      MessageBuilder.status(
-        `Connecting to ${Chat.extractHostname(url)} ...`
-      ).into(this);
+      // If guest load default settings.
+      this.setSettings();
     }
   }
 
@@ -1341,7 +1122,9 @@ class Chat {
 
   onNAMES(data) {
     MessageBuilder.status(
-      `Connected. Serving ${data.connectioncount || 0} connections and ${
+      `Connected as ${
+        this.authenticated ? this.user.username : 'Guest'
+      }. Serving ${data.connectioncount || 0} connections and ${
         data.users.length
       } users.`
     ).into(this);
@@ -1352,12 +1135,10 @@ class Chat {
   }
 
   onPIN(msg) {
-    if (!msg.data) {
-      this.pinnedMessage?.unpin();
-      return;
-    }
-
+    if (this.pinnedMessage?.uuid === msg.uuid) return;
     this.pinnedMessage?.unpin();
+    if (!msg.data) return;
+
     const usr = this.users.get(msg.nick.toLowerCase()) ?? new ChatUser(msg);
     this.pinnedMessage = MessageBuilder.pinned(
       msg.data,
@@ -1383,13 +1164,12 @@ class Chat {
     const win = this.mainwindow;
     if (
       win.lastmessage !== null &&
-      this.emoteService.prefixes.includes(textonly) &&
+      this.emoteService.canUserUseEmote(usr, textonly) &&
       Chat.removeSlashCmdFromText(win.lastmessage.message) === textonly
     ) {
       if (win.lastmessage.type === MessageTypes.EMOTE) {
-        this.mainwindow.lock();
         win.lastmessage.incEmoteCount();
-        this.mainwindow.unlock();
+        this.mainwindow.update();
       } else {
         win.lastmessage.ui.remove();
         MessageBuilder.emote(textonly, data.timestamp, 2).into(this);
@@ -1400,20 +1180,10 @@ class Chat {
   }
 
   onPOLLSTART(data) {
-    const usr = this.users.get(data.nick.toLowerCase());
-    if (this.chatpoll.isPollStarted() || !this.chatpoll.canUserStartPoll(usr)) {
-      return;
-    }
-
     this.chatpoll.startPoll(data);
   }
 
-  onPOLLSTOP(data) {
-    const usr = this.users.get(data.nick.toLowerCase());
-    if (!this.chatpoll.isPollStarted() || !this.chatpoll.canUserStopPoll(usr)) {
-      return;
-    }
-
+  onPOLLSTOP() {
     this.chatpoll.endPoll();
   }
 
@@ -1737,7 +1507,7 @@ class Chat {
       // EMOTE SPAM
       else if (
         this.source.isConnected() &&
-        this.emoteService.prefixes.includes(textonly)
+        this.emoteService.getEmote(textonly)
       ) {
         // Its easier to deal with combos with the this.unresolved flow
         this.source.send('MSG', { data: raw });
@@ -1786,7 +1556,8 @@ class Chat {
       MessageBuilder.error('Poll already started.').into(this);
       return;
     }
-    if (!this.chatpoll.canUserStartPoll(this.user)) {
+
+    if (!this.chatpoll.hasPermission(this.user)) {
       MessageBuilder.error('You do not have permission to start a poll.').into(
         this
       );
@@ -1808,7 +1579,7 @@ class Chat {
       MessageBuilder.error('No poll started.').into(this);
       return;
     }
-    if (!this.chatpoll.canUserStopPoll(this.user)) {
+    if (!this.chatpoll.hasPermission(this.user)) {
       MessageBuilder.error(
         'You do not have permission to stop this poll.'
       ).into(this);
@@ -1825,13 +1596,10 @@ class Chat {
   }
 
   cmdHELP() {
-    let str = `Available commands: \r`;
-    commandsinfo.forEach((a, k) => {
-      str += a.alias
-        ? ` /${k}, /${a.alias.join(', /')} - ${a.desc} \r`
-        : ` /${k} - ${a.desc} \r`;
-    });
-    MessageBuilder.info(str).into(this);
+    MessageBuilder.info(this.commands.generateUserHelpStrings()).into(this);
+    if (this.user.hasModPowers()) {
+      MessageBuilder.info(this.commands.generateAdminHelpStrings()).into(this);
+    }
   }
 
   cmdHINT(parts) {
@@ -2275,13 +2043,16 @@ class Chat {
         }
         const b = { ...banstruct, ...data };
         const by = b.username ? b.username : 'Chat';
-        const start = moment(b.starttimestamp).format(DATE_FORMATS.FULL);
+        const start = moment
+          .utc(b.starttimestamp)
+          .local()
+          .format(DATE_FORMATS.FULL);
         if (!b.endtimestamp) {
           MessageBuilder.info(
             `Permanent ban by ${by} started on ${start}.`
           ).into(this);
         } else {
-          const end = moment(b.endtimestamp).calendar();
+          const end = moment.utc(b.endtimestamp).local().calendar();
           MessageBuilder.info(
             `Temporary ban by ${by} started on ${start} and ending by ${end}.`
           ).into(this);
@@ -2378,12 +2149,6 @@ class Chat {
       MessageBuilder.error(`Still busy stalking ${[parts[0]]} ...`).into(this);
       return;
     }
-    if (this.nextallowedstalk && this.nextallowedstalk.isAfter(new Date())) {
-      MessageBuilder.error(
-        `Next allowed stalk ${this.nextallowedstalk.fromNow()}`
-      ).into(this);
-      return;
-    }
     this.busystalk = true;
     const limit = parts[1] ? parseInt(parts[1], 10) : 3;
     MessageBuilder.info(`Getting messages from ${[parts[0]]} ...`).into(this);
@@ -2421,7 +2186,6 @@ class Chat {
         ).into(this)
       )
       .then(() => {
-        this.nextallowedstalk = moment().add(10, 'seconds');
         this.busystalk = false;
       });
   }
@@ -2447,15 +2211,6 @@ class Chat {
       MessageBuilder.error(`Still busy getting ${[parts[0]]}'s mentions`).into(
         this
       );
-      return;
-    }
-    if (
-      this.nextallowedmentions &&
-      this.nextallowedmentions.isAfter(new Date())
-    ) {
-      MessageBuilder.error(
-        `Next allowed mentions ${this.nextallowedmentions.fromNow()}`
-      ).into(this);
       return;
     }
     this.busymentions = true;
@@ -2494,7 +2249,6 @@ class Chat {
         ).into(this)
       )
       .then(() => {
-        this.nextallowedmentions = moment().add(10, 'seconds');
         this.busymentions = false;
       });
   }
@@ -2609,6 +2363,11 @@ class Chat {
         )
           .then((res) => res.json())
           .then((data) => {
+            if (data.error) {
+              MessageBuilder.error(data.error).into(this, win);
+              return;
+            }
+
             if (data.length > 0) {
               const date = moment(data[0].timestamp).format(DATE_FORMATS.FULL);
               MessageBuilder.info(`Last message ${date}.`).into(this, win);

@@ -3,8 +3,6 @@ import { throttle } from 'throttle-debounce';
 import UserFeatures from './features';
 import { MessageBuilder } from './messages';
 
-const POLL_START = /^\/(vote|svote|poll|spoll) /i;
-const POLL_STOP = /^\/(votestop|pollstop)/i;
 const POLL_CONJUNCTION = /\bor\b/i;
 const POLL_INTERROGATIVE = /^(how|why|when|what|where)\b/i;
 const POLL_TIME = /\b([0-9]+(?:m|s))$/i;
@@ -82,7 +80,7 @@ class ChatPoll {
         }
       }
     });
-    this.throttleVoteCast = throttle(100, false, () => {
+    this.throttleVoteCast = throttle(100, () => {
       this.updateBars();
     });
   }
@@ -90,18 +88,16 @@ class ChatPoll {
   hide() {
     if (!this.hidden) {
       this.hidden = true;
-      this.chat.mainwindow.lock();
       this.ui.removeClass('active');
-      this.chat.mainwindow.unlock();
+      this.chat.mainwindow.update();
     }
   }
 
   show() {
     if (this.hidden) {
       this.hidden = false;
-      this.chat.mainwindow.lock();
       this.ui.addClass('active');
-      this.chat.mainwindow.unlock();
+      this.chat.mainwindow.update();
     }
   }
 
@@ -109,25 +105,12 @@ class ChatPoll {
     return this.voting;
   }
 
-  canUserStartPoll(user) {
+  hasPermission(user) {
     return user.hasAnyFeatures(
       UserFeatures.ADMIN,
       UserFeatures.BOT,
       UserFeatures.MODERATOR
     );
-  }
-
-  canUserStopPoll(user) {
-    // A user can only stop their own poll.
-    return this.canUserStartPoll(user) && this.poll.user === user.nick;
-  }
-
-  isMsgPollStopFmt(txt) {
-    return txt.match(POLL_STOP);
-  }
-
-  isMsgPollStartFmt(txt) {
-    return txt.match(POLL_START);
   }
 
   isMsgVoteCastFmt(txt) {

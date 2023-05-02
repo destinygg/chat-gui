@@ -81,11 +81,15 @@ export default class ChatUserMenu extends ChatMenu {
     this.chat.source.on('NAMES', () => this.addAll());
     this.searchinput.on(
       'keyup',
-      debounce(100, false, () => {
-        this.searchterm = this.searchinput.val();
-        this.filter();
-        this.redraw();
-      })
+      debounce(
+        100,
+        () => {
+          this.searchterm = this.searchinput.val();
+          this.filter();
+          this.redraw();
+        },
+        { atBegin: false }
+      )
     );
   }
 
