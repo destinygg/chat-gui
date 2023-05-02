@@ -38,7 +38,6 @@ export default class ChatSubscriptionMessage extends ChatUserMessage {
 
     attr.style = attrStyle;
     const classes = rainbowColor ? ['rainbow-border'] : [];
-    if (!this.message) this.classes.push('no-message');
 
     const colorFlair = usernameColorFlair(chat.flairs, this.user);
 
@@ -65,7 +64,6 @@ export default class ChatSubscriptionMessage extends ChatUserMessage {
         this.buildMessageTxt(chat);
     } else {
       message.querySelector('.text-wrapper').remove();
-      classes.push('no-message');
     }
 
     return {

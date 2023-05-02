@@ -55,7 +55,6 @@ export default class ChatDonationMessage extends ChatUserMessage {
         this.buildMessageTxt(chat);
     } else {
       message.querySelector('.text-wrapper').remove();
-      classes.push('no-message');
     }
 
     message.querySelector('.donation-icon').classList.add(classes[0]);
