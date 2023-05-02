@@ -7,6 +7,7 @@ export default class ChatGiftedSubscriptionMessage extends ChatSubscriptionMessa
   constructor(message, user, tier, tierLabel, giftee, timestamp) {
     super(message, user, tier, tierLabel, timestamp);
     this.type = MessageTypes.GIFTSUB;
+    this.templateID = '#gift-subscription-template';
     this.giftee = giftee;
   }
 

@@ -5,6 +5,7 @@ export default class ChatMassSubscriptionMessage extends ChatSubscriptionMessage
   constructor(message, user, tier, tierLabel, quantity, timestamp) {
     super(message, user, tier, tierLabel, timestamp);
     this.type = MessageTypes.MASSGIFT;
+    this.templateID = '#mass-subscription-template';
     this.quantity = quantity;
   }
 

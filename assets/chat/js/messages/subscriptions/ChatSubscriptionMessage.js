@@ -1,6 +1,5 @@
 import ChatUserMessage, { usernameColorFlair } from '../ChatUserMessage';
 import features from '../../features';
-import MessageTypes from '../MessageTypes';
 
 export default class ChatSubscriptionMessage extends ChatUserMessage {
   constructor(message, user, tier, tierLabel, timestamp) {
@@ -8,6 +7,7 @@ export default class ChatSubscriptionMessage extends ChatUserMessage {
     this.tier = tier;
     this.tierLabel = tierLabel;
     this.mentioned = [];
+    this.templateID = '';
   }
 
   getTierStyles(chat = null) {
@@ -42,24 +42,10 @@ export default class ChatSubscriptionMessage extends ChatUserMessage {
 
     const colorFlair = usernameColorFlair(chat.flairs, this.user);
 
-    let templateID = '';
-
-    switch (this.type) {
-      case MessageTypes.SUBSCRIPTION:
-        templateID = '#regular-subscription-template';
-        break;
-      case MessageTypes.GIFTSUB:
-        templateID = '#gift-subscription-template';
-        break;
-      case MessageTypes.MASSGIFT:
-        templateID = '#mass-subscription-template';
-        break;
-      default:
-        break;
-    }
-
     /** @type DocumentFragment */
-    const message = document.querySelector(templateID)?.content.cloneNode(true);
+    const message = document
+      .querySelector(this.templateID)
+      ?.content.cloneNode(true);
 
     const user = message.querySelector('.user');
     user.title = this.title;

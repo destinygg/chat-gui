@@ -5,6 +5,7 @@ export default class ChatRegularSubscriptionMessage extends ChatSubscriptionMess
   constructor(message, user, tier, tierLabel, streak, timestamp) {
     super(message, user, tier, tierLabel, timestamp);
     this.type = MessageTypes.SUBSCRIPTION;
+    this.templateID = '#regular-subscription-template';
     this.streak = streak;
   }
 
