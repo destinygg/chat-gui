@@ -13,6 +13,8 @@ export default class ChatGiftedSubscriptionMessage extends ChatSubscriptionMessa
   html(chat = null) {
     const { message, classes, attr } = this.buildBaseSubscription(chat);
 
+    attr['data-giftee'] = this.giftee.toLowerCase();
+
     const gifteeUser =
       chat.users.get(this.giftee.toLowerCase()) ?? new ChatUser(this.giftee);
     const gifteeColorFlair = usernameColorFlair(chat.flairs, gifteeUser);

@@ -30,7 +30,6 @@ export default class ChatSubscriptionMessage extends ChatUserMessage {
 
     if (this.user && this.user.username)
       attr['data-username'] = this.user.username.toLowerCase();
-    if (this.giftee) attr['data-giftee'] = this.giftee.toLowerCase();
     if (this.mentioned && this.mentioned.length > 0)
       attr['data-mentioned'] = this.mentioned.join(' ').toLowerCase();
 
