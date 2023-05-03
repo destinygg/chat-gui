@@ -12,7 +12,7 @@ export default class ChatSubscriptionMessage extends ChatUserMessage {
 
   getTierStyles(chat = null) {
     const tierFlair = features[`SUB_TIER_${this.tier}`];
-    const tierInfo = chat.flairs.filter((el) => el.name === tierFlair)[0];
+    const tierInfo = chat.flairs.find((el) => el.name === tierFlair);
     const tierColor = tierInfo?.color;
 
     const tierClass = tierInfo?.rainbowColor ? `user ${tierFlair}` : '';
