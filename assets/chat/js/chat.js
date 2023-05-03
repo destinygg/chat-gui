@@ -808,7 +808,15 @@ class Chat {
       win.lastmessage.completeCombo();
 
     // Populate the tag, mentioned users and highlight for this $message.
-    if (message.type === MessageTypes.USER) {
+    if (
+      [
+        MessageTypes.USER,
+        MessageTypes.SUBSCRIPTION,
+        MessageTypes.GIFTSUB,
+        MessageTypes.MASSGIFT,
+        MessageTypes.DONATION,
+      ].includes(message.type)
+    ) {
       // check if message is `/me `
       message.slashme =
         message.message.substring(0, 4).toLowerCase() === '/me ';
