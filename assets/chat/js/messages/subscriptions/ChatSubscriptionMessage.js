@@ -38,6 +38,7 @@ export default class ChatSubscriptionMessage extends ChatUserMessage {
 
     attr.style = attrStyle;
     const classes = rainbowColor ? ['rainbow-border'] : [];
+    if (this.slashme) classes.push('msg-me');
 
     const colorFlair = usernameColorFlair(chat.flairs, this.user);
 

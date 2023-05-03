@@ -49,6 +49,7 @@ export default class ChatDonationMessage extends ChatUserMessage {
     );
 
     const classes = this.selectDonationTier(this.amount);
+    if (this.slashme) classes.push('msg-me');
 
     if (this.message) {
       message.querySelector('.text-wrapper').innerHTML =
