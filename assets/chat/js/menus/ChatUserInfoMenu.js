@@ -38,6 +38,7 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     this.configureButtons();
 
     this.chat.output.on('contextmenu', '.msg-chat .user', (e) => {
+      if (e.currentTarget.classList.contains('tier')) return false;
       const message = $(e.currentTarget).closest('.msg-chat');
       this.showUser(e, message);
 
