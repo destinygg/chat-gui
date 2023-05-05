@@ -225,9 +225,9 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
         ? [message]
         : [];
 
-    const selectedUser = [...message[0].querySelectorAll('.user')].filter(
+    const selectedUser = [...message[0].querySelectorAll('.user')].find(
       (user) => user.innerText.toLowerCase() === this.clickedNick.toLowerCase()
-    )[0];
+    );
     const prettyNick = selectedUser.innerText;
     const tagNote = this.chat.taggednotes.get(this.clickedNick);
     const usernameFeatures = selectedUser.classList.value;
@@ -289,7 +289,7 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
 
   buildCreatedDate(nick) {
     const user = this.chat.users.get(nick.toLowerCase());
-    if (!user.createdDate) {
+    if (!user?.createdDate) {
       return '';
     }
     const timeHTML = document.createElement('time');
