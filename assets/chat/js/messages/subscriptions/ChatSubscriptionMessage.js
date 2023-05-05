@@ -1,11 +1,17 @@
-import ChatUserMessage, { usernameColorFlair } from '../ChatUserMessage';
+import { usernameColorFlair } from '../ChatUserMessage';
+import ChatMessage from '../ChatMessage';
 import features from '../../features';
 
-export default class ChatSubscriptionMessage extends ChatUserMessage {
+export default class ChatSubscriptionMessage extends ChatMessage {
   constructor(message, user, tier, tierLabel, timestamp) {
-    super(message, user, timestamp);
+    super(message, timestamp);
+    this.user = user;
     this.tier = tier;
     this.tierLabel = tierLabel;
+    this.tag = null;
+    this.title = '';
+    this.slashme = false;
+    this.isown = false;
     this.mentioned = [];
     this.templateID = '';
   }

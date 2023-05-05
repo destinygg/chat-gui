@@ -807,7 +807,7 @@ class Chat {
     )
       win.lastmessage.completeCombo();
 
-    // Populate the tag, mentioned users and highlight for this $message.
+    // Populate the tag and mentioned users for this $message.
     if (
       [
         MessageTypes.USER,
@@ -824,13 +824,6 @@ class Chat {
       message.isown =
         message.user.username.toLowerCase() ===
         this.user.username.toLowerCase();
-      // check if the last message was from the same user
-      message.continued =
-        win.lastmessage &&
-        !win.lastmessage.target &&
-        win.lastmessage.user &&
-        win.lastmessage.user.username.toLowerCase() ===
-          message.user.username.toLowerCase();
       // get mentions from message
       message.mentioned = Chat.extractNicks(message.message).filter((a) =>
         this.users.has(a.toLowerCase())
@@ -840,6 +833,17 @@ class Chat {
       // set tagged note
       message.title =
         this.taggednotes.get(message.user.nick.toLowerCase()) || '';
+    }
+
+    // Populate highlight for this $message
+    if (message.type === MessageTypes.USER) {
+      // check if the last message was from the same user
+      message.continued =
+        win.lastmessage &&
+        !win.lastmessage.target &&
+        win.lastmessage.user &&
+        win.lastmessage.user.username.toLowerCase() ===
+          message.user.username.toLowerCase();
       // set highlighted state
       message.highlighted =
         /* this.authenticated && */ !message.isown &&

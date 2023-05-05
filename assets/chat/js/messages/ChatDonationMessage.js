@@ -1,12 +1,17 @@
-import ChatUserMessage, { usernameColorFlair } from './ChatUserMessage';
+import { usernameColorFlair } from './ChatUserMessage';
+import ChatMessage from './ChatMessage';
 import MessageTypes from './MessageTypes';
 
 const DONATION_TIERS = [0, 5, 10, 25, 50, 100];
 
-export default class ChatDonationMessage extends ChatUserMessage {
+export default class ChatDonationMessage extends ChatMessage {
   constructor(message, user, amount, timestamp) {
-    super(message, user, timestamp);
-    this.type = MessageTypes.DONATION;
+    super(message, timestamp, MessageTypes.DONATION);
+    this.user = user;
+    this.tag = null;
+    this.title = '';
+    this.slashme = false;
+    this.isown = false;
     this.amount = amount;
     this.mentioned = [];
   }
