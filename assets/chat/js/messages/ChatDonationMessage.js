@@ -1,19 +1,14 @@
 import { usernameColorFlair } from './ChatUserMessage';
-import ChatMessage from './ChatMessage';
+import ChatEventMessage from './ChatEventMessage';
 import MessageTypes from './MessageTypes';
 
 const DONATION_TIERS = [0, 5, 10, 25, 50, 100];
 
-export default class ChatDonationMessage extends ChatMessage {
+export default class ChatDonationMessage extends ChatEventMessage {
   constructor(message, user, amount, timestamp) {
-    super(message, timestamp, MessageTypes.DONATION);
-    this.user = user;
-    this.tag = null;
-    this.title = '';
-    this.slashme = false;
-    this.isown = false;
+    super(message, user, timestamp);
+    this.type = MessageTypes.DONATION;
     this.amount = amount;
-    this.mentioned = [];
   }
 
   /**
@@ -27,44 +22,46 @@ export default class ChatDonationMessage extends ChatMessage {
   }
 
   html(chat = null) {
-    const attr = {};
+    const eventTemplate = super.html(chat);
 
-    if (this.user && this.user.username)
-      attr['data-username'] = this.user.username.toLowerCase();
-    if (this.mentioned && this.mentioned.length > 0)
-      attr['data-mentioned'] = this.mentioned.join(' ').toLowerCase();
+    /** @type HTMLDivElement */
+    const donationTemplate = document
+      .querySelector('#donation-template')
+      ?.content.cloneNode(true);
 
     const colorFlair = usernameColorFlair(chat.flairs, this.user);
 
-    /** @type HTMLDivElement */
-    const message = document
-      .querySelector('#donation-template')
-      ?.content.cloneNode(true).firstElementChild;
-
-    const user = message.querySelector('.user');
+    const user = donationTemplate.querySelector('.user');
     user.title = this.title;
     user.classList.add(colorFlair?.name);
     user.innerText = this.user.username;
 
-    message.querySelector('.donation-wrapper span').append(
+    donationTemplate.querySelector('.donation-wrapper span').append(
       ` donated ${(this.amount / 100).toLocaleString('en-US', {
         style: 'currency',
         currency: 'USD',
       })}`
     );
 
-    const classes = this.selectDonationTier(this.amount);
-    if (this.slashme) classes.push('msg-me');
+    const donationTier = this.selectDonationTier(this.amount);
+    eventTemplate.classList.add(donationTier[0]);
+    donationTemplate
+      .querySelector('.donation-icon')
+      ?.classList.add(donationTier[0]);
 
-    if (this.message) {
-      message.querySelector('.text-wrapper').innerHTML =
-        this.buildMessageTxt(chat);
-    } else {
-      message.querySelector('.text-wrapper').remove();
-    }
+    eventTemplate.querySelector('.event-info')?.append(donationTemplate);
 
-    message.querySelector('.donation-icon').classList.add(classes[0]);
+    const classes = Array.from(eventTemplate.classList);
+    const attributes = eventTemplate
+      .getAttributeNames()
+      .reduce((object, attributeName) => {
+        if (attributeName === 'class') return object;
+        return {
+          ...object,
+          [attributeName]: eventTemplate.getAttribute(attributeName),
+        };
+      }, {});
 
-    return this.wrap(message.innerHTML, classes, attr);
+    return this.wrap(eventTemplate.innerHTML, classes, attributes);
   }
 }

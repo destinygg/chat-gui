@@ -530,6 +530,27 @@ hr {
   }
 }
 
+.msg-donation,
+.msg-subscription,
+.msg-giftsub,
+.msg-massgift {
+  .event-wrapper {
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .event-info {
+    display: flex;
+    padding: $gutter-xs $gutter-md * 2 $gutter-xs $gutter-md;
+    background-color: $color-chat-emphasize;
+  }
+
+  .event-message {
+    padding: $gutter-xs $gutter-md * 2 $gutter-xs $gutter-md;
+    background-color: $color-chat-bg;
+  }
+}
+
 /* Donations */
 .msg-donation {
   text-shadow: 1px 1px 3px rgba(0, 0, 0, 1);
@@ -544,26 +565,15 @@ hr {
   flex-direction: column;
   margin: $gutter-sm $gutter-md * 2 $gutter-sm $gutter-sm;
 
-  .main-donation-wrapper {
-    border-radius: 10px;
-    overflow: hidden;
+  .event-info {
+    @extend .event-info;
+    justify-content: space-between;
+    align-items: center;
   }
 
   .user {
     margin-left: unset;
     text-shadow: none;
-  }
-
-  .text-wrapper {
-    padding: $gutter-xs $gutter-md * 2 $gutter-xs $gutter-md;
-  }
-
-  .donation-info {
-    display: flex;
-    padding: $gutter-xs $gutter-md * 2 $gutter-xs $gutter-md;
-    background-color: $color-chat-emphasize;
-    justify-content: space-between;
-    align-items: center;
   }
 
   .icon-wrapper {
@@ -666,16 +676,9 @@ hr {
   flex-direction: column;
   margin: $gutter-sm $gutter-md * 2 $gutter-sm $gutter-sm;
 
-  .main-sub-wrapper {
-    border-radius: 10px;
-    overflow: hidden;
-  }
-
-  .subscription-info {
-    display: flex;
+  .event-info {
+    @extend .event-info;
     flex-direction: column;
-    padding: $gutter-xs $gutter-md * 2 $gutter-xs $gutter-md;
-    background-color: $color-chat-emphasize;
   }
 
   .subscription {
@@ -718,11 +721,6 @@ hr {
         filter: invert(100%);
       }
     }
-  }
-
-  .text-wrapper {
-    padding: $gutter-xs $gutter-md * 2 $gutter-xs $gutter-md;
-    background-color: $color-chat-bg;
   }
 
   .user {

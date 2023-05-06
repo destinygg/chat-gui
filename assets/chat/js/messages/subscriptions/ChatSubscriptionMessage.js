@@ -1,18 +1,12 @@
 import { usernameColorFlair } from '../ChatUserMessage';
-import ChatMessage from '../ChatMessage';
+import ChatEventMessage from '../ChatEventMessage';
 import features from '../../features';
 
-export default class ChatSubscriptionMessage extends ChatMessage {
+export default class ChatSubscriptionMessage extends ChatEventMessage {
   constructor(message, user, tier, tierLabel, timestamp) {
-    super(message, timestamp);
-    this.user = user;
+    super(message, user, timestamp);
     this.tier = tier;
     this.tierLabel = tierLabel;
-    this.tag = null;
-    this.title = '';
-    this.slashme = false;
-    this.isown = false;
-    this.mentioned = [];
     this.templateID = '';
   }
 
@@ -31,44 +25,35 @@ export default class ChatSubscriptionMessage extends ChatMessage {
   }
 
   html(chat = null) {
-    /** @type HTMLDivElement */
-    const message = document
-      .querySelector(this.templateID)
-      ?.content.cloneNode(true).firstElementChild;
+    const eventTemplate = super.html(chat);
 
-    if (this.user && this.user.username)
-      message.dataset.username = this.user.username.toLowerCase();
-    if (this.mentioned && this.mentioned.length > 0)
-      message.dataset.mentioned = this.mentioned.join(' ').toLowerCase();
+    /** @type HTMLDivElement */
+    const subTemplate = document
+      .querySelector(this.templateID)
+      ?.content.cloneNode(true);
 
     const { rainbowColor, tierClass, tierColor } = this.getTierStyles(chat);
 
-    if (tierColor) message.style.borderColor = tierColor;
-    if (rainbowColor) message.classList.add('rainbow-border');
-    if (this.slashme) message.classList.add('msg-me');
+    if (tierColor) eventTemplate.style.borderColor = tierColor;
+    if (rainbowColor) eventTemplate.classList.add('rainbow-border');
 
     const colorFlair = usernameColorFlair(chat.flairs, this.user);
 
-    const user = message.querySelector('.user');
+    const user = subTemplate.querySelector('.user');
     user.title = this.title;
     user.classList.add(colorFlair?.name);
     user.innerText = this.user.username;
 
     const tierLabel = this.tierLabel ?? `Tier ${this.tier}`;
 
-    const tier = message.querySelector('.tier');
+    const tier = subTemplate.querySelector('.tier');
     if (tierClass)
       tierClass.split(' ').forEach((element) => tier.classList.add(element));
     tier.style.color = tierColor;
     tier.innerText = tierLabel;
 
-    if (this.message) {
-      message.querySelector('.text-wrapper').innerHTML =
-        this.buildMessageTxt(chat);
-    } else {
-      message.querySelector('.text-wrapper').remove();
-    }
+    eventTemplate.querySelector('.event-info')?.append(subTemplate);
 
-    return message;
+    return eventTemplate;
   }
 }
