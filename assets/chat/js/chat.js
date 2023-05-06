@@ -87,7 +87,7 @@ class Chat {
     this.users = new Map();
     this.whispers = new Map();
     this.windows = new Map();
-    this.settings = Object.entries(settingsdefault);
+    this.settings = new Map(Object.entries(settingsdefault));
     this.commands = new ChatCommands();
     this.autocomplete = new ChatAutoComplete();
     this.menus = new Map();
