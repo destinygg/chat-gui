@@ -2,7 +2,15 @@ import { fetch } from 'whatwg-fetch';
 import $ from 'jquery';
 import { debounce } from 'throttle-debounce';
 import moment from 'moment';
-import { KEYCODES, DATE_FORMATS, isKeyCode } from './const';
+import {
+  KEYCODES,
+  DATE_FORMATS,
+  isKeyCode,
+  tagcolors,
+  errorstrings,
+  hintstrings,
+  settingsdefault,
+} from './const';
 import { Notification } from './notification';
 import EventEmitter from './emitter';
 import ChatSource from './source';
@@ -32,128 +40,17 @@ import { ChatPoll, parseQuestionAndTime } from './poll';
 import { isMuteActive, MutedTimer } from './mutedtimer';
 import EmoteService from './emotes';
 import UserFeatures from './features';
-import makeSafeForRegex from './regex';
+import makeSafeForRegex, {
+  regexslashcmd,
+  regextime,
+  nickmessageregex,
+  nickregex,
+  nsfwregex,
+  nsflregex,
+} from './regex';
+
 import { HashLinkConverter, MISSING_ARG_ERROR } from './hashlinkconverter';
 import ChatCommands from './commands';
-
-const regexslashcmd = /^\/([a-z0-9]+)[\s]?/i;
-const regextime = /(\d+(?:\.\d*)?)([a-z]+)?/gi;
-const nickmessageregex = /(?=@?)(\w{3,20})/g;
-const nickregex = /^[a-zA-Z0-9_]{3,20}$/;
-const nsfwnsflregex = /\b(?:NSFL|NSFW)\b/i;
-const nsfwregex = /\b(?:NSFW)\b/i;
-const nsflregex = /\b(?:NSFL)\b/i;
-const tagcolors = [
-  'green',
-  'yellow',
-  'orange',
-  'red',
-  'purple',
-  'blue',
-  'sky',
-  'lime',
-  'pink',
-  'black',
-];
-const errorstrings = new Map([
-  ['unknown', 'Unknown error, this usually indicates an internal problem :('],
-  ['nopermission', 'You do not have the required permissions to use that'],
-  ['protocolerror', 'Invalid or badly formatted'],
-  ['needlogin', 'You have to be logged in to use that'],
-  ['msgempty', 'Message cannot be empty'],
-  ['msgtoolong', 'Message cannot be longer than 512 characters'],
-  ['invalidmsg', 'The message was invalid'],
-  ['throttled', 'Throttled! You were trying to send messages too fast'],
-  ['duplicate', 'The message is identical to the last one you sent'],
-  ['submode', 'The channel is currently in subscriber only mode'],
-  ['needbanreason', 'Providing a reason for the ban is mandatory'],
-  ['privmsgbanned', 'Cannot send private messages while banned'],
-  ['requiresocket', 'This chat requires WebSockets'],
-  ['toomanyconnections', 'Only 5 concurrent connections allowed'],
-  ['socketerror', 'Error contacting server'],
-  [
-    'privmsgaccounttooyoung',
-    'Your account is too recent to send private messages',
-  ],
-  ['notfound', 'The user was not found'],
-  ['notconnected', 'You have to be connected to use that'],
-  ['activepoll', 'Poll already started.'],
-  ['noactivepoll', 'No poll started.'],
-  ['alreadyvoted', 'You have already voted!'],
-]);
-const hintstrings = new Map([
-  [
-    'slashhelp',
-    'Type in /help for a list of more commands that do advanced things, like modify your scroll-back size.',
-  ],
-  [
-    'tabcompletion',
-    'Use the tab key to auto-complete names and emotes (for user only completion prepend a @ or hold shift).',
-  ],
-  [
-    'hoveremotes',
-    'Hovering your cursor over an emote will show you the emote code.',
-  ],
-  ['highlight', 'Chat messages containing your username will be highlighted.'],
-  ['notify', 'Use /msg <nick> to send a private message to someone.'],
-  [
-    'ignoreuser',
-    'Use /ignore <nick> to hide messages from pesky chatters. You can even ignore multiple users at once - /ignore <nick_1> ... <nick_n>!',
-  ],
-  ['mutespermanent', "Mutes are never persistent, don't worry it will pass!"],
-  [
-    'tagshint',
-    `Use the /tag <nick> [<color> <note>] to tag users you like. There are preset colors to choose from ${tagcolors.join(
-      ', '
-    )}.`,
-  ],
-  [
-    'bigscreen',
-    `Bigscreen! Did you know you can have the chat on the left or right side of the stream by clicking the swap icon in the top left?`,
-  ],
-  [
-    'danisold',
-    'Destiny is an Amazon Associate. He earns a commission on qualifying purchases of any product on Amazon linked in Destiny.gg chat.',
-  ],
-]);
-const settingsdefault = new Map([
-  ['schemaversion', 2],
-  ['showtime', false],
-  ['hideflairicons', false],
-  ['profilesettings', false],
-  ['timestampformat', 'HH:mm'],
-  ['maxlines', 250],
-  ['notificationwhisper', false],
-  ['notificationhighlight', false],
-  ['highlight', true], // todo rename this to `highlightself` or something
-  ['customhighlight', []],
-  ['highlightnicks', []],
-  ['taggednicks', []],
-  ['taggednotes', []],
-  ['showremoved', 0], // 0 = false (removes), 1 = true (censor), 2 = do nothing
-  ['showhispersinchat', false],
-  ['ignorenicks', []],
-  ['focusmentioned', false],
-  ['notificationtimeout', true],
-  ['ignorementions', false],
-  ['autocompletehelper', true],
-  ['taggedvisibility', false],
-  ['hidensfw', false],
-  ['hidensfl', false],
-  ['fontscale', 'auto'],
-  ['censorbadwords', false],
-]);
-const banstruct = {
-  id: 0,
-  userid: 0,
-  username: '',
-  targetuserid: '',
-  targetusername: '',
-  ipaddress: '',
-  reason: '',
-  starttimestamp: '',
-  endtimestamp: '',
-};
 
 class Chat {
   constructor(config) {
@@ -190,7 +87,7 @@ class Chat {
     this.users = new Map();
     this.whispers = new Map();
     this.windows = new Map();
-    this.settings = new Map(settingsdefault);
+    this.settings = Object.entries(settingsdefault);
     this.commands = new ChatCommands();
     this.autocomplete = new ChatAutoComplete();
     this.menus = new Map();
@@ -334,7 +231,7 @@ class Chat {
     const oldversion = stored.has('schemaversion')
       ? parseInt(stored.get('schemaversion'), 10)
       : -1;
-    const newversion = settingsdefault.get('schemaversion');
+    const newversion = settingsdefault.schemaversion;
     if (oldversion !== -1 && newversion > oldversion) {
       Settings.upgrade(this, oldversion, newversion);
       this.settings.set('schemaversion', newversion);
@@ -993,9 +890,7 @@ class Chat {
         (this.settings.get('ignorementions') &&
           this.ignoreregex &&
           this.ignoreregex.test(text)) ||
-        (this.settings.get('hidensfw') &&
-          this.settings.get('hidensfl') &&
-          nsfwnsflregex.test(text)) ||
+        (this.settings.get('hidensfw') && this.settings.get('hidensfl')) ||
         (this.settings.get('hidensfl') && nsflregex.test(text)) ||
         (this.settings.get('hidensfw') && nsfwregex.test(text))
       );
@@ -1123,7 +1018,9 @@ class Chat {
       } users.`
     ).into(this);
     if (this.showmotd) {
-      this.cmdHINT([Math.floor(Math.random() * hintstrings.size)]);
+      this.cmdHINT([
+        Math.floor(Math.random() * Object.keys(hintstrings).length),
+      ]);
       this.showmotd = false;
     }
   }
@@ -1294,7 +1191,9 @@ class Chat {
         );
         break;
       default:
-        message = MessageBuilder.error(errorstrings.get(desc) || desc);
+        message = MessageBuilder.error(
+          errorstrings[desc.replace(/'/g, '')] || desc
+        );
     }
 
     message.into(this, this.getActiveWindow());
@@ -1556,7 +1455,7 @@ class Chat {
   cmdHINT(parts) {
     const arr = [...hintstrings];
     const i = parts && parts[0] ? parseInt(parts[0], 10) - 1 : -1;
-    if (i > 0 && i < hintstrings.size) {
+    if (i > 0 && i < Object.keys(hintstrings).length) {
       MessageBuilder.info(arr[i][1]).into(this);
     } else {
       if (
@@ -1992,7 +1891,18 @@ class Chat {
           MessageBuilder.info(`You have no active bans. Thank you.`).into(this);
           return;
         }
-        const b = { ...banstruct, ...data };
+        const b = {
+          id: 0,
+          userid: 0,
+          username: '',
+          targetuserid: '',
+          targetusername: '',
+          ipaddress: '',
+          reason: '',
+          starttimestamp: '',
+          endtimestamp: '',
+          ...data,
+        };
         const by = b.username ? b.username : 'Chat';
         const start = moment
           .utc(b.starttimestamp)
@@ -2209,7 +2119,7 @@ class Chat {
     let url = parts[0];
 
     if (!this.user.hasAnyFeatures(UserFeatures.ADMIN, UserFeatures.MODERATOR)) {
-      MessageBuilder.error(errorstrings.get('nopermission')).into(this);
+      MessageBuilder.error(errorstrings.nopermission).into(this);
       return;
     }
 
@@ -2251,7 +2161,7 @@ class Chat {
 
   cmdUNHOST() {
     if (!this.user.hasAnyFeatures(UserFeatures.ADMIN, UserFeatures.MODERATOR)) {
-      MessageBuilder.error(errorstrings.get('nopermission')).into(this);
+      MessageBuilder.error(errorstrings.nopermission).into(this);
       return;
     }
 
