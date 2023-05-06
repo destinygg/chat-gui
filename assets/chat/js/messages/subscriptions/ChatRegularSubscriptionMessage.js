@@ -10,7 +10,17 @@ export default class ChatRegularSubscriptionMessage extends ChatSubscriptionMess
   }
 
   html(chat = null) {
-    const { message, classes, attr } = this.buildBaseSubscription(chat);
+    const message = super.html(chat);
+    const classes = Array.from(message.classList);
+    const attributes = message
+      .getAttributeNames()
+      .reduce((object, attributeName) => {
+        if (attributeName === 'class') return object;
+        return {
+          ...object,
+          [attributeName]: message.getAttribute(attributeName),
+        };
+      }, {});
 
     if (!this.streak) {
       message.querySelector('.streak').remove();
@@ -18,6 +28,6 @@ export default class ChatRegularSubscriptionMessage extends ChatSubscriptionMess
       message.querySelector('.streak-number').textContent = this.streak;
     }
 
-    return this.wrap(message.firstElementChild.innerHTML, classes, attr);
+    return this.wrap(message.innerHTML, classes, attributes);
   }
 }

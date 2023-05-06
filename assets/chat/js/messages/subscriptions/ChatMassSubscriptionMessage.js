@@ -10,12 +10,22 @@ export default class ChatMassSubscriptionMessage extends ChatSubscriptionMessage
   }
 
   html(chat = null) {
-    const { message, classes, attr } = this.buildBaseSubscription(chat);
+    const message = super.html(chat);
+    const classes = Array.from(message.classList);
+    const attributes = message
+      .getAttributeNames()
+      .reduce((object, attributeName) => {
+        if (attributeName === 'class') return object;
+        return {
+          ...object,
+          [attributeName]: message.getAttribute(attributeName),
+        };
+      }, {});
 
     message.querySelector('.quantity').innerText = this.quantity;
     message.querySelector('.subs-or-sub').innerText =
       this.quantity > 1 ? 'subs' : 'sub';
 
-    return this.wrap(message.firstElementChild.innerHTML, classes, attr);
+    return this.wrap(message.innerHTML, classes, attributes);
   }
 }

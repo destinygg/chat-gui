@@ -12,9 +12,19 @@ export default class ChatGiftedSubscriptionMessage extends ChatSubscriptionMessa
   }
 
   html(chat = null) {
-    const { message, classes, attr } = this.buildBaseSubscription(chat);
+    const message = super.html(chat);
+    const classes = Array.from(message.classList);
+    const attributes = message
+      .getAttributeNames()
+      .reduce((object, attributeName) => {
+        if (attributeName === 'class') return object;
+        return {
+          ...object,
+          [attributeName]: message.getAttribute(attributeName),
+        };
+      }, {});
 
-    attr['data-giftee'] = this.giftee.toLowerCase();
+    attributes['data-giftee'] = this.giftee.toLowerCase();
 
     const gifteeUser =
       chat.users.get(this.giftee.toLowerCase()) ?? new ChatUser(this.giftee);
@@ -23,6 +33,6 @@ export default class ChatGiftedSubscriptionMessage extends ChatSubscriptionMessa
     giftee.classList.add(gifteeColorFlair?.name);
     giftee.innerText = gifteeUser.username;
 
-    return this.wrap(message.firstElementChild.innerHTML, classes, attr);
+    return this.wrap(message.innerHTML, classes, attributes);
   }
 }

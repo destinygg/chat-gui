@@ -27,31 +27,27 @@ export default class ChatSubscriptionMessage extends ChatMessage {
       rainbowColor: tierInfo?.rainbowColor,
       tierClass,
       tierColor: tierInfo?.rainbowColor ? '' : tierColor,
-      attrStyle: tierColor ? `border-color: ${tierColor};` : '',
     };
   }
 
-  buildBaseSubscription(chat = null) {
-    const attr = {};
-
-    if (this.user && this.user.username)
-      attr['data-username'] = this.user.username.toLowerCase();
-    if (this.mentioned && this.mentioned.length > 0)
-      attr['data-mentioned'] = this.mentioned.join(' ').toLowerCase();
-
-    const { rainbowColor, tierClass, tierColor, attrStyle } =
-      this.getTierStyles(chat);
-
-    attr.style = attrStyle;
-    const classes = rainbowColor ? ['rainbow-border'] : [];
-    if (this.slashme) classes.push('msg-me');
-
-    const colorFlair = usernameColorFlair(chat.flairs, this.user);
-
-    /** @type DocumentFragment */
+  html(chat = null) {
+    /** @type HTMLDivElement */
     const message = document
       .querySelector(this.templateID)
-      ?.content.cloneNode(true);
+      ?.content.cloneNode(true).firstElementChild;
+
+    if (this.user && this.user.username)
+      message.dataset.username = this.user.username.toLowerCase();
+    if (this.mentioned && this.mentioned.length > 0)
+      message.dataset.mentioned = this.mentioned.join(' ').toLowerCase();
+
+    const { rainbowColor, tierClass, tierColor } = this.getTierStyles(chat);
+
+    if (tierColor) message.style.borderColor = tierColor;
+    if (rainbowColor) message.classList.add('rainbow-border');
+    if (this.slashme) message.classList.add('msg-me');
+
+    const colorFlair = usernameColorFlair(chat.flairs, this.user);
 
     const user = message.querySelector('.user');
     user.title = this.title;
@@ -73,10 +69,6 @@ export default class ChatSubscriptionMessage extends ChatMessage {
       message.querySelector('.text-wrapper').remove();
     }
 
-    return {
-      message,
-      classes,
-      attr,
-    };
+    return message;
   }
 }

@@ -36,10 +36,10 @@ export default class ChatDonationMessage extends ChatMessage {
 
     const colorFlair = usernameColorFlair(chat.flairs, this.user);
 
-    /** @type DocumentFragment */
+    /** @type HTMLDivElement */
     const message = document
       .querySelector('#donation-template')
-      ?.content.cloneNode(true);
+      ?.content.cloneNode(true).firstElementChild;
 
     const user = message.querySelector('.user');
     user.title = this.title;
@@ -65,6 +65,6 @@ export default class ChatDonationMessage extends ChatMessage {
 
     message.querySelector('.donation-icon').classList.add(classes[0]);
 
-    return this.wrap(message.firstElementChild.innerHTML, classes, attr);
+    return this.wrap(message.innerHTML, classes, attr);
   }
 }
