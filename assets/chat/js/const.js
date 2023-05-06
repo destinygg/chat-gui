@@ -123,6 +123,9 @@ const settingsdefault = {
   hidensfl: false,
   fontscale: 'auto',
   censorbadwords: false,
+  get(key) {
+    return this[key];
+  },
 };
 
 function getKeyCode(e) {
