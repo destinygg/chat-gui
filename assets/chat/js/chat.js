@@ -1453,7 +1453,7 @@ class Chat {
   }
 
   cmdHINT(parts) {
-    const arr = [...hintstrings];
+    const arr = [...new Map(Object.entries(hintstrings))];
     const i = parts && parts[0] ? parseInt(parts[0], 10) - 1 : -1;
     if (i > 0 && i < Object.keys(hintstrings).length) {
       MessageBuilder.info(arr[i][1]).into(this);
