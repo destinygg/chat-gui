@@ -890,7 +890,6 @@ class Chat {
         (this.settings.get('ignorementions') &&
           this.ignoreregex &&
           this.ignoreregex.test(text)) ||
-        (this.settings.get('hidensfw') && this.settings.get('hidensfl')) ||
         (this.settings.get('hidensfl') && nsflregex.test(text)) ||
         (this.settings.get('hidensfw') && nsfwregex.test(text))
       );
@@ -1191,9 +1190,7 @@ class Chat {
         );
         break;
       default:
-        message = MessageBuilder.error(
-          errorstrings[desc.replace(/'/g, '')] || desc
-        );
+        message = MessageBuilder.error(errorstrings[desc] || desc);
     }
 
     message.into(this, this.getActiveWindow());
