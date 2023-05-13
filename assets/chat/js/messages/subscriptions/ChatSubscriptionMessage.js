@@ -48,8 +48,7 @@ export default class ChatSubscriptionMessage extends ChatEventMessage {
     const tierLabel = this.tierLabel ?? `Tier ${this.tier}`;
 
     const tier = subTemplate.querySelector('.tier');
-    if (tierClass)
-      tierClass.split(' ').forEach((element) => tier.classList.add(element));
+    if (tierClass) tier.classList.add(...tierClass.split(' '));
     tier.style.color = tierColor;
     tier.innerText = tierLabel;
 
