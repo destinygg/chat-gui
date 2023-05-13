@@ -1,9 +1,8 @@
 import ChatMessage from './ChatMessage';
 
 export default class ChatEventMessage extends ChatMessage {
-  constructor(message, user, timestamp) {
+  constructor(message, timestamp) {
     super(message, timestamp);
-    this.user = user;
     this.tag = null;
     this.title = '';
     this.slashme = false;

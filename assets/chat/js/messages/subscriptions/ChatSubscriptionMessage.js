@@ -4,7 +4,8 @@ import features from '../../features';
 
 export default class ChatSubscriptionMessage extends ChatEventMessage {
   constructor(message, user, tier, tierLabel, timestamp) {
-    super(message, user, timestamp);
+    super(message, timestamp);
+    this.user = user;
     this.tier = tier;
     this.tierLabel = tierLabel;
     this.templateID = '';
