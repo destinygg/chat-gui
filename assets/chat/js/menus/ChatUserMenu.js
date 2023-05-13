@@ -71,7 +71,7 @@ export default class ChatUserMenu extends ChatMenu {
     this.container.on('contextmenu', '.users .user-entry', (e) => {
       const userinfo = this.chat.menus.get('user-info');
       if (userinfo) {
-        userinfo.showUser(e, $(e.currentTarget), true);
+        userinfo.showUser(e, $(e.currentTarget));
         return false;
       }
       return true;

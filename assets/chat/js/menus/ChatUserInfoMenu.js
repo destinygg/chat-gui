@@ -35,6 +35,13 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     this.muteDurations = ['1m', '10m', '1h', '1d'];
     this.banDurations = ['1d', '7d', '30d', 'Perm'];
 
+    this.observer = new MutationObserver(this.handleMutations.bind(this));
+    this.observer.observe(this.chat.output[0], {
+      attributes: true,
+      childList: true,
+      subtree: true,
+    });
+
     this.configureButtons();
 
     this.chat.output.on('contextmenu', '.msg-user .user', (e) => {
@@ -51,11 +58,19 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     });
   }
 
-  showUser(e, user, userlist = false) {
+  handleMutations(mutationsList) {
+    for (const mutation of mutationsList) {
+      if (mutation.target.classList.contains('chat-lines')) {
+        this.updateContent(mutation.target);
+      }
+    }
+  }
+
+  showUser(e, user) {
     this.clickedNick = user.data('username');
 
     this.setActionsVisibility();
-    this.addContent(user, userlist);
+    this.addContent(user);
 
     this.position(e);
     this.show();
@@ -217,8 +232,16 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     this.hide();
   }
 
-  addContent(message, userlist) {
-    this.messageArray = userlist ? [] : [message];
+  addContent(message) {
+    if (this.chat.output.find('.chat-output-whisper').length) {
+      this.messageArray = this.chat.output
+        .find('.chat-output-whisper')
+        .find(`[data-username='${this.clickedNick.toLowerCase()}']`);
+    } else {
+      this.messageArray = this.chat.output
+        .find('.chat-output')
+        .find(`[data-username='${this.clickedNick.toLowerCase()}']`);
+    }
 
     const prettyNick = message.find('.user')[0].innerText;
     const nick = message.data('username');
@@ -253,7 +276,7 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
       this.flairSubheader.style.display = '';
     }
 
-    const messageList = this.createMessages(userlist);
+    const messageList = this.createMessages();
     if (messageList.length === 0) {
       this.messagesList.toggleClass('hidden', true);
       this.messagesSubheader.style.display = 'none';
@@ -278,6 +301,53 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     });
 
     this.redraw();
+  }
+
+  updateContent(target) {
+    const chatMenuIsOpen = this.chat.menus
+      .get('user-info')
+      .ui[0].className.includes('active');
+
+    if (!chatMenuIsOpen) return;
+
+    if (this.messageArray.length > 0 && this.messagesList) {
+      let newMessagesSet = null;
+      if (this.chat.output.find('.chat-output-whisper').length) {
+        newMessagesSet = this.chat.output
+          .find('.chat-output-whisper')
+          .find(`[data-username='${this.clickedNick.toLowerCase()}']`);
+      } else {
+        newMessagesSet = this.chat.output
+          .find('.chat-output')
+          .find(`[data-username='${this.clickedNick.toLowerCase()}']`);
+      }
+
+      const isNewFirstMessage =
+        this.messageArray
+          .first()
+          .find('[data-unixtimestamp]')
+          .data('unixtimestamp') <
+        newMessagesSet
+          .first()
+          .find('[data-unixtimestamp]')
+          .data('unixtimestamp');
+
+      const isNewLastMessage =
+        target &&
+        target.lastChild &&
+        target.lastChild.nodeType === Node.ELEMENT_NODE
+          ? target.lastChild.getAttribute('data-username') === this.clickedNick
+          : false;
+
+      if (isNewFirstMessage || isNewLastMessage) {
+        this.messageArray = newMessagesSet;
+        const messageList = this.createMessages(false);
+        this.messagesContainer.empty();
+        messageList.forEach((element) => {
+          this.messagesContainer.append(element);
+        });
+      }
+    }
   }
 
   buildCreatedDate(nick) {
@@ -308,23 +378,29 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     return features !== '' ? `<span class="features">${features}</span>` : '';
   }
 
-  createMessages(userlist) {
+  createMessages() {
     const displayedMessages = [];
     if (this.messageArray.length > 0) {
-      let nextMsg = this.messageArray[0].next('.msg-continue');
-      while (nextMsg.length > 0) {
-        this.messageArray.push(nextMsg);
-        nextMsg = nextMsg.next('.msg-continue');
-      }
-      this.messageArray.forEach((element) => {
-        const text = element.find('.text')[0].innerText;
-        const nick = element.data('username');
-        const msg = MessageBuilder.message(text, new ChatUser(nick));
+      const sortedMessageArray = this.messageArray.sort((a, b) => {
+        const aTimestamp = $(a)
+          .find('[data-unixtimestamp]')
+          .data('unixtimestamp');
+        const bTimestamp = $(b)
+          .find('[data-unixtimestamp]')
+          .data('unixtimestamp');
+        return aTimestamp - bTimestamp;
+      });
+      sortedMessageArray.toArray().forEach((element) => {
+        const text = element.getElementsByClassName('text')[0].innerText;
+        const msg = MessageBuilder.message(
+          text,
+          new ChatUser(this.clickedNick)
+        );
         displayedMessages.push(msg.html(this.chat));
       });
-    } else if (!userlist) {
+    } else {
       const msg = MessageBuilder.error(
-        "Wasn't able to grab the clicked message"
+        'Unable to find messages for selected user'
       );
       displayedMessages.push(msg.html(this.chat));
     }
