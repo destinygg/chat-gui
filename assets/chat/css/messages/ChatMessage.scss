@@ -1,0 +1,87 @@
+/* Base ChatMessage */
+.msg-chat {
+  word-wrap: break-word;
+  padding: $gutter-xs $gutter-md * 2 $gutter-xs $gutter-md;
+  color: $color-chat-text2;
+
+  .time {
+    font-size: 0.8em;
+    color: $color-chat-disabled;
+    padding-right: $gutter-sm;
+    display: none; /* hidden by default */
+  }
+
+  .user {
+    font-weight: 500;
+    cursor: pointer;
+    margin-left: $gutter-sm;
+    color: $color-label-user;
+  }
+
+  .chat-user {
+    cursor: pointer;
+    position: relative;
+    z-index: 120;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  .greentext {
+    color: $color-green-text;
+  }
+
+  .sus {
+    text-transform: uppercase;
+    font-family: 'Among Us', $chat-lines-font;
+  }
+
+  .externallink {
+    border-style: solid;
+    border-color: transparent;
+    border-width: 1px 0 1px 0;
+    color: $color-link;
+    position: relative;
+    z-index: 120;
+
+    &:visited {
+      color: $color-link-visited;
+    }
+
+    &:hover,
+    &:focus {
+      color: $color-link-hover;
+    }
+  }
+
+  .nsfw-link {
+    border-style: dashed;
+    border-color: transparent transparent $color-underline-nsfw transparent;
+    border-width: 1px 0 1px 0;
+  }
+
+  .nsfl-link {
+    border-style: dashed;
+    border-color: transparent transparent $color-underline-nsfl transparent;
+    border-width: 1px 0 1px 0;
+  }
+
+  .hidden {
+    display: none !important;
+  }
+}
+
+/* Continue */
+.msg-continue {
+  .text:before {
+    color: $color-chat-disabled;
+    content: '> ';
+  }
+
+  &,
+  .features,
+  .user {
+    display: none;
+  }
+}

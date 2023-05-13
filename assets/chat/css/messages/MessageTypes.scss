@@ -1,0 +1,43 @@
+/* Basic UI ChatMessage styles (Status, Error, Info, Command) */
+$basic-ui-styles: 'status', 'error', 'info', 'command';
+
+@each $style in $basic-ui-styles {
+  .msg-#{$style} {
+    white-space: pre-wrap;
+
+    @if $style != 'info' {
+      color: $color-chat-text1;
+    }
+
+    .text:before {
+      content: '';
+      display: inline-block;
+      vertical-align: text-top;
+      margin-right: $gutter-sm;
+
+      @extend .icon-#{$style};
+    }
+
+    &.msg-continue .text:before {
+      content: '';
+    }
+  }
+}
+
+/* Broadcasts */
+.msg-broadcast {
+  background-color: $color-chat-emphasize;
+  color: $color-text-broadcast !important;
+  font-size: 1.1em;
+  font-weight: 400;
+  padding-top: $gutter-md;
+  padding-bottom: $gutter-md;
+
+  time {
+    margin-right: $gutter-md;
+  }
+
+  &.msg-continue .text:before {
+    content: '';
+  }
+}

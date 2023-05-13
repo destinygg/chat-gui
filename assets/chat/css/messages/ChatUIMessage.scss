@@ -1,0 +1,20 @@
+.censored {
+  .text {
+    display: none;
+  }
+
+  .ctrl {
+    display: inline-block;
+
+    &:after {
+      color: $color-accent;
+      cursor: pointer;
+      padding-left: $gutter-md;
+      content: '<censored>';
+    }
+
+    &:hover:after {
+      color: $color-accent-light;
+    }
+  }
+}

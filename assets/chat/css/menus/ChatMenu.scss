@@ -1,0 +1,91 @@
+/* Chat menus */
+.chat-menu {
+  display: none;
+  position: absolute;
+  z-index: 220;
+  height: auto;
+  bottom: 6.3em;
+  max-width: 75%;
+  min-width: $chat-min-width;
+  width: 33.3333%;
+  right: 0;
+  top: 0;
+
+  .toolbar {
+    position: relative;
+    border-bottom: 1px solid $color-surface-dark4;
+    top: auto;
+    left: auto;
+
+    h5 {
+      justify-content: space-between;
+      padding: $gutter-md;
+      font-size: 1.1em;
+      font-weight: normal;
+      color: $text-color1;
+      align-items: center;
+      user-select: none;
+      display: flex;
+      margin: 0;
+    }
+
+    span {
+      line-height: 1.25em;
+      display: inline-block;
+    }
+
+    .chat-menu-close {
+      width: 1em;
+      height: 1em;
+      opacity: 0.5;
+      font-size: 1.2em;
+      display: inline-block;
+      background: transparent url('../img/icon-close.svg') no-repeat center
+        center;
+      background-size: contain;
+      cursor: pointer;
+
+      &:hover {
+        opacity: 1;
+      }
+    }
+  }
+
+  .floating-window {
+    height: fit-content !important;
+  }
+
+  .chat-menu-inner {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background-color: $color-surface-dark3;
+  }
+
+  .scrollable {
+    flex: 1;
+    height: 100%;
+  }
+
+  &.active {
+    display: block;
+  }
+
+  &.left {
+    left: 0;
+    right: auto;
+
+    .chat-menu-inner {
+      border-bottom-right-radius: $bradius;
+    }
+  }
+
+  &.right {
+    right: 0;
+    left: auto;
+
+    .chat-menu-inner {
+      border-bottom-left-radius: $bradius;
+    }
+  }
+}

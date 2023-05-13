@@ -1,0 +1,8 @@
+/* Focus or highlight a line */
+.focus .msg-chat {
+  opacity: 0.3;
+
+  &.msg-pinned {
+    opacity: 1;
+  }
+}
