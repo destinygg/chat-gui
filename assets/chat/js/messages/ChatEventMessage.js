@@ -23,10 +23,10 @@ export default class ChatEventMessage extends ChatMessage {
     if (this.slashme) eventTemplate.classList.add('msg-me');
 
     if (this.message) {
-      eventTemplate.querySelector('.event-message').innerHTML =
+      eventTemplate.querySelector('.event-bottom').innerHTML =
         this.buildMessageTxt(chat);
     } else {
-      eventTemplate.querySelector('.event-message').remove();
+      eventTemplate.querySelector('.event-bottom').remove();
     }
 
     return eventTemplate;

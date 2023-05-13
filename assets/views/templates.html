@@ -1,57 +1,23 @@
 <template id="event-template">
   <div>
     <div class="event-wrapper">
-      <div class="event-info"></div>
-      <div class="event-message"></div>
+      <div class="event-top">
+        <span class="event-info"></span>
+        <i class="event-icon"></i>
+      </div>
+      <div class="event-bottom"></div>
     </div>
   </div>
 </template>
 
-<template id="donation-template">
-  <span class="donation-wrapper">
-    <span>
-      <a class="user"></a>
-    </span>
-  </span>
-  <a class="icon-wrapper">
-    <i class="donation-icon"></i>
-  </a>
+<template id="user-template">
+  <a class="user"></a>
 </template>
 
-<template id="regular-subscription-template">
-  <span class="subscription">
-    <span class="subscription-wrapper">
-      <a class="user"></a> is now a <a class="tier"></a> subscriber
-    </span>
-    <a class="icon-wrapper">
-      <i class="subscription-icon regular"></i>
-    </a>
-  </span>
-  <span class="streak">
-    They're currently on a <span class="streak-number"></span> month streak
-  </span>
+<template id="tier-template">
+  <a class="tier"></a>
 </template>
 
-<template id="gift-subscription-template">
-  <span class="subscription">
-    <span class="subscription-wrapper">
-      <a class="user"></a> gifted <a class="giftee user"></a> a
-      <a class="tier"></a> subscription
-    </span>
-    <a class="icon-wrapper">
-      <i class="subscription-icon gift"></i>
-    </a>
-  </span>
-</template>
-
-<template id="mass-subscription-template">
-  <span class="subscription">
-    <span class="subscription-wrapper">
-      <a class="user"></a> gifted <span class="quantity"></span>
-      <a class="tier"></a> <span class="subs-or-sub"></span> to the community
-    </span>
-    <a class="icon-wrapper">
-      <i class="subscription-icon mass-gift"></i>
-    </a>
-  </span>
+<template id="streak-template">
+  <span class="streak-message"></span>
 </template>

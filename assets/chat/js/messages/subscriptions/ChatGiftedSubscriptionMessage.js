@@ -7,7 +7,6 @@ export default class ChatGiftedSubscriptionMessage extends ChatSubscriptionMessa
   constructor(message, user, tier, tierLabel, giftee, timestamp) {
     super(message, user, tier, tierLabel, timestamp);
     this.type = MessageTypes.GIFTSUB;
-    this.templateID = '#gift-subscription-template';
     this.giftee = giftee;
   }
 
@@ -26,12 +25,23 @@ export default class ChatGiftedSubscriptionMessage extends ChatSubscriptionMessa
 
     attributes['data-giftee'] = this.giftee.toLowerCase();
 
+    message.querySelector('.subscription-icon').classList.add('gift');
+
+    /** @type HTMLAnchorElement */
+    const giftee = document
+      .querySelector('#user-template')
+      ?.content.cloneNode(true).firstElementChild;
+
     const gifteeUser =
       chat.users.get(this.giftee.toLowerCase()) ?? new ChatUser(this.giftee);
     const gifteeColorFlair = usernameColorFlair(chat.flairs, gifteeUser);
-    const giftee = message.querySelector('.giftee');
     giftee.classList.add(gifteeColorFlair?.name);
     giftee.innerText = gifteeUser.username;
+
+    const subscriptionInfo = message.querySelector('.event-info');
+    const user = message.querySelector('.user');
+    const tier = message.querySelector('.tier');
+    subscriptionInfo.innerHTML = `${user.outerHTML} gifted ${giftee.outerHTML} a ${tier.outerHTML} subscription`;
 
     return this.wrap(message.innerHTML, classes, attributes);
   }

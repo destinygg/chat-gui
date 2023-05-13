@@ -8,7 +8,6 @@ export default class ChatSubscriptionMessage extends ChatEventMessage {
     this.user = user;
     this.tier = tier;
     this.tierLabel = tierLabel;
-    this.templateID = '';
   }
 
   getTierStyles(chat = null) {
@@ -28,11 +27,6 @@ export default class ChatSubscriptionMessage extends ChatEventMessage {
   html(chat = null) {
     const eventTemplate = super.html(chat);
 
-    /** @type HTMLDivElement */
-    const subTemplate = document
-      .querySelector(this.templateID)
-      ?.content.cloneNode(true);
-
     const { rainbowColor, tierClass, tierColor } = this.getTierStyles(chat);
 
     if (tierColor) eventTemplate.style.borderColor = tierColor;
@@ -40,19 +34,28 @@ export default class ChatSubscriptionMessage extends ChatEventMessage {
 
     const colorFlair = usernameColorFlair(chat.flairs, this.user);
 
-    const user = subTemplate.querySelector('.user');
+    /** @type HTMLAnchorElement */
+    const user = document
+      .querySelector('#user-template')
+      ?.content.cloneNode(true).firstElementChild;
     user.title = this.title;
     user.classList.add(colorFlair?.name);
     user.innerText = this.user.username;
 
     const tierLabel = this.tierLabel ?? `Tier ${this.tier}`;
 
-    const tier = subTemplate.querySelector('.tier');
+    /** @type HTMLAnchorElement */
+    const tier = document
+      .querySelector('#tier-template')
+      ?.content.cloneNode(true).firstElementChild;
     if (tierClass) tier.classList.add(...tierClass.split(' '));
     tier.style.color = tierColor;
     tier.innerText = tierLabel;
 
-    eventTemplate.querySelector('.event-info')?.append(subTemplate);
+    eventTemplate
+      .querySelector('.event-icon')
+      .classList.add('subscription-icon');
+    eventTemplate.querySelector('.event-info').append(user, tier);
 
     return eventTemplate;
   }

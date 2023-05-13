@@ -5,7 +5,6 @@ export default class ChatMassSubscriptionMessage extends ChatSubscriptionMessage
   constructor(message, user, tier, tierLabel, quantity, timestamp) {
     super(message, user, tier, tierLabel, timestamp);
     this.type = MessageTypes.MASSGIFT;
-    this.templateID = '#mass-subscription-template';
     this.quantity = quantity;
   }
 
@@ -22,9 +21,14 @@ export default class ChatMassSubscriptionMessage extends ChatSubscriptionMessage
         };
       }, {});
 
-    message.querySelector('.quantity').innerText = this.quantity;
-    message.querySelector('.subs-or-sub').innerText =
-      this.quantity > 1 ? 'subs' : 'sub';
+    message.querySelector('.subscription-icon').classList.add('mass-gift');
+
+    const subscriptionInfo = message.querySelector('.event-info');
+    const user = message.querySelector('.user');
+    const tier = message.querySelector('.tier');
+    subscriptionInfo.innerHTML = `${user.outerHTML} gifted ${this.quantity} ${
+      tier.outerHTML
+    } ${this.quantity > 1 ? 'subs' : 'sub'} to the community`;
 
     return this.wrap(message.innerHTML, classes, attributes);
   }

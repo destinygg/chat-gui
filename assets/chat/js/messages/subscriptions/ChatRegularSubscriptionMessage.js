@@ -5,7 +5,6 @@ export default class ChatRegularSubscriptionMessage extends ChatSubscriptionMess
   constructor(message, user, tier, tierLabel, streak, timestamp) {
     super(message, user, tier, tierLabel, timestamp);
     this.type = MessageTypes.SUBSCRIPTION;
-    this.templateID = '#regular-subscription-template';
     this.streak = streak;
   }
 
@@ -22,10 +21,25 @@ export default class ChatRegularSubscriptionMessage extends ChatSubscriptionMess
         };
       }, {});
 
-    if (!this.streak) {
-      message.querySelector('.streak').remove();
-    } else {
-      message.querySelector('.streak-number').textContent = this.streak;
+    message.querySelector('.subscription-icon').classList.add('regular');
+
+    const subscriptionInfo = message.querySelector('.event-info');
+    const user = message.querySelector('.user');
+    const tier = message.querySelector('.tier');
+    subscriptionInfo.innerHTML = `${user.outerHTML} is now a ${tier.outerHTML} subscriber`;
+
+    if (this.streak) {
+      subscriptionInfo.classList.add('streak');
+      subscriptionInfo.innerHTML = `<span>${subscriptionInfo.innerHTML}</span>`;
+
+      /** @type HTMLSpanElement */
+      const streak = document
+        .querySelector('#streak-template')
+        ?.content.cloneNode(true).firstElementChild;
+
+      streak.innerText = `They're currently on a ${this.streak} month streak`;
+
+      subscriptionInfo.append(streak);
     }
 
     return this.wrap(message.innerHTML, classes, attributes);

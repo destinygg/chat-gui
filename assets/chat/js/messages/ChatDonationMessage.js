@@ -25,19 +25,19 @@ export default class ChatDonationMessage extends ChatEventMessage {
   html(chat = null) {
     const eventTemplate = super.html(chat);
 
-    /** @type HTMLDivElement */
-    const donationTemplate = document
-      .querySelector('#donation-template')
-      ?.content.cloneNode(true);
+    /** @type HTMLAnchorElement */
+    const user = document
+      .querySelector('#user-template')
+      ?.content.cloneNode(true).firstElementChild;
 
     const colorFlair = usernameColorFlair(chat.flairs, this.user);
 
-    const user = donationTemplate.querySelector('.user');
     user.title = this.title;
     user.classList.add(colorFlair?.name);
     user.innerText = this.user.username;
 
-    donationTemplate.querySelector('.donation-wrapper span').append(
+    eventTemplate.querySelector('.event-info').append(
+      user,
       ` donated ${(this.amount / 100).toLocaleString('en-US', {
         style: 'currency',
         currency: 'USD',
@@ -46,11 +46,9 @@ export default class ChatDonationMessage extends ChatEventMessage {
 
     const donationTier = this.selectDonationTier(this.amount);
     eventTemplate.classList.add(donationTier[0]);
-    donationTemplate
-      .querySelector('.donation-icon')
-      ?.classList.add(donationTier[0]);
-
-    eventTemplate.querySelector('.event-info')?.append(donationTemplate);
+    eventTemplate
+      .querySelector('.event-icon')
+      .classList.add('donation-icon', donationTier[0]);
 
     const classes = Array.from(eventTemplate.classList);
     const attributes = eventTemplate
