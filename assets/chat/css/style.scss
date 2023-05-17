@@ -530,6 +530,195 @@ hr {
   }
 }
 
+.msg-donation,
+.msg-subscription,
+.msg-giftsub,
+.msg-massgift {
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 1);
+  font-size: 1.1em;
+  font-weight: 400;
+  padding: unset;
+  border-radius: 10px;
+  border-style: solid;
+  border-color: unset;
+  border-width: 3px;
+  display: flex;
+  flex-direction: column;
+  margin: $gutter-sm $gutter-md * 2 $gutter-sm $gutter-sm;
+
+  .event-wrapper {
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .event-top {
+    display: flex;
+    padding: $gutter-xs $gutter-md * 2 $gutter-xs $gutter-md;
+    background-color: $color-chat-emphasize;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .event-icon {
+    width: 2.25em;
+    height: 2.25em;
+    color: $color-chat-disabled;
+    position: relative;
+    text-decoration: none;
+    display: inline-block;
+    border: 0.25em solid transparent;
+    flex-shrink: 0;
+    opacity: 0.75;
+  }
+
+  .event-bottom {
+    padding: $gutter-xs $gutter-md * 2 $gutter-xs $gutter-md;
+    background-color: $color-chat-bg;
+  }
+
+  .user {
+    margin-left: unset;
+    text-shadow: none;
+  }
+
+  &.censored {
+    .text {
+      display: none;
+    }
+    .text-wrapper:after {
+      color: $color-accent;
+      cursor: pointer;
+      content: '<censored>';
+    }
+    .text:hover:after {
+      color: $color-accent-light;
+    }
+  }
+}
+
+/* Donations */
+.msg-donation {
+  .donation-icon {
+    &.amount-5 {
+      background: transparent url('../img/donation-amount-5.png') no-repeat
+        center center;
+      background-size: contain;
+      filter: invert(100%);
+    }
+    &.amount-10 {
+      background: transparent url('../img/donation-amount-10.png') no-repeat
+        center center;
+      background-size: contain;
+      filter: invert(100%);
+    }
+    &.amount-25 {
+      background: transparent url('../img/donation-amount-25.png') no-repeat
+        center center;
+      background-size: contain;
+      filter: invert(100%);
+    }
+    &.amount-50 {
+      background: transparent url('../img/donation-amount-50.png') no-repeat
+        center center;
+      background-size: contain;
+      filter: invert(100%);
+    }
+    &.amount-100 {
+      background: transparent url('../img/donation-amount-100.png') no-repeat
+        center center;
+      background-size: contain;
+      filter: invert(100%);
+    }
+  }
+
+  &.amount-0 {
+    border-color: #1c5cdb;
+  }
+  &.amount-5 {
+    border-color: #59aeea;
+  }
+  &.amount-10 {
+    border-color: #2addc8;
+  }
+  &.amount-25 {
+    border-color: #4db524;
+  }
+  &.amount-50 {
+    border-color: #dd29d2;
+  }
+  &.amount-100 {
+    border-color: #e62117;
+  }
+}
+
+/* Subscriptions */
+.msg-subscription,
+.msg-giftsub,
+.msg-massgift {
+  position: relative;
+
+  .subscription-icon {
+    &.regular {
+      background: transparent url('../img/sub-regular.svg') no-repeat center
+        center;
+      background-size: contain;
+    }
+    &.gift {
+      background: transparent url('../img/sub-gift.png') no-repeat center center;
+      background-size: contain;
+      filter: invert(100%);
+    }
+    &.mass-gift {
+      background: transparent url('../img/sub-mass-gift.png') no-repeat center
+        center;
+      background-size: contain;
+      filter: invert(100%);
+    }
+  }
+
+  .streak {
+    display: flex;
+    flex-direction: column;
+    width: calc(100% - 2.25em - $gutter-md * 2);
+  }
+
+  .streak-message {
+    border-top-style: solid;
+    border-top-width: 1px;
+    border-top-color: $color-chat-place;
+    padding-top: 2px;
+    margin-top: 2px;
+  }
+
+  .tier {
+    font-weight: 500;
+    cursor: unset;
+
+    &:hover {
+      text-decoration: unset;
+      &:before {
+        content: unset !important;
+      }
+    }
+  }
+
+  &.rainbow-border {
+    background-clip: padding-box;
+    border: solid 3px transparent;
+    border-radius: 10px;
+
+    &:before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      margin: -3px;
+      border-radius: inherit;
+      background: var(--rainbow-gradient);
+    }
+  }
+}
+
 /* Highlight */
 .msg-highlight {
   color: $color-chat-text1;
@@ -1638,7 +1827,7 @@ button.btn {
 
   #chat,
   .msg-chat,
-  .msg-chat:before,
+  .msg-chat:not(.rainbow-border):before,
   .greentext {
     background: none !important;
   }
@@ -1654,6 +1843,42 @@ button.btn {
   }
   #chat-pinned-frame {
     display: none !important;
+  }
+
+  // Donations and subs
+  .msg-donation,
+  .msg-subscription,
+  .msg-giftsub,
+  .msg-massgift {
+    text-shadow: none;
+    padding: 0;
+    border-style: none none none solid;
+    border-width: 6px;
+    border-radius: 0;
+
+    .event-top,
+    .event-bottom {
+      padding: 0 0 0 $gutter-md;
+      background: none;
+    }
+
+    &.rainbow-border {
+      &:before {
+        content: '';
+        position: absolute;
+        top: unset;
+        right: 100%;
+        bottom: unset;
+        left: unset;
+        z-index: -1;
+        margin: -1px 0 0 0;
+        border-radius: inherit;
+        background: var(--rainbow-gradient);
+        aspect-ratio: 1/1;
+        height: 100%;
+        transform: rotate(90deg);
+      }
+    }
   }
 
   time,

@@ -35,6 +35,7 @@ import UserFeatures from './features';
 import makeSafeForRegex from './regex';
 import { HashLinkConverter, MISSING_ARG_ERROR } from './hashlinkconverter';
 import ChatCommands from './commands';
+import MessageTemplateHTML from '../../views/templates.html';
 
 const regexslashcmd = /^\/([a-z0-9]+)[\s]?/i;
 const regextime = /(\d+(?:\.\d*)?)([a-z]+)?/gi;
@@ -237,6 +238,10 @@ class Chat {
     this.source.on('POLLSTART', (data) => this.onPOLLSTART(data));
     this.source.on('POLLSTOP', (data) => this.onPOLLSTOP(data));
     this.source.on('VOTECAST', (data) => this.onVOTECAST(data));
+    this.source.on('SUBSCRIPTION', (data) => this.onSUBSCRIPTION(data));
+    this.source.on('GIFTSUB', (data) => this.onGIFTSUB(data));
+    this.source.on('MASSGIFT', (data) => this.onMASSGIFT(data));
+    this.source.on('DONATION', (data) => this.onDONATION(data));
 
     this.control.on('SEND', (data) => this.cmdSEND(data));
     this.control.on('HINT', (data) => this.cmdHINT(data));
@@ -350,6 +355,7 @@ class Chat {
   withGui(template, appendTo = null) {
     this.ui = $(template);
     this.ui.prependTo(appendTo || 'body');
+    $(MessageTemplateHTML).prependTo('body');
 
     // We use this style sheet to apply GUI updates via css (e.g. user focus)
     this.css = (() => {
@@ -526,7 +532,7 @@ class Chat {
 
     // Censored
     this.output.on('click', '.censored', (e) => {
-      const nick = $(e.currentTarget).closest('.msg-user').data('username');
+      const nick = $(e.currentTarget).closest('.msg-chat').data('username');
       this.getActiveWindow()
         .getlines(`.censored[data-username="${nick}"]`)
         .forEach((line) => line.classList.remove('censored'));
@@ -801,8 +807,16 @@ class Chat {
     )
       win.lastmessage.completeCombo();
 
-    // Populate the tag, mentioned users and highlight for this $message.
-    if (message.type === MessageTypes.USER) {
+    // Populate the tag and mentioned users for this $message.
+    if (
+      [
+        MessageTypes.USER,
+        MessageTypes.SUBSCRIPTION,
+        MessageTypes.GIFTSUB,
+        MessageTypes.MASSGIFT,
+        MessageTypes.DONATION,
+      ].includes(message.type)
+    ) {
       // check if message is `/me `
       message.slashme =
         message.message.substring(0, 4).toLowerCase() === '/me ';
@@ -810,13 +824,6 @@ class Chat {
       message.isown =
         message.user.username.toLowerCase() ===
         this.user.username.toLowerCase();
-      // check if the last message was from the same user
-      message.continued =
-        win.lastmessage &&
-        !win.lastmessage.target &&
-        win.lastmessage.user &&
-        win.lastmessage.user.username.toLowerCase() ===
-          message.user.username.toLowerCase();
       // get mentions from message
       message.mentioned = Chat.extractNicks(message.message).filter((a) =>
         this.users.has(a.toLowerCase())
@@ -826,6 +833,17 @@ class Chat {
       // set tagged note
       message.title =
         this.taggednotes.get(message.user.nick.toLowerCase()) || '';
+    }
+
+    // Populate highlight for this $message
+    if (message.type === MessageTypes.USER) {
+      // check if the last message was from the same user
+      message.continued =
+        win.lastmessage &&
+        !win.lastmessage.target &&
+        win.lastmessage.user &&
+        win.lastmessage.user.username.toLowerCase() ===
+          message.user.username.toLowerCase();
       // set highlighted state
       message.highlighted =
         /* this.authenticated && */ !message.isown &&
@@ -1335,6 +1353,49 @@ class Chat {
     } else {
       MessageBuilder.broadcast(data.data, data.timestamp).into(this);
     }
+  }
+
+  onSUBSCRIPTION(data) {
+    const user = this.users.get(data.nick) ?? new ChatUser(data.nick);
+    MessageBuilder.subscription(
+      data.data,
+      user,
+      data.tier,
+      data.tierlabel,
+      data.streak,
+      data.timestamp
+    ).into(this);
+  }
+
+  onGIFTSUB(data) {
+    const user = this.users.get(data.nick) ?? new ChatUser(data.nick);
+    MessageBuilder.gift(
+      data.data,
+      user,
+      data.tier,
+      data.tierlabel,
+      data.giftee,
+      data.timestamp
+    ).into(this);
+  }
+
+  onMASSGIFT(data) {
+    const user = this.users.get(data.nick) ?? new ChatUser(data.nick);
+    MessageBuilder.massgift(
+      data.data,
+      user,
+      data.tier,
+      data.tierlabel,
+      data.quantity,
+      data.timestamp
+    ).into(this);
+  }
+
+  onDONATION(data) {
+    const user = this.users.get(data.nick) ?? new ChatUser(data.nick);
+    MessageBuilder.donation(data.data, user, data.amount, data.timestamp).into(
+      this
+    );
   }
 
   onPRIVMSGSENT() {

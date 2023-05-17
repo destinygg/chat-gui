@@ -37,25 +37,26 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
 
     this.configureButtons();
 
-    this.chat.output.on('contextmenu', '.msg-user .user', (e) => {
-      const user = $(e.currentTarget).closest('.msg-user');
-      this.showUser(e, user);
+    this.chat.output.on('contextmenu', '.msg-chat .user', (e) => {
+      if (e.currentTarget.classList.contains('tier')) return false;
+      const message = $(e.currentTarget).closest('.msg-chat');
+      this.showUser(e, message);
 
       // gotta return false so that the actual context menu doesn't show up
       return false;
     });
 
     // preventing the window from closing instantly
-    this.chat.output.on('mouseup', '.msg-user .user', (e) => {
+    this.chat.output.on('mouseup', '.msg-chat .user', (e) => {
       e.stopPropagation();
     });
   }
 
-  showUser(e, user, userlist = false) {
-    this.clickedNick = user.data('username');
+  showUser(e, message) {
+    this.clickedNick = e.currentTarget.innerText.toLowerCase();
 
     this.setActionsVisibility();
-    this.addContent(user, userlist);
+    this.addContent(message);
 
     this.position(e);
     this.show();
@@ -92,7 +93,7 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
 
     this.whisperUserBtn.on('click', () => {
       const win = this.chat.getWindow(this.clickedNick);
-      if (win !== (null || undefined)) {
+      if (win) {
         this.chat.windowToFront(this.clickedNick);
       } else {
         if (!this.chat.whispers.has(this.clickedNick))
@@ -217,23 +218,29 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     this.hide();
   }
 
-  addContent(message, userlist) {
-    this.messageArray = userlist ? [] : [message];
+  addContent(message) {
+    this.messageArray =
+      message[0].querySelector('.text') &&
+      this.clickedNick !== message.data('giftee')
+        ? [message]
+        : [];
 
-    const prettyNick = message.find('.user')[0].innerText;
-    const nick = message.data('username');
-    const tagNote = this.chat.taggednotes.get(nick);
-    const usernameFeatures = message.find('.user')[0].classList.value;
+    const selectedUser = [...message[0].querySelectorAll('.user')].find(
+      (user) => user.innerText.toLowerCase() === this.clickedNick.toLowerCase()
+    );
+    const prettyNick = selectedUser.innerText;
+    const tagNote = this.chat.taggednotes.get(this.clickedNick);
+    const usernameFeatures = selectedUser.classList.value;
 
-    const formattedDate = this.buildCreatedDate(nick);
-    if (formattedDate === '') {
+    const formattedDate = this.buildCreatedDate(this.clickedNick);
+    if (formattedDate) {
+      this.createdDateSubheader.style.display = '';
+      this.createdDateSubheader.replaceChildren('Joined on ', formattedDate);
+    } else {
       this.createdDateSubheader.style.display = 'none';
       this.createdDateSubheader.replaceChildren(
         'Unable to display account creation date'
       );
-    } else {
-      this.createdDateSubheader.style.display = '';
-      this.createdDateSubheader.replaceChildren('Joined on ', formattedDate);
     }
 
     if (tagNote) {
@@ -244,16 +251,16 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
       this.tagSubheader.replaceChildren();
     }
 
-    const featuresList = this.buildFeatures(nick, usernameFeatures);
-    if (featuresList === '') {
-      this.flairList.toggleClass('hidden', true);
-      this.flairSubheader.style.display = 'none';
-    } else {
+    const featuresList = this.buildFeatures(this.clickedNick, usernameFeatures);
+    if (featuresList) {
       this.flairList.toggleClass('hidden', false);
       this.flairSubheader.style.display = '';
+    } else {
+      this.flairList.toggleClass('hidden', true);
+      this.flairSubheader.style.display = 'none';
     }
 
-    const messageList = this.createMessages(userlist);
+    const messageList = this.createMessages();
     if (messageList.length === 0) {
       this.messagesList.toggleClass('hidden', true);
       this.messagesSubheader.style.display = 'none';
@@ -282,7 +289,7 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
 
   buildCreatedDate(nick) {
     const user = this.chat.users.get(nick.toLowerCase());
-    if (user.createdDate === '') {
+    if (!user?.createdDate) {
       return '';
     }
     const timeHTML = document.createElement('time');
@@ -308,7 +315,7 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     return features !== '' ? `<span class="features">${features}</span>` : '';
   }
 
-  createMessages(userlist) {
+  createMessages() {
     const displayedMessages = [];
     if (this.messageArray.length > 0) {
       let nextMsg = this.messageArray[0].next('.msg-continue');
@@ -322,11 +329,6 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
         const msg = MessageBuilder.message(text, new ChatUser(nick));
         displayedMessages.push(msg.html(this.chat));
       });
-    } else if (!userlist) {
-      const msg = MessageBuilder.error(
-        "Wasn't able to grab the clicked message"
-      );
-      displayedMessages.push(msg.html(this.chat));
     }
     return displayedMessages;
   }
