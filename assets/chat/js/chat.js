@@ -1118,14 +1118,6 @@ class Chat {
 
   onME(data) {
     this.setUser(data);
-    if (data) {
-      // If is a logged in user.
-      this.loadSettings();
-      this.loadWhispers();
-    } else {
-      // If guest load default settings.
-      this.setSettings();
-    }
   }
 
   onOPEN() {
