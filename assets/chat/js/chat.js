@@ -325,7 +325,7 @@ class Chat {
     // If authed and #settings.profilesettings=true use #settings
     // Else use whats in LocalStorage#chat.settings
     const stored =
-      settings !== null && this.authenticated && settings.get('profilesettings')
+      settings !== null && settings.get('profilesettings')
         ? settings
         : new Map(ChatStore.read('chat.settings') || []);
 
