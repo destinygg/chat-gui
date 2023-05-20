@@ -583,7 +583,7 @@ class Chat {
   }
 
   async loadSettings() {
-    fetch(`${this.config.api.base}/api/chat/me/settings`, {
+    return fetch(`${this.config.api.base}/api/chat/me/settings`, {
       credentials: 'include',
     })
       .then((res) => res.json())
