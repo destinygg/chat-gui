@@ -768,8 +768,14 @@ class Chat {
           continue;
         }
 
-        message.hide(this.ignored(message.user.username, message.message));
+        const {
+          user: { username },
+        } = message;
+
+        message.hide(this.ignored(username, message.message));
         message.highlight(this.shouldHighlightMessage(message));
+        message.setTag(this.taggednicks.get(username.toLowerCase()));
+        message.setTagTitle(this.taggednotes.get(username.toLowerCase()));
       }
     }
 
@@ -1928,22 +1934,6 @@ class Chat {
     } else {
       color = tagcolors[Math.floor(Math.random() * tagcolors.length)];
     }
-
-    this.mainwindow
-      .getlines(`.msg-user[data-username="${n}"]`)
-      .forEach((line) => {
-        const classesToRemove = Chat.removeClasses(
-          'msg-tagged',
-          line.classList.value
-        );
-        classesToRemove.forEach((className) =>
-          line.classList.remove(className)
-        );
-        ['msg-tagged', `msg-tagged-${color}`].forEach((tag) =>
-          line.classList.add(tag)
-        );
-        line.querySelector('.user').title = note;
-      });
 
     this.taggednicks.set(n, color);
     this.taggednotes.set(n, note);
