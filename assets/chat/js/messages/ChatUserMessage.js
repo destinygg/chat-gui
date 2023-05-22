@@ -27,6 +27,7 @@ export default class ChatUserMessage extends ChatMessage {
     this.title = '';
     this.slashme = false;
     this.mentioned = [];
+    this.moderated = false;
   }
 
   html(chat = null) {
@@ -98,8 +99,9 @@ export default class ChatUserMessage extends ChatMessage {
 
   censor(censorType) {
     // Allows for adjusting the message's censorship level when the
-    // `showremoved` setting is changed.
-    this.ui.dataset.moderated = true;
+    // `showremoved` setting is changed. Otherwise, a message with censor type
+    // `2` is indistinguishable from an unmoderated message.
+    this.moderated = true;
 
     switch (censorType) {
       case 0: // Remove
@@ -117,9 +119,5 @@ export default class ChatUserMessage extends ChatMessage {
       default:
         break;
     }
-  }
-
-  get moderated() {
-    return this.ui.dataset.moderated;
   }
 }
