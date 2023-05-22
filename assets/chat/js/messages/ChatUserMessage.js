@@ -95,4 +95,23 @@ export default class ChatUserMessage extends ChatMessage {
     this.ui.querySelector('.user').title = newTitle;
     this.title = newTitle;
   }
+
+  censor(censorType) {
+    switch (censorType) {
+      case 0: // Remove
+        this.ui.classList.remove('censored');
+        this.hide();
+        break;
+      case 1: // Censor
+        this.ui.classList.add('censored');
+        this.hide(false);
+        break;
+      case 2: // Do nothing
+        this.ui.classList.remove('censored');
+        this.hide(false);
+        break;
+      default:
+        break;
+    }
+  }
 }

@@ -986,20 +986,17 @@ class Chat {
   }
 
   censor(nick) {
-    const c = this.mainwindow.getlines(
-      `.msg-chat[data-username="${nick.toLowerCase()}"]`
-    );
-    switch (parseInt(this.settings.get('showremoved') || 1, 10)) {
-      case 0: // remove
-        c.forEach((line) => line.remove());
-        break;
-      case 1: // censor
-        c.forEach((line) => line.classList.add('censored'));
-        break;
-      case 2: // do nothing
-      default:
-        break;
+    for (const message of this.mainwindow.messages) {
+      if (
+        message.type !== MessageTypes.USER ||
+        message.user.username !== nick
+      ) {
+        continue;
+      }
+
+      message.censor(parseInt(this.settings.get('showremoved') || '1', 10));
     }
+
     this.mainwindow.update();
   }
 
