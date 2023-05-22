@@ -70,4 +70,9 @@ export default class ChatMessage extends ChatUIMessage {
     const label = this.timestamp.format(DATE_FORMATS.TIME);
     return `<time class="time" title="${datetime}" data-unixtimestamp="${unixtime}">${label}</time>`;
   }
+
+  updateTimeFormat() {
+    const label = this.timestamp.format(DATE_FORMATS.TIME);
+    this.ui.querySelector('time').textContent = label;
+  }
 }
