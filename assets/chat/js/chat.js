@@ -11,6 +11,7 @@ import {
   MessageBuilder,
   MessageTypes,
   ChatMessage,
+  ChatUserMessage, // eslint-disable-line no-unused-vars
   checkIfPinWasDismissed,
 } from './messages';
 import {
@@ -771,6 +772,7 @@ class Chat {
           text,
         } = message;
         message.hide(this.ignored(username, text));
+        message.highlight(this.shouldHighlightMessage(message));
       }
     }
 
@@ -852,20 +854,7 @@ class Chat {
         win.lastmessage.user.username.toLowerCase() ===
           message.user.username.toLowerCase();
       // set highlighted state
-      message.highlighted =
-        /* this.authenticated && */ !message.isown &&
-        // Check current user nick against msg.message (if highlight setting is on)
-        ((this.regexhighlightself &&
-          this.settings.get('highlight') &&
-          this.regexhighlightself.test(message.message)) ||
-          // Check /highlight nicks against msg.nick
-          (this.regexhighlightnicks &&
-            this.regexhighlightnicks.test(message.user.username)) ||
-          // Check custom highlight against msg.nick and msg.message
-          (this.regexhighlightcustom &&
-            this.regexhighlightcustom.test(
-              `${message.user.username} ${message.message}`
-            )));
+      message.highlighted = this.shouldHighlightMessage(message);
     }
 
     // This looks odd, although it would be a correct implementation
@@ -2422,6 +2411,27 @@ class Chat {
     win.on('hide', () => {
       conv.open = false;
     });
+  }
+
+  /**
+   * @param {ChatUserMessage} message
+   */
+  shouldHighlightMessage(message) {
+    return (
+      /* this.authenticated && */ !message.isown &&
+      // Check current user nick against msg.message (if highlight setting is on)
+      ((this.regexhighlightself &&
+        this.settings.get('highlight') &&
+        this.regexhighlightself.test(message.message)) ||
+        // Check /highlight nicks against msg.nick
+        (this.regexhighlightnicks &&
+          this.regexhighlightnicks.test(message.user.username)) ||
+        // Check custom highlight against msg.nick and msg.message
+        (this.regexhighlightcustom &&
+          this.regexhighlightcustom.test(
+            `${message.user.username} ${message.message}`
+          )))
+    );
   }
 
   static removeSlashCmdFromText(msg) {

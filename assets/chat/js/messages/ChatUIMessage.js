@@ -42,4 +42,9 @@ export default class ChatUIMessage {
   hide(shouldHide = true) {
     this.ui.style.display = shouldHide ? 'none' : null;
   }
+
+  highlight(shouldHighlight = true) {
+    this.highlighted = shouldHighlight;
+    this.ui.classList.toggle('msg-highlight', shouldHighlight);
+  }
 }
