@@ -120,4 +120,9 @@ export default class ChatUserMessage extends ChatMessage {
         break;
     }
   }
+
+  highlight(shouldHighlight = true) {
+    this.highlighted = shouldHighlight;
+    this.ui.classList.toggle('msg-highlight', shouldHighlight);
+  }
 }
