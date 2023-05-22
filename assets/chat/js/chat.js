@@ -767,11 +767,8 @@ class Chat {
         if (message.type !== MessageTypes.USER) {
           continue;
         }
-        const {
-          user: { username },
-          text,
-        } = message;
-        message.hide(this.ignored(username, text));
+
+        message.hide(this.ignored(message.user.username, message.message));
         message.highlight(this.shouldHighlightMessage(message));
       }
     }
