@@ -26,6 +26,7 @@ class ChatWindow extends EventEmitter {
     this.visible = false;
     this.tag = null;
     this.lastmessage = null;
+    this.messages = [];
     this.ui = $(
       `<div id="chat-win-${name}" class="chat-output ${type}" style="display: none;">` +
         `<div class="chat-lines"></div>` +
@@ -75,6 +76,7 @@ class ChatWindow extends EventEmitter {
   addMessage(chat, message) {
     message.ui = message.html(chat);
     message.afterRender(chat);
+    this.messages.push(message);
     this.lastmessage = message;
     this.lines.append(message.ui);
     this.linecount += 1;
@@ -108,6 +110,8 @@ class ChatWindow extends EventEmitter {
         remove.forEach((element) => {
           element.remove();
         });
+
+        this.messages = this.messages.slice(0, lines.length - this.maxlines);
       }
     }
   }
