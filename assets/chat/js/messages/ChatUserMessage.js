@@ -97,6 +97,10 @@ export default class ChatUserMessage extends ChatMessage {
   }
 
   censor(censorType) {
+    // Allows for adjusting the message's censorship level when the
+    // `showremoved` setting is changed.
+    this.ui.dataset.moderated = true;
+
     switch (censorType) {
       case 0: // Remove
         this.ui.classList.remove('censored');
@@ -113,5 +117,9 @@ export default class ChatUserMessage extends ChatMessage {
       default:
         break;
     }
+  }
+
+  get moderated() {
+    return this.ui.dataset.moderated;
   }
 }

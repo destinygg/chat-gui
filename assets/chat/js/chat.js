@@ -776,6 +776,10 @@ class Chat {
         message.highlight(this.shouldHighlightMessage(message));
         message.setTag(this.taggednicks.get(username.toLowerCase()));
         message.setTagTitle(this.taggednotes.get(username.toLowerCase()));
+
+        if (message.moderated) {
+          message.censor(parseInt(this.settings.get('showremoved') || '1', 10));
+        }
       }
     }
 
