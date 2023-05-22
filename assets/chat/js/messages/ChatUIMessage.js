@@ -38,4 +38,8 @@ export default class ChatUIMessage {
 
   // eslint-disable-next-line no-unused-vars
   afterRender(chat = null) {}
+
+  hide(shouldHide = true) {
+    this.ui.style.display = shouldHide ? 'none' : null;
+  }
 }

@@ -788,13 +788,6 @@ class Chat {
   }
 
   addMessage(message, win = null) {
-    // Don't add the gui if user is ignored
-    if (
-      message.type === MessageTypes.USER &&
-      this.ignored(message.user.nick, message.message)
-    )
-      return;
-
     // eslint-disable-next-line no-param-reassign
     if (win === null) win = this.mainwindow;
 
@@ -868,6 +861,13 @@ class Chat {
 
     // The point where we actually add the message dom
     win.addMessage(this, message);
+
+    // Hide the message if the user is ignored
+    if (
+      message.type === MessageTypes.USER &&
+      this.ignored(message.user.nick, message.message)
+    )
+      message.hide();
 
     // Show desktop notification
     if (
