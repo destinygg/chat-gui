@@ -900,13 +900,6 @@ class Chat {
     return false;
   }
 
-  removeMessageByNick(nick) {
-    this.mainwindow.removelines(
-      `.msg-chat[data-username="${nick.toLowerCase()}"]`
-    );
-    this.mainwindow.update();
-  }
-
   windowToFront(name) {
     const win = this.windows.get(name);
     if (win !== null && win !== this.getActiveWindow()) {
@@ -1670,7 +1663,6 @@ class Chat {
       if (!failure) {
         validUsernames.forEach((username) => {
           this.ignore(username, true);
-          this.removeMessageByNick(username);
         });
         const resultArray = Array.from(validUsernames.values());
         const resultMessage =
