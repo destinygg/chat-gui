@@ -760,6 +760,20 @@ class Chat {
     const fontscale = this.settings.get('fontscale') || 'auto';
     $(document.body).toggleClass(`pref-fontscale`, fontscale !== 'auto');
     $(document.body).attr('data-fontscale', fontscale);
+
+    for (const window of this.windows.values()) {
+      for (const message of window.messages) {
+        if (message.type !== MessageTypes.USER) {
+          continue;
+        }
+        const {
+          user: { username },
+          text,
+        } = message;
+        message.hide(this.ignored(username, text));
+      }
+    }
+
     return Promise.resolve(this);
   }
 
