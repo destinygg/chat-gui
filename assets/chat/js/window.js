@@ -130,6 +130,7 @@ class ChatWindow extends EventEmitter {
       if (message.type === MessageTypes.USER) {
         const username = message.user.username.toLowerCase();
 
+        message.setOwnMessage(username === chat.user.username.toLowerCase());
         message.ignore(chat.ignored(username, message.message));
         message.highlight(chat.shouldHighlightMessage(message));
         message.setTag(chat.taggednicks.get(username));

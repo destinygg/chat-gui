@@ -143,4 +143,12 @@ export default class ChatUserMessage extends ChatMessage {
   get moderated() {
     return this.censorType !== null;
   }
+
+  /**
+   * @param {boolean} isOwn
+   */
+  setOwnMessage(isOwn) {
+    this.ui.classList.toggle('msg-own', isOwn);
+    this.isown = isOwn;
+  }
 }
