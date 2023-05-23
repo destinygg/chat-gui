@@ -773,18 +773,16 @@ class Chat {
             user: { username },
           } = message;
 
-          // Apply the censor setting before ignore to avoid unhiding messages
-          // from ignored users.
+          message.ignore(this.ignored(username, message.message));
+          message.highlight(this.shouldHighlightMessage(message));
+          message.setTag(this.taggednicks.get(username.toLowerCase()));
+          message.setTagTitle(this.taggednotes.get(username.toLowerCase()));
+
           if (message.moderated) {
             message.censor(
               parseInt(this.settings.get('showremoved') || '1', 10)
             );
           }
-
-          message.hide(this.ignored(username, message.message));
-          message.highlight(this.shouldHighlightMessage(message));
-          message.setTag(this.taggednicks.get(username.toLowerCase()));
-          message.setTagTitle(this.taggednotes.get(username.toLowerCase()));
         }
       }
     }
@@ -883,7 +881,7 @@ class Chat {
       message.type === MessageTypes.USER &&
       this.ignored(message.user.nick, message.message)
     )
-      message.hide();
+      message.ignore();
 
     // Show desktop notification
     if (
