@@ -87,7 +87,7 @@ class Chat {
     this.users = new Map();
     this.whispers = new Map();
     this.windows = new Map();
-    this.settings = new Map(Object.entries(settingsdefault));
+    this.settings = new Map(settingsdefault);
     this.commands = new ChatCommands();
     this.autocomplete = new ChatAutoComplete();
     this.menus = new Map();
@@ -231,7 +231,7 @@ class Chat {
     const oldversion = stored.has('schemaversion')
       ? parseInt(stored.get('schemaversion'), 10)
       : -1;
-    const newversion = settingsdefault.schemaversion;
+    const newversion = settingsdefault.get('schemaversion');
     if (oldversion !== -1 && newversion > oldversion) {
       Settings.upgrade(this, oldversion, newversion);
       this.settings.set('schemaversion', newversion);
@@ -1017,9 +1017,7 @@ class Chat {
       } users.`
     ).into(this);
     if (this.showmotd) {
-      this.cmdHINT([
-        Math.floor(Math.random() * Object.keys(hintstrings).length),
-      ]);
+      this.cmdHINT([Math.floor(Math.random() * hintstrings.size)]);
       this.showmotd = false;
     }
   }
@@ -1190,7 +1188,7 @@ class Chat {
         );
         break;
       default:
-        message = MessageBuilder.error(errorstrings[desc] || desc);
+        message = MessageBuilder.error(errorstrings.get(desc) || desc);
     }
 
     message.into(this, this.getActiveWindow());
@@ -1450,9 +1448,9 @@ class Chat {
   }
 
   cmdHINT(parts) {
-    const arr = [...new Map(Object.entries(hintstrings))];
+    const arr = [...hintstrings];
     const i = parts && parts[0] ? parseInt(parts[0], 10) - 1 : -1;
-    if (i > 0 && i < Object.keys(hintstrings).length) {
+    if (i > 0 && i < hintstrings.size) {
       MessageBuilder.info(arr[i][1]).into(this);
     } else {
       if (
@@ -2116,7 +2114,7 @@ class Chat {
     let url = parts[0];
 
     if (!this.user.hasAnyFeatures(UserFeatures.ADMIN, UserFeatures.MODERATOR)) {
-      MessageBuilder.error(errorstrings.nopermission).into(this);
+      MessageBuilder.error(errorstrings.get('nopermission')).into(this);
       return;
     }
 
@@ -2158,7 +2156,7 @@ class Chat {
 
   cmdUNHOST() {
     if (!this.user.hasAnyFeatures(UserFeatures.ADMIN, UserFeatures.MODERATOR)) {
-      MessageBuilder.error(errorstrings.nopermission).into(this);
+      MessageBuilder.error(errorstrings.get('nopermission')).into(this);
       return;
     }
 
