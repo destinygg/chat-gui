@@ -2,6 +2,7 @@ import $ from 'jquery';
 import { throttle } from 'throttle-debounce';
 import ChatScrollPlugin from './scroll';
 import EventEmitter from './emitter';
+import { MessageTypes } from './messages';
 
 const tagcolors = [
   'green',
@@ -112,6 +113,31 @@ class ChatWindow extends EventEmitter {
         });
 
         this.messages = this.messages.slice(0, lines.length - this.maxlines);
+      }
+    }
+  }
+
+  /**
+   * Use chat state (settings and authentication data) to update the messages in
+   * this window.
+   */
+  updateMessages(chat) {
+    for (const message of this.messages) {
+      if (message.type !== MessageTypes.UI) {
+        message.updateTimeFormat();
+      }
+
+      if (message.type === MessageTypes.USER) {
+        const username = message.user.username.toLowerCase();
+
+        message.ignore(chat.ignored(username, message.message));
+        message.highlight(chat.shouldHighlightMessage(message));
+        message.setTag(chat.taggednicks.get(username));
+        message.setTagTitle(chat.taggednotes.get(username));
+
+        if (message.moderated) {
+          message.censor(parseInt(chat.settings.get('showremoved') || '1', 10));
+        }
       }
     }
   }

@@ -763,28 +763,7 @@ class Chat {
     $(document.body).attr('data-fontscale', fontscale);
 
     for (const window of this.windows.values()) {
-      for (const message of window.messages) {
-        if (message.type !== MessageTypes.UI) {
-          message.updateTimeFormat();
-        }
-
-        if (message.type === MessageTypes.USER) {
-          const {
-            user: { username },
-          } = message;
-
-          message.ignore(this.ignored(username, message.message));
-          message.highlight(this.shouldHighlightMessage(message));
-          message.setTag(this.taggednicks.get(username.toLowerCase()));
-          message.setTagTitle(this.taggednotes.get(username.toLowerCase()));
-
-          if (message.moderated) {
-            message.censor(
-              parseInt(this.settings.get('showremoved') || '1', 10)
-            );
-          }
-        }
-      }
+      window.updateMessages(this);
     }
 
     return Promise.resolve(this);
