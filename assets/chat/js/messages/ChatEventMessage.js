@@ -31,4 +31,8 @@ export default class ChatEventMessage extends ChatMessage {
 
     return eventTemplate;
   }
+
+  updateTimeFormat() {
+    // This avoids errors. Timestamps aren't rendered in event messages.
+  }
 }
