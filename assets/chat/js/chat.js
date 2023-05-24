@@ -975,13 +975,11 @@ class Chat {
   censor(nick) {
     for (const message of this.mainwindow.messages) {
       if (
-        message.type !== MessageTypes.USER ||
-        message.user.username !== nick
+        message.type === MessageTypes.USER ||
+        message.user.username === nick
       ) {
-        continue;
+        message.censor(parseInt(this.settings.get('showremoved') || '1', 10));
       }
-
-      message.censor(parseInt(this.settings.get('showremoved') || '1', 10));
     }
 
     this.mainwindow.update();
