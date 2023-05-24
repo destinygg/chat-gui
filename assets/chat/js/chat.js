@@ -1164,7 +1164,7 @@ class Chat {
         win.lastmessage.incEmoteCount();
         this.mainwindow.update();
       } else {
-        win.lastmessage.ui.remove();
+        win.removeLastMessage();
         MessageBuilder.emote(textonly, data.timestamp, 2).into(this);
       }
     } else if (!this.resolveMessage(data.nick, data.data)) {

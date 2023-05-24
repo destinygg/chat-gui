@@ -47,4 +47,8 @@ export default class ChatUIMessage {
     this.highlighted = shouldHighlight;
     this.ui.classList.toggle('msg-highlight', shouldHighlight);
   }
+
+  remove() {
+    this.ui.remove();
+  }
 }

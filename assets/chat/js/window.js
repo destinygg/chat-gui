@@ -143,6 +143,11 @@ class ChatWindow extends EventEmitter {
     }
   }
 
+  removeLastMessage() {
+    const lastMessage = this.messages.pop();
+    lastMessage?.remove();
+  }
+
   cleanupThrottle = throttle(50, this.cleanup);
 }
 
