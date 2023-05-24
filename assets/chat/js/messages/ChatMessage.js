@@ -38,6 +38,8 @@ export default class ChatMessage extends ChatUIMessage {
     this.continued = false;
     this.timestamp = timestamp ? moment.utc(timestamp).local() : moment();
     this.unformatted = unformatted;
+    this.ignored = false;
+    this.censorType = null;
   }
 
   html(chat = null) {
@@ -74,5 +76,43 @@ export default class ChatMessage extends ChatUIMessage {
   updateTimeFormat() {
     const label = this.timestamp.format(DATE_FORMATS.TIME);
     this.ui.querySelector('time').textContent = label;
+  }
+
+  censor(censorType) {
+    switch (censorType) {
+      case 0: // Remove
+        this.ui.classList.remove('censored');
+        this.hide();
+        break;
+      case 1: // Censor
+        this.ui.classList.add('censored');
+        // Ensure ignored messages aren't unhidden.
+        this.hide(this.ignored || false);
+        break;
+      case 2: // Do nothing
+        this.ui.classList.remove('censored');
+        this.hide(this.ignored || false);
+        break;
+      default:
+        break;
+    }
+
+    this.censorType = censorType;
+  }
+
+  ignore(shouldIgnore = true) {
+    // Ensure moderated messages remain hidden if they're configured to be
+    // removed.
+    this.hide(this.censorType === 0 || shouldIgnore);
+    this.ignored = shouldIgnore;
+  }
+
+  /**
+   * Allows for adjusting the message's censorship level when the `showremoved`
+   * setting is changed. Otherwise, a message with censor type `2` is
+   * indistinguishable from an unmoderated message.
+   */
+  get moderated() {
+    return this.censorType !== null;
   }
 }

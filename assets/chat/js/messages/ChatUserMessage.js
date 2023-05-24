@@ -27,8 +27,6 @@ export default class ChatUserMessage extends ChatMessage {
     this.title = '';
     this.slashme = false;
     this.mentioned = [];
-    this.ignored = false;
-    this.censorType = null;
   }
 
   html(chat = null) {
@@ -98,50 +96,9 @@ export default class ChatUserMessage extends ChatMessage {
     this.title = newTitle;
   }
 
-  censor(censorType) {
-    switch (censorType) {
-      case 0: // Remove
-        this.ui.classList.remove('censored');
-        this.hide();
-        break;
-      case 1: // Censor
-        this.ui.classList.add('censored');
-        // Ensure ignored messages aren't unhidden.
-        this.hide(this.ignored || false);
-        break;
-      case 2: // Do nothing
-        this.ui.classList.remove('censored');
-        this.hide(this.ignored || false);
-        break;
-      default:
-        break;
-    }
-
-    this.censorType = censorType;
-  }
-
   highlight(shouldHighlight = true) {
     this.highlighted = shouldHighlight;
     this.ui.classList.toggle('msg-highlight', shouldHighlight);
-  }
-
-  ignore(shouldIgnore = true) {
-    // Ensure moderated messages remain hidden if they're configured to be
-    // removed.
-    if (this.censorType !== 0) {
-      this.hide(shouldIgnore);
-    }
-
-    this.ignored = shouldIgnore;
-  }
-
-  /**
-   * Allows for adjusting the message's censorship level when the `showremoved`
-   * setting is changed. Otherwise, a message with censor type `2` is
-   * indistinguishable from an unmoderated message.
-   */
-  get moderated() {
-    return this.censorType !== null;
   }
 
   /**

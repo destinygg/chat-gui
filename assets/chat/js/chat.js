@@ -856,11 +856,9 @@ class Chat {
     win.addMessage(this, message);
 
     // Hide the message if the user is ignored
-    if (
-      message.type === MessageTypes.USER &&
-      this.ignored(message.user.nick, message.message)
-    )
+    if (message.user && this.ignored(message.user.nick, message.message)) {
       message.ignore();
+    }
 
     // Show desktop notification
     if (
@@ -975,10 +973,7 @@ class Chat {
 
   censor(nick) {
     for (const message of this.mainwindow.messages) {
-      if (
-        message.type === MessageTypes.USER &&
-        message.user.username === nick
-      ) {
+      if (message.user?.username === nick) {
         message.censor(parseInt(this.settings.get('showremoved') || '1', 10));
       }
     }
