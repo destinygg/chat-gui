@@ -8,7 +8,7 @@ export default class ChatUIMessage {
     this.message = message;
     /** @type Array */
     this.classes = classes;
-    /** @type JQuery */
+    /** @type HTMLElement */
     this.ui = null;
   }
 
