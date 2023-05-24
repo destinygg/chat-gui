@@ -867,7 +867,8 @@ class Chat {
       !this.backlogloading &&
       message.highlighted &&
       this.settings.get('notificationhighlight') &&
-      this.ishidden
+      this.ishidden &&
+      !message.ignored
     ) {
       Chat.showNotification(
         `${message.user.username} said ...`,
