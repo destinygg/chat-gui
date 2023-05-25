@@ -40,6 +40,11 @@ describe('Valid embeds', () => {
       '#youtube/jfKfPfyJRdk',
     ],
     [
+      'Youtube live stream shareable link - and _',
+      'https://www.youtube.com/live/EHs-_2ddcUQ?feature=share',
+      '#youtube/EHs-_2ddcUQ',
+    ],
+    [
       'Rumble embed',
       'https://rumble.com/embed/v26pcdc/?pub=4',
       '#rumble/v26pcdc',
