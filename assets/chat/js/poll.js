@@ -3,8 +3,6 @@ import { throttle } from 'throttle-debounce';
 import UserFeatures from './features';
 import { MessageBuilder } from './messages';
 
-const POLL_START = /^\/(vote|svote|poll|spoll) /i;
-const POLL_STOP = /^\/(votestop|pollstop)/i;
 const POLL_CONJUNCTION = /\bor\b/i;
 const POLL_INTERROGATIVE = /^(how|why|when|what|where)\b/i;
 const POLL_TIME = /\b([0-9]+(?:m|s))$/i;
@@ -60,7 +58,8 @@ class ChatPoll {
   constructor(chat) {
     this.chat = chat;
     this.ui = this.chat.ui.find('#chat-poll-frame');
-    this.ui.title = this.ui.find('.poll-title');
+    this.ui.title = this.ui.find('.poll-info');
+    this.ui.votes = this.ui.find('.poll-votes');
     this.ui.question = this.ui.find('.poll-question');
     this.ui.options = this.ui.find('.poll-options');
     this.ui.timer = this.ui.find('.poll-timer-inner');
@@ -81,7 +80,7 @@ class ChatPoll {
         }
       }
     });
-    this.throttleVoteCast = throttle(100, false, () => {
+    this.throttleVoteCast = throttle(100, () => {
       this.updateBars();
     });
   }
@@ -89,18 +88,16 @@ class ChatPoll {
   hide() {
     if (!this.hidden) {
       this.hidden = true;
-      this.chat.mainwindow.lock();
       this.ui.removeClass('active');
-      this.chat.mainwindow.unlock();
+      this.chat.mainwindow.update();
     }
   }
 
   show() {
     if (this.hidden) {
       this.hidden = false;
-      this.chat.mainwindow.lock();
       this.ui.addClass('active');
-      this.chat.mainwindow.unlock();
+      this.chat.mainwindow.update();
     }
   }
 
@@ -108,25 +105,12 @@ class ChatPoll {
     return this.voting;
   }
 
-  canUserStartPoll(user) {
+  hasPermission(user) {
     return user.hasAnyFeatures(
       UserFeatures.ADMIN,
       UserFeatures.BOT,
       UserFeatures.MODERATOR
     );
-  }
-
-  canUserStopPoll(user) {
-    // A user can only stop their own poll.
-    return this.canUserStartPoll(user) && this.poll.user === user.nick;
-  }
-
-  isMsgPollStopFmt(txt) {
-    return txt.match(POLL_STOP);
-  }
-
-  isMsgPollStartFmt(txt) {
-    return txt.match(POLL_START);
   }
 
   isMsgVoteCastFmt(txt) {
@@ -138,15 +122,10 @@ class ChatPoll {
   }
 
   castVote(data, user) {
-    if (!this.hidden) {
-      const votes = this.votesForUser(user);
-      this.poll.totals[data.vote - 1] += votes;
-      this.poll.votesCast += votes;
-      this.throttleVoteCast(data.vote);
-      if (!this.voting) this.markWinner();
-      return true;
-    }
-    return false;
+    const votes = this.votesForUser(user);
+    this.poll.totals[data.vote - 1] += votes;
+    this.poll.votesCast += votes;
+    this.throttleVoteCast(data.vote);
   }
 
   votesForUser(user) {
@@ -212,11 +191,10 @@ class ChatPoll {
               <strong>${i + 1}</strong>
             </span>
             <span class="opt-bar-option">${option}</span>
+            <span class="opt-bar-value"></span>
           </div>
           <div class="opt-bar">
-            <div class="opt-bar-inner" style="width: 0;">
-              <span class="opt-bar-value"></span>
-            </div>
+            <div class="opt-bar-inner" style="width: 0;"></div>
           </div>
         </div>
       `
@@ -313,6 +291,8 @@ class ChatPoll {
           .text(`${Math.round(percent)}% (${this.poll.totals[i]} votes)`);
       });
     }
+
+    this.ui.votes.text(`${this.poll.votesCast} votes`);
   }
 
   pollStartMessage() {
@@ -320,7 +300,7 @@ class ChatPoll {
       .map((_, i) => i + 1)
       .join(' or ')} in chat to participate.`;
     if (this.poll.type === PollType.Weighted) {
-      message = `A sub-weighted poll has been started. <strong>The value of your vote depends on your subscription tier.</strong> Type ${this.poll.totals
+      message = `A sub-weighted poll has been started. The value of your vote depends on your subscription tier. Type ${this.poll.totals
         .map((_, i) => i + 1)
         .join(' or ')} in chat to participate.`;
     }

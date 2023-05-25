@@ -17,10 +17,14 @@ export default class ChatEmoteMenu extends ChatMenu {
     });
     this.searchinput.on(
       'keyup',
-      debounce(100, false, () => {
-        this.searchterm = this.searchinput.val();
-        this.buildEmoteMenu();
-      })
+      debounce(
+        100,
+        () => {
+          this.searchterm = this.searchinput.val();
+          this.buildEmoteMenu();
+        },
+        { atBegin: false }
+      )
     );
   }
 
@@ -33,7 +37,7 @@ export default class ChatEmoteMenu extends ChatMenu {
   buildEmoteMenu() {
     this.emoteMenuContent.empty();
 
-    [0, 1, 2, 3, 4].forEach((tier) => {
+    this.chat.emoteService.tiers.forEach((tier) => {
       const emotes = this.chat.emoteService.emotePrefixesForTier(tier);
       if (!emotes.length) return;
 

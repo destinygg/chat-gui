@@ -8,11 +8,15 @@ require('webpack');
  * @param {http.ClientRequest} request
  */
 function bakeCookies(request) {
-  let cookies = request.getHeader('Cookie');
+  let cookies = request.getHeader('Cookie') ?? '';
 
   const { SID, REMEMBERME } = process.env;
   if (SID) {
-    cookies = cookies.replace(/(sid=).*?(;|$)/, `$1${SID}$2`);
+    if (cookies.indexOf('sid=') > -1) {
+      cookies = cookies.replace(/(sid=).*?(;|$)/, `$1${SID}$2`);
+    } else {
+      cookies += `sid=${SID}`;
+    }
   }
   if (REMEMBERME) {
     cookies += `; rememberme=${REMEMBERME}`;

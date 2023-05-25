@@ -4,9 +4,14 @@
   <div id="chat-poll-frame">
     <div class="poll-frame">
       <div class="poll-header">
-        <span class="poll-question"></span>
-        <span class="poll-close" title="Close poll"></span>
-        <span class="poll-title"></span>
+        <div class="poll-top">
+          <span class="poll-question"></span>
+          <span class="poll-close" title="Close poll"></span>
+        </div>
+        <div class="poll-title">
+          <span class="poll-info"></span>
+          <span class="poll-votes"></span>
+        </div>
       </div>
       <div class="poll-options"></div>
       <div class="poll-footer">
@@ -279,8 +284,9 @@
     <div class="chat-menu-inner floating-window">
       <div class="emote-image"></div>
       <div class="emote-info">
-        <div class="name"></div>
-        <div class="creator"></div>
+        <div class="name" title="Emote name"></div>
+        <div class="creator" title="Emote creator"></div>
+        <div class="tier" title="Emote tier"></div>
       </div>
     </div>
   </div>

@@ -75,12 +75,11 @@ export default class PinnedMessage extends ChatUserMessage {
    * @returns {PinnedMessage} Pinned message.
    */
   pin(chat = null, visibility = true) {
-    chat.mainwindow.lock();
     this.ui.id = 'msg-pinned';
     this.ui.classList.toggle('msg-pinned', true);
     this.visible = visibility;
     this.ui.querySelector('span.features').classList.toggle('hidden', true);
-    chat.mainwindow.unlock();
+    chat.mainwindow.update();
 
     if (chat.user.hasModPowers()) {
       const unpinMessage = document.createElement('a');

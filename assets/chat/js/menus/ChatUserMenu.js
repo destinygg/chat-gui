@@ -71,7 +71,7 @@ export default class ChatUserMenu extends ChatMenu {
     this.container.on('contextmenu', '.users .user-entry', (e) => {
       const userinfo = this.chat.menus.get('user-info');
       if (userinfo) {
-        userinfo.showUser(e, $(e.currentTarget), true);
+        userinfo.showUser(e, $(e.currentTarget));
         return false;
       }
       return true;
@@ -81,11 +81,15 @@ export default class ChatUserMenu extends ChatMenu {
     this.chat.source.on('NAMES', () => this.addAll());
     this.searchinput.on(
       'keyup',
-      debounce(100, false, () => {
-        this.searchterm = this.searchinput.val();
-        this.filter();
-        this.redraw();
-      })
+      debounce(
+        100,
+        () => {
+          this.searchterm = this.searchinput.val();
+          this.filter();
+          this.redraw();
+        },
+        { atBegin: false }
+      )
     );
   }
 
