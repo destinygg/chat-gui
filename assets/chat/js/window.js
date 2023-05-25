@@ -2,6 +2,7 @@ import $ from 'jquery';
 import { throttle } from 'throttle-debounce';
 import ChatScrollPlugin from './scroll';
 import EventEmitter from './emitter';
+import { MessageTypes } from './messages';
 
 const tagcolors = [
   'green',
@@ -26,6 +27,7 @@ class ChatWindow extends EventEmitter {
     this.visible = false;
     this.tag = null;
     this.lastmessage = null;
+    this.messages = [];
     this.ui = $(
       `<div id="chat-win-${name}" class="chat-output ${type}" style="display: none;">` +
         `<div class="chat-lines"></div>` +
@@ -75,6 +77,7 @@ class ChatWindow extends EventEmitter {
   addMessage(chat, message) {
     message.ui = message.html(chat);
     message.afterRender(chat);
+    this.messages.push(message);
     this.lastmessage = message;
     this.lines.append(message.ui);
     this.linecount += 1;
@@ -108,8 +111,41 @@ class ChatWindow extends EventEmitter {
         remove.forEach((element) => {
           element.remove();
         });
+
+        this.messages = this.messages.slice(0, lines.length - this.maxlines);
       }
     }
+  }
+
+  /**
+   * Use chat state (settings and authentication data) to update the messages in
+   * this window.
+   */
+  updateMessages(chat) {
+    for (const message of this.messages) {
+      if (message.type !== MessageTypes.UI) {
+        message.updateTimeFormat();
+      }
+
+      if (message.user) {
+        const username = message.user.username.toLowerCase();
+
+        message.setOwnMessage(username === chat.user.username.toLowerCase());
+        message.ignore(chat.ignored(username, message.message));
+        message.highlight(chat.shouldHighlightMessage(message));
+        message.setTag(chat.taggednicks.get(username));
+        message.setTagTitle(chat.taggednotes.get(username));
+
+        if (message.moderated) {
+          message.censor(parseInt(chat.settings.get('showremoved') || '1', 10));
+        }
+      }
+    }
+  }
+
+  removeLastMessage() {
+    const lastMessage = this.messages.pop();
+    lastMessage?.remove();
   }
 
   cleanupThrottle = throttle(50, this.cleanup);

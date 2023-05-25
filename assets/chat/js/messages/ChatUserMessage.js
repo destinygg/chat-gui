@@ -77,4 +77,35 @@ export default class ChatUserMessage extends ChatMessage {
       );
     return features !== '' ? `<span class="features">${features}</span>` : '';
   }
+
+  setTag(newTag) {
+    const previousTag = this.tag;
+    if (previousTag) {
+      this.ui.classList.remove('msg-tagged', `msg-tagged-${previousTag}`);
+    }
+
+    if (newTag) {
+      this.ui.classList.add('msg-tagged', `msg-tagged-${newTag}`);
+    }
+
+    this.tag = newTag;
+  }
+
+  setTagTitle(newTitle) {
+    this.ui.querySelector('.user').title = newTitle;
+    this.title = newTitle;
+  }
+
+  highlight(shouldHighlight = true) {
+    this.highlighted = shouldHighlight;
+    this.ui.classList.toggle('msg-highlight', shouldHighlight);
+  }
+
+  /**
+   * @param {boolean} isOwn
+   */
+  setOwnMessage(isOwn) {
+    this.ui.classList.toggle('msg-own', isOwn);
+    this.isown = isOwn;
+  }
 }

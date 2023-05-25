@@ -19,6 +19,7 @@ import {
   MessageBuilder,
   MessageTypes,
   ChatMessage,
+  ChatUserMessage, // eslint-disable-line no-unused-vars
   checkIfPinWasDismissed,
 } from './messages';
 import {
@@ -657,6 +658,11 @@ class Chat {
     const fontscale = this.settings.get('fontscale') || 'auto';
     $(document.body).toggleClass(`pref-fontscale`, fontscale !== 'auto');
     $(document.body).attr('data-fontscale', fontscale);
+
+    for (const window of this.windows.values()) {
+      window.updateMessages(this);
+    }
+
     return Promise.resolve(this);
   }
 
@@ -685,13 +691,6 @@ class Chat {
   }
 
   addMessage(message, win = null) {
-    // Don't add the gui if user is ignored
-    if (
-      message.type === MessageTypes.USER &&
-      this.ignored(message.user.nick, message.message)
-    )
-      return;
-
     // eslint-disable-next-line no-param-reassign
     if (win === null) win = this.mainwindow;
 
@@ -742,20 +741,7 @@ class Chat {
         win.lastmessage.user.username.toLowerCase() ===
           message.user.username.toLowerCase();
       // set highlighted state
-      message.highlighted =
-        /* this.authenticated && */ !message.isown &&
-        // Check current user nick against msg.message (if highlight setting is on)
-        ((this.regexhighlightself &&
-          this.settings.get('highlight') &&
-          this.regexhighlightself.test(message.message)) ||
-          // Check /highlight nicks against msg.nick
-          (this.regexhighlightnicks &&
-            this.regexhighlightnicks.test(message.user.username)) ||
-          // Check custom highlight against msg.nick and msg.message
-          (this.regexhighlightcustom &&
-            this.regexhighlightcustom.test(
-              `${message.user.username} ${message.message}`
-            )));
+      message.highlighted = this.shouldHighlightMessage(message);
     }
 
     // This looks odd, although it would be a correct implementation
@@ -766,12 +752,18 @@ class Chat {
     // The point where we actually add the message dom
     win.addMessage(this, message);
 
+    // Hide the message if the user is ignored
+    if (message.user && this.ignored(message.user.nick, message.message)) {
+      message.ignore();
+    }
+
     // Show desktop notification
     if (
       !this.backlogloading &&
       message.highlighted &&
       this.settings.get('notificationhighlight') &&
-      this.ishidden
+      this.ishidden &&
+      !message.ignored
     ) {
       Chat.showNotification(
         `${message.user.username} said ...`,
@@ -795,13 +787,6 @@ class Chat {
       }
     }
     return false;
-  }
-
-  removeMessageByNick(nick) {
-    this.mainwindow.removelines(
-      `.msg-chat[data-username="${nick.toLowerCase()}"]`
-    );
-    this.mainwindow.update();
   }
 
   windowToFront(name) {
@@ -884,20 +869,12 @@ class Chat {
   }
 
   censor(nick) {
-    const c = this.mainwindow.getlines(
-      `.msg-chat[data-username="${nick.toLowerCase()}"]`
-    );
-    switch (parseInt(this.settings.get('showremoved') || 1, 10)) {
-      case 0: // remove
-        c.forEach((line) => line.remove());
-        break;
-      case 1: // censor
-        c.forEach((line) => line.classList.add('censored'));
-        break;
-      case 2: // do nothing
-      default:
-        break;
+    for (const message of this.mainwindow.messages) {
+      if (message.user?.username === nick) {
+        message.censor(parseInt(this.settings.get('showremoved') || '1', 10));
+      }
     }
+
     this.mainwindow.update();
   }
 
@@ -1077,7 +1054,7 @@ class Chat {
         win.lastmessage.incEmoteCount();
         this.mainwindow.update();
       } else {
-        win.lastmessage.ui.remove();
+        win.removeLastMessage();
         MessageBuilder.emote(textonly, data.timestamp, 2).into(this);
       }
     } else if (!this.resolveMessage(data.nick, data.data)) {
@@ -1564,7 +1541,6 @@ class Chat {
       if (!failure) {
         validUsernames.forEach((username) => {
           this.ignore(username, true);
-          this.removeMessageByNick(username);
         });
         const resultArray = Array.from(validUsernames.values());
         const resultMessage =
@@ -1830,22 +1806,6 @@ class Chat {
     } else {
       color = tagcolors[Math.floor(Math.random() * tagcolors.length)];
     }
-
-    this.mainwindow
-      .getlines(`.msg-user[data-username="${n}"]`)
-      .forEach((line) => {
-        const classesToRemove = Chat.removeClasses(
-          'msg-tagged',
-          line.classList.value
-        );
-        classesToRemove.forEach((className) =>
-          line.classList.remove(className)
-        );
-        ['msg-tagged', `msg-tagged-${color}`].forEach((tag) =>
-          line.classList.add(tag)
-        );
-        line.querySelector('.user').title = note;
-      });
 
     this.taggednicks.set(n, color);
     this.taggednotes.set(n, note);
@@ -2321,6 +2281,27 @@ class Chat {
     win.on('hide', () => {
       conv.open = false;
     });
+  }
+
+  /**
+   * @param {ChatUserMessage} message
+   */
+  shouldHighlightMessage(message) {
+    return (
+      /* this.authenticated && */ !message.isown &&
+      // Check current user nick against msg.message (if highlight setting is on)
+      ((this.regexhighlightself &&
+        this.settings.get('highlight') &&
+        this.regexhighlightself.test(message.message)) ||
+        // Check /highlight nicks against msg.nick
+        (this.regexhighlightnicks &&
+          this.regexhighlightnicks.test(message.user.username)) ||
+        // Check custom highlight against msg.nick and msg.message
+        (this.regexhighlightcustom &&
+          this.regexhighlightcustom.test(
+            `${message.user.username} ${message.message}`
+          )))
+    );
   }
 
   static removeSlashCmdFromText(msg) {
