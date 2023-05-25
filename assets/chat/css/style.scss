@@ -585,12 +585,12 @@ hr {
     .text {
       display: none;
     }
-    .text-wrapper:after {
+    .event-bottom:after {
       color: $color-accent;
       cursor: pointer;
       content: '<censored>';
     }
-    .text:hover:after {
+    .event-bottom:hover:after {
       color: $color-accent-light;
     }
   }

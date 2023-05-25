@@ -47,7 +47,9 @@ class ChatUserFocus {
       rule = `.msg-user.${value}{opacity:1 !important;}`;
     } else if (this.chat.settings.get('focusmentioned')) {
       rule = `
-        .msg-subscription[data-username="${value}"], .msg-subscription[data-mentioned~="${value}"], .msg-subscription[data-giftee="${value}"],
+        .msg-subscription[data-username="${value}"], .msg-subscription[data-mentioned~="${value}"],
+        .msg-giftsub[data-username="${value}"], .msg-giftsub[data-mentioned~="${value}"], .msg-giftsub[data-giftee="${value}"],
+        .msg-massgift[data-username="${value}"], .msg-massgift[data-mentioned~="${value}"],
         .msg-donation[data-username="${value}"], .msg-donation[data-mentioned~="${value}"],
         .msg-pinned[data-username="${value}"], .msg-pinned[data-mentioned~="${value}"],
         .msg-user[data-username="${value}"], .msg-user[data-mentioned~="${value}"] {
@@ -56,8 +58,12 @@ class ChatUserFocus {
       `;
     } else {
       rule = `
-        .msg-subscription[data-username="${value}"], .msg-subscription[data-giftee="${value}"], .msg-donation[data-username="${value}"],
-        .msg-pinned[data-username="${value}"], .msg-user[data-username="${value}"] {
+        .msg-subscription[data-username="${value}"], 
+        .msg-giftsub[data-username="${value}"], .msg-giftsub[data-giftee="${value}"], 
+        .msg-massgift[data-username="${value}"], 
+        .msg-donation[data-username="${value}"],
+        .msg-pinned[data-username="${value}"], 
+        .msg-user[data-username="${value}"] {
           opacity:1 !important;
         }
       `;
