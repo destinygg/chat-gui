@@ -127,7 +127,7 @@ class ChatWindow extends EventEmitter {
         message.updateTimeFormat();
       }
 
-      if (message.type === MessageTypes.USER) {
+      if (message.user) {
         const username = message.user.username.toLowerCase();
 
         message.setOwnMessage(username === chat.user.username.toLowerCase());
