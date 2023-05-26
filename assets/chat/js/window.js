@@ -144,8 +144,8 @@ class ChatWindow extends EventEmitter {
   }
 
   removeLastMessage() {
-    const lastMessage = this.messages.pop();
-    lastMessage?.remove();
+    this.lastmessage.remove();
+    this.messages = this.messages.filter((m) => m !== this.lastmessage);
   }
 
   cleanupThrottle = throttle(50, this.cleanup);
