@@ -112,7 +112,7 @@ class ChatWindow extends EventEmitter {
           element.remove();
         });
 
-        this.messages = this.messages.slice(0, lines.length - this.maxlines);
+        this.messages = this.messages.slice(lines.length - this.maxlines);
       }
     }
   }
