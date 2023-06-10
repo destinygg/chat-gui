@@ -77,6 +77,8 @@ const errorstrings = new Map(
     activepoll: 'Poll already started.',
     noactivepoll: 'No poll started.',
     alreadyvoted: 'You have already voted!',
+    nochatting:
+      "You aren't allowed to chat. Either you haven't picked a username, or a mod disabled your privileges.",
   })
 );
 
