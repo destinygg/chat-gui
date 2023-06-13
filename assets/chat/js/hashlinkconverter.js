@@ -13,8 +13,8 @@ class HashLinkConverter {
     this.rumbleEmbedRegex = /^embed\/([a-z0-9]+)\/?$/;
   }
 
-  convert(urlString) {
-    if (!urlString) {
+  convert(urlString, throwErrors) {
+    if (!urlString && throwErrors) {
       throw new Error(MISSING_ARG_ERROR);
     }
     const url = new URL(
@@ -46,7 +46,8 @@ class HashLinkConverter {
         }
         videoId = url.searchParams.get('v');
         if (!videoId) {
-          throw new Error(MISSING_VIDEO_ID_ERROR);
+          if (throwErrors) throw new Error(MISSING_VIDEO_ID_ERROR);
+          return '';
         }
         return `#youtube/${videoId}`;
       case 'www.youtu.be':
@@ -58,9 +59,11 @@ class HashLinkConverter {
         if (match) {
           return `#rumble/${match[1]}`;
         }
-        throw new Error(RUMBLE_EMBED_ERROR);
+        if (throwErrors) throw new Error(RUMBLE_EMBED_ERROR);
+        return '';
       default:
-        throw new Error(INVALID_LINK_ERROR);
+        if (throwErrors) throw new Error(INVALID_LINK_ERROR);
+        return '';
     }
   }
 }

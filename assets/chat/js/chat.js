@@ -1864,7 +1864,10 @@ class Chat {
   cmdEMBED(parts) {
     const { location } = window.top || window.parent || window;
     try {
-      location.hash = this.hashLinkConverter.convert(parts[0]);
+      location.hash = this.hashLinkConverter.convert(
+        parts[0],
+        /* throwErrors */ true
+      );
     } catch (error) {
       MessageBuilder.error(error.message).into(this);
       MessageBuilder.info(
@@ -1876,7 +1879,10 @@ class Chat {
   cmdPOSTEMBED(parts) {
     const { location } = window.top || window.parent || window;
     try {
-      const hashLink = this.hashLinkConverter.convert(parts[0]);
+      const hashLink = this.hashLinkConverter.convert(
+        parts[0],
+        /* throwErrors */ true
+      );
       this.source.send('MSG', {
         data: `${hashLink} ${parts.slice(1).join(' ')}`,
       });

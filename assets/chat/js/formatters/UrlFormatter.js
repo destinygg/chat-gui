@@ -1,5 +1,5 @@
 import $ from 'jquery';
-
+import { HashLinkConverter } from '../hashlinkconverter';
 /** @var Array tlds */
 const tlds = require('../../../tld.json');
 
@@ -39,6 +39,7 @@ export default class UrlFormatter {
     const scheme = '(https?|ftp|wss?)://';
     const strict = `\\b${scheme}${pathCont}`;
     const relaxed = `${strict}|${webURL}`;
+    this.hashLinkConverter = new HashLinkConverter();
     this.linkregex = new RegExp(relaxed, 'gi');
     this.elem = $('<div></div>');
   }
@@ -71,6 +72,10 @@ export default class UrlFormatter {
       const m = decodedUrl.match(self.linkregex);
       if (m) {
         const encodedUrl = self.encodeUrl(m[0]);
+        const embedHashLink = this.hashLinkConverter.convert(
+          encodedUrl,
+          /* throwErrors */ false
+        );
         const maxUrlLength = 90;
         let urlText = encodedUrl;
         if (urlText.length > maxUrlLength) {
@@ -78,7 +83,9 @@ export default class UrlFormatter {
         }
         const extra = self.encodeUrl(decodedUrl.substring(m[0].length));
         const href = `${scheme ? '' : 'http://'}${encodedUrl}`;
-        return `<a target="_blank" class="externallink ${extraclass}" href="${href}" rel="nofollow">${urlText}</a>${extra}`;
+        return embedHashLink
+          ? `<a target="_blank" class="externallink ${extraclass}" href="${href}" rel="nofollow">${urlText}</a><button class="embed-button" onclick="location.href='bigscreen${embedHashLink}'">Embed</button>`
+          : `<a target="_blank" class="externallink ${extraclass}" href="${href}" rel="nofollow">${urlText}</a>${extra}`;
       }
       return url;
     });

@@ -51,7 +51,7 @@ describe('Valid embeds', () => {
     ],
   ])('%s', (_, url, expectedHashLink) => {
     const hlc = new HashLinkConverter();
-    expect(hlc.convert(url)).toBe(expectedHashLink);
+    expect(hlc.convert(url, /* throwErrors */ true)).toBe(expectedHashLink);
   });
 });
 
@@ -75,6 +75,8 @@ describe('Invalid embeds', () => {
     ],
   ])('%s', (_, url, expectedError) => {
     const hlc = new HashLinkConverter();
-    expect(() => hlc.convert(url)).toThrow(expectedError);
+    expect(() => hlc.convert(url, /* throwErrors */ true)).toThrow(
+      expectedError
+    );
   });
 });

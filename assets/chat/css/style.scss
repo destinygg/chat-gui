@@ -335,6 +335,11 @@ hr {
   .hidden {
     display: none !important;
   }
+
+  .embed-button {
+    margin-left: $gutter-md;
+    border-radius: 15px;
+  }
 }
 
 /* Base ChatUserMessage */
