@@ -84,7 +84,7 @@ export default class UrlFormatter {
         const extra = self.encodeUrl(decodedUrl.substring(m[0].length));
         const href = `${scheme ? '' : 'http://'}${encodedUrl}`;
         return embedHashLink
-          ? `<a target="_blank" class="externallink ${extraclass}" href="${href}" rel="nofollow">${urlText}</a><button class="embed-button" onclick="location.href='bigscreen${embedHashLink}'">Embed</button>`
+          ? `<a target="_blank" class="externallink ${extraclass}" href="${href}" rel="nofollow">${urlText}</a><button class="embed-button" onclick="location.href='/bigscreen${embedHashLink}'">Embed</button>`
           : `<a target="_blank" class="externallink ${extraclass}" href="${href}" rel="nofollow">${urlText}</a>${extra}`;
       }
       return url;
