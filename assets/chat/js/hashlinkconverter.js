@@ -59,6 +59,9 @@ class HashLinkConverter {
           return `#rumble/${match[1]}`;
         }
         throw new Error(RUMBLE_EMBED_ERROR);
+      case 'www.kick.com':
+      case 'kick.com':
+        return `#kick/${pathname}`;
       default:
         throw new Error(INVALID_LINK_ERROR);
     }
