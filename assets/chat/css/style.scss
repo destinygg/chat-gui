@@ -337,17 +337,13 @@ hr {
   }
 
   .embed-button {
+    position: relative;
+    top: 1.5px;
     margin-left: $gutter-sm;
-    border-radius: 15px;
-    border-color: rgb(89, 174, 234);
-    background-color: #151515;
-    padding-left: 0.5em;
-    padding-right: 0.5em;
-    cursor: pointer;
-    color: white;
+    margin-right: $gutter-xs;
+    opacity: 0.75;
     &:hover {
-      background-color: white;
-      color: black;
+      opacity: 1;
     }
   }
 }
