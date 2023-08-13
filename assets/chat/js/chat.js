@@ -1227,7 +1227,7 @@ class Chat {
   }
 
   onSUBSCRIPTION(data) {
-    const user = this.users.get(data.nick) ?? new ChatUser(data.nick);
+    const user = new ChatUser(data.user);
     MessageBuilder.subscription(
       data.data,
       user,
@@ -1239,19 +1239,20 @@ class Chat {
   }
 
   onGIFTSUB(data) {
-    const user = this.users.get(data.nick) ?? new ChatUser(data.nick);
+    const user = new ChatUser(data.user);
+    const recipient = new ChatUser(data.recipient);
     MessageBuilder.gift(
       data.data,
       user,
       data.tier,
       data.tierlabel,
-      data.giftee,
+      recipient,
       data.timestamp
     ).into(this);
   }
 
   onMASSGIFT(data) {
-    const user = this.users.get(data.nick) ?? new ChatUser(data.nick);
+    const user = new ChatUser(data.user);
     MessageBuilder.massgift(
       data.data,
       user,
@@ -1263,7 +1264,7 @@ class Chat {
   }
 
   onDONATION(data) {
-    const user = this.users.get(data.nick) ?? new ChatUser(data.nick);
+    const user = new ChatUser(data.user);
     MessageBuilder.donation(data.data, user, data.amount, data.timestamp).into(
       this
     );
