@@ -140,6 +140,9 @@ class Chat {
     this.source.on('GIFTSUB', (data) => this.onGIFTSUB(data));
     this.source.on('MASSGIFT', (data) => this.onMASSGIFT(data));
     this.source.on('DONATION', (data) => this.onDONATION(data));
+    this.source.on('ADDPHRASE', (data) => this.onADDPHRASE(data));
+    this.source.on('REMOVEPHRASE', (data) => this.onREMOVEPHRASE(data));
+    this.source.on('DEATH', (data) => this.onDEATH(data));
 
     this.control.on('SEND', (data) => this.cmdSEND(data));
     this.control.on('HINT', (data) => this.cmdHINT(data));
@@ -203,6 +206,21 @@ class Chat {
     this.control.on('UNMOTD', () => this.cmdUNPIN());
     this.control.on('HOST', (data) => this.cmdHOST(data));
     this.control.on('UNHOST', () => this.cmdUNHOST());
+    this.control.on('ADDPHRASE', (data) => this.cmdADDPHRASE(data));
+    this.control.on('ADDBAN', (data) => this.cmdADDPHRASE(data));
+    this.control.on('ADDMUTE', (data) => this.cmdADDPHRASE(data));
+    this.control.on('REMOVEPHRASE', (data) => this.cmdREMOVEPHRASE(data));
+    this.control.on('REMOVEBAN', (data) => this.cmdREMOVEPHRASE(data));
+    this.control.on('REMOVEMUTE', (data) => this.cmdREMOVEPHRASE(data));
+    this.control.on('DELETEPHRASE', (data) => this.cmdREMOVEPHRASE(data));
+    this.control.on('DELETEBAN', (data) => this.cmdREMOVEPHRASE(data));
+    this.control.on('DELETEMUTE', (data) => this.cmdREMOVEPHRASE(data));
+    this.control.on('DPHRASE', (data) => this.cmdREMOVEPHRASE(data));
+    this.control.on('DBAN', (data) => this.cmdREMOVEPHRASE(data));
+    this.control.on('DMUTE', (data) => this.cmdREMOVEPHRASE(data));
+    this.control.on('DIE', (data) => this.cmdDIE(data));
+    this.control.on('SUICIDE', (data) => this.cmdDIE(data));
+    this.control.on('BITLY', (data) => this.cmdDIE(data));
   }
 
   setUser(user) {
@@ -1269,6 +1287,33 @@ class Chat {
     );
   }
 
+  onADDPHRASE(data) {
+    MessageBuilder.command(`Phrase "${data.data}" added.`, data.timestamp).into(
+      this
+    );
+  }
+
+  onREMOVEPHRASE(data) {
+    MessageBuilder.command(
+      `Phrase "${data.data}" removed.`,
+      data.timestamp
+    ).into(this);
+  }
+
+  onDEATH(data) {
+    const user = this.users.get(data.nick) ?? new ChatUser(data.nick);
+    MessageBuilder.death(data.data, user, data.extradata, data.timestamp).into(
+      this
+    );
+    if (user.username.toLowerCase() === data.nick.toLowerCase()) {
+      if (isMuteActive(data)) {
+        this.mutedtimer.setTimer(data.duration);
+        this.mutedtimer.startTimer();
+      }
+    }
+    this.censor(data.nick);
+  }
+
   onPRIVMSGSENT() {
     if (this.mainwindow.visible) {
       MessageBuilder.info('Your message has been sent.').into(this);
@@ -2204,6 +2249,42 @@ class Chat {
 
   cmdUNPIN() {
     this.source.send('PIN', { data: '' });
+  }
+
+  cmdADDPHRASE(parts) {
+    if (!this.user.hasAnyFeatures(UserFeatures.ADMIN, UserFeatures.MODERATOR)) {
+      MessageBuilder.error(errorstrings.get('nopermission')).into(this);
+      return;
+    }
+
+    if (!parts.length) {
+      MessageBuilder.error('No phrase provided - /addphrase <phrase>').into(
+        this
+      );
+      return;
+    }
+
+    this.source.send('ADDPHRASE', { data: parts.join(' ') });
+  }
+
+  cmdREMOVEPHRASE(parts) {
+    if (!this.user.hasAnyFeatures(UserFeatures.ADMIN, UserFeatures.MODERATOR)) {
+      MessageBuilder.error(errorstrings.get('nopermission')).into(this);
+      return;
+    }
+
+    if (!parts.length) {
+      MessageBuilder.error('No phrase provided - /removephrase <phrase>').into(
+        this
+      );
+      return;
+    }
+
+    this.source.send('REMOVEPHRASE', { data: parts.join(' ') });
+  }
+
+  cmdDIE(parts) {
+    this.source.send('DIE', { data: parts.join(' ') });
   }
 
   openConversation(nick) {

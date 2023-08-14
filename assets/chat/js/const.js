@@ -79,6 +79,11 @@ const errorstrings = new Map(
     alreadyvoted: 'You have already voted!',
     nochatting:
       "You aren't allowed to chat. Either you haven't picked a username, or a mod disabled your privileges.",
+    bannedphrase:
+      'Your message was filtered because it contained a banned phrase.',
+    duplicatephrase: 'Banned phrase already exists.',
+    nophrase: "Banned phrase doesn't exist.",
+    cantbanprotected: "Protected users can't die.",
   })
 );
 

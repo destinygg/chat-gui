@@ -52,6 +52,7 @@ class ChatUserFocus {
         .msg-massgift[data-username="${value}"], .msg-massgift[data-mentioned~="${value}"],
         .msg-donation[data-username="${value}"], .msg-donation[data-mentioned~="${value}"],
         .msg-pinned[data-username="${value}"], .msg-pinned[data-mentioned~="${value}"],
+        .msg-death[data-username="${value}"], .msg-death[data-mentioned~="${value}"],
         .msg-user[data-username="${value}"], .msg-user[data-mentioned~="${value}"] {
           opacity:1 !important;
         }
@@ -63,6 +64,7 @@ class ChatUserFocus {
         .msg-massgift[data-username="${value}"], 
         .msg-donation[data-username="${value}"],
         .msg-pinned[data-username="${value}"], 
+        .msg-death[data-username="${value}"], 
         .msg-user[data-username="${value}"] {
           opacity:1 !important;
         }
