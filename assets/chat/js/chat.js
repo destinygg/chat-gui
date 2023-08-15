@@ -1794,7 +1794,7 @@ class Chat {
     let note = '';
     if (parts[1]) {
       if (tagcolors.indexOf(parts[1]) !== -1) {
-        color = parts[1];
+        color = parts[1].toLowerCase();
         note = parts[2] ? parts.slice(2, parts.length).join(' ') : '';
       } else {
         color = tagcolors[Math.floor(Math.random() * tagcolors.length)];
