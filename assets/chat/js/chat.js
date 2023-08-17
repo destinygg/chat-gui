@@ -1227,47 +1227,19 @@ class Chat {
   }
 
   onSUBSCRIPTION(data) {
-    const user = new ChatUser(data.user);
-    MessageBuilder.subscription(
-      data.data,
-      user,
-      data.tier,
-      data.tierlabel,
-      data.streak,
-      data.timestamp
-    ).into(this);
+    MessageBuilder.subscription(data).into(this);
   }
 
   onGIFTSUB(data) {
-    const user = new ChatUser(data.user);
-    const recipient = new ChatUser(data.recipient);
-    MessageBuilder.gift(
-      data.data,
-      user,
-      data.tier,
-      data.tierlabel,
-      recipient,
-      data.timestamp
-    ).into(this);
+    MessageBuilder.gift(data).into(this);
   }
 
   onMASSGIFT(data) {
-    const user = new ChatUser(data.user);
-    MessageBuilder.massgift(
-      data.data,
-      user,
-      data.tier,
-      data.tierlabel,
-      data.quantity,
-      data.timestamp
-    ).into(this);
+    MessageBuilder.massgift(data).into(this);
   }
 
   onDONATION(data) {
-    const user = new ChatUser(data.user);
-    MessageBuilder.donation(data.data, user, data.amount, data.timestamp).into(
-      this
-    );
+    MessageBuilder.donation(data).into(this);
   }
 
   onPRIVMSGSENT() {
