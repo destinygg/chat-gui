@@ -962,13 +962,19 @@ class Chat {
   onDISPATCH({ data }) {
     if (data && typeof data === 'object') {
       let users = [];
-      const now = Date.now();
-      if (Object.hasOwn(data, 'nick')) users.push(this.addUser(data));
-      if (Object.hasOwn(data, 'users'))
-        users = users.concat(
-          Array.from(data.users).map((d) => this.addUser(d))
-        );
-      users.forEach((u) => this.autocomplete.add(u.nick, false, now));
+      if (data.users) {
+        users = users.concat(data.users.map((d) => this.addUser(d)));
+      }
+      if (data.user) {
+        users.push(this.addUser(data.user));
+      } else if (data.nick) {
+        users.push(this.addUser(data));
+      }
+      // For sub recipients in `GIFTSUB` events.
+      if (data.recipient) {
+        users.push(this.addUser(data.recipient));
+      }
+      users.forEach((u) => this.autocomplete.add(u.nick, false, Date.now()));
     }
   }
 
