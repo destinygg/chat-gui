@@ -1,6 +1,7 @@
 import $ from 'jquery';
 import { debounce } from 'throttle-debounce';
 import ChatMenu from './ChatMenu';
+import ChatUser from '../user';
 
 // sections in order.
 const UserMenuSections = [
@@ -20,12 +21,8 @@ const UserMenuSections = [
 ];
 
 function userComparator(a, b) {
-  const u1 = this.chat.users.get(a.getAttribute('data-username').toLowerCase());
-  const u2 = this.chat.users.get(b.getAttribute('data-username').toLowerCase());
-  if (!u1 || !u2) return 0;
-
-  const u1Nick = u1.nick.toLowerCase();
-  const u2Nick = u2.nick.toLowerCase();
+  const u1Nick = a.getAttribute('data-username').toLowerCase();
+  const u2Nick = b.getAttribute('data-username').toLowerCase();
   if (u1Nick < u2Nick) return -1;
   if (u1Nick > u2Nick) return 1;
   return 0;
@@ -76,9 +73,9 @@ export default class ChatUserMenu extends ChatMenu {
       }
       return true;
     });
-    this.chat.source.on('JOIN', (data) => this.addAndRedraw(data.nick));
-    this.chat.source.on('QUIT', (data) => this.removeAndRedraw(data.nick));
-    this.chat.source.on('NAMES', () => this.addAll());
+    this.chat.source.on('JOIN', (data) => this.addAndRedraw(data));
+    this.chat.source.on('QUIT', (data) => this.removeAndRedraw(data));
+    this.chat.source.on('NAMES', (data) => this.addAll(data.users));
     this.searchinput.on(
       'keyup',
       debounce(
@@ -146,7 +143,7 @@ export default class ChatUserMenu extends ChatMenu {
     return features !== '' ? `<span class="features">${features}</span>` : '';
   }
 
-  addAll() {
+  addAll(users) {
     this.totalcount = 0;
     this.container.empty();
     this.sections = new Map();
@@ -157,25 +154,23 @@ export default class ChatUserMenu extends ChatMenu {
         this.flairSection.set(flair, data.name)
       );
     });
-    [...this.chat.users.keys()].forEach((username) =>
-      this.addElement(username)
-    );
+    users.forEach((u) => this.addElement(u));
     this.sort();
     this.filter();
     this.redraw();
   }
 
-  addAndRedraw(username) {
-    if (!this.hasElement(username)) {
-      this.addElement(username, true);
+  addAndRedraw(user) {
+    if (!this.hasElement(user)) {
+      this.addElement(user, true);
       this.filter();
       this.redraw();
     }
   }
 
-  removeAndRedraw(username) {
-    if (this.hasElement(username)) {
-      this.removeElement(username);
+  removeAndRedraw(user) {
+    if (this.hasElement(user)) {
+      this.removeElement(user);
       this.redraw();
     }
   }
@@ -219,13 +214,13 @@ export default class ChatUserMenu extends ChatMenu {
     this.container.append(section);
   }
 
-  removeElement(username) {
-    this.container.find(`.user-entry[data-username="${username}"]`).remove();
+  removeElement(user) {
+    this.container.find(`.user-entry[data-username="${user.nick}"]`).remove();
     this.totalcount -= 1;
   }
 
-  addElement(username, sort = false) {
-    const user = this.chat.users.get(username.toLowerCase());
+  addElement(messageUser, sort = false) {
+    const user = new ChatUser(messageUser);
     const label =
       !user.username || user.username === '' ? 'Anonymous' : user.username;
     const features =
@@ -254,9 +249,10 @@ export default class ChatUserMenu extends ChatMenu {
     this.totalcount += 1;
   }
 
-  hasElement(username) {
+  hasElement(user) {
     return (
-      this.container.find(`.user-entry[data-username="${username}"]`).length > 0
+      this.container.find(`.user-entry[data-username="${user.nick}"]`).length >
+      0
     );
   }
 
