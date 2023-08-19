@@ -112,7 +112,6 @@ class Chat {
     // The websocket connection, emits events from the chat server
     this.source = new ChatSource();
 
-    this.source.on('REFRESH', () => window.location.reload(false));
     this.source.on('PING', (data) => this.source.send('PONG', data));
     this.source.on('CONNECTING', (data) => this.onCONNECTING(data));
     this.source.on('ME', (data) => this.onME(data));
@@ -140,6 +139,7 @@ class Chat {
     this.source.on('GIFTSUB', (data) => this.onGIFTSUB(data));
     this.source.on('MASSGIFT', (data) => this.onMASSGIFT(data));
     this.source.on('DONATION', (data) => this.onDONATION(data));
+    this.source.on('UPDATEUSER', (data) => this.onUPDATEUSER(data));
 
     this.control.on('SEND', (data) => this.cmdSEND(data));
     this.control.on('HINT', (data) => this.cmdHINT(data));
@@ -1389,6 +1389,12 @@ class Chat {
         this.inputhistory.add(raw);
         this.input.val('');
       }
+    }
+  }
+
+  onUPDATEUSER(data) {
+    if (this.user?.id === data.id) {
+      this.setUser(data);
     }
   }
 

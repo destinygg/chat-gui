@@ -76,6 +76,7 @@ export default class ChatUserMenu extends ChatMenu {
     this.chat.source.on('JOIN', (data) => this.addAndRedraw(data));
     this.chat.source.on('QUIT', (data) => this.removeAndRedraw(data));
     this.chat.source.on('NAMES', (data) => this.addAll(data.users));
+    this.chat.source.on('UPDATEUSER', (data) => this.replaceAndRedraw(data));
     this.searchinput.on(
       'keyup',
       debounce(
@@ -175,6 +176,15 @@ export default class ChatUserMenu extends ChatMenu {
     }
   }
 
+  replaceAndRedraw(user) {
+    if (this.hasElement(user)) {
+      this.removeElement(user);
+      this.addElement(user, true);
+      this.filter();
+      this.redraw();
+    }
+  }
+
   highestSection(user) {
     const flairs = [...this.flairSection.keys()];
     if (flairs.length > 0) {
@@ -215,7 +225,7 @@ export default class ChatUserMenu extends ChatMenu {
   }
 
   removeElement(user) {
-    this.container.find(`.user-entry[data-username="${user.nick}"]`).remove();
+    this.container.find(`.user-entry[data-user-id="${user.id}"]`).remove();
     this.totalcount -= 1;
   }
 
@@ -226,7 +236,7 @@ export default class ChatUserMenu extends ChatMenu {
     const features =
       user.features.length === 0 ? 'nofeature' : user.features.join(' ');
     const usr = $(
-      `<div class="user-entry" data-username="${user.username}"><span class="user ${features}">${label}</span><div class="user-actions"><i class="mention-nick"></i><i class="whisper-nick"></i></div></div>`
+      `<div class="user-entry" data-username="${user.username}" data-user-id="${user.id}"><span class="user ${features}">${label}</span><div class="user-actions"><i class="mention-nick"></i><i class="whisper-nick"></i></div></div>`
     );
     const section = this.sections.get(this.highestSection(user));
 
@@ -251,8 +261,7 @@ export default class ChatUserMenu extends ChatMenu {
 
   hasElement(user) {
     return (
-      this.container.find(`.user-entry[data-username="${user.nick}"]`).length >
-      0
+      this.container.find(`.user-entry[data-user-id="${user.id}"]`).length > 0
     );
   }
 
