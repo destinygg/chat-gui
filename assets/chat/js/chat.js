@@ -112,7 +112,6 @@ class Chat {
     // The websocket connection, emits events from the chat server
     this.source = new ChatSource();
 
-    this.source.on('REFRESH', () => window.location.reload(false));
     this.source.on('PING', (data) => this.source.send('PONG', data));
     this.source.on('CONNECTING', (data) => this.onCONNECTING(data));
     this.source.on('ME', (data) => this.onME(data));
