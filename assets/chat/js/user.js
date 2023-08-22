@@ -3,11 +3,13 @@ import UserFeature from './features';
 class ChatUser {
   constructor(args = {}) {
     if (typeof args === 'string') {
+      this.id = null;
       this.nick = args;
       this.username = args;
       this.createdDate = args;
       this.features = [];
     } else {
+      this.id = args.id || null;
       this.nick = args.nick || '';
       this.username = args.nick || '';
       this.createdDate = args.createdDate || '';

@@ -71,16 +71,31 @@ export default class UrlFormatter {
       const m = decodedUrl.match(self.linkregex);
       if (m) {
         const encodedUrl = self.encodeUrl(m[0]);
+        const normalizedUrl = this.normalizeUrl(encodedUrl);
         const maxUrlLength = 90;
-        let urlText = encodedUrl;
+        let urlText = normalizedUrl;
         if (urlText.length > maxUrlLength) {
           urlText = `${urlText.slice(0, 40)}...${urlText.slice(-40)}`;
         }
         const extra = self.encodeUrl(decodedUrl.substring(m[0].length));
-        const href = `${scheme ? '' : 'http://'}${encodedUrl}`;
+        const href = `${scheme ? '' : 'http://'}${normalizedUrl}`;
         return `<a target="_blank" class="externallink ${extraclass}" href="${href}" rel="nofollow">${urlText}</a>${extra}`;
       }
       return url;
     });
+  }
+
+  /**
+   * @param {string} url
+   * @return {string} The normalized URL.
+   */
+  normalizeUrl(url) {
+    if (/(x|twitter)\.com\/\w{1,15}\/status\/\d{2,19}\?/i.test(url)) {
+      // Remove the query string from xeet URLs to protect users from clicking
+      // on a link to a xeet they've already seen.
+      return url.split('?')[0];
+    }
+
+    return url;
   }
 }

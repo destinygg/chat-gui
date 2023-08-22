@@ -112,7 +112,6 @@ class Chat {
     // The websocket connection, emits events from the chat server
     this.source = new ChatSource();
 
-    this.source.on('REFRESH', () => window.location.reload(false));
     this.source.on('PING', (data) => this.source.send('PONG', data));
     this.source.on('CONNECTING', (data) => this.onCONNECTING(data));
     this.source.on('ME', (data) => this.onME(data));
@@ -140,6 +139,7 @@ class Chat {
     this.source.on('GIFTSUB', (data) => this.onGIFTSUB(data));
     this.source.on('MASSGIFT', (data) => this.onMASSGIFT(data));
     this.source.on('DONATION', (data) => this.onDONATION(data));
+    this.source.on('UPDATEUSER', (data) => this.onUPDATEUSER(data));
     this.source.on('ADDPHRASE', (data) => this.onADDPHRASE(data));
     this.source.on('REMOVEPHRASE', (data) => this.onREMOVEPHRASE(data));
 
@@ -973,13 +973,19 @@ class Chat {
   onDISPATCH({ data }) {
     if (data && typeof data === 'object') {
       let users = [];
-      const now = Date.now();
-      if (Object.hasOwn(data, 'nick')) users.push(this.addUser(data));
-      if (Object.hasOwn(data, 'users'))
-        users = users.concat(
-          Array.from(data.users).map((d) => this.addUser(d))
-        );
-      users.forEach((u) => this.autocomplete.add(u.nick, false, now));
+      if (data.users) {
+        users = users.concat(data.users.map((d) => this.addUser(d)));
+      }
+      if (data.user) {
+        users.push(this.addUser(data.user));
+      } else if (data.nick) {
+        users.push(this.addUser(data));
+      }
+      // For sub recipients in `GIFTSUB` events.
+      if (data.recipient) {
+        users.push(this.addUser(data.recipient));
+      }
+      users.forEach((u) => this.autocomplete.add(u.nick, false, Date.now()));
     }
   }
 
@@ -1241,46 +1247,19 @@ class Chat {
   }
 
   onSUBSCRIPTION(data) {
-    const user = this.users.get(data.nick) ?? new ChatUser(data.nick);
-    MessageBuilder.subscription(
-      data.data,
-      user,
-      data.tier,
-      data.tierlabel,
-      data.streak,
-      data.timestamp
-    ).into(this);
+    MessageBuilder.subscription(data).into(this);
   }
 
   onGIFTSUB(data) {
-    const user = this.users.get(data.nick) ?? new ChatUser(data.nick);
-    MessageBuilder.gift(
-      data.data,
-      user,
-      data.tier,
-      data.tierlabel,
-      data.giftee,
-      data.timestamp
-    ).into(this);
+    MessageBuilder.gift(data).into(this);
   }
 
   onMASSGIFT(data) {
-    const user = this.users.get(data.nick) ?? new ChatUser(data.nick);
-    MessageBuilder.massgift(
-      data.data,
-      user,
-      data.tier,
-      data.tierlabel,
-      data.quantity,
-      data.timestamp
-    ).into(this);
+    MessageBuilder.massgift(data).into(this);
   }
 
   onDONATION(data) {
-    const user = this.users.get(data.nick) ?? new ChatUser(data.nick);
-    MessageBuilder.donation(data.data, user, data.amount, data.timestamp).into(
-      this
-    );
+    MessageBuilder.donation(data).into(this);
   }
 
   onADDPHRASE(data) {
@@ -1437,6 +1416,12 @@ class Chat {
         this.inputhistory.add(raw);
         this.input.val('');
       }
+    }
+  }
+
+  onUPDATEUSER(data) {
+    if (this.user?.id === data.id) {
+      this.setUser(data);
     }
   }
 

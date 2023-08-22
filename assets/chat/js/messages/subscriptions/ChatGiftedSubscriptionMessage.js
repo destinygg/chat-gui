@@ -1,5 +1,4 @@
 import { usernameColorFlair } from '../ChatUserMessage';
-import ChatUser from '../../user';
 import ChatSubscriptionMessage from './ChatSubscriptionMessage';
 import MessageTypes from '../MessageTypes';
 
@@ -23,7 +22,7 @@ export default class ChatGiftedSubscriptionMessage extends ChatSubscriptionMessa
         };
       }, {});
 
-    attributes['data-giftee'] = this.giftee.toLowerCase();
+    attributes['data-giftee'] = this.giftee.username.toLowerCase();
 
     message.querySelector('.subscription-icon').classList.add('gift');
 
@@ -32,11 +31,9 @@ export default class ChatGiftedSubscriptionMessage extends ChatSubscriptionMessa
       .querySelector('#user-template')
       ?.content.cloneNode(true).firstElementChild;
 
-    const gifteeUser =
-      chat.users.get(this.giftee.toLowerCase()) ?? new ChatUser(this.giftee);
-    const gifteeColorFlair = usernameColorFlair(chat.flairs, gifteeUser);
+    const gifteeColorFlair = usernameColorFlair(chat.flairs, this.giftee);
     giftee.classList.add(gifteeColorFlair?.name);
-    giftee.innerText = gifteeUser.username;
+    giftee.innerText = this.giftee.username;
 
     const subscriptionInfo = message.querySelector('.event-info');
     const user = message.querySelector('.user');
