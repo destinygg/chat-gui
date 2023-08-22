@@ -142,7 +142,6 @@ class Chat {
     this.source.on('DONATION', (data) => this.onDONATION(data));
     this.source.on('ADDPHRASE', (data) => this.onADDPHRASE(data));
     this.source.on('REMOVEPHRASE', (data) => this.onREMOVEPHRASE(data));
-    this.source.on('DEATH', (data) => this.onDEATH(data));
 
     this.control.on('SEND', (data) => this.cmdSEND(data));
     this.control.on('HINT', (data) => this.cmdHINT(data));
@@ -218,9 +217,6 @@ class Chat {
     this.control.on('DPHRASE', (data) => this.cmdREMOVEPHRASE(data));
     this.control.on('DBAN', (data) => this.cmdREMOVEPHRASE(data));
     this.control.on('DMUTE', (data) => this.cmdREMOVEPHRASE(data));
-    this.control.on('DIE', (data) => this.cmdDIE(data));
-    this.control.on('SUICIDE', (data) => this.cmdDIE(data));
-    this.control.on('BITLY', (data) => this.cmdDIE(data));
   }
 
   setUser(user) {
@@ -1300,20 +1296,6 @@ class Chat {
     ).into(this);
   }
 
-  onDEATH(data) {
-    const user = this.users.get(data.nick) ?? new ChatUser(data.nick);
-    MessageBuilder.death(data.data, user, data.extradata, data.timestamp).into(
-      this
-    );
-    if (user.username.toLowerCase() === data.nick.toLowerCase()) {
-      if (isMuteActive(data)) {
-        this.mutedtimer.setTimer(data.duration);
-        this.mutedtimer.startTimer();
-      }
-    }
-    this.censor(data.nick);
-  }
-
   onPRIVMSGSENT() {
     if (this.mainwindow.visible) {
       MessageBuilder.info('Your message has been sent.').into(this);
@@ -2281,10 +2263,6 @@ class Chat {
     }
 
     this.source.send('REMOVEPHRASE', { data: parts.join(' ') });
-  }
-
-  cmdDIE(parts) {
-    this.source.send('DIE', { data: parts.join(' ') });
   }
 
   openConversation(nick) {

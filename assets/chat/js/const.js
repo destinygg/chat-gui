@@ -83,7 +83,6 @@ const errorstrings = new Map(
       'Your message was filtered because it contained a banned phrase.',
     duplicatephrase: 'Banned phrase already exists.',
     nophrase: "Banned phrase doesn't exist.",
-    cantbanprotected: "Protected users can't die.",
   })
 );
 

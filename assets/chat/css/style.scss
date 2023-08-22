@@ -533,8 +533,7 @@ hr {
 .msg-donation,
 .msg-subscription,
 .msg-giftsub,
-.msg-massgift,
-.msg-death {
+.msg-massgift {
   text-shadow: 1px 1px 3px rgba(0, 0, 0, 1);
   font-size: 1.1em;
   font-weight: 400;
@@ -717,22 +716,6 @@ hr {
       border-radius: inherit;
       background: var(--rainbow-gradient);
     }
-  }
-}
-
-/* Death messages */
-.msg-death {
-  font-size: unset;
-
-  .death-icon {
-    background: transparent url('../img/tombstone.png') no-repeat center center;
-    background-size: contain;
-    filter: invert(100%);
-  }
-
-  .event-top,
-  .event-bottom {
-    padding: 0 $gutter-md * 2 0 $gutter-md;
   }
 }
 
@@ -1866,8 +1849,7 @@ button.btn {
   .msg-donation,
   .msg-subscription,
   .msg-giftsub,
-  .msg-massgift,
-  .msg-death {
+  .msg-massgift {
     text-shadow: none;
     padding: 0;
     border-style: none none none solid;

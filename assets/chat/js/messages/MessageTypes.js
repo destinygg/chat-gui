@@ -13,5 +13,4 @@ export default {
   GIFTSUB: 'GIFTSUB',
   MASSGIFT: 'MASSGIFT',
   DONATION: 'DONATION',
-  DEATH: 'DEATH',
 };

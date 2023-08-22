@@ -8,7 +8,6 @@ import ChatDonationMessage from './ChatDonationMessage';
 import ChatRegularSubscriptionMessage from './subscriptions/ChatRegularSubscriptionMessage';
 import ChatGiftedSubscriptionMessage from './subscriptions/ChatGiftedSubscriptionMessage';
 import ChatMassSubscriptionMessage from './subscriptions/ChatMassSubscriptionMessage';
-import ChatDeathMessage from './ChatDeathMessage';
 
 export default class MessageBuilder {
   static element(message, classes = []) {
@@ -102,9 +101,5 @@ export default class MessageBuilder {
 
   static donation(message, user, currency, timestamp = null) {
     return new ChatDonationMessage(message, user, currency, timestamp);
-  }
-
-  static death(message, user, flavorText, timestamp = null) {
-    return new ChatDeathMessage(message, user, flavorText, timestamp);
   }
 }
