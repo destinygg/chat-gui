@@ -66,6 +66,7 @@ class Chat {
       welcomeMessage: 'Welcome to chat!',
       stalkEnabled: true,
       mentionsEnabled: true,
+      dggOrigin: '',
       ...config,
     };
     this.ui = null;
