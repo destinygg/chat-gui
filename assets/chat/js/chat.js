@@ -2290,6 +2290,18 @@ class Chat {
     );
   }
 
+  isBigscreenEmbed() {
+    try {
+      return this.bigscreenPath === window.top.location.pathname;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  get bigscreenPath() {
+    return '/bigscreen';
+  }
+
   static removeSlashCmdFromText(msg) {
     return msg.replace(regexslashcmd, '').trim();
   }
