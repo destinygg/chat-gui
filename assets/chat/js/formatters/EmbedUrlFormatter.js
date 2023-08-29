@@ -7,9 +7,6 @@ export default class EmbedUrlFormatter {
     try {
       const { location } = window.top || window.parent || window;
       this.currentPath = location.pathname;
-      this.url = `${location.protocol}//${location.host}${this.bigscreenPath}${
-        location.search ? location.search : ''
-      }`.replace(/\/$/, '');
     } catch (e) {} // eslint-disable-line no-empty
   }
 
@@ -21,9 +18,10 @@ export default class EmbedUrlFormatter {
     if (/\b(?:NSFL)\b/i.test(str)) extraclass = 'nsfl-link';
     else if (/\b(?:NSFW|SPOILERS?)\b/i.test(str)) extraclass = 'nsfw-link';
 
+    const baseUrl = chat.config.dggOrigin + chat.bigscreenPath;
     return str.replace(
       this.bigscreenregex,
-      `$1<a class="externallink bookmarklink ${extraclass}" href="${this.url}$2" target="${target}">$2</a>`
+      `$1<a class="externallink bookmarklink ${extraclass}" href="${baseUrl}$2" target="${target}">$2</a>`
     );
   }
 }
