@@ -66,6 +66,7 @@ class Chat {
       welcomeMessage: 'Welcome to chat!',
       stalkEnabled: true,
       mentionsEnabled: true,
+      dggOrigin: '',
       ...config,
     };
     this.ui = null;
@@ -2287,6 +2288,18 @@ class Chat {
             `${message.user.username} ${message.message}`
           )))
     );
+  }
+
+  isBigscreenEmbed() {
+    try {
+      return this.bigscreenPath === window.top.location.pathname;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  get bigscreenPath() {
+    return '/bigscreen';
   }
 
   static removeSlashCmdFromText(msg) {
