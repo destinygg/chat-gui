@@ -1,6 +1,7 @@
 import MessageTypes from './MessageTypes';
 import ChatUIMessage from './ChatUIMessage';
 import ChatMessage from './ChatMessage';
+import ChatUser from '../user';
 import ChatUserMessage from './ChatUserMessage';
 import ChatEmoteMessage from './ChatEmoteMessage';
 import PinnedMessage from './PinnedMessage';
@@ -59,47 +60,49 @@ export default class MessageBuilder {
     return new PinnedMessage(message, user, timestamp, uuid);
   }
 
-  static subscription(
-    message,
-    user,
-    tier,
-    tierLabel,
-    streak,
-    timestamp = null
-  ) {
+  static subscription(data) {
     return new ChatRegularSubscriptionMessage(
-      message,
-      user,
-      tier,
-      tierLabel,
-      streak,
-      timestamp
+      data.data,
+      new ChatUser(data.user),
+      data.tier,
+      data.tierLabel,
+      data.streak,
+      data.timestamp,
+      data.uuid
     );
   }
 
-  static gift(message, user, tier, tierLabel, giftee, timestamp = null) {
+  static gift(data) {
     return new ChatGiftedSubscriptionMessage(
-      message,
-      user,
-      tier,
-      tierLabel,
-      giftee,
-      timestamp
+      data.data,
+      new ChatUser(data.user),
+      data.tier,
+      data.tierLabel,
+      new ChatUser(data.recipient),
+      data.timestamp,
+      data.uuid
     );
   }
 
-  static massgift(message, user, tier, tierLabel, quantity, timestamp = null) {
+  static massgift(data) {
     return new ChatMassSubscriptionMessage(
-      message,
-      user,
-      tier,
-      tierLabel,
-      quantity,
-      timestamp
+      data.data,
+      new ChatUser(data.user),
+      data.tier,
+      data.tierLabel,
+      data.quantity,
+      data.timestamp,
+      data.uuid
     );
   }
 
-  static donation(message, user, currency, timestamp = null) {
-    return new ChatDonationMessage(message, user, currency, timestamp);
+  static donation(data) {
+    return new ChatDonationMessage(
+      data.data,
+      new ChatUser(data.user),
+      data.amount,
+      data.timestamp,
+      data.uuid
+    );
   }
 }

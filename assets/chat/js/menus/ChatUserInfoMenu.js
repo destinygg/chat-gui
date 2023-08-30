@@ -38,7 +38,10 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     this.configureButtons();
 
     this.chat.output.on('contextmenu', '.msg-chat .user', (e) => {
+      // If the target has this class, it's a sub tier label styled to match the
+      // username color of the sub (which requires the `user` class).
       if (e.currentTarget.classList.contains('tier')) return false;
+
       const message = $(e.currentTarget).closest('.msg-chat');
       this.showUser(e, message);
 
@@ -219,6 +222,8 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
   }
 
   addContent(message) {
+    // Don't display messages if the giftee was clicked in a gift sub event
+    // because the message belongs to the gifter.
     this.messageArray =
       message[0].querySelector('.text') &&
       this.clickedNick !== message.data('giftee')
@@ -326,6 +331,8 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
       this.messageArray.forEach((element) => {
         const text = element.find('.text')[0].innerText;
         const nick = element.data('username');
+
+        // Create a new `ChatUser` to remove username styles for a cleaner look.
         const msg = MessageBuilder.message(text, new ChatUser(nick));
         displayedMessages.push(msg.html(this.chat));
       });
