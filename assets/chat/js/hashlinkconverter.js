@@ -24,7 +24,7 @@ class HashLinkConverter {
     const pathname = url.pathname.slice(1);
     let match;
     let videoId;
-    let timeStamp;
+    let timestamp;
     switch (url.hostname) {
       case 'www.twitch.tv':
       case 'twitch.tv':
@@ -46,18 +46,18 @@ class HashLinkConverter {
           return `#youtube/${match[1]}`;
         }
         videoId = url.searchParams.get('v');
-        timeStamp = url.searchParams.get('amp;t') || url.searchParams.get('t');
+        timestamp = url.searchParams.get('amp;t') || url.searchParams.get('t');
         if (!videoId) {
           throw new Error(MISSING_VIDEO_ID_ERROR);
         }
-        return timeStamp
-          ? `#youtube/${videoId}?t=${timeStamp}`
+        return timestamp
+          ? `#youtube/${videoId}?t=${timestamp}`
           : `#youtube/${videoId}`;
       case 'www.youtu.be':
       case 'youtu.be':
-        timeStamp = url.searchParams.get('t');
-        return timeStamp
-          ? `#youtube/${pathname}?t=${timeStamp}`
+        timestamp = url.searchParams.get('t');
+        return timestamp
+          ? `#youtube/${pathname}?t=${timestamp}`
           : `#youtube/${pathname}`;
       case 'www.rumble.com':
       case 'rumble.com':
