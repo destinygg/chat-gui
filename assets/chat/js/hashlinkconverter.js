@@ -46,7 +46,7 @@ class HashLinkConverter {
           return `#youtube/${match[1]}`;
         }
         videoId = url.searchParams.get('v');
-        timestamp = url.searchParams.get('amp;t') || url.searchParams.get('t');
+        timestamp = url.searchParams.get('t');
         if (!videoId) {
           throw new Error(MISSING_VIDEO_ID_ERROR);
         }
