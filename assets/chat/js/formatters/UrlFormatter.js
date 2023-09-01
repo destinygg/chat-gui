@@ -76,7 +76,7 @@ export default class UrlFormatter {
 
         let embedHashLink = '';
         try {
-          embedHashLink = this.hashLinkConverter.convert(normalizedUrl);
+          embedHashLink = this.hashLinkConverter.convert(decodedUrl);
         } catch (err) {
           // ignore
         }
