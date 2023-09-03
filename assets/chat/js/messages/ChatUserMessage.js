@@ -37,6 +37,13 @@ export default class ChatUserMessage extends ChatMessage {
     if (this.user && this.user.username) {
       classes.push(...this.user.features);
       attr['data-username'] = this.user.username.toLowerCase();
+
+      if (this.user.embed) {
+        attr['data-watching'] = this.user.embed;
+        if (chat.user.embed === this.user.embed) {
+          classes.push('watching-same');
+        }
+      }
     }
     if (this.mentioned && this.mentioned.length > 0)
       attr['data-mentioned'] = this.mentioned.join(' ').toLowerCase();
@@ -107,5 +114,10 @@ export default class ChatUserMessage extends ChatMessage {
   setOwnMessage(isOwn) {
     this.ui.classList.toggle('msg-own', isOwn);
     this.isown = isOwn;
+  }
+
+  setWatching(embed) {
+    const msgEmbed = this.ui.getAttribute('data-watching');
+    this.ui.classList.toggle('watching-same', embed && msgEmbed === embed);
   }
 }

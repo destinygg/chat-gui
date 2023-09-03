@@ -426,6 +426,21 @@ hr {
   content: '';
 }
 
+.watching-same {
+  .user::before {
+    content: '';
+    background-color: $color-green;
+    width: 8px;
+    height: 8px;
+    margin-bottom: 0.08em;
+    margin-right: $gutter-sm;
+    -moz-border-radius: 7.5px;
+    -webkit-border-radius: 7.5px;
+    border-radius: 7.5px;
+    display: inline-block;
+  }
+}
+
 /* /ME message */
 .msg-me .text {
   font-style: italic;

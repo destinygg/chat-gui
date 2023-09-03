@@ -135,10 +135,19 @@ class ChatWindow extends EventEmitter {
         message.highlight(chat.shouldHighlightMessage(message));
         message.setTag(chat.taggednicks.get(username));
         message.setTagTitle(chat.taggednotes.get(username));
+        message.setWatching(chat.user.embed);
 
         if (message.moderated) {
           message.censor(parseInt(chat.settings.get('showremoved') || '1', 10));
         }
+      }
+    }
+  }
+
+  updateMessagesWatching(chat) {
+    for (const message of this.messages) {
+      if (message.user) {
+        message.setWatching(chat.user.embed);
       }
     }
   }

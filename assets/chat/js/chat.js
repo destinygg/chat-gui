@@ -115,6 +115,7 @@ class Chat {
     this.source.on('PING', (data) => this.source.send('PONG', data));
     this.source.on('CONNECTING', (data) => this.onCONNECTING(data));
     this.source.on('ME', (data) => this.onME(data));
+    this.source.on('WATCHING', (data) => this.onWATCHING(data));
     this.source.on('OPEN', (data) => this.onOPEN(data));
     this.source.on('DISPATCH', (data) => this.onDISPATCH(data));
     this.source.on('CLOSE', (data) => this.onCLOSE(data));
@@ -686,6 +687,9 @@ class Chat {
       ) {
         user.createdDate = data.createdDate;
       }
+      if (Object.hasOwn(data, 'watching') && data.watching !== user.watching) {
+        user.setWatching(data.watching);
+      }
     }
     return user;
   }
@@ -1005,6 +1009,13 @@ class Chat {
     }
   }
 
+  onWATCHING(data) {
+    this.user.setWatching(data);
+    for (const window of this.windows.values()) {
+      window.updateMessagesWatching(this);
+    }
+  }
+
   onOPEN() {
     // MessageBuilder.status(`Connection established.`).into(this)
   }
@@ -1050,6 +1061,12 @@ class Chat {
   onMSG(data) {
     const textonly = Chat.removeSlashCmdFromText(data.data);
     const usr = this.users.get(data.nick.toLowerCase());
+
+    // update user watching
+    if (usr) {
+      usr.setWatching(data.watching);
+    }
+
     const win = this.mainwindow;
     if (
       win.lastmessage !== null &&
