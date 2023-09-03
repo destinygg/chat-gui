@@ -1,6 +1,6 @@
 {
   "name": "dgg-chat-gui",
-  "version": "2.35.0",
+  "version": "2.36.0",
   "description": "Destiny.gg chat client front-end",
   "main": "destiny",
   "scripts": {
@@ -51,7 +51,7 @@
     "css-loader": "^6.7.3",
     "eslint": "^8.27.0",
     "eslint-config-airbnb-base": "^15.0.0",
-    "eslint-config-prettier": "^8.5.0",
+    "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-import": "^2.26.0",
     "eslint-plugin-jest": "^27.1.4",
     "html-loader": "^4.2.0",

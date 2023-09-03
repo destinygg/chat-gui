@@ -35,6 +35,16 @@ describe('Valid embeds', () => {
       '#youtube/dPmLveKE_wY',
     ],
     [
+      'Youtube video with timestamp',
+      'https://www.youtube.com/watch?v=tZ_gn0E87Qo&t=5',
+      '#youtube/tZ_gn0E87Qo?t=5',
+    ],
+    [
+      'Youtube video shortened link with timestamp',
+      'https://youtu.be/dPmLveKE_wY?t=5',
+      '#youtube/dPmLveKE_wY?t=5',
+    ],
+    [
       'Youtube live stream shareable link',
       'https://www.youtube.com/live/jfKfPfyJRdk?feature=share',
       '#youtube/jfKfPfyJRdk',
