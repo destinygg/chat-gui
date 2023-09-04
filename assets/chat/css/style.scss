@@ -438,17 +438,18 @@ hr {
 }
 
 .watching-same {
-  .user::before {
+  position: relative;
+  &::after {
     content: '';
-    background-color: $color-red;
-    width: 8px;
-    height: 8px;
-    margin-bottom: 0.08em;
-    margin-right: $gutter-sm;
-    -moz-border-radius: 7.5px;
-    -webkit-border-radius: 7.5px;
-    border-radius: 7.5px;
-    display: inline-block;
+    opacity: 0.5;
+    width: 0;
+    height: 0;
+    position: absolute;
+    top: -5px;
+    left: -43px;
+    border-top: 20px solid transparent;
+    border-bottom: 20px solid transparent;
+    border-left: 50px solid white;
   }
 }
 
