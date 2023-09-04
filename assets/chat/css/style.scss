@@ -440,7 +440,7 @@ hr {
 .watching-same {
   .user::before {
     content: '';
-    background-color: $color-green;
+    background-color: $color-red;
     width: 8px;
     height: 8px;
     margin-bottom: 0.08em;
