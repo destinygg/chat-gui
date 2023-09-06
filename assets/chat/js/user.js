@@ -43,7 +43,7 @@ class ChatUser {
       UserFeature.PROTECTED,
       UserFeature.ADMIN,
       UserFeature.BROADCASTER,
-      UserFeature.VIP
+      UserFeature.VIP,
     );
   }
 

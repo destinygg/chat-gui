@@ -11,10 +11,10 @@ export default class ChatWhisperUsers extends ChatMenu {
     this.btn.append(this.notif);
     this.usersEl = ui.find('ul:first');
     this.usersEl.on('click', '.user', (e) =>
-      chat.openConversation(e.target.getAttribute('data-username'))
+      chat.openConversation(e.target.getAttribute('data-username')),
     );
     this.usersEl.on('click', '.remove', (e) =>
-      this.removeConversation(e.target.getAttribute('data-username'))
+      this.removeConversation(e.target.getAttribute('data-username')),
     );
   }
 
@@ -68,8 +68,8 @@ export default class ChatWhisperUsers extends ChatMenu {
     this.usersEl.append(`
             <li class="conversation unread-${unread}">
                 <a style="flex: 1;" data-username="${user.nick.toLowerCase()}" class="user">${
-      user.nick
-    }</a>
+                  user.nick
+                }</a>
                 <span class="badge">${unread}</span>
                 <a data-username="${user.nick.toLowerCase()}" title="Hide" class="remove"></a>
             </li>

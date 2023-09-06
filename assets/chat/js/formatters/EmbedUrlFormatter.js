@@ -15,7 +15,7 @@ export default class EmbedUrlFormatter {
     const baseUrl = chat.config.dggOrigin + chat.bigscreenPath;
     return str.replace(
       this.bigscreenregex,
-      `$1<a class="externallink bookmarklink ${extraclass}" href="${baseUrl}$2" target="${target}">$2</a>`
+      `$1<a class="externallink bookmarklink ${extraclass}" href="${baseUrl}$2" target="${target}">$2</a>`,
     );
   }
 }

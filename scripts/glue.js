@@ -20,7 +20,7 @@ function glueImages(dir, name, cb) {
         if (e) throw e;
         fs.writeFileSync(out, result.image);
         if (cb) cb(dir, name, result.coordinates);
-      }
+      },
     );
   });
 }

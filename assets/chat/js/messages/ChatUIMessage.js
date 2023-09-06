@@ -25,7 +25,7 @@ export default class ChatUIMessage {
     const wrapped = document.createElement('div');
     wrapped.className = classes.join(' ');
     Object.entries(attr).forEach(([key, value]) =>
-      wrapped.setAttribute(key, value)
+      wrapped.setAttribute(key, value),
     );
     wrapped.innerHTML = content;
     return wrapped;

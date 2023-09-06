@@ -9,7 +9,7 @@ class ChatStore {
     let str = '';
     try {
       str = JSON.stringify(
-        obj instanceof Map || obj instanceof Set ? [...obj] : obj
+        obj instanceof Map || obj instanceof Set ? [...obj] : obj,
       );
     } catch {} // eslint-disable-line no-empty
     localStorage.setItem(name, str);

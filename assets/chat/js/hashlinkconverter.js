@@ -19,7 +19,7 @@ class HashLinkConverter {
     }
     const url = new URL(
       // if a url doesn't have a protocol, URL throws an error
-      urlString.match(this.hasHttp) ? urlString : `https://${urlString}`
+      urlString.match(this.hasHttp) ? urlString : `https://${urlString}`,
     );
     const pathname = url.pathname.slice(1);
     let match;

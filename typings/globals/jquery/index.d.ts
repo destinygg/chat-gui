@@ -163,8 +163,8 @@ interface JQueryXHR extends XMLHttpRequest, JQueryPromise<any> {
     failCallback?: (
       jqXHR: JQueryXHR,
       textStatus: string,
-      errorThrown: any
-    ) => void
+      errorThrown: any,
+    ) => void,
   ): JQueryPromise<R>;
   /**
    * Property containing the parsed response if the response Content-Type is json
@@ -272,7 +272,7 @@ interface JQueryGenericPromise<T> {
   then<U>(
     doneFilter: (value?: T, ...values: any[]) => U | JQueryPromise<U>,
     failFilter?: (...reasons: any[]) => any,
-    progressFilter?: (...progression: any[]) => any
+    progressFilter?: (...progression: any[]) => any,
   ): JQueryPromise<U>;
 
   /**
@@ -284,7 +284,7 @@ interface JQueryGenericPromise<T> {
   then(
     doneFilter: (value?: T, ...values: any[]) => void,
     failFilter?: (...reasons: any[]) => any,
-    progressFilter?: (...progression: any[]) => any
+    progressFilter?: (...progression: any[]) => any,
   ): JQueryPromise<void>;
 }
 
@@ -366,7 +366,7 @@ interface JQueryPromise<T> extends JQueryGenericPromise<T> {
   pipe(
     doneFilter?: (x: any) => any,
     failFilter?: (x: any) => any,
-    progressFilter?: (x: any) => any
+    progressFilter?: (x: any) => any,
   ): JQueryPromise<any>;
 
   /**
@@ -491,7 +491,7 @@ interface JQueryDeferred<T> extends JQueryGenericPromise<T> {
   pipe(
     doneFilter?: (x: any) => any,
     failFilter?: (x: any) => any,
-    progressFilter?: (x: any) => any
+    progressFilter?: (x: any) => any,
   ): JQueryPromise<any>;
 }
 
@@ -644,7 +644,7 @@ interface JQueryAnimationOptions {
   progress?: (
     animation: JQueryPromise<any>,
     progress: number,
-    remainingMs: number
+    remainingMs: number,
   ) => any;
   /**
    * A function to call when the animation begins. (version added: 1.8)
@@ -711,8 +711,8 @@ interface JQueryStatic {
     handler: (
       opts: any,
       originalOpts: JQueryAjaxSettings,
-      jqXHR: JQueryXHR
-    ) => any
+      jqXHR: JQueryXHR,
+    ) => any,
   ): void;
   /**
    * Handle custom Ajax options or modify existing options before each request is sent and before they are processed by $.ajax().
@@ -723,8 +723,8 @@ interface JQueryStatic {
     handler: (
       opts: any,
       originalOpts: JQueryAjaxSettings,
-      jqXHR: JQueryXHR
-    ) => any
+      jqXHR: JQueryXHR,
+    ) => any,
   ): void;
 
   ajaxSettings: JQueryAjaxSettings;
@@ -746,7 +746,7 @@ interface JQueryStatic {
   get(
     url: string,
     success?: (data: any, textStatus: string, jqXHR: JQueryXHR) => any,
-    dataType?: string
+    dataType?: string,
   ): JQueryXHR;
   /**
    * Load data from the server using a HTTP GET request.
@@ -760,7 +760,7 @@ interface JQueryStatic {
     url: string,
     data?: Object | string,
     success?: (data: any, textStatus: string, jqXHR: JQueryXHR) => any,
-    dataType?: string
+    dataType?: string,
   ): JQueryXHR;
   /**
    * Load data from the server using a HTTP GET request.
@@ -776,7 +776,7 @@ interface JQueryStatic {
    */
   getJSON(
     url: string,
-    success?: (data: any, textStatus: string, jqXHR: JQueryXHR) => any
+    success?: (data: any, textStatus: string, jqXHR: JQueryXHR) => any,
   ): JQueryXHR;
   /**
    * Load JSON-encoded data from the server using a GET HTTP request.
@@ -788,7 +788,7 @@ interface JQueryStatic {
   getJSON(
     url: string,
     data?: Object | string,
-    success?: (data: any, textStatus: string, jqXHR: JQueryXHR) => any
+    success?: (data: any, textStatus: string, jqXHR: JQueryXHR) => any,
   ): JQueryXHR;
   /**
    * Load a JavaScript file from the server using a GET HTTP request, then execute it.
@@ -798,7 +798,7 @@ interface JQueryStatic {
    */
   getScript(
     url: string,
-    success?: (script: string, textStatus: string, jqXHR: JQueryXHR) => any
+    success?: (script: string, textStatus: string, jqXHR: JQueryXHR) => any,
   ): JQueryXHR;
 
   /**
@@ -816,7 +816,7 @@ interface JQueryStatic {
   post(
     url: string,
     success?: (data: any, textStatus: string, jqXHR: JQueryXHR) => any,
-    dataType?: string
+    dataType?: string,
   ): JQueryXHR;
   /**
    * Load data from the server using a HTTP POST request.
@@ -830,7 +830,7 @@ interface JQueryStatic {
     url: string,
     data?: Object | string,
     success?: (data: any, textStatus: string, jqXHR: JQueryXHR) => any,
-    dataType?: string
+    dataType?: string,
   ): JQueryXHR;
   /**
    * Load data from the server using a HTTP POST request.
@@ -1013,7 +1013,7 @@ interface JQueryStatic {
    * @param beforeStart A function that is called just before the constructor returns.
    */
   Deferred<T>(
-    beforeStart?: (deferred: JQueryDeferred<T>) => any
+    beforeStart?: (deferred: JQueryDeferred<T>) => any,
   ): JQueryDeferred<T>;
 
   /**
@@ -1091,7 +1091,7 @@ interface JQueryStatic {
    */
   each<T>(
     collection: T[],
-    callback: (indexInArray: number, valueOfElement: T) => any
+    callback: (indexInArray: number, valueOfElement: T) => any,
   ): any;
 
   /**
@@ -1102,7 +1102,7 @@ interface JQueryStatic {
    */
   each(
     collection: any,
-    callback: (indexInArray: any, valueOfElement: any) => any
+    callback: (indexInArray: any, valueOfElement: any) => any,
   ): any;
 
   /**
@@ -1140,7 +1140,7 @@ interface JQueryStatic {
   grep<T>(
     array: T[],
     func: (elementOfArray?: T, indexInArray?: number) => boolean,
-    invert?: boolean
+    invert?: boolean,
   ): T[];
 
   /**
@@ -1210,7 +1210,7 @@ interface JQueryStatic {
    */
   map<T, U>(
     array: T[],
-    callback: (elementOfArray?: T, indexInArray?: number) => U
+    callback: (elementOfArray?: T, indexInArray?: number) => U,
   ): U[];
   /**
    * Translate all items in an array or object to new array of items.
@@ -1220,7 +1220,7 @@ interface JQueryStatic {
    */
   map(
     arrayOrObject: any,
-    callback: (value?: any, indexOrKey?: any) => any
+    callback: (value?: any, indexOrKey?: any) => any,
   ): any;
 
   /**
@@ -1308,8 +1308,8 @@ interface JQuery {
     handler: (
       event: JQueryEventObject,
       XMLHttpRequest: XMLHttpRequest,
-      ajaxOptions: any
-    ) => any
+      ajaxOptions: any,
+    ) => any,
   ): JQuery;
   /**
    * Register a handler to be called when Ajax requests complete with an error. This is an Ajax Event.
@@ -1321,8 +1321,8 @@ interface JQuery {
       event: JQueryEventObject,
       jqXHR: JQueryXHR,
       ajaxSettings: JQueryAjaxSettings,
-      thrownError: any
-    ) => any
+      thrownError: any,
+    ) => any,
   ): JQuery;
   /**
    * Attach a function to be executed before an Ajax request is sent. This is an Ajax Event.
@@ -1333,8 +1333,8 @@ interface JQuery {
     handler: (
       event: JQueryEventObject,
       jqXHR: JQueryXHR,
-      ajaxOptions: JQueryAjaxSettings
-    ) => any
+      ajaxOptions: JQueryAjaxSettings,
+    ) => any,
   ): JQuery;
   /**
    * Register a handler to be called when the first Ajax request begins. This is an Ajax Event.
@@ -1357,8 +1357,8 @@ interface JQuery {
     handler: (
       event: JQueryEventObject,
       XMLHttpRequest: XMLHttpRequest,
-      ajaxOptions: JQueryAjaxSettings
-    ) => any
+      ajaxOptions: JQueryAjaxSettings,
+    ) => any,
   ): JQuery;
 
   /**
@@ -1374,8 +1374,8 @@ interface JQuery {
     complete?: (
       responseText: string,
       textStatus: string,
-      XMLHttpRequest: XMLHttpRequest
-    ) => any
+      XMLHttpRequest: XMLHttpRequest,
+    ) => any,
   ): JQuery;
 
   /**
@@ -1426,7 +1426,7 @@ interface JQuery {
    */
   attr(
     attributeName: string,
-    func: (index: number, attr: string) => string | number
+    func: (index: number, attr: string) => string | number,
   ): JQuery;
   /**
    * Set one or more attributes for the set of matched elements.
@@ -1491,7 +1491,7 @@ interface JQuery {
    */
   prop(
     propertyName: string,
-    func: (index: number, oldPropertyValue: any) => any
+    func: (index: number, oldPropertyValue: any) => any,
   ): JQuery;
 
   /**
@@ -1542,7 +1542,7 @@ interface JQuery {
    */
   toggleClass(
     func: (index: number, className: string, swtch: boolean) => string,
-    swtch?: boolean
+    swtch?: boolean,
   ): JQuery;
 
   /**
@@ -1583,7 +1583,7 @@ interface JQuery {
    */
   css(
     propertyName: string,
-    value: (index: number, value: string) => string | number
+    value: (index: number, value: string) => string | number,
   ): JQuery;
   /**
    * Set one or more CSS properties for the set of matched elements.
@@ -1649,7 +1649,7 @@ interface JQuery {
    * @param func A function to return the coordinates to set. Receives the index of the element in the collection as the first argument and the current coordinates as the second argument. The function should return an object with the new top and left properties.
    */
   offset(
-    func: (index: number, coords: JQueryCoordinates) => JQueryCoordinates
+    func: (index: number, coords: JQueryCoordinates) => JQueryCoordinates,
   ): JQuery;
 
   /**
@@ -1797,7 +1797,7 @@ interface JQuery {
   animate(
     properties: Object,
     duration?: string | number,
-    complete?: Function
+    complete?: Function,
   ): JQuery;
   /**
    * Perform a custom animation of a set of CSS properties.
@@ -1811,7 +1811,7 @@ interface JQuery {
     properties: Object,
     duration?: string | number,
     easing?: string,
-    complete?: Function
+    complete?: Function,
   ): JQuery;
   /**
    * Perform a custom animation of a set of CSS properties.
@@ -1846,7 +1846,7 @@ interface JQuery {
   fadeIn(
     duration?: number | string,
     easing?: string,
-    complete?: Function
+    complete?: Function,
   ): JQuery;
   /**
    * Display the matched elements by fading them to opaque.
@@ -1872,7 +1872,7 @@ interface JQuery {
   fadeOut(
     duration?: number | string,
     easing?: string,
-    complete?: Function
+    complete?: Function,
   ): JQuery;
   /**
    * Hide the matched elements by fading them to transparent.
@@ -1891,7 +1891,7 @@ interface JQuery {
   fadeTo(
     duration: string | number,
     opacity: number,
-    complete?: Function
+    complete?: Function,
   ): JQuery;
   /**
    * Adjust the opacity of the matched elements.
@@ -1905,7 +1905,7 @@ interface JQuery {
     duration: string | number,
     opacity: number,
     easing?: string,
-    complete?: Function
+    complete?: Function,
   ): JQuery;
 
   /**
@@ -1925,7 +1925,7 @@ interface JQuery {
   fadeToggle(
     duration?: number | string,
     easing?: string,
-    complete?: Function
+    complete?: Function,
   ): JQuery;
   /**
    * Display or hide the matched elements by animating their opacity.
@@ -1958,7 +1958,7 @@ interface JQuery {
   hide(
     duration?: number | string,
     easing?: string,
-    complete?: Function
+    complete?: Function,
   ): JQuery;
   /**
    * Hide the matched elements.
@@ -1984,7 +1984,7 @@ interface JQuery {
   show(
     duration?: number | string,
     easing?: string,
-    complete?: Function
+    complete?: Function,
   ): JQuery;
   /**
    * Display the matched elements.
@@ -2010,7 +2010,7 @@ interface JQuery {
   slideDown(
     duration?: number | string,
     easing?: string,
-    complete?: Function
+    complete?: Function,
   ): JQuery;
   /**
    * Display the matched elements with a sliding motion.
@@ -2036,7 +2036,7 @@ interface JQuery {
   slideToggle(
     duration?: number | string,
     easing?: string,
-    complete?: Function
+    complete?: Function,
   ): JQuery;
   /**
    * Display or hide the matched elements with a sliding motion.
@@ -2062,7 +2062,7 @@ interface JQuery {
   slideUp(
     duration?: number | string,
     easing?: string,
-    complete?: Function
+    complete?: Function,
   ): JQuery;
   /**
    * Hide the matched elements with a sliding motion.
@@ -2104,7 +2104,7 @@ interface JQuery {
   toggle(
     duration?: number | string,
     easing?: string,
-    complete?: Function
+    complete?: Function,
   ): JQuery;
   /**
    * Display or hide the matched elements.
@@ -2129,7 +2129,7 @@ interface JQuery {
   bind(
     eventType: string,
     eventData: any,
-    handler: (eventObject: JQueryEventObject) => any
+    handler: (eventObject: JQueryEventObject) => any,
   ): JQuery;
   /**
    * Attach a handler to an event for the elements.
@@ -2139,7 +2139,7 @@ interface JQuery {
    */
   bind(
     eventType: string,
-    handler: (eventObject: JQueryEventObject) => any
+    handler: (eventObject: JQueryEventObject) => any,
   ): JQuery;
   /**
    * Attach a handler to an event for the elements.
@@ -2181,7 +2181,7 @@ interface JQuery {
    */
   blur(
     eventData?: any,
-    handler?: (eventObject: JQueryEventObject) => any
+    handler?: (eventObject: JQueryEventObject) => any,
   ): JQuery;
 
   /**
@@ -2202,7 +2202,7 @@ interface JQuery {
    */
   change(
     eventData?: any,
-    handler?: (eventObject: JQueryEventObject) => any
+    handler?: (eventObject: JQueryEventObject) => any,
   ): JQuery;
 
   /**
@@ -2223,7 +2223,7 @@ interface JQuery {
    */
   click(
     eventData?: any,
-    handler?: (eventObject: JQueryEventObject) => any
+    handler?: (eventObject: JQueryEventObject) => any,
   ): JQuery;
 
   /**
@@ -2244,7 +2244,7 @@ interface JQuery {
    */
   contextmenu(
     eventData: Object,
-    handler: (eventObject: JQueryMouseEventObject) => any
+    handler: (eventObject: JQueryMouseEventObject) => any,
   ): JQuery;
 
   /**
@@ -2265,19 +2265,19 @@ interface JQuery {
    */
   dblclick(
     eventData?: any,
-    handler?: (eventObject: JQueryEventObject) => any
+    handler?: (eventObject: JQueryEventObject) => any,
   ): JQuery;
 
   delegate(
     selector: any,
     eventType: string,
-    handler: (eventObject: JQueryEventObject) => any
+    handler: (eventObject: JQueryEventObject) => any,
   ): JQuery;
   delegate(
     selector: any,
     eventType: string,
     eventData: any,
-    handler: (eventObject: JQueryEventObject) => any
+    handler: (eventObject: JQueryEventObject) => any,
   ): JQuery;
 
   /**
@@ -2298,7 +2298,7 @@ interface JQuery {
    */
   focus(
     eventData?: any,
-    handler?: (eventObject: JQueryEventObject) => any
+    handler?: (eventObject: JQueryEventObject) => any,
   ): JQuery;
 
   /**
@@ -2319,7 +2319,7 @@ interface JQuery {
    */
   focusin(
     eventData: Object,
-    handler: (eventObject: JQueryEventObject) => any
+    handler: (eventObject: JQueryEventObject) => any,
   ): JQuery;
 
   /**
@@ -2340,7 +2340,7 @@ interface JQuery {
    */
   focusout(
     eventData: Object,
-    handler: (eventObject: JQueryEventObject) => any
+    handler: (eventObject: JQueryEventObject) => any,
   ): JQuery;
 
   /**
@@ -2351,7 +2351,7 @@ interface JQuery {
    */
   hover(
     handlerIn: (eventObject: JQueryEventObject) => any,
-    handlerOut: (eventObject: JQueryEventObject) => any
+    handlerOut: (eventObject: JQueryEventObject) => any,
   ): JQuery;
   /**
    * Bind a single handler to the matched elements, to be executed when the mouse pointer enters or leaves the elements.
@@ -2378,7 +2378,7 @@ interface JQuery {
    */
   keydown(
     eventData?: any,
-    handler?: (eventObject: JQueryKeyEventObject) => any
+    handler?: (eventObject: JQueryKeyEventObject) => any,
   ): JQuery;
 
   /**
@@ -2399,7 +2399,7 @@ interface JQuery {
    */
   keypress(
     eventData?: any,
-    handler?: (eventObject: JQueryKeyEventObject) => any
+    handler?: (eventObject: JQueryKeyEventObject) => any,
   ): JQuery;
 
   /**
@@ -2420,7 +2420,7 @@ interface JQuery {
    */
   keyup(
     eventData?: any,
-    handler?: (eventObject: JQueryKeyEventObject) => any
+    handler?: (eventObject: JQueryKeyEventObject) => any,
   ): JQuery;
 
   /**
@@ -2437,7 +2437,7 @@ interface JQuery {
    */
   load(
     eventData?: any,
-    handler?: (eventObject: JQueryEventObject) => any
+    handler?: (eventObject: JQueryEventObject) => any,
   ): JQuery;
 
   /**
@@ -2458,7 +2458,7 @@ interface JQuery {
    */
   mousedown(
     eventData: Object,
-    handler: (eventObject: JQueryMouseEventObject) => any
+    handler: (eventObject: JQueryMouseEventObject) => any,
   ): JQuery;
 
   /**
@@ -2479,7 +2479,7 @@ interface JQuery {
    */
   mouseenter(
     eventData: Object,
-    handler: (eventObject: JQueryMouseEventObject) => any
+    handler: (eventObject: JQueryMouseEventObject) => any,
   ): JQuery;
 
   /**
@@ -2500,7 +2500,7 @@ interface JQuery {
    */
   mouseleave(
     eventData: Object,
-    handler: (eventObject: JQueryMouseEventObject) => any
+    handler: (eventObject: JQueryMouseEventObject) => any,
   ): JQuery;
 
   /**
@@ -2521,7 +2521,7 @@ interface JQuery {
    */
   mousemove(
     eventData: Object,
-    handler: (eventObject: JQueryMouseEventObject) => any
+    handler: (eventObject: JQueryMouseEventObject) => any,
   ): JQuery;
 
   /**
@@ -2542,7 +2542,7 @@ interface JQuery {
    */
   mouseout(
     eventData: Object,
-    handler: (eventObject: JQueryMouseEventObject) => any
+    handler: (eventObject: JQueryMouseEventObject) => any,
   ): JQuery;
 
   /**
@@ -2563,7 +2563,7 @@ interface JQuery {
    */
   mouseover(
     eventData: Object,
-    handler: (eventObject: JQueryMouseEventObject) => any
+    handler: (eventObject: JQueryMouseEventObject) => any,
   ): JQuery;
 
   /**
@@ -2584,7 +2584,7 @@ interface JQuery {
    */
   mouseup(
     eventData: Object,
-    handler: (eventObject: JQueryMouseEventObject) => any
+    handler: (eventObject: JQueryMouseEventObject) => any,
   ): JQuery;
 
   /**
@@ -2601,7 +2601,7 @@ interface JQuery {
   off(
     events: string,
     selector?: string,
-    handler?: (eventObject: JQueryEventObject) => any
+    handler?: (eventObject: JQueryEventObject) => any,
   ): JQuery;
   /**
    * Remove an event handler.
@@ -2611,7 +2611,7 @@ interface JQuery {
    */
   off(
     events: string,
-    handler: (eventObject: JQueryEventObject, ...args: any[]) => any
+    handler: (eventObject: JQueryEventObject, ...args: any[]) => any,
   ): JQuery;
   /**
    * Remove an event handler.
@@ -2636,7 +2636,7 @@ interface JQuery {
    */
   on(
     events: string,
-    handler: (eventObject: JQueryEventObject, ...args: any[]) => any
+    handler: (eventObject: JQueryEventObject, ...args: any[]) => any,
   ): JQuery;
   /**
    * Attach an event handler function for one or more events to the selected elements.
@@ -2648,7 +2648,7 @@ interface JQuery {
   on(
     events: string,
     data: any,
-    handler: (eventObject: JQueryEventObject, ...args: any[]) => any
+    handler: (eventObject: JQueryEventObject, ...args: any[]) => any,
   ): JQuery;
   /**
    * Attach an event handler function for one or more events to the selected elements.
@@ -2660,7 +2660,7 @@ interface JQuery {
   on(
     events: string,
     selector: string,
-    handler: (eventObject: JQueryEventObject, ...eventData: any[]) => any
+    handler: (eventObject: JQueryEventObject, ...eventData: any[]) => any,
   ): JQuery;
   /**
    * Attach an event handler function for one or more events to the selected elements.
@@ -2674,7 +2674,7 @@ interface JQuery {
     events: string,
     selector: string,
     data: any,
-    handler: (eventObject: JQueryEventObject, ...eventData: any[]) => any
+    handler: (eventObject: JQueryEventObject, ...eventData: any[]) => any,
   ): JQuery;
   /**
    * Attach an event handler function for one or more events to the selected elements.
@@ -2709,7 +2709,7 @@ interface JQuery {
   one(
     events: string,
     data: Object,
-    handler: (eventObject: JQueryEventObject) => any
+    handler: (eventObject: JQueryEventObject) => any,
   ): JQuery;
 
   /**
@@ -2722,7 +2722,7 @@ interface JQuery {
   one(
     events: string,
     selector: string,
-    handler: (eventObject: JQueryEventObject) => any
+    handler: (eventObject: JQueryEventObject) => any,
   ): JQuery;
   /**
    * Attach a handler to an event for the elements. The handler is executed at most once per element per event type.
@@ -2736,7 +2736,7 @@ interface JQuery {
     events: string,
     selector: string,
     data: any,
-    handler: (eventObject: JQueryEventObject) => any
+    handler: (eventObject: JQueryEventObject) => any,
   ): JQuery;
 
   /**
@@ -2781,7 +2781,7 @@ interface JQuery {
    */
   resize(
     eventData: Object,
-    handler: (eventObject: JQueryEventObject) => any
+    handler: (eventObject: JQueryEventObject) => any,
   ): JQuery;
 
   /**
@@ -2802,7 +2802,7 @@ interface JQuery {
    */
   scroll(
     eventData: Object,
-    handler: (eventObject: JQueryEventObject) => any
+    handler: (eventObject: JQueryEventObject) => any,
   ): JQuery;
 
   /**
@@ -2823,7 +2823,7 @@ interface JQuery {
    */
   select(
     eventData: Object,
-    handler: (eventObject: JQueryEventObject) => any
+    handler: (eventObject: JQueryEventObject) => any,
   ): JQuery;
 
   /**
@@ -2844,7 +2844,7 @@ interface JQuery {
    */
   submit(
     eventData?: any,
-    handler?: (eventObject: JQueryEventObject) => any
+    handler?: (eventObject: JQueryEventObject) => any,
   ): JQuery;
 
   /**
@@ -2886,7 +2886,7 @@ interface JQuery {
    */
   unbind(
     eventType?: string,
-    handler?: (eventObject: JQueryEventObject) => any
+    handler?: (eventObject: JQueryEventObject) => any,
   ): JQuery;
   /**
    * Remove a previously-attached event handler from the elements.
@@ -2916,7 +2916,7 @@ interface JQuery {
   undelegate(
     selector: string,
     eventType: string,
-    handler?: (eventObject: JQueryEventObject) => any
+    handler?: (eventObject: JQueryEventObject) => any,
   ): JQuery;
   /**
    * Remove a handler from the event for all elements which match the current selector, based upon a specific set of root elements.
@@ -2946,7 +2946,7 @@ interface JQuery {
    */
   unload(
     eventData?: any,
-    handler?: (eventObject: JQueryEventObject) => any
+    handler?: (eventObject: JQueryEventObject) => any,
   ): JQuery;
 
   /**
@@ -2970,7 +2970,7 @@ interface JQuery {
    */
   error(
     eventData: any,
-    handler: (eventObject: JQueryEventObject) => any
+    handler: (eventObject: JQueryEventObject) => any,
   ): JQuery;
 
   /**
@@ -3004,7 +3004,7 @@ interface JQuery {
    * param func A function that returns an HTML string, DOM element(s), or jQuery object to insert after each element in the set of matched elements. Receives the index position of the element in the set as an argument. Within the function, this refers to the current element in the set.
    */
   after(
-    func: (index: number, html: string) => string | Element | JQuery
+    func: (index: number, html: string) => string | Element | JQuery,
   ): JQuery;
 
   /**
@@ -3023,7 +3023,7 @@ interface JQuery {
    * param func A function that returns an HTML string, DOM element(s), or jQuery object to insert at the end of each element in the set of matched elements. Receives the index position of the element in the set and the old HTML value of the element as arguments. Within the function, this refers to the current element in the set.
    */
   append(
-    func: (index: number, html: string) => string | Element | JQuery
+    func: (index: number, html: string) => string | Element | JQuery,
   ): JQuery;
 
   /**
@@ -3049,7 +3049,7 @@ interface JQuery {
    * param func A function that returns an HTML string, DOM element(s), or jQuery object to insert before each element in the set of matched elements. Receives the index position of the element in the set as an argument. Within the function, this refers to the current element in the set.
    */
   before(
-    func: (index: number, html: string) => string | Element | JQuery
+    func: (index: number, html: string) => string | Element | JQuery,
   ): JQuery;
 
   /**
@@ -3102,7 +3102,7 @@ interface JQuery {
    * param func A function that returns an HTML string, DOM element(s), or jQuery object to insert at the beginning of each element in the set of matched elements. Receives the index position of the element in the set and the old HTML value of the element as arguments. Within the function, this refers to the current element in the set.
    */
   prepend(
-    func: (index: number, html: string) => string | Element | JQuery
+    func: (index: number, html: string) => string | Element | JQuery,
   ): JQuery;
 
   /**
