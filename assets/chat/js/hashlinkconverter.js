@@ -73,6 +73,9 @@ class HashLinkConverter {
         throw new Error(RUMBLE_EMBED_ERROR);
       case 'www.kick.com':
       case 'kick.com':
+        if (url.searchParams.has('clip') || pathname.startsWith('video/')) {
+          throw new Error(INVALID_LINK_ERROR);
+        }
         return `#kick/${pathname}`;
       default:
         throw new Error(INVALID_LINK_ERROR);
