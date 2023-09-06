@@ -8,6 +8,7 @@ class HashLinkConverter {
   constructor() {
     this.hasHttp = /^http[s]?:\/{0,2}/;
     this.youtubeLiveRegex = /^live\/([A-Za-z0-9-_]{11})$/;
+    this.youtubeShortsRegex = /^shorts\/([A-Za-z0-9-_]{11})$/;
     this.twitchClipRegex = /^[^/]+\/clip\/([A-Za-z0-9-_]*)$/;
     this.twitchVODRegex = /^videos\/(\d+)$/;
     this.rumbleEmbedRegex = /^embed\/([a-z0-9]+)\/?$/;
@@ -19,7 +20,7 @@ class HashLinkConverter {
     }
     const url = new URL(
       // if a url doesn't have a protocol, URL throws an error
-      urlString.match(this.hasHttp) ? urlString : `https://${urlString}`
+      urlString.match(this.hasHttp) ? urlString : `https://${urlString}`,
     );
     const pathname = url.pathname.slice(1);
     let match;
@@ -42,6 +43,10 @@ class HashLinkConverter {
       case 'www.youtube.com':
       case 'youtube.com':
         match = pathname.match(this.youtubeLiveRegex);
+        if (match) {
+          return `#youtube/${match[1]}`;
+        }
+        match = pathname.match(this.youtubeShortsRegex);
         if (match) {
           return `#youtube/${match[1]}`;
         }

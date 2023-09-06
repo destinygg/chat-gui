@@ -307,7 +307,7 @@ declare namespace moment {
       a: MomentComparable,
       b: MomentComparable,
       granularity?: string,
-      inclusivity?: string
+      inclusivity?: string,
     ): boolean;
 
     /**
@@ -489,7 +489,7 @@ declare namespace moment {
       number: number,
       withoutSuffix: boolean,
       key: string,
-      isFuture: boolean
+      isFuture: boolean,
     ): string;
 
     /**
@@ -596,13 +596,13 @@ declare namespace moment {
     (
       date: string,
       format?: MomentFormatSpecification,
-      strict?: boolean
+      strict?: boolean,
     ): Moment;
     (
       date: string,
       format?: MomentFormatSpecification,
       language?: string,
-      strict?: boolean
+      strict?: boolean,
     ): Moment;
     (date: Date): Moment;
     (date: Moment): Moment;
@@ -616,14 +616,14 @@ declare namespace moment {
       date: string,
       format?: string,
       language?: string,
-      strict?: boolean
+      strict?: boolean,
     ): Moment;
     utc(date: string, formats: string[], strict?: boolean): Moment;
     utc(
       date: string,
       formats: string[],
       language?: string,
-      strict?: boolean
+      strict?: boolean,
     ): Moment;
     utc(date: Date): Moment;
     utc(date: Moment): Moment;

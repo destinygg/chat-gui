@@ -30,7 +30,7 @@ export default class ChatMessage extends ChatUIMessage {
     message,
     timestamp = null,
     type = MessageTypes.CHAT,
-    unformatted = false
+    unformatted = false,
   ) {
     super(message);
     this.user = null;
@@ -49,7 +49,7 @@ export default class ChatMessage extends ChatUIMessage {
     return this.wrap(
       `${this.buildTime()} ${this.buildMessageTxt(chat)}`,
       classes,
-      attr
+      attr,
     );
   }
 

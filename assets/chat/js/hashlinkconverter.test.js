@@ -55,6 +55,11 @@ describe('Valid embeds', () => {
       '#youtube/EHs-_2ddcUQ',
     ],
     [
+      'Youtube shorts link',
+      'https://youtube.com/shorts/Bg1JpTqc0iA?si=7pzY1RnY2fEe9A8_',
+      '#youtube/Bg1JpTqc0iA',
+    ],
+    [
       'Rumble embed',
       'https://rumble.com/embed/v26pcdc/?pub=4',
       '#rumble/v26pcdc',

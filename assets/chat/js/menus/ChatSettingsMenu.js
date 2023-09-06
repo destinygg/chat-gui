@@ -8,13 +8,13 @@ export default class ChatSettingsMenu extends ChatMenu {
   constructor(ui, btn, chat) {
     super(ui, btn, chat);
     this.notificationEl = this.ui.find(
-      '#chat-settings-notification-permissions'
+      '#chat-settings-notification-permissions',
     );
     this.ui.on('change', 'input[type="checkbox"],select', (e) =>
-      this.onSettingsChange(e)
+      this.onSettingsChange(e),
     );
     this.ui.on('keypress blur', 'textarea[name="customhighlight"]', (e) =>
-      this.onCustomHighlightChange(e)
+      this.onCustomHighlightChange(e),
     );
   }
 
@@ -66,8 +66,8 @@ export default class ChatSettingsMenu extends ChatMenu {
         .forEach((e) =>
           this.setSettingValue(
             e,
-            this.chat.settings.get(e.getAttribute('name'))
-          )
+            this.chat.settings.get(e.getAttribute('name')),
+          ),
         );
       this.ui
         .find('textarea[name="customhighlight"]')
@@ -128,7 +128,7 @@ export default class ChatSettingsMenu extends ChatMenu {
     if (e.getAttribute('type') === 'checkbox') {
       $(e).prop(
         'checked',
-        Boolean(e.hasAttribute('data-opposite') ? !val : val)
+        Boolean(e.hasAttribute('data-opposite') ? !val : val),
       );
     } else if (
       e.getAttribute('type') === 'text' ||

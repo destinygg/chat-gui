@@ -42,7 +42,7 @@ switch ((Chat.reqParam('t') || 'embed').toUpperCase()) {
                     <div id="chat-vote-frame"></div>
                     <div id="chat-output-frame" style="display: none;"></div>
                 </div>
-            `
+            `,
       )
       .then(() => chat.connect());
     break;
