@@ -157,10 +157,10 @@ class Chat {
     this.control.on('SUBONLY', (data) => this.cmdSUBONLY(data, 'SUBONLY'));
     this.control.on('MAXLINES', (data) => this.cmdMAXLINES(data, 'MAXLINES'));
     this.control.on('UNHIGHLIGHT', (data) =>
-      this.cmdHIGHLIGHT(data, 'UNHIGHLIGHT')
+      this.cmdHIGHLIGHT(data, 'UNHIGHLIGHT'),
     );
     this.control.on('HIGHLIGHT', (data) =>
-      this.cmdHIGHLIGHT(data, 'HIGHLIGHT')
+      this.cmdHIGHLIGHT(data, 'HIGHLIGHT'),
     );
     this.control.on('TIMESTAMPFORMAT', (data) => this.cmdTIMESTAMPFORMAT(data));
     this.control.on('BROADCAST', (data) => this.cmdBROADCAST(data));
@@ -286,48 +286,48 @@ class Chat {
       new ChatSettingsMenu(
         this.ui.find('#chat-settings'),
         this.ui.find('#chat-settings-btn'),
-        this
-      )
+        this,
+      ),
     );
     this.menus.set(
       'emotes',
       new ChatEmoteMenu(
         this.ui.find('#chat-emote-list'),
         this.ui.find('#chat-emoticon-btn'),
-        this
-      )
+        this,
+      ),
     );
     this.menus.set(
       'emote-tooltip',
       new ChatEmoteTooltip(
         this.ui.find('#chat-emote-tooltip'),
         this.output.find('.msg-user .text .emote'),
-        this
-      )
+        this,
+      ),
     );
     this.menus.set(
       'users',
       new ChatUserMenu(
         this.ui.find('#chat-user-list'),
         this.ui.find('#chat-users-btn'),
-        this
-      )
+        this,
+      ),
     );
     this.menus.set(
       'whisper-users',
       new ChatWhisperUsers(
         this.ui.find('#chat-whisper-users'),
         this.ui.find('#chat-whisper-btn'),
-        this
-      )
+        this,
+      ),
     );
     this.menus.set(
       'user-info',
       new ChatUserInfoMenu(
         this.ui.find('#chat-user-info'),
         this.output.find('.msg-user .user'),
-        this
-      )
+        this,
+      ),
     );
 
     this.commands
@@ -384,9 +384,9 @@ class Chat {
           if (!this.ishidden) this.focusIfNothingSelected();
           else ChatMenu.closeMenus(this);
         },
-        { atBegin: false }
+        { atBegin: false },
       ),
-      true
+      true,
     );
 
     // Resize
@@ -397,7 +397,7 @@ class Chat {
         resizing = false;
         this.focusIfNothingSelected();
       },
-      { atBegin: false }
+      { atBegin: false },
     );
     const onresize = () => {
       // If this is a mobile screen, don't close menus.
@@ -450,7 +450,7 @@ class Chat {
         try {
           if (window.self === window.top) {
             window.location.href = `${uri}/login?follow=${encodeURIComponent(
-              window.location.pathname
+              window.location.pathname,
             )}`;
           } else {
             window.location.href = `${uri}/login`;
@@ -505,10 +505,10 @@ class Chat {
 
   async loadEmotes() {
     Chat.loadCss(
-      `${this.config.cdn.base}/emotes/emotes.css?_=${this.config.cacheKey}`
+      `${this.config.cdn.base}/emotes/emotes.css?_=${this.config.cacheKey}`,
     );
     return fetch(
-      `${this.config.cdn.base}/emotes/emotes.json?_=${this.config.cacheKey}`
+      `${this.config.cdn.base}/emotes/emotes.json?_=${this.config.cacheKey}`,
     )
       .then((res) => res.json())
       .then((json) => {
@@ -519,10 +519,10 @@ class Chat {
 
   async loadFlairs() {
     Chat.loadCss(
-      `${this.config.cdn.base}/flairs/flairs.css?_=${this.config.cacheKey}`
+      `${this.config.cdn.base}/flairs/flairs.css?_=${this.config.cacheKey}`,
     );
     return fetch(
-      `${this.config.cdn.base}/flairs/flairs.json?_=${this.config.cacheKey}`
+      `${this.config.cdn.base}/flairs/flairs.json?_=${this.config.cacheKey}`,
     )
       .then((res) => res.json())
       .then((json) => {
@@ -552,7 +552,7 @@ class Chat {
             nick: e.username,
             unread: Number(e.unread),
             open: false,
-          })
+          }),
         );
       })
       .then(() => this.menus.get('whisper-users').redraw())
@@ -629,10 +629,10 @@ class Chat {
 
     // Highlight Regex
     const cust = [...(this.settings.get('customhighlight') || [])].filter(
-      (a) => a !== ''
+      (a) => a !== '',
     );
     const nicks = [...(this.settings.get('highlightnicks') || [])].filter(
-      (a) => a !== ''
+      (a) => a !== '',
     );
     this.regexhighlightself = this.user.nick
       ? new RegExp(`\\b(?:${this.user.nick})\\b`, 'i')
@@ -646,7 +646,7 @@ class Chat {
     Array.from(this.settings.keys())
       .filter((key) => typeof this.settings.get(key) === 'boolean')
       .forEach((key) =>
-        this.ui.toggleClass(`pref-${key}`, this.settings.get(key))
+        this.ui.toggleClass(`pref-${key}`, this.settings.get(key)),
       );
 
     // Update maxlines
@@ -723,7 +723,7 @@ class Chat {
         this.user.username.toLowerCase();
       // get mentions from message
       message.mentioned = Chat.extractNicks(message.message).filter((a) =>
-        this.users.has(a.toLowerCase())
+        this.users.has(a.toLowerCase()),
       );
       // set tagged state
       message.tag = this.taggednicks.get(message.user.nick.toLowerCase());
@@ -770,7 +770,7 @@ class Chat {
         `${message.user.username} said ...`,
         message.message,
         message.timestamp.valueOf(),
-        this.settings.get('notificationtimeout')
+        this.settings.get('notificationtimeout'),
       );
     }
 
@@ -846,7 +846,7 @@ class Chat {
           this.windowselect.append(
             `<span title="Destiny GG" data-name="main" class="tab win-main tag-${
               w.tag
-            } ${w.visible ? 'active' : ''}"><i class="dgg-icon"></i></span>`
+            } ${w.visible ? 'active' : ''}"><i class="dgg-icon"></i></span>`,
           );
         } else {
           const conv = this.whispers.get(w.name);
@@ -856,8 +856,8 @@ class Chat {
             w.visible ? 'active' : ''
           } ${conv.unread > 0 ? 'unread' : ''}">
                     <span>${w.label}${
-            conv.unread > 0 ? ` (${conv.unread})` : ''
-          }</span>
+                      conv.unread > 0 ? ` (${conv.unread})` : ''
+                    }</span>
                     <i class="tab-close" title="Close" />
                     </span>`);
         }
@@ -949,7 +949,7 @@ class Chat {
     // Show scrollbars if the input's height exceeds the max.
     this.input.css(
       'overflow-y',
-      calculatedHeight >= maxHeight ? 'scroll' : 'hidden'
+      calculatedHeight >= maxHeight ? 'scroll' : 'hidden',
     );
 
     this.input.css('height', calculatedHeight);
@@ -983,14 +983,14 @@ class Chat {
     if (this.chatpoll.isPollStarted()) this.chatpoll.endPoll(); // end poll on disconnect so it is not there forever.
     if (retryMilli > 0)
       MessageBuilder.error(
-        `Disconnected, retry in ${Math.round(retryMilli / 1000)} seconds ...`
+        `Disconnected, retry in ${Math.round(retryMilli / 1000)} seconds ...`,
       ).into(this);
     else MessageBuilder.error(`Disconnected.`).into(this);
   }
 
   onCONNECTING(url) {
     MessageBuilder.status(
-      `Connecting to ${Chat.extractHostname(url)} ...`
+      `Connecting to ${Chat.extractHostname(url)} ...`,
     ).into(this);
   }
 
@@ -1016,7 +1016,7 @@ class Chat {
         this.authenticated ? this.user.username : 'Guest'
       }. Serving ${data.connectioncount || 0} connections and ${
         data.users.length
-      } users.`
+      } users.`,
     ).into(this);
     if (this.showmotd) {
       this.cmdHINT([Math.floor(Math.random() * hintstrings.size)]);
@@ -1034,7 +1034,7 @@ class Chat {
       msg.data,
       usr,
       msg.timestamp,
-      msg.uuid
+      msg.uuid,
     )
       .into(this)
       .pin(this, !checkIfPinWasDismissed(msg.uuid));
@@ -1090,7 +1090,7 @@ class Chat {
     if (this.user.username.toLowerCase() === data.data.toLowerCase()) {
       MessageBuilder.command(
         `You have been muted by ${data.nick}.`,
-        data.timestamp
+        data.timestamp,
       ).into(this);
 
       // Every cached mute message calls `onMUTE()`. We perform this check
@@ -1102,7 +1102,7 @@ class Chat {
     } else {
       MessageBuilder.command(
         `${data.data} muted by ${data.nick}.`,
-        data.timestamp
+        data.timestamp,
       ).into(this);
     }
     this.censor(data.data);
@@ -1112,14 +1112,14 @@ class Chat {
     if (this.user.username.toLowerCase() === data.data.toLowerCase()) {
       MessageBuilder.command(
         `You have been unmuted by ${data.nick}.`,
-        data.timestamp
+        data.timestamp,
       ).into(this);
 
       this.mutedtimer.stopTimer();
     } else {
       MessageBuilder.command(
         `${data.data} unmuted by ${data.nick}.`,
-        data.timestamp
+        data.timestamp,
       ).into(this);
     }
   }
@@ -1129,13 +1129,13 @@ class Chat {
     if (this.user.username.toLowerCase() === data.data.toLowerCase()) {
       MessageBuilder.command(
         `You have been banned by ${data.nick}. Check your profile for more information.`,
-        data.timestamp
+        data.timestamp,
       ).into(this);
       this.cmdBANINFO();
     } else {
       MessageBuilder.command(
         `${data.data} banned by ${data.nick}.`,
-        data.timestamp
+        data.timestamp,
       ).into(this);
     }
     this.censor(data.data);
@@ -1145,7 +1145,7 @@ class Chat {
     if (this.user.username.toLowerCase() === data.data.toLowerCase()) {
       MessageBuilder.command(
         `You have been unbanned by ${data.nick}.`,
-        data.timestamp
+        data.timestamp,
       ).into(this);
 
       // Unbanning a user unmutes them, too.
@@ -1153,7 +1153,7 @@ class Chat {
     } else {
       MessageBuilder.command(
         `${data.data} unbanned by ${data.nick}.`,
-        data.timestamp
+        data.timestamp,
       ).into(this);
     }
   }
@@ -1186,7 +1186,7 @@ class Chat {
         this.mutedtimer.startTimer();
 
         message = MessageBuilder.error(
-          `You are temporarily muted! You can chat again ${this.mutedtimer.getReadableDuration()}. Subscribe to remove the mute immediately.`
+          `You are temporarily muted! You can chat again ${this.mutedtimer.getReadableDuration()}. Subscribe to remove the mute immediately.`,
         );
         break;
       default:
@@ -1209,7 +1209,7 @@ class Chat {
       `Subscriber only mode ${this.subonly ? 'enabled' : 'disabled'}${
         data.nick ? ` by ${data.nick}` : ''
       }.`,
-      data.timestamp
+      data.timestamp,
     ).into(this);
     if (this.subonly && !this.user.isSubscriber()) {
       this.subonlyicon.show();
@@ -1225,7 +1225,7 @@ class Chat {
         const retryMilli = Math.floor(Math.random() * 30000) + 4000;
         setTimeout(() => window.location.reload(true), retryMilli);
         MessageBuilder.broadcast(
-          `Restart incoming in ${Math.round(retryMilli / 1000)} seconds ...`
+          `Restart incoming in ${Math.round(retryMilli / 1000)} seconds ...`,
         ).into(this);
       }
     } else {
@@ -1277,21 +1277,21 @@ class Chat {
           user,
           this.user.username,
           data.timestamp,
-          messageid
+          messageid,
         ).into(this);
       if (this.settings.get('notificationwhisper') && this.ishidden)
         Chat.showNotification(
           `${data.nick} whispered ...`,
           data.data,
           data.timestamp,
-          this.settings.get('notificationtimeout')
+          this.settings.get('notificationtimeout'),
         );
 
       const win = this.getWindow(normalized);
       if (win)
         MessageBuilder.historical(data.data, user, data.timestamp).into(
           this,
-          win
+          win,
         );
       if (win === this.getActiveWindow()) {
         fetch(`${this.config.api.base}/api/messages/msg/${messageid}/open`, {
@@ -1332,11 +1332,11 @@ class Chat {
 
         if (win !== this.mainwindow && normalized !== 'EXIT') {
           MessageBuilder.error(
-            `No commands in private windows. Try /exit`
+            `No commands in private windows. Try /exit`,
           ).into(this, win);
         } else if (this.control.listeners.has(normalized)) {
           const parts = (raw.substring(command.length + 1) || '').match(
-            /([^ ]+)/g
+            /([^ ]+)/g,
           );
           this.control.emit(normalized, parts || []);
         } else {
@@ -1416,7 +1416,7 @@ class Chat {
       parseQuestionAndTime(textOnly);
     } catch {
       MessageBuilder.info(
-        `Usage: ${slashCommand} <question>? <option 1> or <option 2> [or <option 3> [or <option 4> ... [or <option n>]]] [<time>].`
+        `Usage: ${slashCommand} <question>? <option 1> or <option 2> [or <option 3> [or <option 4> ... [or <option n>]]] [<time>].`,
       ).into(this);
       return;
     }
@@ -1428,7 +1428,7 @@ class Chat {
 
     if (!this.chatpoll.hasPermission(this.user)) {
       MessageBuilder.error('You do not have permission to start a poll.').into(
-        this
+        this,
       );
       return;
     }
@@ -1450,7 +1450,7 @@ class Chat {
     }
     if (!this.chatpoll.hasPermission(this.user)) {
       MessageBuilder.error(
-        'You do not have permission to stop this poll.'
+        'You do not have permission to stop this poll.',
       ).into(this);
       return;
     }
@@ -1460,7 +1460,7 @@ class Chat {
 
   cmdEMOTES() {
     MessageBuilder.info(
-      `Available emotes: ${this.emoteService.prefixes.join(', ')}.`
+      `Available emotes: ${this.emoteService.prefixes.join(', ')}.`,
     ).into(this);
   }
 
@@ -1496,17 +1496,17 @@ class Chat {
       } else {
         MessageBuilder.info(
           `Ignoring the following people: ${Array.from(
-            this.ignoring.values()
-          ).join(', ')}.`
+            this.ignoring.values(),
+          ).join(', ')}.`,
         ).into(this);
       }
     } else if (
       parts.some(
-        (username) => username.toLowerCase() === this.user.nick.toLowerCase()
+        (username) => username.toLowerCase() === this.user.nick.toLowerCase(),
       )
     ) {
       MessageBuilder.info("You can't add yourself to your ignore list.").into(
-        this
+        this,
       );
     } else {
       // this is a little ugly, but it allows us to not ignore anything if there's an invalid nick in there
@@ -1517,7 +1517,7 @@ class Chat {
       const failure = parts.some((username) => {
         if (!nickregex.test(username)) {
           MessageBuilder.info(
-            `${username} is not a valid nick - /ignore <nick> OR /ignore <nick_1> <nick_2> ... <nick_n>.`
+            `${username} is not a valid nick - /ignore <nick> OR /ignore <nick_1> <nick_2> ... <nick_n>.`,
           ).into(this);
           return true;
         }
@@ -1533,7 +1533,7 @@ class Chat {
           validUsernames.size === 1
             ? `Ignoring ${resultArray[0]}`
             : `Added the following people to your ignore list: ${resultArray.join(
-                ', '
+                ', ',
               )}`;
         MessageBuilder.status(resultMessage).into(this);
       }
@@ -1547,7 +1547,7 @@ class Chat {
       const failure = parts.some((username) => {
         if (!nickregex.test(username)) {
           MessageBuilder.info(
-            `${username} is not a valid nick - /unignore <nick> OR /unignore <nick_1> <nick_2> ... <nick_n>.`
+            `${username} is not a valid nick - /unignore <nick> OR /unignore <nick_1> <nick_2> ... <nick_n>.`,
           ).into(this);
           return true;
         }
@@ -1561,13 +1561,13 @@ class Chat {
         const haveOrHas = parts.length === 1 ? 'has' : 'have';
         MessageBuilder.status(
           `${Array.from(validUsernames.values()).join(
-            ', '
-          )} ${haveOrHas} been removed from your ignore list`
+            ', ',
+          )} ${haveOrHas} been removed from your ignore list`,
         ).into(this);
       }
     } else {
       MessageBuilder.error(
-        'Invalid nick - /unignore <nick> OR /unignore <nick_1> <nick_2> ... <nick_n>'
+        'Invalid nick - /unignore <nick> OR /unignore <nick_1> <nick_2> ... <nick_n>',
       ).into(this);
     }
   }
@@ -1580,7 +1580,7 @@ class Chat {
         confirmation.toLowerCase() !== 'y')
     ) {
       MessageBuilder.error(
-        'This command requires confirmation - /unignoreall yes OR /unignoreall y'
+        'This command requires confirmation - /unignoreall yes OR /unignoreall y',
       ).into(this);
     } else {
       this.unignoreall();
@@ -1606,7 +1606,7 @@ class Chat {
   cmdBAN(parts, command) {
     if (parts.length === 0 || parts.length < 3) {
       MessageBuilder.info(
-        `Usage: /${command} <nick> <time> <reason> (time can be 'permanent').`
+        `Usage: /${command} <nick> <time> <reason> (time can be 'permanent').`,
       ).into(this);
     } else if (!nickregex.test(parts[0])) {
       MessageBuilder.info('Invalid nick.').into(this);
@@ -1641,7 +1641,7 @@ class Chat {
       this.source.send(command.toUpperCase(), { data: parts[0].toLowerCase() });
     } else {
       MessageBuilder.error(
-        `Invalid argument - /${command.toLowerCase()} on | off`
+        `Invalid argument - /${command.toLowerCase()} on | off`,
       ).into(this);
     }
   }
@@ -1649,14 +1649,14 @@ class Chat {
   cmdMAXLINES(parts, command) {
     if (parts.length === 0) {
       MessageBuilder.info(
-        `Maximum lines stored: ${this.settings.get('maxlines')}.`
+        `Maximum lines stored: ${this.settings.get('maxlines')}.`,
       ).into(this);
       return;
     }
     const newmaxlines = Math.abs(parseInt(parts[0], 10));
     if (!newmaxlines) {
       MessageBuilder.info(
-        `Invalid argument - /${command} is expecting a number.`
+        `Invalid argument - /${command} is expecting a number.`,
       ).into(this);
     } else {
       this.settings.set('maxlines', newmaxlines);
@@ -1670,7 +1670,7 @@ class Chat {
     if (parts.length === 0) {
       if (highlights.length > 0)
         MessageBuilder.info(
-          `Currently highlighted users: ${highlights.join(',')}.`
+          `Currently highlighted users: ${highlights.join(',')}.`,
         ).into(this);
       else MessageBuilder.info(`No highlighted users.`).into(this);
       return;
@@ -1692,7 +1692,7 @@ class Chat {
     MessageBuilder.info(
       command.toUpperCase() === 'HIGHLIGHT'
         ? `Highlighting ${nick}.`
-        : `No longer highlighting ${nick}.`
+        : `No longer highlighting ${nick}.`,
     ).into(this);
     this.settings.set('highlightnicks', highlights);
     this.applySettings();
@@ -1702,14 +1702,14 @@ class Chat {
     if (parts.length === 0) {
       MessageBuilder.info(
         `Current format: ${this.settings.get(
-          'timestampformat'
-        )} (the default is 'HH:mm', for more info: http://momentjs.com/docs/#/displaying/format/)`
+          'timestampformat',
+        )} (the default is 'HH:mm', for more info: http://momentjs.com/docs/#/displaying/format/)`,
       ).into(this);
     } else {
       const format = parts.join(' ');
       if (!/^[a-z :.,-\\*]+$/i.test(format)) {
         MessageBuilder.error(
-          'Invalid format, see: http://momentjs.com/docs/#/displaying/format/'
+          'Invalid format, see: http://momentjs.com/docs/#/displaying/format/',
         ).into(this);
       } else {
         this.settings.set('timestampformat', format);
@@ -1755,14 +1755,14 @@ class Chat {
       }
       MessageBuilder.info(
         `Usage. /tag <nick> [<color>, <note>]\n(Available colors: ${tagcolors.join(
-          ', '
-        )})`
+          ', ',
+        )})`,
       ).into(this);
       return;
     }
     if (!nickregex.test(parts[0])) {
       MessageBuilder.error('Invalid nick - /tag <nick> [<color>, <note>]').into(
-        this
+        this,
       );
       return;
     }
@@ -1779,8 +1779,8 @@ class Chat {
     let color = '';
     let note = '';
     if (parts[1]) {
-      if (tagcolors.indexOf(parts[1]) !== -1) {
-        color = parts[1];
+      if (tagcolors.indexOf(parts[1].toLowerCase()) !== -1) {
+        color = parts[1].toLowerCase();
         note = parts[2] ? parts.slice(2, parts.length).join(' ') : '';
       } else {
         color = tagcolors[Math.floor(Math.random() * tagcolors.length)];
@@ -1820,7 +1820,7 @@ class Chat {
     }
     if (!nickregex.test(parts[0])) {
       MessageBuilder.error(
-        'Invalid nick - /untag <nick> [<color>, <note>]'
+        'Invalid nick - /untag <nick> [<color>, <note>]',
       ).into(this);
       return;
     }
@@ -1831,10 +1831,10 @@ class Chat {
       .forEach((line) => {
         const classesToRemove = Chat.removeClasses(
           'msg-tagged',
-          line.classList.value
+          line.classList.value,
         );
         classesToRemove.forEach((className) =>
-          line.classList.remove(className)
+          line.classList.remove(className),
         );
         line.querySelector('.user').removeAttribute('title');
       });
@@ -1854,7 +1854,7 @@ class Chat {
     } catch (error) {
       MessageBuilder.error(error.message).into(this);
       MessageBuilder.info(
-        'Usage: /embed <link> OR /e <link> (Valid links: Twitch streams, VODs, clips, Youtube, Rumble)'
+        'Usage: /embed <link> OR /e <link> (Valid links: Twitch streams, VODs, clips, Youtube, Rumble)',
       ).into(this);
     }
   }
@@ -1878,7 +1878,7 @@ class Chat {
           MessageBuilder.error(error.message).into(this);
         }
         MessageBuilder.info(
-          'Usage: /postembed [<link>] [<message>] (Alias: /pe) (Valid links: Twitch streams, VODs, clips, Youtube, Rumble)'
+          'Usage: /postembed [<link>] [<message>] (Alias: /pe) (Valid links: Twitch streams, VODs, clips, Youtube, Rumble)',
         ).into(this);
       }
     }
@@ -1912,19 +1912,19 @@ class Chat {
           .format(DATE_FORMATS.FULL);
         if (!b.endtimestamp) {
           MessageBuilder.info(
-            `Permanent ban by ${by} started on ${start}.`
+            `Permanent ban by ${by} started on ${start}.`,
           ).into(this);
         } else {
           const end = moment.utc(b.endtimestamp).local().calendar();
           MessageBuilder.info(
-            `Temporary ban by ${by} started on ${start} and ending by ${end}.`
+            `Temporary ban by ${by} started on ${start} and ending by ${end}.`,
           ).into(this);
         }
         if (b.reason) {
           const m = MessageBuilder.message(
             b.reason,
             new ChatUser(by),
-            b.starttimestamp
+            b.starttimestamp,
           );
           m.historical = true;
           m.into(this);
@@ -1933,19 +1933,19 @@ class Chat {
       })
       .catch(() =>
         MessageBuilder.error(
-          'Error loading ban info. Check your profile.'
-        ).into(this)
+          'Error loading ban info. Check your profile.',
+        ).into(this),
       );
   }
 
   cmdOPEN(parts) {
     if (!parts[0]) {
       MessageBuilder.error(
-        'No username specified - /open <username> OR /o <username>'
+        'No username specified - /open <username> OR /o <username>',
       ).into(this);
     } else if (parts.length > 1) {
       MessageBuilder.error(
-        'Too many arguments provided - /open <username> OR /o <username>'
+        'Too many arguments provided - /open <username> OR /o <username>',
       ).into(this);
     } else if (parts[0] !== this.user.username) {
       const normalized = parts[0].toLowerCase();
@@ -1963,7 +1963,7 @@ class Chat {
       }
     } else {
       MessageBuilder.error(
-        "Can't open a convo with yourself - /open <username> OR /o <username>"
+        "Can't open a convo with yourself - /open <username> OR /o <username>",
       ).into(this);
     }
   }
@@ -2018,9 +2018,9 @@ class Chat {
 
     fetch(
       `${this.config.api.base}/api/chat/stalk?username=${encodeURIComponent(
-        parts[0]
+        parts[0],
       )}&limit=${limit}`,
-      { credentials: 'include' }
+      { credentials: 'include' },
     )
       .then((res) => res.json())
       .then((d) => {
@@ -2032,21 +2032,21 @@ class Chat {
             .local()
             .format(DATE_FORMATS.FULL);
           MessageBuilder.info(`Stalked ${parts[0]} last seen ${date}.`).into(
-            this
+            this,
           );
           d.lines.forEach((a) =>
             MessageBuilder.historical(
               a.text,
               new ChatUser(d.nick),
-              a.timestamp * 1000
-            ).into(this)
+              a.timestamp * 1000,
+            ).into(this),
           );
         }
       })
       .catch(() =>
         MessageBuilder.error(
-          `No messages from ${parts[0]} received. Try again later.`
-        ).into(this)
+          `No messages from ${parts[0]} received. Try again later.`,
+        ).into(this),
       )
       .then(() => {
         this.busystalk = false;
@@ -2066,13 +2066,13 @@ class Chat {
     if (!parts[0]) parts[0] = this.user.username;
     if (!parts[0] || !nickregex.test(parts[0].toLowerCase())) {
       MessageBuilder.error('Invalid nick - /mentions <nick> <limit>').into(
-        this
+        this,
       );
       return;
     }
     if (this.busymentions) {
       MessageBuilder.error(`Still busy getting ${[parts[0]]}'s mentions`).into(
-        this
+        this,
       );
       return;
     }
@@ -2081,9 +2081,9 @@ class Chat {
     MessageBuilder.info(`Getting mentions for ${[parts[0]]} ...`).into(this);
     fetch(
       `${this.config.api.base}/api/chat/mentions?username=${encodeURIComponent(
-        parts[0]
+        parts[0],
       )}&limit=${limit}`,
-      { credentials: 'include' }
+      { credentials: 'include' },
     )
       .then((res) => res.json())
       .then((d) => {
@@ -2095,21 +2095,21 @@ class Chat {
             .local()
             .format(DATE_FORMATS.FULL);
           MessageBuilder.info(
-            `Mentions for ${parts[0]} last seen ${date}.`
+            `Mentions for ${parts[0]} last seen ${date}.`,
           ).into(this);
           d.forEach((a) =>
             MessageBuilder.historical(
               a.text,
               new ChatUser(a.nick),
-              a.date * 1000
-            ).into(this)
+              a.date * 1000,
+            ).into(this),
           );
         }
       })
       .catch(() =>
         MessageBuilder.error(
-          `No mentions for ${parts[0]} received. Try again later.`
-        ).into(this)
+          `No mentions for ${parts[0]} received. Try again later.`,
+        ).into(this),
       )
       .then(() => {
         this.busymentions = false;
@@ -2127,7 +2127,7 @@ class Chat {
 
     if (!url) {
       MessageBuilder.error(
-        'No argument provided - /host <url> <displayName optional>'
+        'No argument provided - /host <url> <displayName optional>',
       ).into(this);
       return;
     }
@@ -2142,7 +2142,7 @@ class Chat {
       new URL(url); // eslint-disable-line no-new
     } catch (e) {
       MessageBuilder.error(
-        'Invalid url - /host <url> <displayName optional>'
+        'Invalid url - /host <url> <displayName optional>',
       ).into(this);
       return;
     }
@@ -2211,7 +2211,7 @@ class Chat {
     const win = new ChatWindow(
       normalized,
       'chat-output-whisper',
-      user.nick
+      user.nick,
     ).into(this);
     let once = true;
     win.on('show', () => {
@@ -2220,9 +2220,9 @@ class Chat {
         MessageBuilder.info(`Messages between you and ${nick}`).into(this, win);
         fetch(
           `${this.config.api.base}/api/messages/usr/${encodeURIComponent(
-            user.nick
+            user.nick,
           )}/inbox`,
-          { credentials: 'include' }
+          { credentials: 'include' },
         )
           .then((res) => res.json())
           .then((data) => {
@@ -2240,25 +2240,25 @@ class Chat {
                 MessageBuilder.historical(
                   e.message,
                   inboxUser,
-                  e.timestamp
+                  e.timestamp,
                 ).into(this, win);
               });
             }
           })
           .catch(() =>
-            MessageBuilder.error(`Failed to load messages :(`).into(this, win)
+            MessageBuilder.error(`Failed to load messages :(`).into(this, win),
           );
       } else if (conv.unread > 0) {
         fetch(
           `${this.config.api.base}/api/messages/usr/${encodeURIComponent(
-            normalized
+            normalized,
           )}/inbox`,
-          { credentials: 'include' }
+          { credentials: 'include' },
         ).catch(() =>
           MessageBuilder.error(`Failed to mark messages as read :(`).into(
             this,
-            win
-          )
+            win,
+          ),
         );
       }
       conv.unread = 0;
@@ -2285,7 +2285,7 @@ class Chat {
         // Check custom highlight against msg.nick and msg.message
         (this.regexhighlightcustom &&
           this.regexhighlightcustom.test(
-            `${message.user.username} ${message.message}`
+            `${message.user.username} ${message.message}`,
           )))
     );
   }
