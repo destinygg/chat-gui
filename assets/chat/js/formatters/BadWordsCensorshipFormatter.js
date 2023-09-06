@@ -7,7 +7,7 @@ export default class BadWordsCensorshipFormatter {
   format(chat, str /* , message=null */) {
     if (chat.settings.get('censorbadwords')) {
       return str.replace(this.badWordsRegex, (match) =>
-        '*'.repeat(match.length)
+        '*'.repeat(match.length),
       );
     }
 

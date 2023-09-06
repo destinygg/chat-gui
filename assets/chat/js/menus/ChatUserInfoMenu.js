@@ -87,11 +87,11 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     });
 
     this.muteDurations.forEach((duration) =>
-      this.createDurationButtons(duration, 'mute')
+      this.createDurationButtons(duration, 'mute'),
     );
 
     this.banDurations.forEach((duration) =>
-      this.createDurationButtons(duration, 'ban')
+      this.createDurationButtons(duration, 'ban'),
     );
 
     this.whisperUserBtn.on('click', () => {
@@ -125,7 +125,7 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     this.unignoreUserBtn.on('click', () => {
       this.chat.ignore(this.clickedNick, false);
       MessageBuilder.status(
-        `${this.clickedNick} has been removed from your ignore list`
+        `${this.clickedNick} has been removed from your ignore list`,
       ).into(this.chat);
       this.hide();
     });
@@ -194,7 +194,7 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     durationButton.textContent = duration;
 
     durationButton.addEventListener('click', () =>
-      this.processMuteOrBan(duration)
+      this.processMuteOrBan(duration),
     );
 
     this.actionInputs.append(durationButton);
@@ -209,7 +209,7 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
             providedDuration,
             `${this.clickedNick} banned by ${this.chat.user.nick}.`,
           ],
-          'IPBAN'
+          'IPBAN',
         );
         break;
       case 'mute':
@@ -231,7 +231,7 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
         : [];
 
     const selectedUser = [...message[0].querySelectorAll('.user')].find(
-      (user) => user.innerText.toLowerCase() === this.clickedNick.toLowerCase()
+      (user) => user.innerText.toLowerCase() === this.clickedNick.toLowerCase(),
     );
     const prettyNick = selectedUser.innerText;
     const tagNote = this.chat.taggednotes.get(this.clickedNick);
@@ -244,7 +244,7 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     } else {
       this.createdDateSubheader.style.display = 'none';
       this.createdDateSubheader.replaceChildren(
-        'Unable to display account creation date'
+        'Unable to display account creation date',
       );
     }
 
@@ -300,7 +300,7 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     const timeHTML = document.createElement('time');
     timeHTML.className = 'time';
     timeHTML.textContent = moment(user.createdDate).format(
-      'Do MMMM, YYYY h:mm a'
+      'Do MMMM, YYYY h:mm a',
     );
     timeHTML.setAttribute('datetime', user.createdDate);
     return timeHTML;
@@ -314,7 +314,7 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     const features =
       user !== undefined
         ? this.buildFeatureHTML(
-            user.features.filter((e) => e !== 'subscriber') || []
+            user.features.filter((e) => e !== 'subscriber') || [],
           )
         : this.buildFeatureHTML(messageFeaturesArray);
     return features !== '' ? `<span class="features">${features}</span>` : '';

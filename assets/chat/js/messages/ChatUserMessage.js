@@ -8,7 +8,7 @@ import MessageTypes from './MessageTypes';
 export function usernameColorFlair(allFlairs, user) {
   return allFlairs
     .filter((flair) =>
-      user.features.some((userFlair) => userFlair === flair.name)
+      user.features.some((userFlair) => userFlair === flair.name),
     )
     .sort((a, b) => (a.priority - b.priority >= 0 ? 1 : -1))
     .find((f) => f.rainbowColor || f.color);
@@ -59,10 +59,10 @@ export default class ChatUserMessage extends ChatMessage {
     }" class="user ${colorFlair?.name}">${this.user.username}</a>`;
     return this.wrap(
       `${this.buildTime()} ${user}<span class="ctrl">${ctrl}</span> ${this.buildMessageTxt(
-        chat
+        chat,
       )}`,
       classes,
-      attr
+      attr,
     );
   }
 
@@ -73,7 +73,7 @@ export default class ChatUserMessage extends ChatMessage {
       .reduce(
         (str, e) =>
           `${str}<i data-flair="${e.name}" class="flair ${e.name}" title="${e.label}"></i> `,
-        ''
+        '',
       );
     return features !== '' ? `<span class="features">${features}</span>` : '';
   }

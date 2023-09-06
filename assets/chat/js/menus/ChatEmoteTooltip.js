@@ -28,7 +28,7 @@ export default class ChatEmoteTooltip extends ChatMenuFloating {
       const value = this.chat.input.val().toString().trim();
       this.chat.input
         .val(
-          `${value + (value === '' ? '' : ' ') + e.currentTarget.innerText} `
+          `${value + (value === '' ? '' : ' ') + e.currentTarget.innerText} `,
         )
         .focus();
     });

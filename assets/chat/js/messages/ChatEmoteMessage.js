@@ -21,7 +21,7 @@ function ChatEmoteMessageCount(message) {
   message.combo_count.text(`${message.emotecount}`);
   message.ui.append(
     message.text.detach().get(0),
-    message.combo.detach().get(0)
+    message.combo.detach().get(0),
   );
 }
 const ChatEmoteMessageCountThrottle = throttle(63, ChatEmoteMessageCount);
@@ -38,8 +38,8 @@ export default class ChatEmoteMessage extends ChatMessage {
       `<span class="text">${this.emoteFormatter.format(
         chat,
         this.message,
-        this
-      )}</span>`
+        this,
+      )}</span>`,
     );
     this.combo = $(`<span class="chat-combo"></span>`);
     this.combo_count = $(`<i class="count">${this.emotecount}</i>`);
@@ -57,7 +57,7 @@ export default class ChatEmoteMessage extends ChatMessage {
       ' ',
       this.combo_hits,
       ' ',
-      this.combo_txt
+      this.combo_txt,
     );
     this.ui.append(this.text.get(0), this.combo.get(0));
   }
