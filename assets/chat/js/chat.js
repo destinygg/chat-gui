@@ -688,8 +688,11 @@ class Chat {
       ) {
         user.createdDate = data.createdDate;
       }
-      if (Object.hasOwn(data, 'watching') && data.watching !== user.watching) {
-        user.setWatching(data.watching);
+      if (
+        Object.hasOwn(data, 'watching') &&
+        !user.equalWatching(data.watching)
+      ) {
+        user.watching = data.watching;
       }
     }
     return user;
@@ -1011,7 +1014,7 @@ class Chat {
   }
 
   onWATCHING(data) {
-    this.user.setWatching(data);
+    this.user.watching = data;
     for (const window of this.windows.values()) {
       window.updateMessagesWatching(this);
     }
@@ -1062,11 +1065,6 @@ class Chat {
   onMSG(data) {
     const textonly = Chat.removeSlashCmdFromText(data.data);
     const usr = this.users.get(data.nick.toLowerCase());
-
-    // update user watching
-    if (usr) {
-      usr.setWatching(data.watching);
-    }
 
     const win = this.mainwindow;
     if (

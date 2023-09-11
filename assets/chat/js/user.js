@@ -76,14 +76,19 @@ class ChatUser {
     return 0;
   }
 
-  setWatching(embed) {
-    this.watching = embed;
-  }
-
   get embed() {
     return this.watching
       ? `#${this.watching.platform}/${this.watching.id}`
       : null;
+  }
+
+  equalWatching(embed) {
+    if (
+      this.watching?.platform === embed?.platform &&
+      this.watching?.id === embed?.id
+    )
+      return true;
+    return false;
   }
 }
 
