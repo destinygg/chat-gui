@@ -76,12 +76,6 @@ class ChatUser {
     return 0;
   }
 
-  get embed() {
-    return this.watching
-      ? `#${this.watching.platform}/${this.watching.id}`
-      : null;
-  }
-
   equalWatching(embed) {
     if (
       this.watching?.platform === embed?.platform &&
