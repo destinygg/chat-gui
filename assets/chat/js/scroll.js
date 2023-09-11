@@ -31,7 +31,7 @@ class ChatScrollPlugin {
           autoHide: isTouchDevice ? 'never' : 'move',
           autoHideDelay: 1000,
         },
-      }
+      },
     );
 
     if (this.target.find('.chat-scroll-notify').length > 0) {
@@ -59,7 +59,7 @@ class ChatScrollPlugin {
         resizing = false;
         this.update(pinnedBeforeResize);
       },
-      { atBegin: false }
+      { atBegin: false },
     );
     this.resizeObserver = new ResizeObserver(() => {
       if (!resizing) {

@@ -7,7 +7,7 @@ export default class ChatEmoteMenu extends ChatMenu {
     this.searchterm = '';
     this.emoteMenuContent = this.ui.find('.content');
     this.searchinput = this.ui.find(
-      '#chat-emote-list-search .form-control:first'
+      '#chat-emote-list-search .form-control:first',
     );
     this.ui.on('click', '.emote', (e) => {
       if (!e.currentTarget.classList.contains('disabled')) {
@@ -23,8 +23,8 @@ export default class ChatEmoteMenu extends ChatMenu {
           this.searchterm = this.searchinput.val();
           this.buildEmoteMenu();
         },
-        { atBegin: false }
-      )
+        { atBegin: false },
+      ),
     );
   }
 
@@ -45,14 +45,14 @@ export default class ChatEmoteMenu extends ChatMenu {
       const locked =
         tier > this.chat.user.subTier && !this.chat.user.isPrivileged();
       this.emoteMenuContent.append(
-        this.buildEmoteMenuSection(title, emotes, locked)
+        this.buildEmoteMenuSection(title, emotes, locked),
       );
     });
 
     const twitchEmotes = this.chat.emoteService.twitchEmotePrefixes;
     if (twitchEmotes.length) {
       this.emoteMenuContent.append(
-        this.buildEmoteMenuSection('Twitch Subscribers', twitchEmotes)
+        this.buildEmoteMenuSection('Twitch Subscribers', twitchEmotes),
       );
     }
   }

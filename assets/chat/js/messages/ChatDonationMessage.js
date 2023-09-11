@@ -41,7 +41,7 @@ export default class ChatDonationMessage extends ChatEventMessage {
       ` donated ${(this.amount / 100).toLocaleString('en-US', {
         style: 'currency',
         currency: 'USD',
-      })}`
+      })}`,
     );
 
     const donationTier = this.selectDonationTier(this.amount);

@@ -11,10 +11,10 @@ export default class ChatWhisperUsers extends ChatMenu {
     this.unreadEl = this.ui.find('.whispers-unread .whispers');
     this.readEl = this.ui.find('.whispers-read .whispers');
     this.searchinput = this.ui.find(
-      '#chat-whisper-users-search .form-control:first'
+      '#chat-whisper-users-search .form-control:first',
     );
     this.ui.on('click', '.user-entry', (e) =>
-      chat.openConversation(e.currentTarget.getAttribute('data-username'))
+      chat.openConversation(e.currentTarget.getAttribute('data-username')),
     );
     this.searchinput.on(
       'keyup',
@@ -25,8 +25,8 @@ export default class ChatWhisperUsers extends ChatMenu {
           this.filter();
           this.redraw();
         },
-        { atBegin: false }
-      )
+        { atBegin: false },
+      ),
     );
   }
 

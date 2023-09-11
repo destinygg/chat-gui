@@ -4,9 +4,9 @@ export default class MentionedUserFormatter {
       return str.replace(
         new RegExp(
           `((?:^|\\s)@?)(${message.mentioned.join('|')})(?=$|\\s|[.?!,])`,
-          'igm'
+          'igm',
         ),
-        `$1<span class="chat-user">$2</span>`
+        `$1<span class="chat-user">$2</span>`,
       );
     }
     return str;

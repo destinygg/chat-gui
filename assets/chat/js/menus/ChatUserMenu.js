@@ -39,15 +39,18 @@ export default class ChatUserMenu extends ChatMenu {
     this.header = this.ui.find('h5 span');
     this.container = this.ui.find('.content:first');
     this.searchinput = this.ui.find(
-      '#chat-user-list-search .form-control:first'
+      '#chat-user-list-search .form-control:first',
     );
     this.container.on('click', '.user-entry', (e) =>
       this.chat.userfocus.toggleFocus(
-        e.currentTarget.getAttribute('data-username')
-      )
+        e.currentTarget.getAttribute('data-username'),
+      ),
     );
     this.container.on('click', '.flair', (e) =>
-      this.chat.userfocus.toggleFocus(e.target.getAttribute('data-flair'), true)
+      this.chat.userfocus.toggleFocus(
+        e.target.getAttribute('data-flair'),
+        true,
+      ),
     );
     this.container.on('click', '.mention-nick', (e) => {
       ChatMenu.closeMenus(this.chat);
@@ -86,8 +89,8 @@ export default class ChatUserMenu extends ChatMenu {
           this.filter();
           this.redraw();
         },
-        { atBegin: false }
-      )
+        { atBegin: false },
+      ),
     );
   }
 
@@ -101,7 +104,7 @@ export default class ChatUserMenu extends ChatMenu {
       const searching = this.searchterm.length > 0;
       if (searching && this.totalcount !== this.searchcount) {
         this.header.text(
-          `Users (${this.searchcount} out of ${this.totalcount})`
+          `Users (${this.searchcount} out of ${this.totalcount})`,
         );
         [...this.sections.values()].forEach((section) => {
           $(section.title).html(
@@ -109,7 +112,7 @@ export default class ChatUserMenu extends ChatMenu {
               section.data.name
             }${
               section.users.children.length === 1 ? '' : 's'
-            }${this.buildFeatures(section.data.flairs)}`
+            }${this.buildFeatures(section.data.flairs)}`,
           );
           if (section.searchcount === 0) $(section.container).hide();
           else $(section.container).show();
@@ -120,7 +123,7 @@ export default class ChatUserMenu extends ChatMenu {
           $(section.title).html(
             `${section.users.children.length} ${section.data.name}${
               section.users.children.length === 1 ? '' : 's'
-            }${this.buildFeatures(section.data.flairs)}`
+            }${this.buildFeatures(section.data.flairs)}`,
           );
           if (section.users.children.length === 0) $(section.container).hide();
           else $(section.container).show();
@@ -139,7 +142,7 @@ export default class ChatUserMenu extends ChatMenu {
       .reduce(
         (str, e) =>
           `${str}<i data-flair="${e.name}" class="flair ${e.name}" title="${e.label}"></i> `,
-        ''
+        '',
       );
     return features !== '' ? `<span class="features">${features}</span>` : '';
   }
@@ -152,7 +155,7 @@ export default class ChatUserMenu extends ChatMenu {
     UserMenuSections.forEach((data) => {
       this.addSection(data);
       [...data.flairs].forEach((flair) =>
-        this.flairSection.set(flair, data.name)
+        this.flairSection.set(flair, data.name),
       );
     });
     users.forEach((u) => this.addElement(u));
@@ -212,7 +215,7 @@ export default class ChatUserMenu extends ChatMenu {
 
   addSection(data) {
     const section = $(
-      `<div class="section" data-section="${data.name}"><p class="title">${data.name}</p><div class="users"></div></div>`
+      `<div class="section" data-section="${data.name}"><p class="title">${data.name}</p><div class="users"></div></div>`,
     );
     this.sections.set(data.name, {
       data,
@@ -236,7 +239,7 @@ export default class ChatUserMenu extends ChatMenu {
     const features =
       user.features.length === 0 ? 'nofeature' : user.features.join(' ');
     const usr = $(
-      `<div class="user-entry" data-username="${user.username}" data-user-id="${user.id}"><span class="user ${features}">${label}</span><div class="user-actions"><i class="mention-nick"></i><i class="whisper-nick"></i></div></div>`
+      `<div class="user-entry" data-username="${user.username}" data-user-id="${user.id}"><span class="user ${features}">${label}</span><div class="user-actions"><i class="mention-nick"></i><i class="whisper-nick"></i></div></div>`,
     );
     const section = this.sections.get(this.highestSection(user));
 
@@ -291,7 +294,7 @@ export default class ChatUserMenu extends ChatMenu {
   sort() {
     [...this.sections.values()].forEach((section) => {
       [...$(section.users.children).sort(userComparator.bind(this))].forEach(
-        (a) => a.parentNode.appendChild(a)
+        (a) => a.parentNode.appendChild(a),
       );
     });
   }
