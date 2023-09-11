@@ -196,7 +196,7 @@ export default class ChatCommands {
     return [
       REGULAR_HELP_HEADER,
       ...CHAT_COMMANDS.filter((command) => !command.admin).map((command) =>
-        this.formatHelpString(command)
+        this.formatHelpString(command),
       ),
     ].join('');
   }
@@ -208,7 +208,7 @@ export default class ChatCommands {
     return [
       ADMIN_HELP_HEADER,
       ...CHAT_COMMANDS.filter((command) => command.admin).map((command) =>
-        this.formatHelpString(command)
+        this.formatHelpString(command),
       ),
     ].join('');
   }
