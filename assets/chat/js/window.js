@@ -144,14 +144,6 @@ class ChatWindow extends EventEmitter {
     }
   }
 
-  updateMessagesWatching(chat) {
-    for (const message of this.messages) {
-      if (message.user) {
-        message.setWatching(chat.user.embed);
-      }
-    }
-  }
-
   removeLastMessage() {
     this.lastmessage.remove();
     this.messages = this.messages.filter((m) => m !== this.lastmessage);

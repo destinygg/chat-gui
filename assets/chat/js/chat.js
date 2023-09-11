@@ -1016,7 +1016,7 @@ class Chat {
   onWATCHING(data) {
     this.user.watching = data;
     for (const window of this.windows.values()) {
-      window.updateMessagesWatching(this);
+      window.updateMessages(this);
     }
   }
 
