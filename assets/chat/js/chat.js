@@ -554,7 +554,6 @@ class Chat {
             unread: Number(e.unread),
             read: Number(e.read),
             open: false,
-            online: false,
             found: false,
           })
         );

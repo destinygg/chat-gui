@@ -16,11 +16,6 @@ export default class ChatWhisperUsers extends ChatMenu {
     this.ui.on('click', '.user-entry', (e) =>
       chat.openConversation(e.currentTarget.getAttribute('data-username'))
     );
-    this.chat.source.on('JOIN', (data) => this.online(data.nick));
-    this.chat.source.on('QUIT', (data) => this.offline(data.nick));
-    this.chat.source.on('NAMES', (data) => {
-      data.users.forEach((user) => this.online(user.nick));
-    });
     this.searchinput.on(
       'keyup',
       debounce(
@@ -45,20 +40,6 @@ export default class ChatWhisperUsers extends ChatMenu {
         whisper.found = false;
       }
     });
-  }
-
-  online(nick) {
-    if (this.chat.whispers.has(nick.toLowerCase())) {
-      this.chat.whispers.get(nick.toLowerCase()).online = true;
-      this.redraw();
-    }
-  }
-
-  offline(nick) {
-    if (this.chat.whispers.has(nick.toLowerCase())) {
-      this.chat.whispers.get(nick.toLowerCase()).online = false;
-      this.redraw();
-    }
   }
 
   removeConversation(nick) {
@@ -102,20 +83,20 @@ export default class ChatWhisperUsers extends ChatMenu {
 
   addConversation(whisper) {
     const time = moment.utc(whisper.time).local();
-    const found = whisper.found ? ' found' : '';
+    const found = whisper.found && this.searchterm.length > 0 ? ' found' : '';
+    const online = this.chat.users.has(whisper.nick.toLowerCase())
+      ? 'online'
+      : 'offline';
+    const unread =
+      whisper.unread > 0
+        ? `<span class="unread">${whisper.unread} new</span>`
+        : '';
+
     (whisper.unread > 0 ? this.unreadEl : this.readEl).append(`
-    <div class="user-entry ${whisper.online ? 'online' : 'offline'}${
-      this.searchterm.length > 0 ? found : ''
-    }" title="${
-      whisper.online ? 'online' : 'offline'
-    }" data-username="${whisper.nick.toLowerCase()}">
+    <div class="user-entry ${online}${found}" title="${online}" data-username="${whisper.nick.toLowerCase()}">
       <span class="user">${whisper.nick}</span>
       <div class="right">
-        ${
-          whisper.unread > 0
-            ? `<span class="unread">${whisper.unread} new</span>`
-            : ''
-        }
+        ${unread}
         <span class="time">${time.format('DD/MM/YY')}</span>
       </div>
     </div>`);
