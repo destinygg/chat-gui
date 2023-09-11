@@ -27,6 +27,7 @@ export default class ChatUserMessage extends ChatMessage {
     this.title = '';
     this.slashme = false;
     this.mentioned = [];
+    this.watching = null;
   }
 
   html(chat = null) {
@@ -38,9 +39,9 @@ export default class ChatUserMessage extends ChatMessage {
       classes.push(...this.user.features);
       attr['data-username'] = this.user.username.toLowerCase();
 
-      if (this.user.embed) {
-        attr['data-watching'] = this.user.embed;
-        if (chat.user.embed === this.user.embed) {
+      if (this.user.watching) {
+        this.watching = this.user.watching;
+        if (chat.user.equalWatching(this.user.watching)) {
           classes.push('watching-same');
         }
       }
@@ -116,8 +117,10 @@ export default class ChatUserMessage extends ChatMessage {
     this.isown = isOwn;
   }
 
-  setWatching(embed) {
-    const msgEmbed = this.ui.getAttribute('data-watching');
-    this.ui.classList.toggle('watching-same', embed && msgEmbed === embed);
+  setWatching(user) {
+    this.ui.classList.toggle(
+      'watching-same',
+      user.watching && user.equalWatching(this.watching),
+    );
   }
 }
