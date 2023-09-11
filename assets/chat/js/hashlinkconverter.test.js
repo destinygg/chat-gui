@@ -35,15 +35,36 @@ describe('Valid embeds', () => {
       '#youtube/dPmLveKE_wY',
     ],
     [
+      'Youtube video with timestamp',
+      'https://www.youtube.com/watch?v=tZ_gn0E87Qo&t=5',
+      '#youtube/tZ_gn0E87Qo?t=5',
+    ],
+    [
+      'Youtube video shortened link with timestamp',
+      'https://youtu.be/dPmLveKE_wY?t=5',
+      '#youtube/dPmLveKE_wY?t=5',
+    ],
+    [
       'Youtube live stream shareable link',
       'https://www.youtube.com/live/jfKfPfyJRdk?feature=share',
       '#youtube/jfKfPfyJRdk',
+    ],
+    [
+      'Youtube live stream shareable link - and _',
+      'https://www.youtube.com/live/EHs-_2ddcUQ?feature=share',
+      '#youtube/EHs-_2ddcUQ',
+    ],
+    [
+      'Youtube shorts link',
+      'https://youtube.com/shorts/Bg1JpTqc0iA?si=7pzY1RnY2fEe9A8_',
+      '#youtube/Bg1JpTqc0iA',
     ],
     [
       'Rumble embed',
       'https://rumble.com/embed/v26pcdc/?pub=4',
       '#rumble/v26pcdc',
     ],
+    ['Kick stream link', 'https://kick.com/destiny', '#kick/destiny'],
   ])('%s', (_, url, expectedHashLink) => {
     const hlc = new HashLinkConverter();
     expect(hlc.convert(url)).toBe(expectedHashLink);
@@ -62,6 +83,16 @@ describe('Invalid embeds', () => {
       'Youtube link missing video id parameter',
       'https://www.youtube.com/tZ_gn0E87Qo',
       MISSING_VIDEO_ID_ERROR,
+    ],
+    [
+      'Kick VOD link',
+      'https://kick.com/video/d353657d-f6c5-40c0-9df2-645aadda1e66',
+      INVALID_LINK_ERROR,
+    ],
+    [
+      'Kick clip link',
+      'https://kick.com/destiny?clip=clip_01H96SPCHRV0E2X8Y670CGXTS4',
+      INVALID_LINK_ERROR,
     ],
     [
       'No arguments were giving after the command',

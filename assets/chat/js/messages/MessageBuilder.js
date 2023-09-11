@@ -1,9 +1,14 @@
 import MessageTypes from './MessageTypes';
 import ChatUIMessage from './ChatUIMessage';
 import ChatMessage from './ChatMessage';
+import ChatUser from '../user';
 import ChatUserMessage from './ChatUserMessage';
 import ChatEmoteMessage from './ChatEmoteMessage';
 import PinnedMessage from './PinnedMessage';
+import ChatDonationMessage from './ChatDonationMessage';
+import ChatRegularSubscriptionMessage from './subscriptions/ChatRegularSubscriptionMessage';
+import ChatGiftedSubscriptionMessage from './subscriptions/ChatGiftedSubscriptionMessage';
+import ChatMassSubscriptionMessage from './subscriptions/ChatMassSubscriptionMessage';
 
 export default class MessageBuilder {
   static element(message, classes = []) {
@@ -53,5 +58,51 @@ export default class MessageBuilder {
 
   static pinned(message, user, timestamp, uuid) {
     return new PinnedMessage(message, user, timestamp, uuid);
+  }
+
+  static subscription(data) {
+    return new ChatRegularSubscriptionMessage(
+      data.data,
+      new ChatUser(data.user),
+      data.tier,
+      data.tierLabel,
+      data.streak,
+      data.timestamp,
+      data.uuid
+    );
+  }
+
+  static gift(data) {
+    return new ChatGiftedSubscriptionMessage(
+      data.data,
+      new ChatUser(data.user),
+      data.tier,
+      data.tierLabel,
+      new ChatUser(data.recipient),
+      data.timestamp,
+      data.uuid
+    );
+  }
+
+  static massgift(data) {
+    return new ChatMassSubscriptionMessage(
+      data.data,
+      new ChatUser(data.user),
+      data.tier,
+      data.tierLabel,
+      data.quantity,
+      data.timestamp,
+      data.uuid
+    );
+  }
+
+  static donation(data) {
+    return new ChatDonationMessage(
+      data.data,
+      new ChatUser(data.user),
+      data.amount,
+      data.timestamp,
+      data.uuid
+    );
   }
 }

@@ -1,4 +1,4 @@
-import { AmazonAssociatesTagInjector } from './formatters';
+import AmazonAssociatesTagInjector from './AmazonAssociatesTagInjector';
 
 const chatStub = {
   config: {

@@ -8,7 +8,7 @@ export default class ChatUIMessage {
     this.message = message;
     /** @type Array */
     this.classes = classes;
-    /** @type JQuery */
+    /** @type HTMLElement */
     this.ui = null;
   }
 
@@ -38,4 +38,17 @@ export default class ChatUIMessage {
 
   // eslint-disable-next-line no-unused-vars
   afterRender(chat = null) {}
+
+  hide(shouldHide = true) {
+    this.ui.style.display = shouldHide ? 'none' : null;
+  }
+
+  highlight(shouldHighlight = true) {
+    this.highlighted = shouldHighlight;
+    this.ui.classList.toggle('msg-highlight', shouldHighlight);
+  }
+
+  remove() {
+    this.ui.remove();
+  }
 }

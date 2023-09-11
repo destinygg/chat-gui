@@ -32,6 +32,7 @@ module.exports = {
           '`with` is disallowed in strict mode because it makes code impossible to predict and optimize.',
       },
     ],
+    'no-continue': 'off',
   },
   ignorePatterns: ['postcss.config.js'],
   plugins: ['jest'],

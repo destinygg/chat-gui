@@ -18,7 +18,7 @@ class ChatUserFocus {
       if (!this.chat.settings.get('focusmentioned'))
         this.toggleFocus(t.closest('.msg-user').data('username'), false, true);
       this.toggleFocus(t.text());
-    } else if (t.hasClass('user')) {
+    } else if (t.hasClass('user') && !t.hasClass('tier')) {
       this.toggleFocus(t.text());
     } else if (t.hasClass('flair')) {
       this.toggleFocus(t.data('flair'), true);
@@ -46,9 +46,27 @@ class ChatUserFocus {
     if (isFlair) {
       rule = `.msg-user.${value}{opacity:1 !important;}`;
     } else if (this.chat.settings.get('focusmentioned')) {
-      rule = `.msg-pinned[data-username="${value}"],.msg-pinned[data-mentioned~="${value}"],.msg-user[data-username="${value}"],.msg-user[data-mentioned~="${value}"]{opacity:1 !important;}`;
+      rule = `
+        .msg-subscription[data-username="${value}"], .msg-subscription[data-mentioned~="${value}"],
+        .msg-giftsub[data-username="${value}"], .msg-giftsub[data-mentioned~="${value}"], .msg-giftsub[data-giftee="${value}"],
+        .msg-massgift[data-username="${value}"], .msg-massgift[data-mentioned~="${value}"],
+        .msg-donation[data-username="${value}"], .msg-donation[data-mentioned~="${value}"],
+        .msg-pinned[data-username="${value}"], .msg-pinned[data-mentioned~="${value}"],
+        .msg-user[data-username="${value}"], .msg-user[data-mentioned~="${value}"] {
+          opacity:1 !important;
+        }
+      `;
     } else {
-      rule = `.msg-pinned[data-username="${value}"],.msg-user[data-username="${value}"]{opacity:1 !important;}`;
+      rule = `
+        .msg-subscription[data-username="${value}"], 
+        .msg-giftsub[data-username="${value}"], .msg-giftsub[data-giftee="${value}"], 
+        .msg-massgift[data-username="${value}"], 
+        .msg-donation[data-username="${value}"],
+        .msg-pinned[data-username="${value}"], 
+        .msg-user[data-username="${value}"] {
+          opacity:1 !important;
+        }
+      `;
     }
     this.css.insertRule(rule, this.focused.length); // max 4294967295
     this.focused.push(value);
