@@ -116,7 +116,6 @@ class Chat {
     this.source.on('PING', (data) => this.source.send('PONG', data));
     this.source.on('CONNECTING', (data) => this.onCONNECTING(data));
     this.source.on('ME', (data) => this.onME(data));
-    this.source.on('WATCHING', (data) => this.onWATCHING(data));
     this.source.on('OPEN', (data) => this.onOPEN(data));
     this.source.on('DISPATCH', (data) => this.onDISPATCH(data));
     this.source.on('CLOSE', (data) => this.onCLOSE(data));
@@ -1013,13 +1012,6 @@ class Chat {
     }
   }
 
-  onWATCHING(data) {
-    this.user.watching = data;
-    for (const window of this.windows.values()) {
-      window.updateMessages(this);
-    }
-  }
-
   onOPEN() {
     // MessageBuilder.status(`Connection established.`).into(this)
   }
@@ -1411,6 +1403,9 @@ class Chat {
   onUPDATEUSER(data) {
     if (this.user?.id === data.id) {
       this.setUser(data);
+      for (const window of this.windows.values()) {
+        window.updateMessages(this);
+      }
     }
   }
 
