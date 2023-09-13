@@ -109,7 +109,7 @@ class ChatPoll {
     return user.hasAnyFeatures(
       UserFeatures.ADMIN,
       UserFeatures.BOT,
-      UserFeatures.MODERATOR
+      UserFeatures.MODERATOR,
     );
   }
 
@@ -177,8 +177,8 @@ class ChatPoll {
       `${
         this.poll.type === PollType.Weighted ? 'Sub-weighted poll' : 'Poll'
       } started by ${this.poll.user} for ${Math.floor(
-        this.poll.time / 1000
-      )} seconds.`
+        this.poll.time / 1000,
+      )} seconds.`,
     );
     this.ui.question.text(this.poll.question);
     this.ui.options.html(
@@ -197,9 +197,9 @@ class ChatPoll {
             <div class="opt-bar-inner" style="width: 0;"></div>
           </div>
         </div>
-      `
+      `,
         )
-        .join('')
+        .join(''),
     );
 
     this.pollStartMessage();
@@ -238,14 +238,14 @@ class ChatPoll {
 
     const winnerIndex = this.poll.totals.reduce(
       (max, x, i, arr) => (x > arr[max] ? i : max),
-      0
+      0,
     );
 
     this.ui.options.children().eq(winnerIndex).addClass('opt-winner');
 
     this.pollEndMessage(
       winnerIndex + 1,
-      this.ui.options.children().eq(winnerIndex).data('percentage')
+      this.ui.options.children().eq(winnerIndex).data('percentage'),
     );
   }
 
@@ -312,7 +312,7 @@ class ChatPoll {
     let message = `The poll has ended. Option ${winner} won!`;
     if (winnerPercentage > 0) {
       message = `The poll has ended. Option ${winner} won with ${Math.round(
-        winnerPercentage
+        winnerPercentage,
       )}% of the vote.`;
     }
 

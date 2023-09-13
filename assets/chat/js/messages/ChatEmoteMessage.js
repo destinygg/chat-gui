@@ -6,17 +6,22 @@ import { EmoteFormatter } from '../formatters';
 
 function ChatEmoteMessageCount(message) {
   if (!message || !message.combo) return;
-  let stepClass = '';
-  if (message.emotecount >= 50) stepClass = ' x50';
-  else if (message.emotecount >= 30) stepClass = ' x30';
-  else if (message.emotecount >= 20) stepClass = ' x20';
-  else if (message.emotecount >= 10) stepClass = ' x10';
-  else if (message.emotecount >= 5) stepClass = ' x5';
-  message.combo.attr('class', `chat-combo${stepClass}`);
+
+  let stepClass = 'x2';
+  if (message.emotecount >= 50) stepClass = 'x50';
+  else if (message.emotecount >= 30) stepClass = 'x30';
+  else if (message.emotecount >= 20) stepClass = 'x20';
+  else if (message.emotecount >= 10) stepClass = 'x10';
+  else if (message.emotecount >= 5) stepClass = 'x5';
+
+  message.ui.setAttribute('data-combo', message.emotecount);
+  message.ui.setAttribute('data-combo-group', stepClass);
+
+  message.combo.attr('class', `chat-combo ${stepClass}`);
   message.combo_count.text(`${message.emotecount}`);
   message.ui.append(
     message.text.detach().get(0),
-    message.combo.detach().get(0)
+    message.combo.detach().get(0),
   );
 }
 const ChatEmoteMessageCountThrottle = throttle(63, ChatEmoteMessageCount);
@@ -33,8 +38,8 @@ export default class ChatEmoteMessage extends ChatMessage {
       `<span class="text">${this.emoteFormatter.format(
         chat,
         this.message,
-        this
-      )}</span>`
+        this,
+      )}</span>`,
     );
     this.combo = $(`<span class="chat-combo"></span>`);
     this.combo_count = $(`<i class="count">${this.emotecount}</i>`);
@@ -52,7 +57,7 @@ export default class ChatEmoteMessage extends ChatMessage {
       ' ',
       this.combo_hits,
       ' ',
-      this.combo_txt
+      this.combo_txt,
     );
     this.ui.append(this.text.get(0), this.combo.get(0));
   }

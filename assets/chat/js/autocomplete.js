@@ -85,7 +85,7 @@ class ChatAutoComplete {
     /** @member jQuery */
     this.ui = $(`<div id="chat-auto-complete"><ul></ul></div>`);
     this.ui.on('click', 'li', (e) =>
-      this.select(parseInt(e.currentTarget.getAttribute('data-index'), 10))
+      this.select(parseInt(e.currentTarget.getAttribute('data-index'), 10)),
     );
     this.container = $(this.ui[0].firstElementChild);
     this.buckets = new Map();
@@ -111,7 +111,7 @@ class ChatAutoComplete {
       if (keycode === KEYCODES.TAB) {
         if (this.results.length > 0)
           this.select(
-            this.selected >= this.results.length - 1 ? 0 : this.selected + 1
+            this.selected >= this.results.length - 1 ? 0 : this.selected + 1,
           );
         e.preventDefault();
         e.stopPropagation();
@@ -192,7 +192,7 @@ class ChatAutoComplete {
         .filter(
           (a) =>
             (!a.isemote || !(criteria.useronly || useronly)) &&
-            regex.test(a.data)
+            regex.test(a.data),
         )
         .sort(sortResults)
         .slice(0, maxResults);
@@ -239,7 +239,7 @@ class ChatAutoComplete {
 
     const pre = this.criteria.orig.substr(0, this.criteria.startCaret);
     let post = this.criteria.orig.substr(
-      this.criteria.startCaret + this.criteria.word.length
+      this.criteria.startCaret + this.criteria.word.length,
     );
 
     // always add a space after our completion if there isn't one since people

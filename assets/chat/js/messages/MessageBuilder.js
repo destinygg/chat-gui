@@ -68,7 +68,7 @@ export default class MessageBuilder {
       data.tierLabel,
       data.streak,
       data.timestamp,
-      data.uuid
+      data.uuid,
     );
   }
 
@@ -80,7 +80,7 @@ export default class MessageBuilder {
       data.tierLabel,
       new ChatUser(data.recipient),
       data.timestamp,
-      data.uuid
+      data.uuid,
     );
   }
 
@@ -92,7 +92,7 @@ export default class MessageBuilder {
       data.tierLabel,
       data.quantity,
       data.timestamp,
-      data.uuid
+      data.uuid,
     );
   }
 
@@ -102,7 +102,7 @@ export default class MessageBuilder {
       new ChatUser(data.user),
       data.amount,
       data.timestamp,
-      data.uuid
+      data.uuid,
     );
   }
 }

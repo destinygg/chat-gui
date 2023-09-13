@@ -83,7 +83,7 @@ const errorstrings = new Map(
       'Your message was filtered because it contained a banned phrase.',
     duplicatephrase: 'Banned phrase already exists.',
     nophrase: "Banned phrase doesn't exist.",
-  })
+  }),
 );
 
 const hintstrings = new Map(
@@ -100,12 +100,12 @@ const hintstrings = new Map(
       'Use /ignore <nick> to hide messages from pesky chatters. You can even ignore multiple users at once - /ignore <nick_1> ... <nick_n>!',
     mutespermanent: "Mutes are never persistent, don't worry it will pass!",
     tagshint: `Use the /tag <nick> [<color> <note>] to tag users you like. There are preset colors to choose from ${tagcolors.join(
-      ', '
+      ', ',
     )}.`,
     bigscreen: `Bigscreen! Did you know you can have the chat on the left or right side of the stream by clicking the swap icon in the top left?`,
     danisold:
       'Destiny is an Amazon Associate. He earns a commission on qualifying purchases of any product on Amazon linked in Destiny.gg chat.',
-  })
+  }),
 );
 
 const settingsdefault = new Map(
@@ -135,7 +135,7 @@ const settingsdefault = new Map(
     hidensfl: false,
     fontscale: 'auto',
     censorbadwords: false,
-  })
+  }),
 );
 
 function getKeyCode(e) {

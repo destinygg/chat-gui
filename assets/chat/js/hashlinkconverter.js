@@ -8,6 +8,7 @@ class HashLinkConverter {
   constructor() {
     this.hasHttp = /^http[s]?:\/{0,2}/;
     this.youtubeLiveRegex = /^live\/([A-Za-z0-9-_]{11})$/;
+    this.youtubeShortsRegex = /^shorts\/([A-Za-z0-9-_]{11})$/;
     this.twitchClipRegex = /^[^/]+\/clip\/([A-Za-z0-9-_]*)$/;
     this.twitchVODRegex = /^videos\/(\d+)$/;
     this.rumbleEmbedRegex = /^embed\/([a-z0-9]+)\/?$/;
@@ -19,11 +20,12 @@ class HashLinkConverter {
     }
     const url = new URL(
       // if a url doesn't have a protocol, URL throws an error
-      urlString.match(this.hasHttp) ? urlString : `https://${urlString}`
+      urlString.match(this.hasHttp) ? urlString : `https://${urlString}`,
     );
     const pathname = url.pathname.slice(1);
     let match;
     let videoId;
+    let timestamp;
     switch (url.hostname) {
       case 'www.twitch.tv':
       case 'twitch.tv':
@@ -44,14 +46,24 @@ class HashLinkConverter {
         if (match) {
           return `#youtube/${match[1]}`;
         }
+        match = pathname.match(this.youtubeShortsRegex);
+        if (match) {
+          return `#youtube/${match[1]}`;
+        }
         videoId = url.searchParams.get('v');
+        timestamp = url.searchParams.get('t');
         if (!videoId) {
           throw new Error(MISSING_VIDEO_ID_ERROR);
         }
-        return `#youtube/${videoId}`;
+        return timestamp
+          ? `#youtube/${videoId}?t=${timestamp}`
+          : `#youtube/${videoId}`;
       case 'www.youtu.be':
       case 'youtu.be':
-        return `#youtube/${pathname}`;
+        timestamp = url.searchParams.get('t');
+        return timestamp
+          ? `#youtube/${pathname}?t=${timestamp}`
+          : `#youtube/${pathname}`;
       case 'www.rumble.com':
       case 'rumble.com':
         match = pathname.match(this.rumbleEmbedRegex);
@@ -61,6 +73,9 @@ class HashLinkConverter {
         throw new Error(RUMBLE_EMBED_ERROR);
       case 'www.kick.com':
       case 'kick.com':
+        if (url.searchParams.has('clip') || pathname.startsWith('video/')) {
+          throw new Error(INVALID_LINK_ERROR);
+        }
         return `#kick/${pathname}`;
       default:
         throw new Error(INVALID_LINK_ERROR);
