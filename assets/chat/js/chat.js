@@ -1203,6 +1203,17 @@ class Chat {
           `You are temporarily muted! You can chat again ${this.mutedtimer.getReadableDuration()}. Subscribe to remove the mute immediately.`,
         );
         break;
+      case 'bannedphrase': {
+        const phraseCountText =
+          data.filtered.length === 1
+            ? 'this banned phrase'
+            : 'these banned phrases';
+        const filteredPretty = data.filtered.map((p) => `"${p}"`).join(', ');
+        message = MessageBuilder.error(
+          `Your message was filtered because it contained ${phraseCountText}: ${filteredPretty}.`,
+        );
+        break;
+      }
       default:
         message = MessageBuilder.error(errorstrings.get(desc) || desc);
     }
