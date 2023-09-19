@@ -8,12 +8,14 @@ class ChatUser {
       this.username = args;
       this.createdDate = args;
       this.features = [];
+      this.watching = null;
     } else {
       this.id = args.id || null;
       this.nick = args.nick || '';
       this.username = args.nick || '';
       this.createdDate = args.createdDate || '';
       this.features = args.features || [];
+      this.watching = args.watching || null;
     }
   }
 
@@ -72,6 +74,13 @@ class ChatUser {
       return 1;
     }
     return 0;
+  }
+
+  equalWatching(embed) {
+    return (
+      this.watching?.platform === embed?.platform &&
+      this.watching?.id === embed?.id
+    );
   }
 }
 

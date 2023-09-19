@@ -102,6 +102,7 @@ class Chat {
     this.regexhighlightnicks = null;
     this.regexhighlightself = null;
     this.replyusername = null;
+    this.watchingfocus = false;
 
     // An interface to tell the chat to do things via chat commands, or via emit
     // e.g. control.emit('CONNECT', 'ws://localhost:9001') is essentially chat.cmdCONNECT('ws://localhost:9001')
@@ -350,6 +351,12 @@ class Chat {
         this.adjustInputHeight();
         this.input.focus();
       }
+    });
+
+    // Watching focus
+    this.ui.on('click touch', '#chat-watching-focus-btn', () => {
+      this.watchingfocus = !this.watchingfocus;
+      this.ui.toggleClass('watching-focus', this.watchingfocus);
     });
 
     // Chat focus / menu close when clicking on some areas
@@ -686,6 +693,12 @@ class Chat {
         data.createdDate !== user.createdDate
       ) {
         user.createdDate = data.createdDate;
+      }
+      if (
+        Object.hasOwn(data, 'watching') &&
+        !user.equalWatching(data.watching)
+      ) {
+        user.watching = data.watching;
       }
     }
     return user;
@@ -1059,10 +1072,21 @@ class Chat {
     ) {
       if (win.lastmessage.type === MessageTypes.EMOTE) {
         win.lastmessage.incEmoteCount();
+
+        if (this.user.equalWatching(usr.watching)) {
+          win.lastmessage.ui.classList.toggle('watching-same', true);
+        }
+
         this.mainwindow.update();
       } else {
         win.removeLastMessage();
-        MessageBuilder.emote(textonly, data.timestamp, 2).into(this);
+        const msg = MessageBuilder.emote(textonly, data.timestamp, 2).into(
+          this,
+        );
+
+        if (this.user.equalWatching(usr.watching)) {
+          msg.ui.classList.add('watching-same');
+        }
       }
     } else if (!this.resolveMessage(data.nick, data.data)) {
       MessageBuilder.message(data.data, usr, data.timestamp).into(this);
@@ -1396,6 +1420,9 @@ class Chat {
   onUPDATEUSER(data) {
     if (this.user?.id === data.id) {
       this.setUser(data);
+      for (const window of this.windows.values()) {
+        window.updateMessages(this);
+      }
     }
   }
 

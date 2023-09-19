@@ -200,6 +200,11 @@ hr {
       center;
     background-size: contain;
   }
+  #chat-watching-focus-btn .btn-icon {
+    background: transparent url('../img/icon-watching.svg') no-repeat center
+      center;
+    background-size: contain;
+  }
   #chat-settings-btn .btn-icon {
     background: transparent url('../img/icon-settings.svg') no-repeat center
       center;
@@ -836,8 +841,20 @@ hr {
   }
 }
 
+.watching-focus {
+  .msg-emote,
+  .msg-user {
+    opacity: 0.3;
+
+    &.watching-same,
+    &.msg-highlight {
+      opacity: 1;
+    }
+  }
+}
+
 /* Focus or highlight a line */
-.focus .msg-chat {
+.focus:not(.watching-focus) .msg-chat {
   opacity: 0.3;
 
   &.msg-pinned {
