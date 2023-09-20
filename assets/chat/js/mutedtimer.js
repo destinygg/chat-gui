@@ -74,7 +74,7 @@ class MutedTimer {
 
   getPlaceholderText() {
     return `Sorry, ${
-      this.chat.user.username
+      this.chat.user.displayName
     }, you are muted. You can chat again ${this.getReadableDuration()}.`;
   }
 

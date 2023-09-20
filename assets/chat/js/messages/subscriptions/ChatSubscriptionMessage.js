@@ -40,7 +40,7 @@ export default class ChatSubscriptionMessage extends ChatEventMessage {
       ?.content.cloneNode(true).firstElementChild;
     user.title = this.title;
     user.classList.add(colorFlair?.name);
-    user.innerText = this.user.username;
+    user.innerText = this.user.displayName;
 
     const tierLabel = this.tierLabel ?? `Tier ${this.tier}`;
 
