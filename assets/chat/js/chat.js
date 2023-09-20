@@ -871,7 +871,7 @@ class Chat {
 
   censor(nick) {
     for (const message of this.mainwindow.messages) {
-      if (message.user?.username === nick) {
+      if (message.user?.username === nick.toLowerCase()) {
         message.censor(parseInt(this.settings.get('showremoved') || '1', 10));
       }
     }
