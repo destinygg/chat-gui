@@ -48,6 +48,7 @@
         </a>
         <a id="chat-whisper-btn" class="chat-tool-btn" title="Whispers">
           <i class="btn-icon"></i>
+          <span id="chat-whisper-unread-indicator"></span>
         </a>
       </div>
       <div class="chat-tools-group">
@@ -317,8 +318,23 @@
       </div>
       <div class="scrollable">
         <div class="content">
-          <ul></ul>
+          <div class="section whispers-unread">
+            <p class="title">Unread</p>
+            <div class="whispers"></div>
+          </div>
+          <div class="section whispers-read">
+            <p class="title">Read</p>
+            <div class="whispers"></div>
+          </div>
         </div>
+      </div>
+      <div id="chat-whisper-users-search">
+        <input
+          type="text"
+          class="form-control"
+          value=""
+          placeholder="Username search ..."
+        />
       </div>
     </div>
   </div>
