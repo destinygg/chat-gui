@@ -1204,13 +1204,8 @@ class Chat {
         );
         break;
       case 'bannedphrase': {
-        const phraseCountText =
-          data.filtered.length === 1
-            ? 'this banned phrase'
-            : 'these banned phrases';
-        const filteredPretty = data.filtered.map((p) => `"${p}"`).join(', ');
         message = MessageBuilder.error(
-          `Your message was filtered because it contained ${phraseCountText}: ${filteredPretty}.`,
+          `Your message was filtered because it contained this banned phrase: "${data.filtered}".`,
         );
         break;
       }
