@@ -81,6 +81,8 @@ const errorstrings = new Map(
       "You aren't allowed to chat. Either you haven't picked a username, or a mod disabled your privileges.",
     duplicatephrase: 'Banned phrase already exists.',
     nophrase: "Banned phrase doesn't exist.",
+    invalidphrase:
+      'Invalid phrase provided. Either the phrase was empty, or its regex was invalid.',
   }),
 );
 
