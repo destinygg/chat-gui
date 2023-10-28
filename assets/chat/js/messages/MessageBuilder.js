@@ -9,6 +9,7 @@ import ChatDonationMessage from './ChatDonationMessage';
 import ChatRegularSubscriptionMessage from './subscriptions/ChatRegularSubscriptionMessage';
 import ChatGiftedSubscriptionMessage from './subscriptions/ChatGiftedSubscriptionMessage';
 import ChatMassSubscriptionMessage from './subscriptions/ChatMassSubscriptionMessage';
+import ChatGenericEventMessage from './ChatGenericEventMessage';
 
 export default class MessageBuilder {
   static element(message, classes = []) {
@@ -58,6 +59,10 @@ export default class MessageBuilder {
 
   static pinned(message, user, timestamp, uuid) {
     return new PinnedMessage(message, user, timestamp, uuid);
+  }
+
+  static event(options) {
+    return new ChatGenericEventMessage(options);
   }
 
   static subscription(data) {

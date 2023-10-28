@@ -53,6 +53,7 @@ import makeSafeForRegex, {
 import { HashLinkConverter, MISSING_ARG_ERROR } from './hashlinkconverter';
 import ChatCommands from './commands';
 import MessageTemplateHTML from '../../views/templates.html';
+import { EmoteFormatter } from './formatters';
 
 class Chat {
   constructor(config) {
@@ -85,6 +86,7 @@ class Chat {
     this.flairs = [];
     this.flairsMap = new Map();
     this.emoteService = new EmoteService();
+    this.emoteformatter = new EmoteFormatter();
 
     this.user = new ChatUser();
     this.users = new Map();
@@ -141,6 +143,10 @@ class Chat {
     this.source.on('MASSGIFT', (data) => this.onMASSGIFT(data));
     this.source.on('DONATION', (data) => this.onDONATION(data));
     this.source.on('UPDATEUSER', (data) => this.onUPDATEUSER(data));
+    this.source.on('THEMECHANGED', (data) => this.onTHEMECHANGED(data));
+    this.source.on('EMOTECHANGED', (data) => this.onEMOTECHANGED(data));
+    this.source.on('EMOTEADDED', (data) => this.onEMOTEADDED(data));
+    this.source.on('EMOTEREMOVED', (data) => this.onEMOTEREMOVED(data));
 
     this.control.on('SEND', (data) => this.cmdSEND(data));
     this.control.on('HINT', (data) => this.cmdHINT(data));
@@ -503,18 +509,35 @@ class Chat {
     await this.loadFlairs();
   }
 
-  async loadEmotes() {
+  async reloadEmotes(cacheKey, updateMessages = true) {
+    this.config.cacheKey = cacheKey;
+    await this.loadEmotes();
+
+    if (updateMessages) {
+      for (const window of this.windows.values()) {
+        window.updateMessages(this, true);
+      }
+    }
+  }
+
+  async loadEmotes(cssOnly = false) {
+    const emotecss = document.getElementById('emotescss');
+    if (emotecss) emotecss.remove();
     Chat.loadCss(
       `${this.config.cdn.base}/emotes/emotes.css?_=${this.config.cacheKey}`,
+      'emotescss',
     );
-    return fetch(
-      `${this.config.cdn.base}/emotes/emotes.json?_=${this.config.cacheKey}`,
-    )
-      .then((res) => res.json())
-      .then((json) => {
-        this.setEmotes(json);
-      })
-      .catch(() => {});
+    if (!cssOnly) {
+      return fetch(
+        `${this.config.cdn.base}/emotes/emotes.json?_=${this.config.cacheKey}`,
+      )
+        .then((res) => res.json())
+        .then((json) => {
+          this.setEmotes(json);
+        })
+        .catch(() => {});
+    }
+    return null;
   }
 
   async loadFlairs() {
@@ -561,6 +584,7 @@ class Chat {
 
   setEmotes(emotes) {
     this.emoteService.setEmotes(emotes);
+    this.autocomplete.removeEmotes();
     this.emoteService
       .emotesForUser(this.user)
       .map((e) => e.prefix)
@@ -1397,6 +1421,49 @@ class Chat {
     if (this.user?.id === data.id) {
       this.setUser(data);
     }
+  }
+
+  onTHEMECHANGED(data) {
+    this.reloadEmotes(data.cacheKey);
+
+    MessageBuilder.event({
+      infoHtml: `Theme changed to ${data.label}`,
+      borderColor: data.color,
+    }).into(this);
+  }
+
+  async onEMOTECHANGED(data) {
+    await this.reloadEmotes(data.cacheKey);
+
+    // Only send a message if prefix changed.
+    if (data.oldEmote.prefix !== data.newEmote.prefix) {
+      MessageBuilder.event({
+        infoHtml: `${data.oldEmote.prefix} was changed to ${
+          data.newEmote.prefix
+        } ${this.emoteformatter.format(this, data.newEmote.prefix)}`,
+      }).into(this);
+    }
+  }
+
+  async onEMOTEADDED(data) {
+    await this.reloadEmotes(data.cacheKey, false);
+
+    MessageBuilder.event({
+      infoHtml: `${data.emote.prefix} was added ${this.emoteformatter.format(
+        this,
+        data.emote.prefix,
+      )}`,
+      borderColor: 'success',
+    }).into(this);
+  }
+
+  onEMOTEREMOVED(data) {
+    this.reloadEmotes(data.cacheKey);
+
+    MessageBuilder.event({
+      infoHtml: `${data.prefix} was removed`,
+      borderColor: 'fail',
+    }).into(this);
   }
 
   cmdSHOWPOLL() {
@@ -2303,7 +2370,7 @@ class Chat {
   }
 
   static removeSlashCmdFromText(msg) {
-    return msg.replace(regexslashcmd, '').trim();
+    return msg ? msg.replace(regexslashcmd, '').trim() : '';
   }
 
   static extractNicks(text) {
@@ -2368,12 +2435,13 @@ class Chat {
     return nanoseconds;
   }
 
-  static loadCss(url) {
+  static loadCss(url, id) {
     const link = document.createElement('link');
     link.href = url;
     link.type = 'text/css';
     link.rel = 'stylesheet';
     link.media = 'screen';
+    if (id) link.id = id;
     document.getElementsByTagName('head')[0].appendChild(link);
     return link;
   }

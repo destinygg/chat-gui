@@ -232,6 +232,16 @@ class ChatAutoComplete {
     }
   }
 
+  removeEmotes() {
+    this.buckets.forEach((bucket, key) => {
+      if (key !== '/') {
+        bucket.forEach((ac, str) => {
+          if (ac.isemote) bucket.delete(str);
+        });
+      }
+    });
+  }
+
   select(index) {
     this.selected = Math.min(index, this.results.length - 1);
     const result = this.results[this.selected];

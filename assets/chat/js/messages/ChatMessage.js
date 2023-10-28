@@ -53,6 +53,11 @@ export default class ChatMessage extends ChatUIMessage {
     );
   }
 
+  rebuildTxt(chat) {
+    const text = this.buildMessageTxt(chat);
+    this.ui.getElementsByClassName('text')[0].outerHTML = text;
+  }
+
   buildMessageTxt(chat) {
     // TODO we strip off the `/me ` of every message -- must be a better way to do this
     let msg =

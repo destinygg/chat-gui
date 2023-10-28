@@ -8,6 +8,7 @@ export { default as ChatUserMessage } from './ChatUserMessage';
 export { default as ChatGiftedSubscriptionMessage } from './subscriptions/ChatGiftedSubscriptionMessage';
 export { default as ChatMassSubscriptionMessage } from './subscriptions/ChatMassSubscriptionMessage';
 export { default as ChatRegularSubscriptionMessage } from './subscriptions/ChatRegularSubscriptionMessage';
+export { default as ChatGenericEventMessage } from './ChatGenericEventMessage';
 export {
   default as PinnedMessage,
   checkIfPinWasDismissed,
