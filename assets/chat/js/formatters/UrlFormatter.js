@@ -80,11 +80,16 @@ export default class UrlFormatter {
         } catch (err) {
           // ignore
         }
+
         const maxUrlLength = 90;
         let urlText = normalizedUrl;
-        if (urlText.length > maxUrlLength) {
+        if (
+          !(chat.settings.get('showentireurl') ?? false) &&
+          urlText.length > maxUrlLength
+        ) {
           urlText = `${urlText.slice(0, 40)}...${urlText.slice(-40)}`;
         }
+
         const extra = self.encodeUrl(decodedUrl.substring(m[0].length));
         const href = `${scheme ? '' : 'http://'}${normalizedUrl}`;
 
