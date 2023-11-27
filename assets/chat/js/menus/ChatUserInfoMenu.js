@@ -207,7 +207,7 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
           [
             this.clickedNick,
             providedDuration,
-            `${this.clickedNick} banned by ${this.chat.user.nick}.`,
+            `${this.clickedNick} banned by ${this.chat.user.displayName}.`,
           ],
           'IPBAN',
         );
@@ -233,7 +233,7 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     const selectedUser = [...message[0].querySelectorAll('.user')].find(
       (user) => user.innerText.toLowerCase() === this.clickedNick.toLowerCase(),
     );
-    const prettyNick = selectedUser.innerText;
+    const displayName = selectedUser.innerText;
     const tagNote = this.chat.taggednotes.get(this.clickedNick);
     const usernameFeatures = selectedUser.classList.value;
 
@@ -265,7 +265,7 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
       this.flairSubheader.style.display = 'none';
     }
 
-    const messageList = this.createMessages();
+    const messageList = this.createMessages(displayName);
     if (messageList.length === 0) {
       this.messagesList.toggleClass('hidden', true);
       this.messagesSubheader.style.display = 'none';
@@ -282,7 +282,7 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     this.messagesContainer.empty();
     this.flairList.empty();
 
-    this.header.text(prettyNick);
+    this.header.text(displayName);
     this.header.addClass(usernameFeatures);
     this.flairList.append(featuresList);
     messageList.forEach((element) => {
@@ -320,7 +320,7 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     return features !== '' ? `<span class="features">${features}</span>` : '';
   }
 
-  createMessages() {
+  createMessages(nick) {
     const displayedMessages = [];
     if (this.messageArray.length > 0) {
       let nextMsg = this.messageArray[0].next('.msg-continue');
@@ -330,7 +330,6 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
       }
       this.messageArray.forEach((element) => {
         const text = element.find('.text')[0].innerText;
-        const nick = element.data('username');
 
         // Create a new `ChatUser` to remove username styles for a cleaner look.
         const msg = MessageBuilder.message(text, new ChatUser(nick));
