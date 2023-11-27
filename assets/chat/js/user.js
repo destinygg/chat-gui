@@ -10,46 +10,48 @@ import UserFeature from './features';
 
 class ChatUser {
   /**
+   * User's immutable ID.
+   * @type {?Number}
+   */
+  id = null;
+
+  /**
+   * User's name that is displayed in chat (i.e. with case preserved).
+   * @type {string}
+   */
+  displayName = '';
+
+  /**
+   * User's normalized (lowercase) name.
+   * @type {string}
+   */
+  username = '';
+
+  /**
+   * User's creation date as an RFC3339 date-time string (e.g. '2069-04-20T13:37:00Z').
+   * @type {string}
+   */
+  createdDate = '';
+
+  /**
+   * User's features (a.k.a. flairs).
+   * @type {[]string}
+   */
+  features = [];
+
+  /**
    * @param {string|User} user
    */
-  constructor(user = {}) {
+  constructor(user = '') {
     if (typeof user === 'string') {
-      /**
-       * User's immutable ID.
-       * @type {?Number}
-       * @public
-       */
-      this.id = null;
-      /**
-       * User's name that is displayed in chat (i.e. with case preserved).
-       * @type {string}
-       * @public
-       */
       this.displayName = user;
-      /**
-       * User's normalized (lowercase) name.
-       * @type {string}
-       * @public
-       */
       this.username = this.displayName.toLowerCase();
-      /**
-       * User's creation date as an RFC3339 date-time string (e.g. '2069-04-20T13:37:00Z').
-       * @type {string}
-       * @public
-       */
-      this.createdDate = '';
-      /**
-       * User's features (a.k.a. flairs).
-       * @type {[]string}
-       * @public
-       */
-      this.features = [];
     } else {
-      this.id = user.id || null;
-      this.displayName = user.nick || '';
-      this.username = this.displayName.toLowerCase() || '';
-      this.createdDate = user.createdDate || '';
-      this.features = user.features || [];
+      this.id = user.id;
+      this.displayName = user.nick;
+      this.username = this.displayName.toLowerCase();
+      this.createdDate = user.createdDate;
+      this.features = user.features;
     }
   }
 
