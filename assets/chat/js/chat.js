@@ -972,7 +972,12 @@ class Chat {
         users.push(this.addUser(data.recipient));
       }
       users.forEach((u) =>
-        this.autocomplete.add(u.username, false, Date.now()),
+        {
+          const username = typeof u.username === 'string' ?
+            u.username.toLowerCase()
+            : u.username;
+          this.autocomplete.add(username, false, Date.now());
+        }
       );
     }
   }
