@@ -971,14 +971,13 @@ class Chat {
       if (data.recipient) {
         users.push(this.addUser(data.recipient));
       }
-      users.forEach((u) =>
-        {
-          const username = typeof u.username === 'string' ?
-            u.username.toLowerCase()
+      users.forEach((u) => {
+        const username =
+          typeof u.username === 'string'
+            ? u.username.toLowerCase()
             : u.username;
-          this.autocomplete.add(username, false, Date.now());
-        }
-      );
+        this.autocomplete.add(username, false, Date.now());
+      });
     }
   }
 
