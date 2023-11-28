@@ -972,7 +972,7 @@ class Chat {
         users.push(this.addUser(data.recipient));
       }
       users.forEach((u) =>
-        this.autocomplete.add(u.username, false, Date.now()),
+        this.autocomplete.add(u.displayName, false, Date.now()),
       );
     }
   }
