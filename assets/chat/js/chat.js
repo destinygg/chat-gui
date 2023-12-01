@@ -736,6 +736,7 @@ class Chat {
         win.lastmessage &&
         !win.lastmessage.target &&
         win.lastmessage.user &&
+        (!win.lastmessage.ignored || win.lastmessage.continued) && // messages should not appear as "continued" if the previous message is ignored and was the start of the thread
         win.lastmessage.user.username === message.user.username;
       // set highlighted state
       message.highlighted = this.shouldHighlightMessage(message);

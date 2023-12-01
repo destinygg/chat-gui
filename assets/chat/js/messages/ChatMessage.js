@@ -146,4 +146,20 @@ export default class ChatMessage extends ChatUIMessage {
     this.ui.classList.toggle('msg-own', isOwn);
     this.isown = isOwn;
   }
+
+  /**
+   * @param {ChatMessage} lastMessage
+   */
+  setContinued(lastMessage) {
+    this.continued =
+      lastMessage &&
+      !lastMessage.target &&
+      lastMessage.user &&
+      (!lastMessage.ignored || lastMessage.continued) && // messages should not appear as "continued" if the previous message is ignored and was the start of the thread
+      lastMessage.user.username === this.user.username;
+
+    this.ui.classList.toggle('msg-continue', this.continued);
+    const ctrl = this.ui.querySelector('.ctrl');
+    if (ctrl) ctrl.textContent = this.continued ? '' : ': ';
+  }
 }

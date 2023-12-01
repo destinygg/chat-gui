@@ -122,7 +122,7 @@ class ChatWindow extends EventEmitter {
    * this window.
    */
   updateMessages(chat) {
-    for (const message of this.messages) {
+    for (const [i, message] of this.messages.entries()) {
       if (message.type !== MessageTypes.UI) {
         message.updateTimeFormat();
       }
@@ -134,6 +134,7 @@ class ChatWindow extends EventEmitter {
         message.ignore(chat.ignored(username, message.message));
         message.highlight(chat.shouldHighlightMessage(message));
         if (message.type === MessageTypes.USER) {
+          message.setContinued(this.messages[i - 1]);
           message.setTag(chat.taggednicks.get(username));
         }
         message.setTagTitle(chat.taggednotes.get(username));
