@@ -133,7 +133,9 @@ class ChatWindow extends EventEmitter {
         message.setOwnMessage(username === chat.user.username);
         message.ignore(chat.ignored(username, message.message));
         message.highlight(chat.shouldHighlightMessage(message));
-        message.setTag(chat.taggednicks.get(username));
+        if (message.type === MessageTypes.USER) {
+          message.setTag(chat.taggednicks.get(username));
+        }
         message.setTagTitle(chat.taggednotes.get(username));
 
         if (message.moderated) {
