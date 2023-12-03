@@ -27,7 +27,6 @@ export default class ChatUserMessage extends ChatMessage {
     this.title = '';
     this.slashme = false;
     this.mentioned = [];
-    this.watching = null;
   }
 
   html(chat = null) {
@@ -115,12 +114,5 @@ export default class ChatUserMessage extends ChatMessage {
   setOwnMessage(isOwn) {
     this.ui.classList.toggle('msg-own', isOwn);
     this.isown = isOwn;
-  }
-
-  setWatching(user) {
-    this.ui.classList.toggle(
-      'watching-same',
-      user.watching && user.equalWatching(this.watching),
-    );
   }
 }
