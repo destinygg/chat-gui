@@ -11,6 +11,7 @@ module.exports = {
   },
   rules: {
     'class-methods-use-this': 'off',
+    'import/no-extraneous-dependencies': ['error', { devDependencies: true }],
     'no-plusplus': ['error', { allowForLoopAfterthoughts: true }],
     'no-param-reassign': ['error', { props: false }],
     'prefer-destructuring': ['error', { object: true, array: false }],

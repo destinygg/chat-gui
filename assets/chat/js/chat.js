@@ -2,6 +2,7 @@ import { fetch } from 'whatwg-fetch';
 import $ from 'jquery';
 import { debounce } from 'throttle-debounce';
 import moment from 'moment';
+import { Tooltip } from 'bootstrap';
 import {
   KEYCODES,
   DATE_FORMATS,
@@ -265,6 +266,9 @@ class Chat {
       document.getElementsByTagName('head')[0].appendChild(link);
       return link.sheet;
     })();
+
+    const tooltipList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    tooltipList.forEach((el) => new Tooltip(el));
 
     this.ishidden = (document.visibilityState || 'visible') !== 'visible';
     this.output = this.ui.find('#chat-output-frame');
