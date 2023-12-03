@@ -641,8 +641,8 @@ class Chat {
     const nicks = [...(this.settings.get('highlightnicks') || [])].filter(
       (a) => a !== '',
     );
-    this.regexhighlightself = this.user.nick
-      ? new RegExp(`\\b(?:${this.user.nick})\\b`, 'i')
+    this.regexhighlightself = this.user.displayName
+      ? new RegExp(`\\b(?:${this.user.displayName})\\b`, 'i')
       : null;
     this.regexhighlightcustom =
       cust.length > 0 ? new RegExp(`\\b(?:${cust.join('|')})\\b`, 'i') : null;
@@ -731,18 +731,15 @@ class Chat {
       message.slashme =
         message.message.substring(0, 4).toLowerCase() === '/me ';
       // check if this is the current users message
-      message.isown =
-        message.user.username.toLowerCase() ===
-        this.user.username.toLowerCase();
+      message.isown = message.user.username === this.user.username;
       // get mentions from message
       message.mentioned = Chat.extractNicks(message.message).filter((a) =>
         this.users.has(a.toLowerCase()),
       );
       // set tagged state
-      message.tag = this.taggednicks.get(message.user.nick.toLowerCase());
+      message.tag = this.taggednicks.get(message.user.username);
       // set tagged note
-      message.title =
-        this.taggednotes.get(message.user.nick.toLowerCase()) || '';
+      message.title = this.taggednotes.get(message.user.username) || '';
     }
 
     // Populate highlight for this $message
@@ -752,8 +749,7 @@ class Chat {
         win.lastmessage &&
         !win.lastmessage.target &&
         win.lastmessage.user &&
-        win.lastmessage.user.username.toLowerCase() ===
-          message.user.username.toLowerCase();
+        win.lastmessage.user.username === message.user.username;
       // set highlighted state
       message.highlighted = this.shouldHighlightMessage(message);
     }
@@ -767,7 +763,7 @@ class Chat {
     win.addMessage(this, message);
 
     // Hide the message if the user is ignored
-    if (message.user && this.ignored(message.user.nick, message.message)) {
+    if (message.user && this.ignored(message.user.username, message.message)) {
       message.ignore();
     }
 
@@ -780,7 +776,7 @@ class Chat {
       !message.ignored
     ) {
       Chat.showNotification(
-        `${message.user.username} said ...`,
+        `${message.user.displayName} said ...`,
         message.message,
         message.timestamp.valueOf(),
         this.settings.get('notificationtimeout'),
@@ -793,7 +789,7 @@ class Chat {
   resolveMessage(nick, str) {
     for (const message of this.unresolved) {
       if (
-        this.user.username.toLowerCase() === nick.toLowerCase() &&
+        this.user.username === nick.toLowerCase() &&
         message.message === str
       ) {
         this.unresolved.splice(this.unresolved.indexOf(message), 1);
@@ -884,7 +880,7 @@ class Chat {
 
   censor(nick) {
     for (const message of this.mainwindow.messages) {
-      if (message.user?.username === nick) {
+      if (message.user?.username === nick.toLowerCase()) {
         message.censor(parseInt(this.settings.get('showremoved') || '1', 10));
       }
     }
@@ -892,8 +888,8 @@ class Chat {
     this.mainwindow.update();
   }
 
-  ignored(nick, text = null) {
-    const ignore = this.ignoring.has(nick.toLowerCase());
+  ignored(username, text = null) {
+    const ignore = this.ignoring.has(username);
     if (!ignore && text !== null) {
       return (
         (this.settings.get('ignorementions') &&
@@ -942,7 +938,7 @@ class Chat {
 
   setDefaultPlaceholderText() {
     const placeholderText = this.authenticated
-      ? `Write something ${this.user.username} ...`
+      ? `Write something ${this.user.displayName} ...`
       : `Write something ...`;
     this.input.attr('placeholder', placeholderText);
   }
@@ -988,7 +984,9 @@ class Chat {
       if (data.recipient) {
         users.push(this.addUser(data.recipient));
       }
-      users.forEach((u) => this.autocomplete.add(u.nick, false, Date.now()));
+      users.forEach((u) =>
+        this.autocomplete.add(u.displayName, false, Date.now()),
+      );
     }
   }
 
@@ -1026,7 +1024,7 @@ class Chat {
   onNAMES(data) {
     MessageBuilder.status(
       `Connected as ${
-        this.authenticated ? this.user.username : 'Guest'
+        this.authenticated ? this.user.displayName : 'Guest'
       }. Serving ${data.connectioncount || 0} connections and ${
         data.users.length
       } users.`,
@@ -1104,14 +1102,14 @@ class Chat {
   onVOTECAST(data) {
     const usr = this.users.get(data.nick.toLowerCase());
     this.chatpoll.castVote(data, usr);
-    if (data.nick.toLowerCase() === this.user.nick.toLowerCase()) {
+    if (data.nick.toLowerCase() === this.user.username) {
       this.chatpoll.markVote(data.vote);
     }
   }
 
   onMUTE(data) {
     // data.data is the nick which has been banned
-    if (this.user.username.toLowerCase() === data.data.toLowerCase()) {
+    if (this.user.username === data.data.toLowerCase()) {
       MessageBuilder.command(
         `You have been muted by ${data.nick}.`,
         data.timestamp,
@@ -1133,7 +1131,7 @@ class Chat {
   }
 
   onUNMUTE(data) {
-    if (this.user.username.toLowerCase() === data.data.toLowerCase()) {
+    if (this.user.username === data.data.toLowerCase()) {
       MessageBuilder.command(
         `You have been unmuted by ${data.nick}.`,
         data.timestamp,
@@ -1150,7 +1148,7 @@ class Chat {
 
   onBAN(data) {
     // data.data is the nick which has been banned, no info about duration
-    if (this.user.username.toLowerCase() === data.data.toLowerCase()) {
+    if (this.user.username === data.data.toLowerCase()) {
       MessageBuilder.command(
         `You have been banned by ${data.nick}. Check your profile for more information.`,
         data.timestamp,
@@ -1166,7 +1164,7 @@ class Chat {
   }
 
   onUNBAN(data) {
-    if (this.user.username.toLowerCase() === data.data.toLowerCase()) {
+    if (this.user.username === data.data.toLowerCase()) {
       MessageBuilder.command(
         `You have been unbanned by ${data.nick}.`,
         data.timestamp,
@@ -1326,7 +1324,7 @@ class Chat {
       } else {
         conv.unread += 1;
       }
-      this.replyusername = user.username;
+      this.replyusername = user.displayName;
       this.menus.get('whisper-users').redraw();
       this.redrawWindowIndicators();
     }
@@ -1528,9 +1526,7 @@ class Chat {
         ).into(this);
       }
     } else if (
-      parts.some(
-        (username) => username.toLowerCase() === this.user.nick.toLowerCase(),
-      )
+      parts.some((username) => username.toLowerCase() === this.user.username)
     ) {
       MessageBuilder.info("You can't add yourself to your ignore list.").into(
         this,
@@ -1753,7 +1749,7 @@ class Chat {
   cmdWHISPER(parts) {
     if (!parts[0] || !nickregex.test(parts[0])) {
       MessageBuilder.error('Invalid nick - /msg nick message').into(this);
-    } else if (parts[0].toLowerCase() === this.user.username.toLowerCase()) {
+    } else if (parts[0].toLowerCase() === this.user.username) {
       MessageBuilder.error('Cannot send a message to yourself').into(this);
     } else {
       const data = parts.slice(1, parts.length).join(' ');
@@ -1794,7 +1790,7 @@ class Chat {
       return;
     }
     const n = parts[0].toLowerCase();
-    if (n === this.user.username.toLowerCase()) {
+    if (n === this.user.username) {
       MessageBuilder.error('Cannot tag yourself').into(this);
       return;
     }
@@ -2007,7 +2003,7 @@ class Chat {
     const win = this.getActiveWindow();
     const lastuser =
       win.lastmessage && win.lastmessage.user
-        ? win.lastmessage.user.username
+        ? win.lastmessage.user.displayName
         : null;
     const username =
       this.replyusername !== null && this.replyusername !== ''
@@ -2238,7 +2234,7 @@ class Chat {
     const win = new ChatWindow(
       normalized,
       'chat-output-whisper',
-      user.nick,
+      user.displayName,
     ).into(this);
     let once = true;
     win.on('show', () => {
@@ -2247,7 +2243,7 @@ class Chat {
         MessageBuilder.info(`Messages between you and ${nick}`).into(this, win);
         fetch(
           `${this.config.api.base}/api/messages/usr/${encodeURIComponent(
-            user.nick,
+            user.displayName,
           )}/inbox`,
           { credentials: 'include' },
         )

@@ -108,6 +108,7 @@ const settingsdefault = new Map(
   Object.entries({
     schemaversion: 2,
     showtime: false,
+    showentireurl: false,
     hideflairicons: false,
     profilesettings: false,
     timestampformat: 'HH:mm',

@@ -17,7 +17,7 @@ export default class ChatEventMessage extends ChatMessage {
       ?.content.cloneNode(true).firstElementChild;
 
     if (this.user && this.user.username)
-      eventTemplate.dataset.username = this.user.username.toLowerCase();
+      eventTemplate.dataset.username = this.user.username;
     if (this.mentioned && this.mentioned.length > 0)
       eventTemplate.dataset.mentioned = this.mentioned.join(' ').toLowerCase();
     if (this.slashme) eventTemplate.classList.add('msg-me');

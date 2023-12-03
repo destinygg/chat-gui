@@ -34,7 +34,7 @@ export default class ChatDonationMessage extends ChatEventMessage {
 
     user.title = this.title;
     user.classList.add(colorFlair?.name);
-    user.innerText = this.user.username;
+    user.innerText = this.user.displayName;
 
     eventTemplate.querySelector('.event-info').append(
       user,
