@@ -2,7 +2,7 @@ import { fetch } from 'whatwg-fetch';
 import $ from 'jquery';
 import { debounce } from 'throttle-debounce';
 import moment from 'moment';
-import { Tooltip } from 'bootstrap';
+import tippy, { roundArrow } from 'tippy.js';
 import {
   KEYCODES,
   DATE_FORMATS,
@@ -267,8 +267,15 @@ class Chat {
       return link.sheet;
     })();
 
-    const tooltipList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-    tooltipList.forEach((el) => new Tooltip(el));
+    // Tooltips
+    tippy('[data-tippy-content]', {
+      arrow: roundArrow,
+      delay: 0,
+      duration: 0,
+      maxWidth: 250,
+      hideOnClick: false,
+      theme: 'dgg',
+    });
 
     this.ishidden = (document.visibilityState || 'visible') !== 'visible';
     this.output = this.ui.find('#chat-output-frame');

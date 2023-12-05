@@ -49,7 +49,6 @@ switch ((Chat.reqParam('t') || 'embed').toUpperCase()) {
 
   case 'EMBED':
   default:
-    html.attr('data-bs-theme', 'dark');
     chat
       .withGui(embedHtml)
       .then(() => chat.loadEmotesAndFlairs())

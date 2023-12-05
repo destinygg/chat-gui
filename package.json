@@ -40,6 +40,7 @@
     "overlayscrollbars": "^2.0.3",
     "sass-loader": "^13.2.0",
     "throttle-debounce": "~5.0.0",
+    "tippy.js": "^6.3.7",
     "whatwg-fetch": "^3.6.2"
   },
   "devDependencies": {
@@ -48,7 +49,6 @@
     "@babel/preset-env": "^7.14.2",
     "autoprefixer": "^10.2.5",
     "babel-loader": "^9.1.2",
-    "bootstrap": "^5.3.2",
     "css-loader": "^6.7.3",
     "eslint": "^8.27.0",
     "eslint-config-airbnb-base": "^15.0.0",

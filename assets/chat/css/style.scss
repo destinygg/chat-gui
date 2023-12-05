@@ -1,7 +1,8 @@
 @import '../../common';
 @import '../../icons/icons';
 @import '~normalize.css';
-@import '~bootstrap';
+@import '~tippy.js/dist/tippy.css';
+@import '~tippy.js/dist/svg-arrow.css';
 @import url('https://fonts.googleapis.com/css?family=Roboto:400,500,600,700');
 
 *,
@@ -2179,4 +2180,14 @@ body.pref-fontscale[data-fontscale='10'] {
 @font-face {
   font-family: 'Among Us';
   src: url('../../../fonts/AmongUs-Regular.ttf') format('truetype');
+}
+
+.tippy-box[data-theme~='dgg'] {
+  text-align: center;
+  background-color: white;
+  color: #000;
+}
+
+.tippy-box[data-theme~='dgg'] > .tippy-svg-arrow {
+  fill: white;
 }
