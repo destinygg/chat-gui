@@ -1,6 +1,8 @@
 @import '../../common';
 @import '../../icons/icons';
 @import '~normalize.css';
+@import '~tippy.js/dist/tippy.css';
+@import '~tippy.js/dist/svg-arrow.css';
 @import url('https://fonts.googleapis.com/css?family=Roboto:400,500,600,700');
 
 *,
@@ -197,6 +199,11 @@ hr {
   }
   #chat-whisper-btn .btn-icon {
     background: transparent url('../img/icon-whispers.svg') no-repeat center
+      center;
+    background-size: contain;
+  }
+  #chat-watching-focus-btn .btn-icon {
+    background: transparent url('../img/icon-watching.svg') no-repeat center
       center;
     background-size: contain;
   }
@@ -836,8 +843,20 @@ hr {
   }
 }
 
+.watching-focus {
+  .msg-emote,
+  .msg-user {
+    opacity: 0.3;
+
+    &.watching-same,
+    &.msg-highlight {
+      opacity: 1;
+    }
+  }
+}
+
 /* Focus or highlight a line */
-.focus .msg-chat {
+.focus:not(.watching-focus) .msg-chat {
   opacity: 0.3;
 
   &.msg-pinned {
@@ -2161,4 +2180,14 @@ body.pref-fontscale[data-fontscale='10'] {
 @font-face {
   font-family: 'Among Us';
   src: url('../../../fonts/AmongUs-Regular.ttf') format('truetype');
+}
+
+.tippy-box[data-theme~='dgg'] {
+  text-align: center;
+  background-color: white;
+  color: #000;
+}
+
+.tippy-box[data-theme~='dgg'] > .tippy-svg-arrow {
+  fill: white;
 }
