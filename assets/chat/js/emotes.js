@@ -1,5 +1,5 @@
 export default class EmoteService {
-  tiers = new Set();
+  emoteTiers = new Set();
 
   emotesMapped = new Map();
 
@@ -41,17 +41,22 @@ export default class EmoteService {
     return this.emotes.filter((e) => e.twitch).map((e) => e.prefix);
   }
 
+  get tiers() {
+    return Array.from(this.emoteTiers).sort((a, b) => a - b);
+  }
+
   getEmote(emote) {
     return this.emotesMapped.get(emote);
   }
 
   setEmotes(emotes) {
+    this.emoteTiers = new Set();
+    this.emotesMapped = new Map();
     this.emotes = emotes;
     emotes.forEach((e) => {
-      this.tiers.add(e.minimumSubTier);
+      this.emoteTiers.add(e.minimumSubTier);
       this.emotesMapped.set(e.prefix, e);
     });
-    this.tiers = Array.from(this.tiers).sort((a, b) => a - b);
   }
 
   emotePrefixesForTier(tier) {

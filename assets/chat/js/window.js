@@ -121,7 +121,7 @@ class ChatWindow extends EventEmitter {
    * Use chat state (settings and authentication data) to update the messages in
    * this window.
    */
-  updateMessages(chat) {
+  updateMessages(chat, rebuildTxt = false) {
     for (const message of this.messages) {
       if (message.type !== MessageTypes.UI) {
         message.updateTimeFormat();
@@ -136,6 +136,10 @@ class ChatWindow extends EventEmitter {
         message.setTag(chat.taggednicks.get(username));
         message.setTagTitle(chat.taggednotes.get(username));
         message.setWatching(chat.user);
+
+        if (rebuildTxt) {
+          message.rebuildTxt(chat);
+        }
 
         if (message.moderated) {
           message.censor(parseInt(chat.settings.get('showremoved') || '1', 10));
