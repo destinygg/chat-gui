@@ -53,12 +53,12 @@ class ChatUser {
       this.displayName = user;
       this.username = this.displayName.toLowerCase();
     } else {
-      this.id = user.id || null;
-      this.displayName = user.nick || '';
+      this.id = user?.id || null;
+      this.displayName = user?.nick || '';
       this.username = this.displayName.toLowerCase();
-      this.createdDate = user.createdDate || '';
-      this.features = user.features || [];
-      this.watching = user.watching || null;
+      this.createdDate = user?.createdDate || '';
+      this.features = user?.features || [];
+      this.watching = user?.watching || null;
     }
   }
 

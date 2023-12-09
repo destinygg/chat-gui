@@ -1257,12 +1257,17 @@ class Chat {
       if (!this.backlogloading) {
         const retryMilli = Math.floor(Math.random() * 30000) + 4000;
         setTimeout(() => window.location.reload(true), retryMilli);
+
         MessageBuilder.broadcast(
-          `Restart incoming in ${Math.round(retryMilli / 1000)} seconds ...`,
+          `Restart incoming in ${Math.round(retryMilli / 1000)} seconds...`,
+          new ChatUser(),
+          data.timestamp,
         ).into(this);
       }
     } else {
-      MessageBuilder.broadcast(data.data, data.timestamp).into(this);
+      const user =
+        this.users.get(data.nick.toLowerCase()) ?? new ChatUser(data.user);
+      MessageBuilder.broadcast(data.data, user, data.timestamp).into(this);
     }
   }
 
