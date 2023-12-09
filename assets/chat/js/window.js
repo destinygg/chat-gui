@@ -134,7 +134,15 @@ class ChatWindow extends EventEmitter {
         message.ignore(chat.ignored(username, message.message));
         message.highlight(chat.shouldHighlightMessage(message));
         if (message.type === MessageTypes.USER) {
-          message.setContinued(this.messages[i - 1]);
+          const lastMessage = this.messages[i - 1];
+          message.setContinued(
+            lastMessage &&
+              !lastMessage.target &&
+              lastMessage.user &&
+              (!lastMessage.ignored || lastMessage.continued) && // messages should not appear as "continued" if the previous message is ignored and was the start of the thread
+              lastMessage.user.username === this.user.username,
+          );
+
           message.setTag(chat.taggednicks.get(username));
         }
         message.setTagTitle(chat.taggednotes.get(username));
