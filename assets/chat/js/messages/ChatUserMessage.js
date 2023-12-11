@@ -37,6 +37,13 @@ export default class ChatUserMessage extends ChatMessage {
     if (this.user && this.user.username) {
       classes.push(...this.user.features);
       attr['data-username'] = this.user.username;
+
+      if (this.user.watching) {
+        this.watching = this.user.watching;
+        if (chat.user.equalWatching(this.user.watching)) {
+          classes.push('watching-same');
+        }
+      }
     }
     if (this.mentioned && this.mentioned.length > 0)
       attr['data-mentioned'] = this.mentioned.join(' ').toLowerCase();

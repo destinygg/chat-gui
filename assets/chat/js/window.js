@@ -146,6 +146,7 @@ class ChatWindow extends EventEmitter {
           message.setTag(chat.taggednicks.get(username));
         }
         message.setTagTitle(chat.taggednotes.get(username));
+        message.setWatching(chat.user);
 
         if (message.moderated) {
           message.censor(parseInt(chat.settings.get('showremoved') || '1', 10));

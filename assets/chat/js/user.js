@@ -40,6 +40,12 @@ class ChatUser {
   features = [];
 
   /**
+   * User's watching embed.
+   * @type {?Object}
+   */
+  watching = null;
+
+  /**
    * @param {string|User} user
    */
   constructor(user = '') {
@@ -52,6 +58,7 @@ class ChatUser {
       this.username = this.displayName.toLowerCase();
       this.createdDate = user.createdDate || '';
       this.features = user.features || [];
+      this.watching = user.watching || null;
     }
   }
 
@@ -110,6 +117,13 @@ class ChatUser {
       return 1;
     }
     return 0;
+  }
+
+  equalWatching(embed) {
+    return (
+      this.watching?.platform === embed?.platform &&
+      this.watching?.id === embed?.id
+    );
   }
 }
 
