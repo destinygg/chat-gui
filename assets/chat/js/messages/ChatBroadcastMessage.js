@@ -22,7 +22,13 @@ export default class ChatBroadcastMessage extends ChatEventMessage {
       user.innerText = this.user.displayName;
 
       const ctrl = document.createElement('span');
+      ctrl.classList.toggle('ctrl');
       ctrl.innerText = ': ';
+
+      if (this.slashme) {
+        ctrl.innerText = '';
+        return [user, ctrl, ' '];
+      }
 
       return [user, ctrl];
     }
