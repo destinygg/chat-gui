@@ -736,6 +736,7 @@ class Chat {
         MessageTypes.GIFTSUB,
         MessageTypes.MASSGIFT,
         MessageTypes.DONATION,
+        MessageTypes.BROADCAST,
       ].includes(message.type)
     ) {
       // check if message is `/me `
