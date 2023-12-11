@@ -25,6 +25,11 @@ const CHAT_COMMANDS = [
     description: 'Check your ban status.',
   },
   {
+    name: 'die',
+    description: 'Mute yourself for 10 minutes.',
+    alias: ['suicide', 'bitly'],
+  },
+  {
     name: 'embed',
     description: 'Embed a video to bigscreen.',
     alias: ['e'],
