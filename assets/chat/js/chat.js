@@ -743,15 +743,15 @@ class Chat {
       message.slashme =
         message.message.substring(0, 4).toLowerCase() === '/me ';
       // check if this is the current users message
-      message.isown = message.user.username === this.user.username;
+      message.isown = message.user?.username === this.user.username;
       // get mentions from message
       message.mentioned = Chat.extractNicks(message.message).filter((a) =>
         this.users.has(a.toLowerCase()),
       );
       // set tagged state
-      message.tag = this.taggednicks.get(message.user.username);
+      message.tag = this.taggednicks.get(message.user?.username);
       // set tagged note
-      message.title = this.taggednotes.get(message.user.username) || '';
+      message.title = this.taggednotes.get(message.user?.username) || '';
     }
 
     // Populate highlight for this $message
@@ -1266,8 +1266,9 @@ class Chat {
         ).into(this);
       }
     } else {
-      const user =
-        this.users.get(data.nick.toLowerCase()) ?? new ChatUser(data.user);
+      const user = data.nick
+        ? this.users.get(data.nick.toLowerCase()) ?? new ChatUser(data.user)
+        : null;
       MessageBuilder.broadcast(data.data, user, data.timestamp).into(this);
     }
   }

@@ -10,7 +10,7 @@ export default class ChatBroadcastMessage extends ChatEventMessage {
   }
 
   buildUserTemplate(chat = null) {
-    if (this.user.displayName !== '') {
+    if (this.user && this.user.displayName !== '') {
       const colorFlair = usernameColorFlair(chat.flairs, this.user);
 
       /** @type HTMLAnchorElement */
