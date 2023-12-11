@@ -156,7 +156,7 @@ export default class ChatMessage extends ChatUIMessage {
   }
 
   /**
-   * @param {ChatMessage} lastMessage
+   * @param {boolean} isContinued
    */
   setContinued(isContinued) {
     this.ui.classList.toggle('msg-continue', isContinued);

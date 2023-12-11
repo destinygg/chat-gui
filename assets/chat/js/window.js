@@ -140,7 +140,7 @@ class ChatWindow extends EventEmitter {
               !lastMessage.target &&
               lastMessage.user &&
               (!lastMessage.ignored || lastMessage.continued) && // messages should not appear as "continued" if the previous message is ignored and was the start of the thread
-              lastMessage.user.username === this.user.username,
+              lastMessage.user.username === username,
           );
 
           message.setTag(chat.taggednicks.get(username));
