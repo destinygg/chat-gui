@@ -13,7 +13,9 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
 
     this.header = this.ui.find('.toolbar span');
 
-    this.watchingSubheader = this.ui.find('.user-info h5.watching-subheader')[0];
+    this.watchingSubheader = this.ui.find(
+      '.user-info h5.watching-subheader',
+    )[0];
 
     this.createdDateSubheader = this.ui.find('.user-info h5.date-subheader')[0];
 
@@ -240,7 +242,7 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     const usernameFeatures = selectedUser.classList.value;
 
     const watchingEmbed = this.buildWatchingEmbed(this.clickedNick);
-    if (watchingEmbed !== '') {      
+    if (watchingEmbed !== '') {
       this.watchingSubheader.style.display = '';
       this.watchingSubheader.replaceChildren('Watching: ', watchingEmbed);
     } else {
@@ -305,7 +307,7 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
 
   buildWatchingEmbed(nick) {
     const user = this.chat.users.get(nick);
-    if (!user?.watching) { 
+    if (!user?.watching) {
       return '';
     }
     return `${user.watching.id} on ${user.watching.platform}`;
