@@ -10,7 +10,8 @@ export default class ChatBroadcastMessage extends ChatEventMessage {
   }
 
   buildUserTemplate(chat = null) {
-    if (this.user && this.user.displayName !== '') {
+    // User with an id of -1 is the dummy system user used for server broadcasts
+    if (this.user.id !== -1) {
       const colorFlair = usernameColorFlair(chat.flairs, this.user);
 
       /** @type HTMLAnchorElement */

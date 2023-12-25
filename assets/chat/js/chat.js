@@ -1266,10 +1266,11 @@ class Chat {
         ).into(this);
       }
     } else {
-      const user = data.nick
-        ? this.users.get(data.nick.toLowerCase()) ?? new ChatUser(data.user)
-        : null;
-      MessageBuilder.broadcast(data.data, user, data.timestamp).into(this);
+      MessageBuilder.broadcast(
+        data.data,
+        new ChatUser(data.user),
+        data.timestamp,
+      ).into(this);
     }
   }
 
