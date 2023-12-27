@@ -1261,7 +1261,10 @@ class Chat {
 
         MessageBuilder.broadcast(
           `Restart incoming in ${Math.round(retryMilli / 1000)} seconds...`,
-          new ChatUser(),
+          new ChatUser({
+            nick: 'System',
+            id: -1,
+          }),
           data.timestamp,
         ).into(this);
       }
