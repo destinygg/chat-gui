@@ -756,12 +756,7 @@ class Chat {
     // Populate highlight for this $message
     if (message.type === MessageTypes.USER) {
       // check if the last message was from the same user
-      message.continued =
-        win.lastmessage &&
-        !win.lastmessage.target &&
-        win.lastmessage.user &&
-        (!win.lastmessage.ignored || win.lastmessage.continued) && // messages should not appear as "continued" if the previous message is ignored and was the start of the thread
-        win.lastmessage.user.username === message.user.username;
+      message.continued = win.isContinued(message);
       // set highlighted state
       message.highlighted = this.shouldHighlightMessage(message);
     }

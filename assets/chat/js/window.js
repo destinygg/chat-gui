@@ -134,15 +134,7 @@ class ChatWindow extends EventEmitter {
         message.ignore(chat.ignored(username, message.message));
         message.highlight(chat.shouldHighlightMessage(message));
         if (message.type === MessageTypes.USER) {
-          const lastMessage = this.messages[i - 1];
-          message.setContinued(
-            lastMessage &&
-              !lastMessage.target &&
-              lastMessage.user &&
-              (!lastMessage.ignored || lastMessage.continued) && // messages should not appear as "continued" if the previous message is ignored and was the start of the thread
-              lastMessage.user.username === username,
-          );
-
+          message.setContinued(this.isContinued(message, this.messages[i - 1]));
           message.setTag(chat.taggednicks.get(username));
         }
         message.setTagTitle(chat.taggednotes.get(username));
@@ -158,6 +150,21 @@ class ChatWindow extends EventEmitter {
   removeLastMessage() {
     this.lastmessage.remove();
     this.messages = this.messages.filter((m) => m !== this.lastmessage);
+  }
+
+  /**
+   * @param {ChatMessage} message
+   * @param {ChatMessage} lastMessage
+   * @returns {boolean}
+   */
+  isContinued(message, lastMessage = this.lastmessage) {
+    return (
+      lastMessage &&
+      !lastMessage.target &&
+      lastMessage.user &&
+      (!lastMessage.ignored || lastMessage.continued) && // messages should not appear as "continued" if the previous message is ignored and was the start of the thread
+      lastMessage.user.username === message.user.username
+    );
   }
 
   cleanupThrottle = throttle(50, this.cleanup);
