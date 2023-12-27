@@ -71,8 +71,7 @@ export default class UrlFormatter {
       const decodedUrl = self.elem.html(url).text();
       const m = decodedUrl.match(self.linkregex);
       if (m) {
-        const encodedUrl = self.encodeUrl(m[0]);
-        const normalizedUrl = this.normalizeUrl(encodedUrl);
+        const normalizedUrl = self.encodeUrl(this.normalizeUrl(m[0]));
 
         let embedHashLink = '';
         try {
@@ -112,6 +111,14 @@ export default class UrlFormatter {
       // Remove the query string from xeet URLs to protect users from clicking
       // on a link to a xeet they've already seen.
       return url.split('?')[0];
+    }
+
+    if (/youtu(?:be\.com|\.be)/i.test(url)) {
+      // Same as with xeets, remove the nasty share tracking query param
+      // from YouTube links.
+      const ytLink = new URL(url);
+      ytLink.searchParams.delete('si');
+      return ytLink.href;
     }
 
     return url;
