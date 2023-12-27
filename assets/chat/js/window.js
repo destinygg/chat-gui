@@ -127,7 +127,7 @@ class ChatWindow extends EventEmitter {
         message.updateTimeFormat();
       }
 
-      if (message.user) {
+      if (message.user && !message.user.isSystem()) {
         const { username } = message.user;
 
         message.setOwnMessage(username === chat.user.username);

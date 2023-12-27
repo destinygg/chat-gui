@@ -736,21 +736,22 @@ class Chat {
         MessageTypes.GIFTSUB,
         MessageTypes.MASSGIFT,
         MessageTypes.DONATION,
+        MessageTypes.BROADCAST,
       ].includes(message.type)
     ) {
       // check if message is `/me `
       message.slashme =
         message.message.substring(0, 4).toLowerCase() === '/me ';
       // check if this is the current users message
-      message.isown = message.user.username === this.user.username;
+      message.isown = message.user?.username === this.user.username;
       // get mentions from message
       message.mentioned = Chat.extractNicks(message.message).filter((a) =>
         this.users.has(a.toLowerCase()),
       );
       // set tagged state
-      message.tag = this.taggednicks.get(message.user.username);
+      message.tag = this.taggednicks.get(message.user?.username);
       // set tagged note
-      message.title = this.taggednotes.get(message.user.username) || '';
+      message.title = this.taggednotes.get(message.user?.username) || '';
     }
 
     // Populate highlight for this $message
@@ -1257,12 +1258,22 @@ class Chat {
       if (!this.backlogloading) {
         const retryMilli = Math.floor(Math.random() * 30000) + 4000;
         setTimeout(() => window.location.reload(true), retryMilli);
+
         MessageBuilder.broadcast(
-          `Restart incoming in ${Math.round(retryMilli / 1000)} seconds ...`,
+          `Restart incoming in ${Math.round(retryMilli / 1000)} seconds...`,
+          new ChatUser({
+            nick: 'System',
+            id: -1,
+          }),
+          data.timestamp,
         ).into(this);
       }
     } else {
-      MessageBuilder.broadcast(data.data, data.timestamp).into(this);
+      MessageBuilder.broadcast(
+        data.data,
+        new ChatUser(data.user),
+        data.timestamp,
+      ).into(this);
     }
   }
 
