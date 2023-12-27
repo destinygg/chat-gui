@@ -125,6 +125,10 @@ class ChatUser {
       this.watching?.id === embed?.id
     );
   }
+
+  isSystem() {
+    return this.id === -1;
+  }
 }
 
 export default ChatUser;

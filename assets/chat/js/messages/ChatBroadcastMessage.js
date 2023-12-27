@@ -10,31 +10,30 @@ export default class ChatBroadcastMessage extends ChatEventMessage {
   }
 
   buildUserTemplate(chat = null) {
-    // User with an id of -1 is the dummy system user used for server broadcasts
-    if (this.user.id !== -1) {
-      const colorFlair = usernameColorFlair(chat.flairs, this.user);
-
-      /** @type HTMLAnchorElement */
-      const user = document
-        .querySelector('#user-template')
-        ?.content.cloneNode(true).firstElementChild;
-      user.title = this.title;
-      user.classList.add(colorFlair?.name);
-      user.innerText = this.user.displayName;
-
-      const ctrl = document.createElement('span');
-      ctrl.classList.toggle('ctrl');
-
-      if (this.slashme) {
-        return [user, ctrl, ' '];
-      }
-
-      ctrl.innerText = ': ';
-
-      return [user, ctrl];
+    if (this.user.isSystem()) {
+      return [];
     }
 
-    return [];
+    const colorFlair = usernameColorFlair(chat.flairs, this.user);
+
+    /** @type HTMLAnchorElement */
+    const user = document
+      .querySelector('#user-template')
+      ?.content.cloneNode(true).firstElementChild;
+    user.title = this.title;
+    user.classList.add(colorFlair?.name);
+    user.innerText = this.user.displayName;
+
+    const ctrl = document.createElement('span');
+    ctrl.classList.toggle('ctrl');
+
+    if (this.slashme) {
+      return [user, ctrl, ' '];
+    }
+
+    ctrl.innerText = ': ';
+
+    return [user, ctrl];
   }
 
   html(chat = null) {
