@@ -1074,30 +1074,32 @@ class Chat {
     const textonly = Chat.removeSlashCmdFromText(data.data);
     const usr = this.users.get(data.nick.toLowerCase());
     const win = this.mainwindow;
-    if (
-      win.lastmessage !== null &&
+    const isCombo =
       this.emoteService.canUserUseEmote(usr, textonly) &&
-      Chat.removeSlashCmdFromText(win.lastmessage.message) === textonly
-    ) {
-      if (win.lastmessage.type === MessageTypes.EMOTE) {
-        win.lastmessage.incEmoteCount();
+      Chat.removeSlashCmdFromText(win.lastmessage?.message) === textonly;
 
-        if (this.user.equalWatching(usr.watching)) {
-          win.lastmessage.ui.classList.toggle('watching-same', true);
-        }
+    if (isCombo && win.lastmessage?.type === MessageTypes.EMOTE) {
+      win.lastmessage.incEmoteCount();
 
-        this.mainwindow.update();
-      } else {
-        win.removeLastMessage();
-        const msg = MessageBuilder.emote(textonly, data.timestamp, 2).into(
-          this,
-        );
-
-        if (this.user.equalWatching(usr.watching)) {
-          msg.ui.classList.add('watching-same');
-        }
+      if (this.user.equalWatching(usr.watching)) {
+        win.lastmessage.ui.classList.toggle('watching-same', true);
       }
-    } else if (!this.resolveMessage(data.nick, data.data)) {
+
+      this.mainwindow.update();
+      return;
+    }
+
+    if (isCombo && win.lastmessage?.type === MessageTypes.USER) {
+      win.removeLastMessage();
+      const msg = MessageBuilder.emote(textonly, data.timestamp, 2).into(this);
+
+      if (this.user.equalWatching(usr.watching)) {
+        msg.ui.classList.add('watching-same');
+      }
+      return;
+    }
+
+    if (!this.resolveMessage(data.nick, data.data)) {
       MessageBuilder.message(data.data, usr, data.timestamp).into(this);
     }
   }
@@ -2337,7 +2339,7 @@ class Chat {
   }
 
   static removeSlashCmdFromText(msg) {
-    return msg.replace(regexslashcmd, '').trim();
+    return msg?.replace(regexslashcmd, '').trim();
   }
 
   static extractNicks(text) {
