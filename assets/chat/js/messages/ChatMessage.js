@@ -154,4 +154,15 @@ export default class ChatMessage extends ChatUIMessage {
       user.equalWatching(this.watching),
     );
   }
+
+  /**
+   * @param {boolean} isContinued
+   */
+  setContinued(isContinued) {
+    this.ui.classList.toggle('msg-continue', isContinued);
+    const ctrl = this.ui.querySelector('.ctrl');
+    if (ctrl) ctrl.textContent = isContinued ? '' : ': ';
+
+    this.continued = isContinued;
+  }
 }

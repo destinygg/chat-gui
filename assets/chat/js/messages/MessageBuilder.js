@@ -9,6 +9,7 @@ import ChatDonationMessage from './ChatDonationMessage';
 import ChatRegularSubscriptionMessage from './subscriptions/ChatRegularSubscriptionMessage';
 import ChatGiftedSubscriptionMessage from './subscriptions/ChatGiftedSubscriptionMessage';
 import ChatMassSubscriptionMessage from './subscriptions/ChatMassSubscriptionMessage';
+import ChatBroadcastMessage from './ChatBroadcastMessage';
 import ChatDeathMessage from './ChatDeathMessage';
 
 export default class MessageBuilder {
@@ -28,8 +29,8 @@ export default class MessageBuilder {
     return new ChatMessage(message, timestamp, MessageTypes.INFO);
   }
 
-  static broadcast(message, timestamp = null) {
-    return new ChatMessage(message, timestamp, MessageTypes.BROADCAST);
+  static broadcast(message, user, timestamp = null) {
+    return new ChatBroadcastMessage(message, user, timestamp);
   }
 
   static command(message, timestamp = null) {

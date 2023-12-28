@@ -48,6 +48,7 @@ class ChatUserFocus {
     } else if (this.chat.settings.get('focusmentioned')) {
       rule = `
         .msg-death[data-username="${value}"], .msg-death[data-mentioned~="${value}"],
+        .msg-broadcast[data-username="${value}"], .msg-broadcast[data-mentioned~="${value}"],
         .msg-subscription[data-username="${value}"], .msg-subscription[data-mentioned~="${value}"],
         .msg-giftsub[data-username="${value}"], .msg-giftsub[data-mentioned~="${value}"], .msg-giftsub[data-giftee="${value}"],
         .msg-massgift[data-username="${value}"], .msg-massgift[data-mentioned~="${value}"],
@@ -60,6 +61,7 @@ class ChatUserFocus {
     } else {
       rule = `
         .msg-death[data-username="${value}"],
+        .msg-broadcast[data-username="${value}"], 
         .msg-subscription[data-username="${value}"], 
         .msg-giftsub[data-username="${value}"], .msg-giftsub[data-giftee="${value}"], 
         .msg-massgift[data-username="${value}"], 

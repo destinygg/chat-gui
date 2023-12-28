@@ -740,6 +740,7 @@ class Chat {
         MessageTypes.GIFTSUB,
         MessageTypes.MASSGIFT,
         MessageTypes.DONATION,
+        MessageTypes.BROADCAST,
         MessageTypes.DEATH,
       ].includes(message.type)
     ) {
@@ -748,25 +749,21 @@ class Chat {
         message.message.substring(0, 4).toLowerCase() === '/me ' ||
         message.type === MessageTypes.DEATH;
       // check if this is the current users message
-      message.isown = message.user.username === this.user.username;
+      message.isown = message.user?.username === this.user.username;
       // get mentions from message
       message.mentioned = Chat.extractNicks(message.message).filter((a) =>
         this.users.has(a.toLowerCase()),
       );
       // set tagged state
-      message.tag = this.taggednicks.get(message.user.username);
+      message.tag = this.taggednicks.get(message.user?.username);
       // set tagged note
-      message.title = this.taggednotes.get(message.user.username) || '';
+      message.title = this.taggednotes.get(message.user?.username) || '';
     }
 
     // Populate highlight for this $message
     if (message.type === MessageTypes.USER) {
       // check if the last message was from the same user
-      message.continued =
-        win.lastmessage &&
-        !win.lastmessage.target &&
-        win.lastmessage.user &&
-        win.lastmessage.user.username === message.user.username;
+      message.continued = win.isContinued(message);
       // set highlighted state
       message.highlighted = this.shouldHighlightMessage(message);
     }
@@ -1080,30 +1077,32 @@ class Chat {
     const textonly = Chat.removeSlashCmdFromText(data.data);
     const usr = this.users.get(data.nick.toLowerCase());
     const win = this.mainwindow;
-    if (
-      win.lastmessage !== null &&
+    const isCombo =
       this.emoteService.canUserUseEmote(usr, textonly) &&
-      Chat.removeSlashCmdFromText(win.lastmessage.message) === textonly
-    ) {
-      if (win.lastmessage.type === MessageTypes.EMOTE) {
-        win.lastmessage.incEmoteCount();
+      Chat.removeSlashCmdFromText(win.lastmessage?.message) === textonly;
 
-        if (this.user.equalWatching(usr.watching)) {
-          win.lastmessage.ui.classList.toggle('watching-same', true);
-        }
+    if (isCombo && win.lastmessage?.type === MessageTypes.EMOTE) {
+      win.lastmessage.incEmoteCount();
 
-        this.mainwindow.update();
-      } else {
-        win.removeLastMessage();
-        const msg = MessageBuilder.emote(textonly, data.timestamp, 2).into(
-          this,
-        );
-
-        if (this.user.equalWatching(usr.watching)) {
-          msg.ui.classList.add('watching-same');
-        }
+      if (this.user.equalWatching(usr.watching)) {
+        win.lastmessage.ui.classList.toggle('watching-same', true);
       }
-    } else if (!this.resolveMessage(data.nick, data.data)) {
+
+      this.mainwindow.update();
+      return;
+    }
+
+    if (isCombo && win.lastmessage?.type === MessageTypes.USER) {
+      win.removeLastMessage();
+      const msg = MessageBuilder.emote(textonly, data.timestamp, 2).into(this);
+
+      if (this.user.equalWatching(usr.watching)) {
+        msg.ui.classList.add('watching-same');
+      }
+      return;
+    }
+
+    if (!this.resolveMessage(data.nick, data.data)) {
       MessageBuilder.message(data.data, usr, data.timestamp).into(this);
     }
   }
@@ -1263,12 +1262,22 @@ class Chat {
       if (!this.backlogloading) {
         const retryMilli = Math.floor(Math.random() * 30000) + 4000;
         setTimeout(() => window.location.reload(true), retryMilli);
+
         MessageBuilder.broadcast(
-          `Restart incoming in ${Math.round(retryMilli / 1000)} seconds ...`,
+          `Restart incoming in ${Math.round(retryMilli / 1000)} seconds...`,
+          new ChatUser({
+            nick: 'System',
+            id: -1,
+          }),
+          data.timestamp,
         ).into(this);
       }
     } else {
-      MessageBuilder.broadcast(data.data, data.timestamp).into(this);
+      MessageBuilder.broadcast(
+        data.data,
+        new ChatUser(data.user),
+        data.timestamp,
+      ).into(this);
     }
   }
 
@@ -2360,7 +2369,7 @@ class Chat {
   }
 
   static removeSlashCmdFromText(msg) {
-    return msg.replace(regexslashcmd, '').trim();
+    return msg?.replace(regexslashcmd, '').trim();
   }
 
   static extractNicks(text) {
