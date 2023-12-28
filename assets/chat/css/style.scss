@@ -741,6 +741,15 @@ hr {
   .text {
     font-style: italic;
   }
+
+  .user:before {
+    content: '';
+    display: inline-block;
+    vertical-align: text-top;
+    margin-right: $gutter-sm;
+
+    @extend .icon-command;
+  }
 }
 
 /* Highlight */
