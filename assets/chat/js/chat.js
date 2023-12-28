@@ -1442,7 +1442,8 @@ class Chat {
   }
 
   onDEATH(data) {
-    const user = this.users.get(data.nick) ?? new ChatUser(data.nick);
+    const user =
+      this.users.get(data.nick.toLowerCase()) ?? new ChatUser(data.nick);
     if (this.user.username === data.nick.toLowerCase()) {
       if (isMuteActive(data)) {
         this.mutedtimer.setTimer(data.duration);
