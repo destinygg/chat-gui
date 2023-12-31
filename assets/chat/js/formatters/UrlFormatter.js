@@ -113,12 +113,16 @@ export default class UrlFormatter {
       return url.split('?')[0];
     }
 
-    if (/youtu(?:be\.com|\.be)/i.test(url)) {
+    if (/^(?:(?:https|http):\/\/)?(?:www\.)?youtu(?:be\.com|\.be)/i.test(url)) {
       // Same as with xeets, remove the nasty share tracking query param
       // from YouTube links.
-      const ytLink = new URL(url);
-      ytLink.searchParams.delete('si');
-      return ytLink.href;
+      try {
+        const ytLink = new URL(url);
+        ytLink.searchParams.delete('si');
+        return ytLink.href;
+      } catch {
+        return url;
+      }
     }
 
     return url;
