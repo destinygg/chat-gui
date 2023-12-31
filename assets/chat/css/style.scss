@@ -737,6 +737,21 @@ hr {
   }
 }
 
+.msg-death {
+  .text {
+    font-style: italic;
+  }
+
+  .user:before {
+    content: '';
+    display: inline-block;
+    vertical-align: text-top;
+    margin-right: $gutter-sm;
+
+    @extend .icon-command;
+  }
+}
+
 /* Highlight */
 .msg-highlight {
   color: $color-chat-text1;
@@ -845,7 +860,8 @@ hr {
 
 .watching-focus {
   .msg-emote,
-  .msg-user {
+  .msg-user,
+  .msg-death {
     opacity: 0.3;
 
     &.watching-same,

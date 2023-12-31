@@ -10,6 +10,7 @@ import ChatRegularSubscriptionMessage from './subscriptions/ChatRegularSubscript
 import ChatGiftedSubscriptionMessage from './subscriptions/ChatGiftedSubscriptionMessage';
 import ChatMassSubscriptionMessage from './subscriptions/ChatMassSubscriptionMessage';
 import ChatBroadcastMessage from './ChatBroadcastMessage';
+import ChatDeathMessage from './ChatDeathMessage';
 
 export default class MessageBuilder {
   static element(message, classes = []) {
@@ -105,5 +106,9 @@ export default class MessageBuilder {
       data.timestamp,
       data.uuid,
     );
+  }
+
+  static death(message, user, timestamp = null) {
+    return new ChatDeathMessage(message, user, timestamp);
   }
 }

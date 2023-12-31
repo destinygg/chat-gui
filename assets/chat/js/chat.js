@@ -143,6 +143,7 @@ class Chat {
     this.source.on('MASSGIFT', (data) => this.onMASSGIFT(data));
     this.source.on('DONATION', (data) => this.onDONATION(data));
     this.source.on('UPDATEUSER', (data) => this.onUPDATEUSER(data));
+    this.source.on('DEATH', (data) => this.onDEATH(data));
 
     this.control.on('SEND', (data) => this.cmdSEND(data));
     this.control.on('HINT', (data) => this.cmdHINT(data));
@@ -206,6 +207,9 @@ class Chat {
     this.control.on('UNMOTD', () => this.cmdUNPIN());
     this.control.on('HOST', (data) => this.cmdHOST(data));
     this.control.on('UNHOST', () => this.cmdUNHOST());
+    this.control.on('DIE', () => this.cmdDIE());
+    this.control.on('SUICIDE', () => this.cmdDIE());
+    this.control.on('BITLY', () => this.cmdDIE());
   }
 
   setUser(user) {
@@ -737,11 +741,13 @@ class Chat {
         MessageTypes.MASSGIFT,
         MessageTypes.DONATION,
         MessageTypes.BROADCAST,
+        MessageTypes.DEATH,
       ].includes(message.type)
     ) {
-      // check if message is `/me `
+      // check if message is `/me ` or a death message
       message.slashme =
-        message.message.substring(0, 4).toLowerCase() === '/me ';
+        message.message.substring(0, 4).toLowerCase() === '/me ' ||
+        message.type === MessageTypes.DEATH;
       // check if this is the current users message
       message.isown = message.user?.username === this.user.username;
       // get mentions from message
@@ -1442,6 +1448,19 @@ class Chat {
         window.updateMessages(this);
       }
     }
+  }
+
+  onDEATH(data) {
+    const user =
+      this.users.get(data.nick.toLowerCase()) ?? new ChatUser(data.nick);
+    if (this.user.username === data.nick.toLowerCase()) {
+      if (isMuteActive(data)) {
+        this.mutedtimer.setTimer(data.duration);
+        this.mutedtimer.startTimer();
+      }
+    }
+    this.censor(data.nick);
+    MessageBuilder.death(data.data, user, data.timestamp).into(this);
   }
 
   cmdSHOWPOLL() {
@@ -2233,6 +2252,10 @@ class Chat {
 
   cmdUNPIN() {
     this.source.send('PIN', { data: '' });
+  }
+
+  cmdDIE() {
+    this.source.send('DIE', { data: '' });
   }
 
   openConversation(nick) {
