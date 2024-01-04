@@ -21,7 +21,7 @@ export default class ChatBroadcastMessage extends ChatEventMessage {
       .querySelector('#user-template')
       ?.content.cloneNode(true).firstElementChild;
     user.title = this.title;
-    user.classList.add(colorFlair?.name);
+    if (colorFlair) user.classList.add(colorFlair.name);
     user.innerText = this.user.displayName;
 
     const ctrl = document.createElement('span');
