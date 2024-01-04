@@ -1,5 +1,6 @@
 const regexslashcmd = /^\/([a-z0-9]+)[\s]?/i;
-const regextime = /(\d+)([a-z]+)?/gi;
+const regextime =
+  /(?<number>\d+)(?<unit>s(?:econds?)?$|m(?:inutes?)?$|h(?:ours?)?$|d(?:ays?)?$)?/i;
 const nickmessageregex = /(?=@?)(\w{3,20})/g;
 const nickregex = /^\w{3,20}$/;
 const nsfwregex = /\bNSFW\b/i;
