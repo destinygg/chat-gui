@@ -137,7 +137,7 @@ class ChatWindow extends EventEmitter {
           message.setContinued(this.isContinued(message, this.messages[i - 1]));
           message.setTag(chat.taggednicks.get(username));
         }
-        message.setTagTitle(chat.taggednotes.get(username));
+        message.setTagTitle(chat.taggednotes.get(username) ?? '');
         message.setWatching(chat.user);
 
         if (message.moderated) {
