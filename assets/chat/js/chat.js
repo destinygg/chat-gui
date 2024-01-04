@@ -526,7 +526,7 @@ class Chat {
   }
 
   async loadEmotes() {
-    Chat.loadCss(
+    this.loadCss(
       `${this.config.cdn.base}/emotes/emotes.css?_=${this.config.cacheKey}`,
     );
     return fetch(
@@ -540,7 +540,7 @@ class Chat {
   }
 
   async loadFlairs() {
-    Chat.loadCss(
+    this.loadCss(
       `${this.config.cdn.base}/flairs/flairs.css?_=${this.config.cacheKey}`,
     );
     return fetch(
@@ -699,7 +699,7 @@ class Chat {
     } else {
       if (
         Object.hasOwn(data, 'features') &&
-        !Chat.isArraysEqual(data.features, user.features)
+        !this.isArraysEqual(data.features, user.features)
       ) {
         user.features = data.features;
       }
@@ -751,7 +751,7 @@ class Chat {
       // check if this is the current users message
       message.isown = message.user?.username === this.user.username;
       // get mentions from message
-      message.mentioned = Chat.extractNicks(message.message).filter((a) =>
+      message.mentioned = this.extractNicks(message.message).filter((a) =>
         this.users.has(a.toLowerCase()),
       );
       // set tagged state
@@ -789,7 +789,7 @@ class Chat {
       this.ishidden &&
       !message.ignored
     ) {
-      Chat.showNotification(
+      this.showNotification(
         `${message.user.displayName} said ...`,
         message.message,
         message.timestamp.valueOf(),
@@ -1015,7 +1015,7 @@ class Chat {
 
   onCONNECTING(url) {
     MessageBuilder.status(
-      `Connecting to ${Chat.extractHostname(url)} ...`,
+      `Connecting to ${this.extractHostname(url)} ...`,
     ).into(this);
   }
 
@@ -1074,12 +1074,12 @@ class Chat {
   }
 
   onMSG(data) {
-    const textonly = Chat.removeSlashCmdFromText(data.data);
+    const textonly = this.removeSlashCmdFromText(data.data);
     const usr = this.users.get(data.nick.toLowerCase());
     const win = this.mainwindow;
     const isCombo =
       this.emoteService.canUserUseEmote(usr, textonly) &&
-      Chat.removeSlashCmdFromText(win.lastmessage?.message) === textonly;
+      this.removeSlashCmdFromText(win.lastmessage?.message) === textonly;
 
     if (isCombo && win.lastmessage?.type === MessageTypes.EMOTE) {
       win.lastmessage.incEmoteCount();
@@ -1328,7 +1328,7 @@ class Chat {
           messageid,
         ).into(this);
       if (this.settings.get('notificationwhisper') && this.ishidden)
-        Chat.showNotification(
+        this.showNotification(
           `${data.nick} whispered ...`,
           data.data,
           data.timestamp,
@@ -1366,7 +1366,7 @@ class Chat {
       const matches = raw.match(regexslashcmd);
       const iscommand = matches && matches.length > 1;
       const ismecmd = iscommand && matches[1].toLowerCase() === 'me';
-      const textonly = Chat.removeSlashCmdFromText(raw);
+      const textonly = this.removeSlashCmdFromText(raw);
 
       // COMMAND
       if (iscommand && !ismecmd) {
@@ -1656,7 +1656,7 @@ class Chat {
     } else if (!nickregex.test(parts[0])) {
       MessageBuilder.info(`Invalid nick - /mute <nick> [<time>].`).into(this);
     } else {
-      const duration = parts[1] ? Chat.parseTimeInterval(parts[1]) : null;
+      const duration = parts[1] ? this.parseTimeInterval(parts[1]) : null;
       if (duration && duration > 0) {
         this.source.send('MUTE', { data: parts[0], duration });
       } else {
@@ -1680,7 +1680,7 @@ class Chat {
         reason: parts.slice(2, parts.length).join(' '),
       };
       if (/^perm/i.test(parts[1])) payload.ispermanent = true;
-      else payload.duration = Chat.parseTimeInterval(parts[1]);
+      else payload.duration = this.parseTimeInterval(parts[1]);
 
       payload.banip = command === 'IPBAN';
 
@@ -1891,7 +1891,7 @@ class Chat {
     this.mainwindow
       .getlines(`.msg-user[data-username="${n}"]`)
       .forEach((line) => {
-        const classesToRemove = Chat.removeClasses(
+        const classesToRemove = this.removeClasses(
           'msg-tagged',
           line.classList.value,
         );
@@ -2368,28 +2368,28 @@ class Chat {
     return '/bigscreen';
   }
 
-  static removeSlashCmdFromText(msg) {
+  removeSlashCmdFromText(msg) {
     return msg?.replace(regexslashcmd, '').trim();
   }
 
-  static extractNicks(text) {
+  extractNicks(text) {
     const uniqueNicks = new Set(text.match(nickmessageregex));
     return [...uniqueNicks];
   }
 
-  static removeClasses(search, classList) {
+  removeClasses(search, classList) {
     return (
       classList.match(new RegExp(`\\b${search}(?:[A-z-]+)?\\b`, 'g')) || []
     );
   }
 
-  static isArraysEqual(a, b) {
+  isArraysEqual(a, b) {
     return !a || !b
       ? a.length !== b.length || a.sort().toString() !== b.sort().toString()
       : false;
   }
 
-  static showNotification(title, message, timestamp, timeout = false) {
+  showNotification(title, message, timestamp, timeout = false) {
     if (Notification.permission === 'granted') {
       const n = new Notification(title, {
         body: message,
@@ -2401,7 +2401,7 @@ class Chat {
     }
   }
 
-  static parseTimeInterval(str) {
+  parseTimeInterval(str) {
     let nanoseconds = 0;
     const units = {
       s: 1000000000,
@@ -2434,7 +2434,7 @@ class Chat {
     return nanoseconds;
   }
 
-  static loadCss(url) {
+  loadCss(url) {
     const link = document.createElement('link');
     link.href = url;
     link.type = 'text/css';
@@ -2444,7 +2444,7 @@ class Chat {
     return link;
   }
 
-  static reqParam(name) {
+  reqParam(name) {
     const sanitizedName = name.replace(/[[\]]/g, '\\$&');
     const url = window.location || window.location.href || null;
     const regex = new RegExp(`[?&]${sanitizedName}(=([^&#]*)|&|#|$)`);
@@ -2453,7 +2453,7 @@ class Chat {
     return decodeURIComponent(results[2].replace(/\+/g, ' '));
   }
 
-  static extractHostname(url) {
+  extractHostname(url) {
     let hostname =
       url.indexOf('://') > -1 ? url.split('/')[2] : url.split('/')[0];
     hostname = hostname.split(':')[0];
