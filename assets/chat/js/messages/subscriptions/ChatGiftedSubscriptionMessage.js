@@ -32,7 +32,7 @@ export default class ChatGiftedSubscriptionMessage extends ChatSubscriptionMessa
       ?.content.cloneNode(true).firstElementChild;
 
     const gifteeColorFlair = usernameColorFlair(chat.flairs, this.giftee);
-    giftee.classList.add(gifteeColorFlair?.name);
+    if (gifteeColorFlair) giftee.classList.add(gifteeColorFlair.name);
     giftee.innerText = this.giftee.displayName;
 
     const subscriptionInfo = message.querySelector('.event-info');
