@@ -1894,11 +1894,12 @@ button.btn {
     display: none !important;
   }
 
-  // Donations and subs
+  // Donations, subs and broadcasts
   .msg-donation,
   .msg-subscription,
   .msg-giftsub,
-  .msg-massgift {
+  .msg-massgift,
+  .msg-broadcast {
     text-shadow: none;
     padding: 0;
     border-style: none none none solid;
