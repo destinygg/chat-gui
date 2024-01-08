@@ -372,6 +372,7 @@ class Chat {
     this.ui.on('click touch', '#chat-watching-focus-btn', () => {
       this.watchingfocus = !this.watchingfocus;
       this.ui.toggleClass('watching-focus', this.watchingfocus);
+      this.ui.find('#chat-watching-focus-btn').toggleClass('active');
     });
 
     // Chat focus / menu close when clicking on some areas
