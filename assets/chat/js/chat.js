@@ -2406,7 +2406,7 @@ class Chat {
     return (
       moment
         .duration(number, (unit ?? 'seconds').toLowerCase())
-        .asMilliseconds() * 1000000
+        .asMilliseconds() * 1e6
     );
   }
 
