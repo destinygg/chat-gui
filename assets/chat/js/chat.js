@@ -2402,36 +2402,12 @@ class Chat {
   }
 
   static parseTimeInterval(str) {
-    let nanoseconds = 0;
-    const units = {
-      s: 1000000000,
-      sec: 1000000000,
-      secs: 1000000000,
-      second: 1000000000,
-      seconds: 1000000000,
-
-      m: 60000000000,
-      min: 60000000000,
-      mins: 60000000000,
-      minute: 60000000000,
-      minutes: 60000000000,
-
-      h: 3600000000000,
-      hr: 3600000000000,
-      hrs: 3600000000000,
-      hour: 3600000000000,
-      hours: 3600000000000,
-
-      d: 86400000000000,
-      day: 86400000000000,
-      days: 86400000000000,
-    };
-    str.replace(regextime, ($0, number, unit) => {
-      const addNs =
-        number * (unit ? units[unit.toLowerCase()] || units.s : units.s);
-      nanoseconds += addNs;
-    });
-    return nanoseconds;
+    const { number, unit } = str.match(regextime)?.groups ?? {};
+    return (
+      moment
+        .duration(number, (unit ?? 'seconds').toLowerCase())
+        .asMilliseconds() * 1e6
+    );
   }
 
   static loadCss(url) {
