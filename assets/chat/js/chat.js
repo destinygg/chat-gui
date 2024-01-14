@@ -346,9 +346,6 @@ class Chat {
       ),
     );
 
-    this.commands
-      .generateAutocomplete(this.user.hasModPowers())
-      .forEach((command) => this.autocomplete.add(command));
     this.autocomplete.bind(this);
 
     // Chat input
@@ -682,6 +679,11 @@ class Chat {
     const fontscale = this.settings.get('fontscale') || 'auto';
     $(document.body).toggleClass(`pref-fontscale`, fontscale !== 'auto');
     $(document.body).attr('data-fontscale', fontscale);
+
+    // Add command autocomplete
+    this.commands
+      .generateAutocomplete(this.user.hasModPowers())
+      .forEach((command) => this.autocomplete.add(command));
 
     for (const window of this.windows.values()) {
       window.updateMessages(this);
