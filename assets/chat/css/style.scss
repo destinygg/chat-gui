@@ -1317,6 +1317,16 @@ hr {
     background: none;
     border-radius: 0;
   }
+  .all {
+    flex: 1;
+    height: auto;
+  }
+  .favorite {
+    flex: 0;
+    height: auto;
+    min-height: 88px;
+    border-top: 1px solid $color-surface-dark4;
+  }
 }
 
 #chat-whisper-users {
@@ -1472,6 +1482,7 @@ hr {
   width: fit-content;
   min-width: 75px;
   max-width: 250px;
+  z-index: 999;
   .emote-image {
     display: flex;
     justify-content: center;
@@ -1490,6 +1501,23 @@ hr {
       &.tier,
       &.creator {
         color: $text-color1;
+      }
+      &.favorite {
+        cursor: pointer;
+        margin-top: 5px;
+        .btn-icon {
+          transition: background-color 500ms;
+          width: 20px;
+          height: 20px;
+          mask: url('../img/icon-favorite.svg') no-repeat;
+          background-color: $text-color2;
+        }
+        &.favorited .btn-icon {
+          mask: url('../img/icon-favorite-fill.svg') no-repeat;
+        }
+        &:hover .btn-icon {
+          background-color: $color-yellow;
+        }
       }
     }
   }

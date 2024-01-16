@@ -9,29 +9,60 @@ export default class ChatEmoteTooltip extends ChatMenuFloating {
     this.ui.name = this.ui.find('.emote-info .name');
     this.ui.creator = this.ui.find('.emote-info .creator');
     this.ui.tier = this.ui.find('.emote-info .tier');
+    this.ui.favorite = this.ui.find('.emote-info .favorite');
 
-    this.chat.output.on('contextmenu', '.msg-chat .text .emote', (e) => {
-      const emote = $(e.currentTarget).closest('.emote')[0].innerText;
-      const { creator, minimumSubTier } =
-        this.chat.emoteService.getEmote(emote) ?? {};
-
-      this.emote = emote;
-      this.creator = creator;
-      this.tier = minimumSubTier;
-
-      this.position(e);
-      this.show();
+    this.chat.menus.get('emotes').ui.on('contextmenu', '.emote', (e) => {
+      this.contextmenu(e);
       return false;
     });
 
-    this.ui.emote.on('click', '.emote', (e) => {
+    this.chat.menus.get('emotes').ui.on('click', () => this.hide());
+
+    this.chat.output.on('contextmenu', '.msg-chat .text .emote', (e) => {
+      this.contextmenu(e);
+      return false;
+    });
+
+    this.ui.emote.on('click', '.emote', () => {
       const value = this.chat.input.val().toString().trim();
       this.chat.input
-        .val(
-          `${value + (value === '' ? '' : ' ') + e.currentTarget.innerText} `,
-        )
+        .val(`${value + (value === '' ? '' : ' ') + this.emote} `)
         .focus();
     });
+
+    this.ui.favorite.on('click', () => {
+      const result = this.chat.toggleFavoriteEmote(this.emote);
+      this.favorite = result;
+    });
+  }
+
+  contextmenu(e) {
+    const emote = $(e.currentTarget).closest('.emote')[0].innerText;
+    const { creator, minimumSubTier } =
+      this.chat.emoteService.getEmote(emote) ?? {};
+
+    this.emote = emote;
+    this.favorite = this.chat.favoriteemotes.has(emote);
+    this.creator = creator;
+    this.tier = minimumSubTier;
+
+    this.position(e);
+    this.show();
+  }
+
+  /**
+   * @param {boolean} favorited
+   */
+  set favorite(favorited) {
+    this.ui.favorite.toggleClass('favorited', favorited);
+    this.ui.favorite.attr(
+      'title',
+      favorited ? 'Unfavorite emote' : 'Favorite emote',
+    );
+  }
+
+  get emote() {
+    return this.ui.name.text();
   }
 
   /**
