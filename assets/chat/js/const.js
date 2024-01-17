@@ -124,6 +124,7 @@ const settingsdefault = new Map(
     showremoved: 0, // 0 = false (removes), 1 = true (censor), 2 = do nothing
     showhispersinchat: false,
     ignorenicks: [],
+    favoriteemotes: [],
     focusmentioned: false,
     notificationtimeout: true,
     ignorementions: false,
