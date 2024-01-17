@@ -29,14 +29,17 @@
 
   <div id="chat-input-frame">
     <div id="chat-input-wrap">
-      <textarea
-        id="chat-input-control"
-        placeholder="Getting things ready ..."
-        autocomplete="off"
-        tabindex="1"
-        autofocus
-        spellcheck
-      ></textarea>
+      <div id="chat-input-textarea">
+        <textarea
+          id="chat-input-control"
+          placeholder="Getting things ready ..."
+          autocomplete="off"
+          tabindex="1"
+          autofocus
+          spellcheck
+        ></textarea>
+        <div id="chat-input-send"><i class="btn-icon"></i></div>
+      </div>
       <a id="chat-input-subonly" class="chat-tool-btn" title="Subonly mode">
         <i class="btn-icon"></i>
       </a>
@@ -92,6 +95,13 @@
                 <option value="medium">Size Medium</option>
                 <option value="large">Size Large</option>
               </select>
+            </div>
+
+            <div class="form-group checkbox">
+              <label title="Show send message button">
+                <input name="showsendmsgbtn" type="checkbox" data-opposite />
+                Show send message button
+              </label>
             </div>
 
             <h4>Messages</h4>
