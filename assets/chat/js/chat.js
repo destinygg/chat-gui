@@ -49,6 +49,7 @@ import makeSafeForRegex, {
   nickregex,
   nsfwregex,
   nsflregex,
+  linkregex,
 } from './regex';
 
 import { HashLinkConverter, MISSING_ARG_ERROR } from './hashlinkconverter';
@@ -2345,7 +2346,7 @@ class Chat {
       // Check current user nick against msg.message (if highlight setting is on)
       ((this.regexhighlightself &&
         this.settings.get('highlight') &&
-        this.regexhighlightself.test(message.message)) ||
+        this.regexhighlightself.test(message.message.replace(linkregex, ''))) ||
         // Check /highlight nicks against msg.nick
         (this.regexhighlightnicks &&
           this.regexhighlightnicks.test(message.user.username)) ||
@@ -2374,7 +2375,9 @@ class Chat {
   }
 
   extractNicks(text) {
-    const uniqueNicks = new Set(text.match(nickmessageregex));
+    const uniqueNicks = new Set(
+      text.replace(linkregex, '').match(nickmessageregex),
+    );
     return [...uniqueNicks];
   }
 
