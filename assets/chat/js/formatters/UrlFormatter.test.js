@@ -21,7 +21,37 @@ describe('Normalizing URLs', () => {
     );
   });
 
-  test("Don't modify a URL that isn't Twitter or X", () => {
+  test('Remove the share tracking query param from a youtube.com link', () => {
+    expect(
+      urlFormatter.normalizeUrl(
+        'https://www.youtube.com/live/2NjXXQYtUNY?si=5ALpT28ptRec6T7u&t=70',
+      ),
+    ).toBe('https://www.youtube.com/live/2NjXXQYtUNY?t=70');
+  });
+
+  test('Remove the share tracking query param from a youtu.be link', () => {
+    expect(
+      urlFormatter.normalizeUrl(
+        'https://youtu.be/SbPP1i6INPk?si=K0qpdHBGOIJ-gBMK&t=60',
+      ),
+    ).toBe('https://youtu.be/SbPP1i6INPk?t=60');
+  });
+
+  test("Don't modify a youtube.com link that doesn't contain the share tracking query param", () => {
+    expect(
+      urlFormatter.normalizeUrl(
+        'https://www.youtube.com/live/2NjXXQYtUNY?t=70',
+      ),
+    ).toBe('https://www.youtube.com/live/2NjXXQYtUNY?t=70');
+  });
+
+  test("Don't modify a youtu.be link that doesn't contain the share tracking query param", () => {
+    expect(urlFormatter.normalizeUrl('https://youtu.be/SbPP1i6INPk?t=60')).toBe(
+      'https://youtu.be/SbPP1i6INPk?t=60',
+    );
+  });
+
+  test("Don't modify a URL that isn't Twitter, X or YouTube", () => {
     expect(
       urlFormatter.normalizeUrl('https://www.twitch.tv/search?term=vtuber'),
     ).toBe('https://www.twitch.tv/search?term=vtuber');

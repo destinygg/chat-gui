@@ -12,3 +12,5 @@ export {
   default as PinnedMessage,
   checkIfPinWasDismissed,
 } from './PinnedMessage';
+export { default as ChatBroadcastMessage } from './ChatBroadcastMessage';
+export { default as ChatDeathMessage } from './ChatDeathMessage';

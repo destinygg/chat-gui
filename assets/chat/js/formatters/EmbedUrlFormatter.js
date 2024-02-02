@@ -1,7 +1,7 @@
 export default class EmbedUrlFormatter {
   constructor() {
     this.bigscreenregex =
-      /(^|\s)(#(kick|twitch|twitch-vod|twitch-clip|youtube|youtube-live|facebook|rumble|vimeo)\/([\w-]{3,64}|\d{10,20}\/videos\/\d{10,20}|\w{7}\/\?pub=\w{5})(?:\?t=(\d+)s?)?)\b/g;
+      /(^|\s)(#(kick|twitch|twitch-vod|twitch-clip|youtube|youtube-live|facebook|rumble|vimeo)\/([\w\d]{3,64}\/videos\/\d{10,20}|[\w-]{3,64}|\w{7}\/\?pub=\w{5})(?:\?t=(\d+)s?)?)\b/g;
   }
 
   format(chat, str /* , message=null */) {

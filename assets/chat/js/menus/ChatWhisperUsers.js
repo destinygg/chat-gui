@@ -67,11 +67,9 @@ export default class ChatWhisperUsers extends ChatMenu {
     const user = this.chat.users.get(nick.toLowerCase()) || new ChatUser(nick);
     this.usersEl.append(`
             <li class="conversation unread-${unread}">
-                <a style="flex: 1;" data-username="${user.nick.toLowerCase()}" class="user">${
-                  user.nick
-                }</a>
+                <a style="flex: 1;" data-username="${user.username}" class="user">${user.displayName}</a>
                 <span class="badge">${unread}</span>
-                <a data-username="${user.nick.toLowerCase()}" title="Hide" class="remove"></a>
+                <a data-username="${user.username}" title="Hide" class="remove"></a>
             </li>
         `);
   }

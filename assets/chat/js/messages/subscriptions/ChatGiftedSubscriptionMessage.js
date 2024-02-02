@@ -22,7 +22,7 @@ export default class ChatGiftedSubscriptionMessage extends ChatSubscriptionMessa
         };
       }, {});
 
-    attributes['data-giftee'] = this.giftee.username.toLowerCase();
+    attributes['data-giftee'] = this.giftee.username;
 
     message.querySelector('.subscription-icon').classList.add('gift');
 
@@ -32,8 +32,8 @@ export default class ChatGiftedSubscriptionMessage extends ChatSubscriptionMessa
       ?.content.cloneNode(true).firstElementChild;
 
     const gifteeColorFlair = usernameColorFlair(chat.flairs, this.giftee);
-    giftee.classList.add(gifteeColorFlair?.name);
-    giftee.innerText = this.giftee.username;
+    if (gifteeColorFlair) giftee.classList.add(gifteeColorFlair.name);
+    giftee.innerText = this.giftee.displayName;
 
     const subscriptionInfo = message.querySelector('.event-info');
     const user = message.querySelector('.user');

@@ -235,7 +235,9 @@ export default class ChatUserMenu extends ChatMenu {
   addElement(messageUser, sort = false) {
     const user = new ChatUser(messageUser);
     const label =
-      !user.username || user.username === '' ? 'Anonymous' : user.username;
+      !user.displayName || user.displayName === ''
+        ? 'Anonymous'
+        : user.displayName;
     const features =
       user.features.length === 0 ? 'nofeature' : user.features.join(' ');
     const usr = $(

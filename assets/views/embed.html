@@ -51,6 +51,13 @@
         </a>
       </div>
       <div class="chat-tools-group">
+        <a
+          id="chat-watching-focus-btn"
+          class="chat-tool-btn"
+          data-tippy-content="Highlights messages from users watching the same stream"
+        >
+          <i class="btn-icon"></i>
+        </a>
         <a id="chat-settings-btn" class="chat-tool-btn" title="Settings">
           <i class="btn-icon"></i>
         </a>
@@ -102,6 +109,11 @@
             <div class="form-group checkbox">
               <label title="Ignore messages that mention ignored users">
                 <input name="ignorementions" type="checkbox" /> Harsh ignore
+              </label>
+            </div>
+            <div class="form-group checkbox">
+              <label title="Show entire url in message">
+                <input name="showentireurl" type="checkbox" /> Show entire URL
               </label>
             </div>
             <div class="form-group checkbox">
@@ -243,6 +255,7 @@
         <h5><span>User Info</span> <i class="chat-menu-close"></i></h5>
       </div>
       <div class="user-info">
+        <h5 class="watching-subheader">Watching:</h5>
         <h5 class="date-subheader"></h5>
         <h5 class="tag-subheader"></h5>
         <h5 class="flairs-subheader">Flairs:</h5>

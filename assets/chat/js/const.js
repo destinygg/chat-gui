@@ -83,6 +83,7 @@ const errorstrings = new Map(
     nophrase: "Banned phrase doesn't exist.",
     invalidphrase:
       'Invalid phrase provided. Either the phrase was empty, or its regex was invalid.',
+    cantbanprotected: "Protected users can't die.",
   }),
 );
 
@@ -112,6 +113,7 @@ const settingsdefault = new Map(
   Object.entries({
     schemaversion: 2,
     showtime: false,
+    showentireurl: false,
     hideflairicons: false,
     profilesettings: false,
     timestampformat: 'HH:mm',
