@@ -117,4 +117,15 @@ export default class ChatUserMessage extends ChatMessage {
     this.ui.classList.toggle('msg-own', isOwn);
     this.isown = isOwn;
   }
+
+  /**
+   * @param {boolean} isSlashMe
+   */
+  setSlashMe(isSlashMe) {
+    this.ui.classList.toggle('msg-me', isSlashMe);
+    const ctrl = this.ui.querySelector('.ctrl');
+    if (ctrl) ctrl.textContent = isSlashMe ? '' : ': ';
+
+    this.slashme = isSlashMe;
+  }
 }
