@@ -133,8 +133,7 @@ const settingsdefault = new Map(
     hidensfl: false,
     fontscale: 'auto',
     censorbadwords: false,
-    disableemoteanimations: false,
-    disableflairanimations: false,
+    disableanimations: false,
   }),
 );
 

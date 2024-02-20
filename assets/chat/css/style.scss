@@ -1717,18 +1717,18 @@ hr {
 .pref-autocompletehelper #chat-auto-complete.active {
   display: block;
 }
-.pref-disableemoteanimations .emote {
-  &,
-  &:hover,
-  &:before,
-  &:after {
+.pref-disableanimations {
+  .emote,
+  .emote:hover,
+  .emote::before,
+  .emote::after {
     animation: none !important;
   }
-}
 
-.pref-disableflairanimations a.user,
-.pref-disableflairanimations span.user {
-  animation: none !important;
+  a.user,
+  span.user {
+    animation: none !important;
+  }
 }
 
 /* OverlayScrollbars theme */
