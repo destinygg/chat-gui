@@ -1726,6 +1726,11 @@ hr {
   }
 }
 
+.pref-disableflairanimations a.user,
+.pref-disableflairanimations span.user {
+  animation: none !important;
+}
+
 /* OverlayScrollbars theme */
 .dgg-scroller-theme.os-scrollbar-horizontal {
   right: 10px;

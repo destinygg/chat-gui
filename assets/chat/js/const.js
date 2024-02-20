@@ -134,6 +134,7 @@ const settingsdefault = new Map(
     fontscale: 'auto',
     censorbadwords: false,
     disableemoteanimations: false,
+    disableflairanimations: false,
   }),
 );
 
