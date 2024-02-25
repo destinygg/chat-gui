@@ -858,7 +858,7 @@ hr {
   }
 }
 
-.watching-focus {
+.watching-focus:not(.focus) {
   .msg-emote,
   .msg-user,
   .msg-death {
@@ -872,7 +872,7 @@ hr {
 }
 
 /* Focus or highlight a line */
-.focus:not(.watching-focus) .msg-chat {
+.focus .msg-chat {
   opacity: 0.3;
 
   &.msg-pinned {
