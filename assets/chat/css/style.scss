@@ -1717,6 +1717,19 @@ hr {
 .pref-autocompletehelper #chat-auto-complete.active {
   display: block;
 }
+.pref-disableanimations {
+  .emote,
+  .emote:hover,
+  .emote::before,
+  .emote::after {
+    animation: none !important;
+  }
+
+  a.user,
+  span.user {
+    animation: none !important;
+  }
+}
 
 /* OverlayScrollbars theme */
 .dgg-scroller-theme.os-scrollbar-horizontal {
