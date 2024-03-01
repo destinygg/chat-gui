@@ -1317,14 +1317,8 @@ hr {
     background: none;
     border-radius: 0;
   }
-  .all {
-    flex: 1;
-    height: auto;
-  }
   .favorite {
-    flex: 0;
-    height: auto;
-    min-height: 88px;
+    flex: 0 88px;
     border-top: 1px solid $color-surface-dark4;
   }
 }
