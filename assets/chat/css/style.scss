@@ -1509,11 +1509,11 @@ hr {
           transition: background-color 500ms;
           width: 20px;
           height: 20px;
-          mask: url('../img/icon-favorite.svg') no-repeat;
+          mask: url('../img/icon-favorite.svg');
           background-color: $text-color2;
         }
         &.favorited .btn-icon {
-          mask: url('../img/icon-favorite-fill.svg') no-repeat;
+          mask: url('../img/icon-favorite-fill.svg');
         }
         &:hover .btn-icon {
           background-color: $color-yellow;
