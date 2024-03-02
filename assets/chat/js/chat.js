@@ -1245,7 +1245,7 @@ class Chat {
         break;
       case 'bannedphrase': {
         message = MessageBuilder.error(
-          `Your message was filtered because it contained this banned phrase: "${data.filtered}".`,
+          `Your message was blocked because it contained this banned phrase: "${data.filtered}".`,
         );
         break;
       }
