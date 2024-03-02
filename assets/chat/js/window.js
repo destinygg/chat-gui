@@ -135,6 +135,7 @@ class ChatWindow extends EventEmitter {
         message.highlight(chat.shouldHighlightMessage(message));
         if (message.type === MessageTypes.USER) {
           message.setContinued(this.isContinued(message, this.messages[i - 1]));
+          message.setSlashMe(message.slashme);
           message.setTag(chat.taggednicks.get(username));
         }
         message.setTagTitle(chat.taggednotes.get(username) ?? '');

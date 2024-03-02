@@ -237,6 +237,9 @@ class Chat {
       this.user = this.addUser(user);
       this.authenticated = true;
     }
+    this.commands
+      .generateAutocomplete(this.user.hasModPowers())
+      .forEach((command) => this.autocomplete.add(command));
     this.setDefaultPlaceholderText();
     return this;
   }
@@ -361,9 +364,6 @@ class Chat {
       ),
     );
 
-    this.commands
-      .generateAutocomplete(this.user.hasModPowers())
-      .forEach((command) => this.autocomplete.add(command));
     this.autocomplete.bind(this);
 
     // Chat input

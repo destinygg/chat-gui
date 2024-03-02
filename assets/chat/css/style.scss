@@ -858,7 +858,7 @@ hr {
   }
 }
 
-.watching-focus {
+.watching-focus:not(.focus) {
   .msg-emote,
   .msg-user,
   .msg-death {
@@ -872,7 +872,7 @@ hr {
 }
 
 /* Focus or highlight a line */
-.focus:not(.watching-focus) .msg-chat {
+.focus .msg-chat {
   opacity: 0.3;
 
   &.msg-pinned {
@@ -1716,6 +1716,19 @@ hr {
 }
 .pref-autocompletehelper #chat-auto-complete.active {
   display: block;
+}
+.pref-disableanimations {
+  .emote,
+  .emote:hover,
+  .emote::before,
+  .emote::after {
+    animation: none !important;
+  }
+
+  a.user,
+  span.user {
+    animation: none !important;
+  }
 }
 
 /* OverlayScrollbars theme */
