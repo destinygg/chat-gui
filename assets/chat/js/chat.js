@@ -361,6 +361,9 @@ class Chat {
       ),
     );
 
+    this.commands
+      .generateAutocomplete(this.user.hasModPowers())
+      .forEach((command) => this.autocomplete.add(command));
     this.autocomplete.bind(this);
 
     // Chat input
@@ -1034,9 +1037,6 @@ class Chat {
 
   onME(data) {
     this.setUser(data);
-    this.commands
-      .generateAutocomplete(this.user.hasModPowers())
-      .forEach((command) => this.autocomplete.add(command));
     if (data) {
       // If is a logged in user.
       this.loadSettings();
