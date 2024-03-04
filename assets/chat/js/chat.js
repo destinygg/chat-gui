@@ -145,6 +145,8 @@ class Chat {
     this.source.on('MASSGIFT', (data) => this.onMASSGIFT(data));
     this.source.on('DONATION', (data) => this.onDONATION(data));
     this.source.on('UPDATEUSER', (data) => this.onUPDATEUSER(data));
+    this.source.on('ADDPHRASE', (data) => this.onADDPHRASE(data));
+    this.source.on('REMOVEPHRASE', (data) => this.onREMOVEPHRASE(data));
     this.source.on('DEATH', (data) => this.onDEATH(data));
 
     this.control.on('SEND', (data) => this.cmdSEND(data));
@@ -209,6 +211,18 @@ class Chat {
     this.control.on('UNMOTD', () => this.cmdUNPIN());
     this.control.on('HOST', (data) => this.cmdHOST(data));
     this.control.on('UNHOST', () => this.cmdUNHOST());
+    this.control.on('ADDPHRASE', (data) => this.cmdADDPHRASE(data));
+    this.control.on('ADDBAN', (data) => this.cmdADDPHRASE(data));
+    this.control.on('ADDMUTE', (data) => this.cmdADDPHRASE(data));
+    this.control.on('REMOVEPHRASE', (data) => this.cmdREMOVEPHRASE(data));
+    this.control.on('REMOVEBAN', (data) => this.cmdREMOVEPHRASE(data));
+    this.control.on('REMOVEMUTE', (data) => this.cmdREMOVEPHRASE(data));
+    this.control.on('DELETEPHRASE', (data) => this.cmdREMOVEPHRASE(data));
+    this.control.on('DELETEBAN', (data) => this.cmdREMOVEPHRASE(data));
+    this.control.on('DELETEMUTE', (data) => this.cmdREMOVEPHRASE(data));
+    this.control.on('DPHRASE', (data) => this.cmdREMOVEPHRASE(data));
+    this.control.on('DBAN', (data) => this.cmdREMOVEPHRASE(data));
+    this.control.on('DMUTE', (data) => this.cmdREMOVEPHRASE(data));
     this.control.on('DIE', () => this.cmdDIE());
     this.control.on('SUICIDE', () => this.cmdDIE());
     this.control.on('BITLY', () => this.cmdDIE());
@@ -1245,6 +1259,12 @@ class Chat {
           `You are temporarily muted! You can chat again ${this.mutedtimer.getReadableDuration()}. Subscribe to remove the mute immediately.`,
         );
         break;
+      case 'bannedphrase': {
+        message = MessageBuilder.error(
+          `Your message was blocked because it contained this banned phrase: "${data.filtered}".`,
+        );
+        break;
+      }
       default:
         message = MessageBuilder.error(errorstrings.get(desc) || desc);
     }
@@ -1313,6 +1333,19 @@ class Chat {
 
   onDONATION(data) {
     MessageBuilder.donation(data).into(this);
+  }
+
+  onADDPHRASE(data) {
+    MessageBuilder.command(`Phrase "${data.data}" added.`, data.timestamp).into(
+      this,
+    );
+  }
+
+  onREMOVEPHRASE(data) {
+    MessageBuilder.command(
+      `Phrase "${data.data}" removed.`,
+      data.timestamp,
+    ).into(this);
   }
 
   onPRIVMSGSENT() {
@@ -2270,6 +2303,38 @@ class Chat {
 
   cmdUNPIN() {
     this.source.send('PIN', { data: '' });
+  }
+
+  cmdADDPHRASE(parts) {
+    if (!this.user.hasAnyFeatures(UserFeatures.ADMIN, UserFeatures.MODERATOR)) {
+      MessageBuilder.error(errorstrings.get('nopermission')).into(this);
+      return;
+    }
+
+    if (!parts.length) {
+      MessageBuilder.error('No phrase provided - /addphrase <phrase>').into(
+        this,
+      );
+      return;
+    }
+
+    this.source.send('ADDPHRASE', { data: parts.join(' ') });
+  }
+
+  cmdREMOVEPHRASE(parts) {
+    if (!this.user.hasAnyFeatures(UserFeatures.ADMIN, UserFeatures.MODERATOR)) {
+      MessageBuilder.error(errorstrings.get('nopermission')).into(this);
+      return;
+    }
+
+    if (!parts.length) {
+      MessageBuilder.error('No phrase provided - /removephrase <phrase>').into(
+        this,
+      );
+      return;
+    }
+
+    this.source.send('REMOVEPHRASE', { data: parts.join(' ') });
   }
 
   cmdDIE() {
