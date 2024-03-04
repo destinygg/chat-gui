@@ -98,7 +98,7 @@ class ChatAutoComplete {
   bind(chat) {
     this.chat = chat;
     this.input = chat.input;
-    this.ui.insertBefore(chat.input);
+    this.ui.insertBefore('#chat-input-textarea');
     let originval = '';
     let shiftdown = false;
     let keypressed = false;

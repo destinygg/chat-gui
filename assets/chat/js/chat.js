@@ -291,6 +291,7 @@ class Chat {
     this.ishidden = (document.visibilityState || 'visible') !== 'visible';
     this.output = this.ui.find('#chat-output-frame');
     this.input = this.ui.find('#chat-input-control');
+    this.inputsendbtn = this.ui.find('#chat-input-send');
     this.subonlyicon = this.ui.find('#chat-input-subonly');
     this.loginscrn = this.ui.find('#chat-login-screen');
     this.loadingscrn = this.ui.find('#chat-loading');
@@ -370,6 +371,12 @@ class Chat {
         this.adjustInputHeight();
         this.input.focus();
       }
+    });
+
+    this.inputsendbtn.on('click', '.btn-icon', () => {
+      this.control.emit('SEND', this.input.val().toString().trim());
+      this.adjustInputHeight();
+      this.input.focus();
     });
 
     // Watching focus

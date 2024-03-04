@@ -129,6 +129,7 @@ const settingsdefault = new Map(
     notificationtimeout: true,
     ignorementions: false,
     autocompletehelper: true,
+    showsendmsgbtn: false,
     taggedvisibility: false,
     hidensfw: false,
     hidensfl: false,
