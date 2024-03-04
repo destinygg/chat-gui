@@ -46,6 +46,15 @@ button {
   font-family: inherit;
 }
 
+/* Default button style */
+button {
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
+  border: none;
+  background: transparent;
+}
+
 html,
 body {
   height: 100%;
@@ -1317,6 +1326,10 @@ hr {
     background: none;
     border-radius: 0;
   }
+  .favorite {
+    flex: 0 88px;
+    border-top: 1px solid $color-surface-dark4;
+  }
 }
 
 #chat-whisper-users {
@@ -1472,6 +1485,7 @@ hr {
   width: fit-content;
   min-width: 75px;
   max-width: 250px;
+  z-index: 221;
   .emote-image {
     display: flex;
     justify-content: center;
@@ -1490,6 +1504,25 @@ hr {
       &.tier,
       &.creator {
         color: $text-color1;
+      }
+    }
+    button.favorite {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      margin-top: 5px;
+      .btn-icon {
+        transition: background-color 500ms;
+        height: 20px;
+        aspect-ratio: 1;
+        mask: url('../img/icon-favorite.svg');
+        background-color: $text-color2;
+      }
+      &.favorited .btn-icon {
+        mask: url('../img/icon-favorite-fill.svg');
+      }
+      &:hover .btn-icon {
+        background-color: $color-yellow;
       }
     }
   }
@@ -1666,6 +1699,7 @@ hr {
   left: 0;
   right: 0;
   bottom: 0;
+  z-index: 300;
   h2 {
     font-size: 2.5em;
     font-weight: normal;

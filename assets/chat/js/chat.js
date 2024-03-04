@@ -99,6 +99,7 @@ class Chat {
     this.taggednicks = new Map();
     this.taggednotes = new Map();
     this.ignoring = new Set();
+    this.favoriteemotes = new Set();
     this.mainwindow = null;
     this.regexhighlightcustom = null;
     this.regexhighlightnicks = null;
@@ -258,6 +259,8 @@ class Chat {
     this.taggednicks = new Map(this.settings.get('taggednicks'));
     this.taggednotes = new Map(this.settings.get('taggednotes'));
     this.ignoring = new Set(this.settings.get('ignorenicks'));
+    this.favoriteemotes = new Set(this.settings.get('favoriteemotes'));
+
     return this.applySettings(false);
   }
 
@@ -934,6 +937,19 @@ class Chat {
     this.ignoring.clear();
     this.settings.set('ignorenicks', [...this.ignoring]);
     this.applySettings();
+  }
+
+  toggleFavoriteEmote(emote) {
+    const exists = this.favoriteemotes.has(emote);
+    if (!exists) {
+      this.favoriteemotes.add(emote);
+    } else {
+      this.favoriteemotes.delete(emote);
+    }
+    this.settings.set('favoriteemotes', [...this.favoriteemotes]);
+    this.applySettings();
+    this.menus.get('emotes').buildFavoriteEmoteMenu();
+    return !exists;
   }
 
   focusIfNothingSelected() {
