@@ -2,8 +2,18 @@ import ChatSubscriptionMessage from './ChatSubscriptionMessage';
 import MessageTypes from '../MessageTypes';
 
 export default class ChatMassSubscriptionMessage extends ChatSubscriptionMessage {
-  constructor(message, user, tier, tierLabel, quantity, timestamp) {
-    super(message, user, tier, tierLabel, timestamp);
+  constructor(
+    message,
+    user,
+    tier,
+    tierLabel,
+    amount,
+    quantity,
+    timestamp,
+    expiry,
+    uuid,
+  ) {
+    super(message, user, tier, tierLabel, amount, timestamp, expiry, uuid);
     this.type = MessageTypes.MASSGIFT;
     this.quantity = quantity;
   }
