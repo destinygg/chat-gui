@@ -765,13 +765,121 @@ hr {
   background-color: $color-chat-highlight;
 }
 
-/* Pinned Messages */
-#chat-pinned-frame {
-  display: none;
+/* Event bar */
+#chat-event-bar {
+  &:empty {
+    display: none !important;
+  }
+
+  display: inline-flex;
+  overflow-x: scroll !important;
+  background: #151515;
+  z-index: 6;
+
+  // width = height (lmao firefox)
+  scrollbar-width: none;
+  --ms-overflow-style: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  .msg-event-bar-wrapper {
+    cursor: pointer;
+    transition:
+      transform 500ms,
+      opacity 500ms;
+    opacity: 0;
+    transform: scale(0.1);
+
+    &.active {
+      transform: unset;
+      opacity: 1;
+    }
+
+    &:hover {
+      transition: transform 100ms;
+      transform: scale(1.05) !important;
+    }
+
+    &.removed {
+      transform: scale(0.1) !important;
+    }
+  }
+
+  .msg-chat {
+    margin: $gutter-sm $gutter-sm $gutter-sm $gutter-sm;
+    border-width: 2px;
+  }
+
+  .user {
+    &.scrolling {
+      display: inline-block;
+      animation: scrolling-event-username 12s linear 3s infinite;
+      word-wrap: normal;
+    }
+
+    &::before {
+      content: unset;
+    }
+
+    &:hover {
+      text-decoration: none;
+    }
+  }
+
+  .event-top {
+    padding: 0 $gutter-xs 0 0.4em;
+  }
+
+  .event-info {
+    padding-right: $gutter-xs;
+
+    &.scrolling {
+      overflow: hidden;
+      width: 74px;
+    }
+  }
+
+  .event-icon {
+    width: 2em;
+    height: 2em;
+  }
+
+  .rainbow-border::before {
+    margin: -2px;
+  }
+}
+
+@keyframes scrolling-event-username {
+  25%,
+  50% {
+    transform: translateX(calc(-100% + 74px));
+  }
+
+  75%,
+  100% {
+    transform: translateX(0%);
+  }
+}
+
+/* Hovering frame containing highlighted event from event bar and pinned message */
+#chat-hover-frame {
   padding: 4px;
   position: absolute;
   width: 100%;
   z-index: 210;
+}
+
+/* Event highlight frame */
+#chat-event-highlight-frame {
+  .msg-event-bar {
+    margin: $gutter-sm $gutter-sm $gutter-sm $gutter-sm;
+  }
+}
+
+/* Pinned Messages */
+#chat-pinned-frame {
+  display: none;
 
   &.active {
     display: block;
@@ -876,6 +984,10 @@ hr {
   opacity: 0.3;
 
   &.msg-pinned {
+    opacity: 1;
+  }
+
+  &.msg-event-bar {
     opacity: 1;
   }
 }
@@ -1890,7 +2002,10 @@ button.btn {
   #chat-output-frame {
     margin: 0;
   }
-  #chat-pinned-frame {
+  #chat-event-bar {
+    display: none !important;
+  }
+  #chat-hover-frame {
     display: none !important;
   }
 

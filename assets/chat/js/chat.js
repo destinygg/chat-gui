@@ -31,6 +31,7 @@ import {
   ChatEmoteTooltip,
   ChatSettingsMenu,
   ChatUserInfoMenu,
+  ChatEventBar,
 } from './menus';
 import ChatAutoComplete from './autocomplete';
 import ChatInputHistory from './history';
@@ -145,6 +146,7 @@ class Chat {
     this.source.on('DONATION', (data) => this.onDONATION(data));
     this.source.on('UPDATEUSER', (data) => this.onUPDATEUSER(data));
     this.source.on('DEATH', (data) => this.onDEATH(data));
+    this.source.on('PAIDEVENTS', (data) => this.onPAIDEVENTS(data));
 
     this.control.on('SEND', (data) => this.cmdSEND(data));
     this.control.on('HINT', (data) => this.cmdHINT(data));
@@ -294,6 +296,7 @@ class Chat {
     this.mainwindow = new ChatWindow('main').into(this);
     this.mutedtimer = new MutedTimer(this);
     this.chatpoll = new ChatPoll(this);
+    this.eventBar = new ChatEventBar(this);
     this.pinnedMessage = null;
 
     this.windowToFront('main');
@@ -1284,19 +1287,53 @@ class Chat {
   }
 
   onSUBSCRIPTION(data) {
-    MessageBuilder.subscription(data).into(this);
+    const event = MessageBuilder.subscription(data);
+    event.into(this);
+    this.eventBar.add(event);
   }
 
   onGIFTSUB(data) {
-    MessageBuilder.gift(data).into(this);
+    const event = MessageBuilder.gift(data);
+    event.into(this);
+    this.eventBar.add(event);
   }
 
   onMASSGIFT(data) {
-    MessageBuilder.massgift(data).into(this);
+    const event = MessageBuilder.massgift(data);
+    event.into(this);
+    this.eventBar.add(event);
   }
 
   onDONATION(data) {
-    MessageBuilder.donation(data).into(this);
+    const event = MessageBuilder.donation(data);
+    event.into(this);
+    this.eventBar.add(event);
+  }
+
+  onPAIDEVENTS(lines) {
+    lines.forEach((line) => {
+      const { eventname, data } = this.source.parse({ data: line });
+      switch (eventname) {
+        case 'SUBSCRIPTION': {
+          this.eventBar.add(MessageBuilder.subscription(data));
+          break;
+        }
+        case 'GIFTSUB': {
+          this.eventBar.add(MessageBuilder.gift(data));
+          break;
+        }
+        case 'MASSGIFT': {
+          this.eventBar.add(MessageBuilder.massgift(data));
+          break;
+        }
+        case 'DONATION': {
+          this.eventBar.add(MessageBuilder.donation(data));
+          break;
+        }
+        default:
+          break;
+      }
+    });
   }
 
   onPRIVMSGSENT() {
