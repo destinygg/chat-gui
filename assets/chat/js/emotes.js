@@ -41,6 +41,10 @@ export default class EmoteService {
     return this.emotes.filter((e) => e.twitch).map((e) => e.prefix);
   }
 
+  hasEmote(emote) {
+    return this.emotesMapped.has(emote);
+  }
+
   getEmote(emote) {
     return this.emotesMapped.get(emote);
   }

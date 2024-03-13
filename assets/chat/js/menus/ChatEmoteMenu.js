@@ -38,7 +38,9 @@ export default class ChatEmoteMenu extends ChatMenu {
   }
 
   buildFavoriteEmoteMenu() {
-    const favoriteEmotes = [...this.chat.favoriteemotes];
+    const favoriteEmotes = [...this.chat.favoriteemotes].filter((e) =>
+      this.chat.emoteService.hasEmote(e),
+    );
     if (favoriteEmotes.length === 0) {
       this.favoriteEmoteMenuContent.html(`<div class="emote-container">
         <div id="emote-subscribe-note">Favorite Emotes</div>
