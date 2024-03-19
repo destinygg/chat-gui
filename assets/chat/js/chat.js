@@ -94,7 +94,7 @@ class Chat {
     this.windows = new Map();
     this.settings = new Map(settingsdefault);
     this.commands = new ChatCommands();
-    this.autocomplete = new ChatAutoComplete();
+    this.autocomplete = null;
     this.menus = new Map();
     this.taggednicks = new Map();
     this.taggednotes = new Map();
@@ -295,6 +295,7 @@ class Chat {
     this.loginscrn = this.ui.find('#chat-login-screen');
     this.loadingscrn = this.ui.find('#chat-loading');
     this.windowselect = this.ui.find('#chat-windows-select');
+    this.autocomplete = new ChatAutoComplete(this);
     this.inputhistory = new ChatInputHistory(this);
     this.userfocus = new ChatUserFocus(this, this.css);
     this.mainwindow = new ChatWindow('main').into(this);
