@@ -2,9 +2,9 @@ import $ from 'jquery';
 import { throttle } from 'throttle-debounce';
 import UserFeatures from './features';
 import { MessageBuilder } from './messages';
+import ChatPollInput from './pollInput';
 
 const POLL_CONJUNCTION = /\bor\b/i;
-const POLL_INTERROGATIVE = /^(how|why|when|what|where)\b/i;
 const POLL_TIME = /\b([0-9]+(?:m|s))$/i;
 const POLL_DEFAULT_TIME = 30000;
 const POLL_MAX_TIME = 10 * 60 * 1000;
@@ -18,15 +18,13 @@ const PollType = {
 
 function parseQuestion(msg) {
   if (msg.indexOf('?') === -1) {
-    throw new Error('Must contain a ?');
+    return { question: '', options: [] };
+    // throw new Error('Must contain a ?');
   }
   const parts = msg.split('?');
   const question = `${parts[0]}?`;
   if (parts[1].trim() !== '') {
     const options = parts[1].split(POLL_CONJUNCTION).map((a) => a.trim());
-    if (options.length < 2 && question.match(POLL_INTERROGATIVE)) {
-      throw new Error('question needs at least 2 available answers');
-    }
     return { question, options };
   }
   return { question, options: ['Yes', 'No'] };
@@ -57,6 +55,7 @@ function parseQuestionAndTime(rawQuestion) {
 class ChatPoll {
   constructor(chat) {
     this.chat = chat;
+    this.inputUi = new ChatPollInput(this.chat);
     this.ui = this.chat.ui.find('#chat-poll-frame');
     this.ui.title = this.ui.find('.poll-info');
     this.ui.votes = this.ui.find('.poll-votes');
@@ -317,6 +316,11 @@ class ChatPoll {
     }
 
     MessageBuilder.info(message).into(this.chat);
+  }
+
+  showInput(message, weighted) {
+    const { question, options, time } = parseQuestionAndTime(message);
+    this.inputUi.show(question, options, time, weighted);
   }
 }
 

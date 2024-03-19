@@ -38,7 +38,7 @@ import ChatUserFocus from './focus';
 import ChatStore from './store';
 import Settings from './settings';
 import ChatWindow from './window';
-import { ChatPoll, parseQuestionAndTime } from './poll';
+import { ChatPoll } from './poll';
 import { isMuteActive, MutedTimer } from './mutedtimer';
 import EmoteService from './emotes';
 import UserFeatures from './features';
@@ -1491,18 +1491,7 @@ class Chat {
   }
 
   cmdPOLL(parts, command) {
-    const slashCommand = `/${command.toLowerCase()}`;
     const textOnly = parts.join(' ');
-
-    try {
-      // Assume the command's format is invalid if an exception is thrown.
-      parseQuestionAndTime(textOnly);
-    } catch {
-      MessageBuilder.info(
-        `Usage: ${slashCommand} <question>? <option 1> or <option 2> [or <option 3> [or <option 4> ... [or <option n>]]] [<time>].`,
-      ).into(this);
-      return;
-    }
 
     if (this.chatpoll.isPollStarted()) {
       MessageBuilder.error('Poll already started.').into(this);
@@ -1516,14 +1505,7 @@ class Chat {
       return;
     }
 
-    const { question, options, time } = parseQuestionAndTime(textOnly);
-    const dataOut = {
-      weighted: slashCommand === '/spoll',
-      time,
-      question,
-      options,
-    };
-    this.source.send('STARTPOLL', dataOut);
+    this.chatpoll.showInput(textOnly, command === 'SPOLL');
   }
 
   cmdPOLLSTOP() {
