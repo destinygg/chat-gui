@@ -1141,9 +1141,12 @@ hr {
         border-radius: $bradius;
         color: $color-chat-text2;
         background-color: $color-surface-dark2;
-        border: 1px solid $color-surface-dark3;
+        border: 1px solid $color-red;
         outline: none;
         resize: none;
+        &:not(:placeholder-shown) {
+          border: 1px solid $color-surface-dark3;
+        }
       }
       .chat-poll-input-button {
         margin: 0 0.5em 0 0.5em;
