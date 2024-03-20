@@ -6,7 +6,6 @@ class ChatPollInput extends ChatMenu {
     super(ui, btn, chat);
 
     this.ui.send = this.ui.find('.chat-poll-input-button-send');
-    this.ui.cancel = this.ui.find('.chat-poll-input-button-cancel');
     this.ui.add = this.ui.find('.chat-poll-input-button-add');
     this.ui.question = this.ui.find('.chat-poll-input-question');
     this.ui.answers = this.ui.find('.chat-poll-input-answers');
@@ -14,7 +13,6 @@ class ChatPollInput extends ChatMenu {
     this.ui.time = this.ui.find('.chat-poll-input-time');
     this.ui.weighted = this.ui.find('.chat-poll-input-weighted');
 
-    this.ui.cancel.on('click touch', () => this.hide());
     this.ui.send.on('click touch', () => this.send());
     this.ui.add.on('click touch', () => this.addAnswer());
 
