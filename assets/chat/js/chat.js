@@ -31,6 +31,7 @@ import {
   ChatEmoteTooltip,
   ChatSettingsMenu,
   ChatUserInfoMenu,
+  ChatPollInput,
 } from './menus';
 import ChatAutoComplete from './autocomplete';
 import ChatInputHistory from './history';
@@ -38,7 +39,7 @@ import ChatUserFocus from './focus';
 import ChatStore from './store';
 import Settings from './settings';
 import ChatWindow from './window';
-import { ChatPoll } from './poll';
+import { ChatPoll, parseQuestionAndTime } from './poll';
 import { isMuteActive, MutedTimer } from './mutedtimer';
 import EmoteService from './emotes';
 import UserFeatures from './features';
@@ -352,6 +353,10 @@ class Chat {
         this.output.find('.msg-user .user'),
         this,
       ),
+    );
+    this.menus.set(
+      'poll-input',
+      new ChatPollInput(this.ui.find('#chat-poll-input'), null, this),
     );
 
     this.autocomplete.bind(this);
@@ -1505,7 +1510,10 @@ class Chat {
       return;
     }
 
-    this.chatpoll.showInput(textOnly, command === 'SPOLL');
+    const { question, options, time } = parseQuestionAndTime(textOnly);
+    this.menus
+      .get('poll-input')
+      .show(question, options, time, command === 'SPOLL');
   }
 
   cmdPOLLSTOP() {

@@ -2,7 +2,6 @@ import $ from 'jquery';
 import { throttle } from 'throttle-debounce';
 import UserFeatures from './features';
 import { MessageBuilder } from './messages';
-import ChatPollInput from './pollInput';
 
 const POLL_CONJUNCTION = /\bor\b/i;
 const POLL_TIME = /\b([0-9]+(?:m|s))$/i;
@@ -55,7 +54,6 @@ function parseQuestionAndTime(rawQuestion) {
 class ChatPoll {
   constructor(chat) {
     this.chat = chat;
-    this.inputUi = new ChatPollInput(this.chat);
     this.ui = this.chat.ui.find('#chat-poll-frame');
     this.ui.title = this.ui.find('.poll-info');
     this.ui.votes = this.ui.find('.poll-votes');
@@ -316,11 +314,6 @@ class ChatPoll {
     }
 
     MessageBuilder.info(message).into(this.chat);
-  }
-
-  showInput(message, weighted) {
-    const { question, options, time } = parseQuestionAndTime(message);
-    this.inputUi.show(question, options, time, weighted);
   }
 }
 

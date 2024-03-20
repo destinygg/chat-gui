@@ -1,9 +1,10 @@
 import $ from 'jquery';
+import ChatMenu from './ChatMenu';
 
-class ChatPollInput {
-  constructor(chat) {
-    this.chat = chat;
-    this.ui = this.chat.ui.find('#chat-poll-input');
+class ChatPollInput extends ChatMenu {
+  constructor(ui, btn, chat) {
+    super(ui, btn, chat);
+
     this.ui.send = this.ui.find('.chat-poll-input-button-send');
     this.ui.cancel = this.ui.find('.chat-poll-input-button-cancel');
     this.ui.add = this.ui.find('.chat-poll-input-button-add');
@@ -32,22 +33,17 @@ class ChatPollInput {
     this.options = options;
     this.time = time;
 
-    this.ui.show();
-  }
-
-  hide() {
-    this.ui.hide();
+    super.show();
   }
 
   send() {
     this.hide();
-    const dataOut = {
+    this.chat.source.send('STARTPOLL', {
       weighted: this.weighted,
       time: this.time,
       question: this.question,
       options: this.options,
-    };
-    this.chat.source.send('STARTPOLL', dataOut);
+    });
   }
 
   addAnswer() {
@@ -102,7 +98,7 @@ class ChatPollInput {
   }
 
   get weighted() {
-    return this.ui.weighted.checked;
+    return this.ui.weighted[0].checked;
   }
 
   set weighted(weighted) {

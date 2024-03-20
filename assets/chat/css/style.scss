@@ -1094,11 +1094,14 @@ hr {
 
 /* Poll input */
 #chat-poll-input {
+  &.active {
+    display: block;
+  }
   display: none;
   background-color: $color-surface-dark1;
   z-index: 132;
   border-radius: $bradius $bradius 0 0;
-  position: relative;
+  position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
