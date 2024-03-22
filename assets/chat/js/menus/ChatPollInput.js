@@ -21,6 +21,7 @@ class ChatPollInput extends ChatMenu {
       '.chat-poll-input-answer .chat-poll-input-button-remove',
       (e) => {
         e.target.closest('.chat-poll-input-answer').remove();
+        this.drawOptions(this.options);
       },
     );
   }
@@ -87,6 +88,10 @@ class ChatPollInput extends ChatMenu {
     if (options.length === 0) options = ['', ''];
     else if (options.length === 1) options.push('');
 
+    this.drawOptions(options);
+  }
+
+  drawOptions(options) {
     this.ui.answers.options = options.map((option, index) =>
       this.buildOptionHtml(option, index),
     );
