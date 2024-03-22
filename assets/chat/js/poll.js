@@ -18,7 +18,6 @@ const PollType = {
 function parseQuestion(msg) {
   if (msg.indexOf('?') === -1) {
     return { question: '', options: [] };
-    // throw new Error('Must contain a ?');
   }
   const parts = msg.split('?');
   const question = `${parts[0]}?`;
