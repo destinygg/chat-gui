@@ -13,18 +13,22 @@ export default class ChatMenu extends EventEmitter {
       this.scrollplugin = new ChatScrollPlugin(e.querySelector('.content'), e);
     });
     this.ui.on('click', '.close,.chat-menu-close', this.hide.bind(this));
-    this.btn.on('click', (e) => {
-      if (this.visible) chat.input.focus();
-      this.toggle(e);
-      return false;
-    });
+    if (this.btn) {
+      this.btn.on('click', (e) => {
+        if (this.visible) chat.input.focus();
+        this.toggle(e);
+        return false;
+      });
+    }
   }
 
   show() {
     if (!this.visible) {
       this.visible = true;
       this.shown = true;
-      this.btn.addClass('active');
+      if (this.btn) {
+        this.btn.addClass('active');
+      }
       this.ui.addClass('active');
       this.redraw();
       this.emit('show');
@@ -34,7 +38,9 @@ export default class ChatMenu extends EventEmitter {
   hide() {
     if (this.visible) {
       this.visible = false;
-      this.btn.removeClass('active');
+      if (this.btn) {
+        this.btn.removeClass('active');
+      }
       this.ui.removeClass('active');
       this.emit('hide');
     }

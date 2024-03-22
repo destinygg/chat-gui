@@ -31,6 +31,7 @@ import {
   ChatEmoteTooltip,
   ChatSettingsMenu,
   ChatUserInfoMenu,
+  ChatPollInput,
 } from './menus';
 import ChatAutoComplete from './autocomplete';
 import ChatInputHistory from './history';
@@ -94,7 +95,7 @@ class Chat {
     this.windows = new Map();
     this.settings = new Map(settingsdefault);
     this.commands = new ChatCommands();
-    this.autocomplete = new ChatAutoComplete();
+    this.autocomplete = null;
     this.menus = new Map();
     this.taggednicks = new Map();
     this.taggednotes = new Map();
@@ -295,6 +296,7 @@ class Chat {
     this.loginscrn = this.ui.find('#chat-login-screen');
     this.loadingscrn = this.ui.find('#chat-loading');
     this.windowselect = this.ui.find('#chat-windows-select');
+    this.autocomplete = new ChatAutoComplete(this);
     this.inputhistory = new ChatInputHistory(this);
     this.userfocus = new ChatUserFocus(this, this.css);
     this.mainwindow = new ChatWindow('main').into(this);
@@ -351,6 +353,10 @@ class Chat {
         this.output.find('.msg-user .user'),
         this,
       ),
+    );
+    this.menus.set(
+      'poll-input',
+      new ChatPollInput(this.ui.find('#chat-poll-input'), null, this),
     );
 
     this.autocomplete.bind(this);
@@ -1490,18 +1496,7 @@ class Chat {
   }
 
   cmdPOLL(parts, command) {
-    const slashCommand = `/${command.toLowerCase()}`;
     const textOnly = parts.join(' ');
-
-    try {
-      // Assume the command's format is invalid if an exception is thrown.
-      parseQuestionAndTime(textOnly);
-    } catch {
-      MessageBuilder.info(
-        `Usage: ${slashCommand} <question>? <option 1> or <option 2> [or <option 3> [or <option 4> ... [or <option n>]]] [<time>].`,
-      ).into(this);
-      return;
-    }
 
     if (this.chatpoll.isPollStarted()) {
       MessageBuilder.error('Poll already started.').into(this);
@@ -1516,13 +1511,9 @@ class Chat {
     }
 
     const { question, options, time } = parseQuestionAndTime(textOnly);
-    const dataOut = {
-      weighted: slashCommand === '/spoll',
-      time,
-      question,
-      options,
-    };
-    this.source.send('STARTPOLL', dataOut);
+    this.menus
+      .get('poll-input')
+      .show(question, options, time, command === 'SPOLL');
   }
 
   cmdPOLLSTOP() {
