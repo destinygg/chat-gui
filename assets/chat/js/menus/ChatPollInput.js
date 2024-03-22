@@ -37,7 +37,10 @@ class ChatPollInput extends ChatMenu {
   send() {
     if (this.question === '') return;
     if (this.options.includes('')) return;
-    if (this.time < 5000 || this.time > 600000) return;
+    if (this.time < 5000 || this.time > 600000) {
+      this.ui.time.val('');
+      return;
+    }
 
     this.hide();
     this.chat.source.send('STARTPOLL', {
