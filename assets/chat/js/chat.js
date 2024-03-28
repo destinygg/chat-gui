@@ -1334,6 +1334,7 @@ class Chat {
           break;
       }
     });
+    this.eventBar.sort();
   }
 
   onPRIVMSGSENT() {

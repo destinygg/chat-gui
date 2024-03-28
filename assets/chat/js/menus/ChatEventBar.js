@@ -31,6 +31,7 @@ export default class ChatEventBar {
     const eventMessageWrapper = document.createElement('div');
     eventMessageWrapper.classList.add('msg-event-bar-wrapper');
     eventMessageWrapper.dataset.uuid = event.uuid;
+    eventMessageWrapper.dataset.unixtimestamp = event.timestamp.valueOf();
     eventMessageWrapper.addEventListener('click', () => {
       this.highlight(event);
       this.chat.userfocus.toggleFocus('', false, true);
@@ -114,6 +115,19 @@ export default class ChatEventBar {
     return !!this.eventBarUI.querySelector(
       `.msg-event-bar-wrapper[data-uuid="${event.uuid}"]`,
     );
+  }
+
+  /**
+   * Sorts the events in the event bar in descending order by time received.
+   */
+  sort() {
+    [...this.eventBarUI.children]
+      .sort((a, b) =>
+        Number(a.dataset.unixtimestamp) < Number(b.dataset.unixtimestamp)
+          ? 1
+          : -1,
+      )
+      .forEach((node) => this.eventBarUI.appendChild(node));
   }
 
   /**
