@@ -172,8 +172,7 @@ export default class ChatEventBar {
    */
   setExpiryPercentage(eventWrapper, percentageLeft) {
     eventWrapper.dataset.percentageLeft = percentageLeft;
-    eventWrapper.querySelector(
-      '.event-top',
-    ).style.background = `linear-gradient(90deg, #282828, #282828 ${percentageLeft}%, #151515 ${percentageLeft}%, #151515)`;
+    eventWrapper.querySelector('.event-top').style.background =
+      `linear-gradient(90deg, #282828, #282828 ${percentageLeft}%, #151515 ${percentageLeft}%, #151515)`;
   }
 }
