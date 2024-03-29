@@ -229,7 +229,7 @@ hr {
   margin: 0;
   width: 100%;
   padding: $gutter-md;
-  border-radius: $bradius;
+  border-radius: $bradius 0 0 $bradius;
   box-shadow: none;
   box-sizing: border-box;
   display: block;
@@ -243,16 +243,8 @@ hr {
   border: 1px solid $color-surface-dark3;
   border-radius: $bradius;
 }
-#chat:not(.pref-showsendmsgbtn) #chat-input-textarea {
-  #chat-input-control {
-    border-radius: $bradius 0 0 $bradius;
-  }
-  #chat-input-send {
-    display: block;
-  }
-}
 #chat-input-send {
-  display: none;
+  display: block;
   background-color: $color-surface-dark2;
   border-radius: 0 $bradius $bradius 0;
   width: 30px;
