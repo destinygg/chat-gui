@@ -31,6 +31,11 @@ const CHAT_COMMANDS = [
     description: 'Check your ban status.',
   },
   {
+    name: 'broadcast',
+    description: 'Broadcast a message to chat.',
+    admin: true,
+  },
+  {
     name: 'die',
     description: 'Mute yourself for 10 minutes.',
     alias: ['suicide', 'bitly'],
@@ -113,6 +118,11 @@ const CHAT_COMMANDS = [
     name: 'postembed',
     description: 'Post a video embed in chat.',
     alias: ['pe'],
+  },
+  {
+    name: 'reloadusers',
+    description: 'Reload all users in chat.',
+    admin: true,
   },
   {
     name: 'removephrase',

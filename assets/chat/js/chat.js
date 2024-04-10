@@ -135,6 +135,7 @@ class Chat {
     this.source.on('SOCKETERROR', (data) => this.onSOCKETERROR(data));
     this.source.on('SUBONLY', (data) => this.onSUBONLY(data));
     this.source.on('BROADCAST', (data) => this.onBROADCAST(data));
+    this.source.on('RELOAD', () => this.onRELOAD());
     this.source.on('PRIVMSGSENT', (data) => this.onPRIVMSGSENT(data));
     this.source.on('PRIVMSG', (data) => this.onPRIVMSG(data));
     this.source.on('POLLSTART', (data) => this.onPOLLSTART(data));
@@ -171,6 +172,7 @@ class Chat {
     );
     this.control.on('TIMESTAMPFORMAT', (data) => this.cmdTIMESTAMPFORMAT(data));
     this.control.on('BROADCAST', (data) => this.cmdBROADCAST(data));
+    this.control.on('RELOADUSERS', () => this.cmdRELOADUSERS());
     this.control.on('CONNECT', (data) => this.cmdCONNECT(data));
     this.control.on('TAG', (data) => this.cmdTAG(data));
     this.control.on('UNTAG', (data) => this.cmdUNTAG(data));
@@ -1295,28 +1297,24 @@ class Chat {
   }
 
   onBROADCAST(data) {
-    // TODO kind of ... hackey
-    if (data.data === 'reload') {
-      if (!this.backlogloading) {
-        const retryMilli = Math.floor(Math.random() * 30000) + 4000;
-        setTimeout(() => window.location.reload(true), retryMilli);
+    MessageBuilder.broadcast(
+      data.data,
+      new ChatUser(data.user),
+      data.timestamp,
+    ).into(this);
+  }
 
-        MessageBuilder.broadcast(
-          `Restart incoming in ${Math.round(retryMilli / 1000)} seconds...`,
-          new ChatUser({
-            nick: 'System',
-            id: -1,
-          }),
-          data.timestamp,
-        ).into(this);
-      }
-    } else {
-      MessageBuilder.broadcast(
-        data.data,
-        new ChatUser(data.user),
-        data.timestamp,
-      ).into(this);
-    }
+  onRELOAD() {
+    const retryMilli = Math.floor(Math.random() * 30000) + 4000;
+    setTimeout(() => window.location.reload(true), retryMilli);
+
+    MessageBuilder.broadcast(
+      `Reload incoming in ${Math.round(retryMilli / 1000)} seconds...`,
+      new ChatUser({
+        nick: 'System',
+        id: -1,
+      }),
+    ).into(this);
   }
 
   onSUBSCRIPTION(data) {
@@ -1834,6 +1832,10 @@ class Chat {
 
   cmdBROADCAST(parts) {
     this.source.send('BROADCAST', { data: parts.join(' ') });
+  }
+
+  cmdRELOADUSERS() {
+    this.source.send('RELOADUSERS', {});
   }
 
   cmdWHISPER(parts) {
