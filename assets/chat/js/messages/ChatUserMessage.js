@@ -61,11 +61,12 @@ export default class ChatUserMessage extends ChatMessage {
     else if (this.slashme || this.continued) ctrl = '';
 
     const colorFlair = usernameColorFlair(chat.flairs, this.user);
-    const user = `${this.buildFeatures(this.user, chat)} <a title="${
-      this.title
-    }" class="${['user', colorFlair?.name].filter(Boolean).join(' ')}">${
-      this.user.displayName
-    }</a>`;
+    const user = `${this.buildFeatures(this.user, chat)} <a title="${this.title
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')}" class="${['user', colorFlair?.name]
+      .filter(Boolean)
+      .join(' ')}">${this.user.displayName}</a>`;
     return this.wrap(
       `${this.buildTime()} ${user}<span class="ctrl">${ctrl}</span> ${this.buildMessageTxt(
         chat,
