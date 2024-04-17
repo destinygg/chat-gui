@@ -39,7 +39,7 @@ function buildSearchCriteria(str, offset) {
   if (endCaret > -1) post = post.substring(0, endCaret);
 
   // Ignore the first char as part of the search and flag as a user only search
-  if (pre.lastIndexOf('@') === 0) {
+  if (pre.lastIndexOf('@') === 0 || pre.lastIndexOf('>') === 0) {
     startCaret += 1;
     pre = pre.substring(1);
     useronly = true;
