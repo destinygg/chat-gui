@@ -32,7 +32,7 @@ const CHAT_COMMANDS = [
   },
   {
     name: 'broadcast',
-    description: 'Broadcast a message to chat.',
+    description: 'Send a system-wide message to all users present in the chat.',
     admin: true,
   },
   {
