@@ -120,6 +120,11 @@ const CHAT_COMMANDS = [
     alias: ['pe'],
   },
   {
+    name: 'reloadusers',
+    description: 'Reload all users in chat.',
+    admin: true,
+  },
+  {
     name: 'removephrase',
     description: 'Remove a banned phrase from chat.',
     alias: [
