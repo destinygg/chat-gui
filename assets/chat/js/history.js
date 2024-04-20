@@ -71,7 +71,7 @@ class ChatInputHistory {
     this.history.push(message);
     // limit entries
     if (this.history.length > this.maxentries)
-      this.history.slice(-this.maxentries);
+      this.history.splice(0, this.history.length - this.maxentries);
     ChatStore.write('chat.history', this.history);
   }
 }

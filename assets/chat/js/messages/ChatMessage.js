@@ -40,6 +40,7 @@ export default class ChatMessage extends ChatUIMessage {
     this.unformatted = unformatted;
     this.ignored = false;
     this.censorType = null;
+    this.watching = null;
   }
 
   html(chat = null) {
@@ -145,5 +146,23 @@ export default class ChatMessage extends ChatUIMessage {
   setOwnMessage(isOwn) {
     this.ui.classList.toggle('msg-own', isOwn);
     this.isown = isOwn;
+  }
+
+  setWatching(user) {
+    this.ui.classList.toggle(
+      'watching-same',
+      user.equalWatching(this.watching),
+    );
+  }
+
+  /**
+   * @param {boolean} isContinued
+   */
+  setContinued(isContinued) {
+    this.ui.classList.toggle('msg-continue', isContinued);
+    const ctrl = this.ui.querySelector('.ctrl');
+    if (ctrl) ctrl.textContent = isContinued ? '' : ': ';
+
+    this.continued = isContinued;
   }
 }

@@ -1,6 +1,8 @@
 @import '../../common';
 @import '../../icons/icons';
 @import '~normalize.css';
+@import '~tippy.js/dist/tippy.css';
+@import '~tippy.js/dist/svg-arrow.css';
 @import url('https://fonts.googleapis.com/css?family=Roboto:400,500,600,700');
 
 *,
@@ -42,6 +44,15 @@ button {
   text-rendering: optimizeLegibility;
   font-feature-settings: 'kern';
   font-family: inherit;
+}
+
+/* Default button style */
+button {
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
+  border: none;
+  background: transparent;
 }
 
 html,
@@ -197,6 +208,11 @@ hr {
   }
   #chat-whisper-btn .btn-icon {
     background: transparent url('../img/icon-whispers.svg') no-repeat center
+      center;
+    background-size: contain;
+  }
+  #chat-watching-focus-btn .btn-icon {
+    background: transparent url('../img/icon-watching.svg') no-repeat center
       center;
     background-size: contain;
   }
@@ -528,23 +544,11 @@ hr {
   }
 }
 
-/* Broadcasts */
-.msg-broadcast {
-  background-color: $color-chat-emphasize;
-  color: $color-text-broadcast !important;
-  font-size: 1.1em;
-  font-weight: 400;
-  padding-top: $gutter-md;
-  padding-bottom: $gutter-md;
-  time {
-    margin-right: $gutter-md;
-  }
-}
-
 .msg-donation,
 .msg-subscription,
 .msg-giftsub,
-.msg-massgift {
+.msg-massgift,
+.msg-broadcast {
   text-shadow: 1px 1px 3px rgba(0, 0, 0, 1);
   font-size: 1.1em;
   font-weight: 400;
@@ -604,6 +608,18 @@ hr {
     .event-bottom:hover:after {
       color: $color-accent-light;
     }
+  }
+}
+
+/* Broadcasts */
+.msg-broadcast {
+  border-color: $color-text-broadcast;
+
+  .broadcast-icon {
+    background: transparent url('../img/icon-broadcast.png') no-repeat center
+      center;
+    background-size: contain;
+    filter: invert(100%);
   }
 }
 
@@ -730,6 +746,21 @@ hr {
   }
 }
 
+.msg-death {
+  .text {
+    font-style: italic;
+  }
+
+  .user:before {
+    content: '';
+    display: inline-block;
+    vertical-align: text-top;
+    margin-right: $gutter-sm;
+
+    @extend .icon-command;
+  }
+}
+
 /* Highlight */
 .msg-highlight {
   color: $color-chat-text1;
@@ -833,6 +864,19 @@ hr {
 
   &.hidden {
     display: none;
+  }
+}
+
+.watching-focus:not(.focus) {
+  .msg-emote,
+  .msg-user,
+  .msg-death {
+    opacity: 0.3;
+
+    &.watching-same,
+    &.msg-highlight {
+      opacity: 1;
+    }
   }
 }
 
@@ -1282,6 +1326,10 @@ hr {
     background: none;
     border-radius: 0;
   }
+  .favorite {
+    flex: 0 88px;
+    border-top: 1px solid $color-surface-dark4;
+  }
 }
 
 #chat-whisper-users {
@@ -1455,6 +1503,7 @@ hr {
   width: fit-content;
   min-width: 75px;
   max-width: 250px;
+  z-index: 221;
   .emote-image {
     display: flex;
     justify-content: center;
@@ -1473,6 +1522,25 @@ hr {
       &.tier,
       &.creator {
         color: $text-color1;
+      }
+    }
+    button.favorite {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      margin-top: 5px;
+      .btn-icon {
+        transition: background-color 500ms;
+        height: 20px;
+        aspect-ratio: 1;
+        mask: url('../img/icon-favorite.svg');
+        background-color: $text-color2;
+      }
+      &.favorited .btn-icon {
+        mask: url('../img/icon-favorite-fill.svg');
+      }
+      &:hover .btn-icon {
+        background-color: $color-yellow;
       }
     }
   }
@@ -1649,6 +1717,7 @@ hr {
   left: 0;
   right: 0;
   bottom: 0;
+  z-index: 300;
   h2 {
     font-size: 2.5em;
     font-weight: normal;
@@ -1699,6 +1768,19 @@ hr {
 }
 .pref-autocompletehelper #chat-auto-complete.active {
   display: block;
+}
+.pref-disableanimations {
+  .emote,
+  .emote:hover,
+  .emote::before,
+  .emote::after {
+    animation: none !important;
+  }
+
+  a.user,
+  span.user {
+    animation: none !important;
+  }
 }
 
 /* OverlayScrollbars theme */
@@ -1877,11 +1959,12 @@ button.btn {
     display: none !important;
   }
 
-  // Donations and subs
+  // Donations, subs and broadcasts
   .msg-donation,
   .msg-subscription,
   .msg-giftsub,
-  .msg-massgift {
+  .msg-massgift,
+  .msg-broadcast {
     text-shadow: none;
     padding: 0;
     border-style: none none none solid;
@@ -2179,4 +2262,14 @@ body.pref-fontscale[data-fontscale='10'] {
 @font-face {
   font-family: 'Among Us';
   src: url('../../../fonts/AmongUs-Regular.ttf') format('truetype');
+}
+
+.tippy-box[data-theme~='dgg'] {
+  text-align: center;
+  background-color: white;
+  color: #000;
+}
+
+.tippy-box[data-theme~='dgg'] > .tippy-svg-arrow {
+  fill: white;
 }

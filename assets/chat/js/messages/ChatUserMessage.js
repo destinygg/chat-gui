@@ -36,7 +36,14 @@ export default class ChatUserMessage extends ChatMessage {
     if (this.id) attr['data-id'] = this.id;
     if (this.user && this.user.username) {
       classes.push(...this.user.features);
-      attr['data-username'] = this.user.username.toLowerCase();
+      attr['data-username'] = this.user.username;
+
+      if (this.user.watching) {
+        this.watching = this.user.watching;
+        if (chat.user.equalWatching(this.user.watching)) {
+          classes.push('watching-same');
+        }
+      }
     }
     if (this.mentioned && this.mentioned.length > 0)
       attr['data-mentioned'] = this.mentioned.join(' ').toLowerCase();
@@ -56,7 +63,9 @@ export default class ChatUserMessage extends ChatMessage {
     const colorFlair = usernameColorFlair(chat.flairs, this.user);
     const user = `${this.buildFeatures(this.user, chat)} <a title="${
       this.title
-    }" class="user ${colorFlair?.name}">${this.user.username}</a>`;
+    }" class="${['user', colorFlair?.name].filter(Boolean).join(' ')}">${
+      this.user.displayName
+    }</a>`;
     return this.wrap(
       `${this.buildTime()} ${user}<span class="ctrl">${ctrl}</span> ${this.buildMessageTxt(
         chat,
@@ -107,5 +116,18 @@ export default class ChatUserMessage extends ChatMessage {
   setOwnMessage(isOwn) {
     this.ui.classList.toggle('msg-own', isOwn);
     this.isown = isOwn;
+  }
+
+  /**
+   * @param {boolean} isSlashMe
+   */
+  setSlashMe(isSlashMe) {
+    this.ui.classList.toggle('msg-me', isSlashMe);
+    const ctrl = this.ui.querySelector('.ctrl');
+    if (ctrl) {
+      ctrl.textContent = this.slashme || this.continued ? '' : ': ';
+    }
+
+    this.slashme = isSlashMe;
   }
 }

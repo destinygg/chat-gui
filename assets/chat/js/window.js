@@ -122,19 +122,24 @@ class ChatWindow extends EventEmitter {
    * this window.
    */
   updateMessages(chat) {
-    for (const message of this.messages) {
+    for (const [i, message] of this.messages.entries()) {
       if (message.type !== MessageTypes.UI) {
         message.updateTimeFormat();
       }
 
-      if (message.user) {
-        const username = message.user.username.toLowerCase();
+      if (message.user && !message.user.isSystem()) {
+        const { username } = message.user;
 
-        message.setOwnMessage(username === chat.user.username.toLowerCase());
+        message.setOwnMessage(username === chat.user.username);
         message.ignore(chat.ignored(username, message.message));
         message.highlight(chat.shouldHighlightMessage(message));
-        message.setTag(chat.taggednicks.get(username));
-        message.setTagTitle(chat.taggednotes.get(username));
+        if (message.type === MessageTypes.USER) {
+          message.setContinued(this.isContinued(message, this.messages[i - 1]));
+          message.setSlashMe(message.slashme);
+          message.setTag(chat.taggednicks.get(username));
+        }
+        message.setTagTitle(chat.taggednotes.get(username) ?? '');
+        message.setWatching(chat.user);
 
         if (message.moderated) {
           message.censor(parseInt(chat.settings.get('showremoved') || '1', 10));
@@ -146,6 +151,21 @@ class ChatWindow extends EventEmitter {
   removeLastMessage() {
     this.lastmessage.remove();
     this.messages = this.messages.filter((m) => m !== this.lastmessage);
+  }
+
+  /**
+   * @param {ChatMessage} message
+   * @param {ChatMessage} lastMessage
+   * @returns {boolean}
+   */
+  isContinued(message, lastMessage = this.lastmessage) {
+    return (
+      lastMessage &&
+      !lastMessage.target &&
+      lastMessage.user &&
+      (!lastMessage.ignored || lastMessage.continued) && // messages should not appear as "continued" if the previous message is ignored and was the start of the thread
+      lastMessage.user.username === message.user.username
+    );
   }
 
   cleanupThrottle = throttle(50, this.cleanup);

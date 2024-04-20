@@ -19,13 +19,13 @@ const chat = new Chat({
 
 const html = $('body,html');
 
-switch ((Chat.reqParam('t') || 'embed').toUpperCase()) {
+switch ((chat.reqParam('t') || 'embed').toUpperCase()) {
   case 'STREAM':
     html.css('background', 'transparent');
     chat
       .withGui(streamHtml)
       .then(() => {
-        chat.settings.set('fontscale', Chat.reqParam('f') || 1);
+        chat.settings.set('fontscale', chat.reqParam('f') || 1);
         chat.applySettings(false);
       })
       .then(() => chat.loadEmotesAndFlairs())

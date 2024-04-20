@@ -33,8 +33,8 @@ export default class ChatDonationMessage extends ChatEventMessage {
     const colorFlair = usernameColorFlair(chat.flairs, this.user);
 
     user.title = this.title;
-    user.classList.add(colorFlair?.name);
-    user.innerText = this.user.username;
+    if (colorFlair) user.classList.add(colorFlair.name);
+    user.innerText = this.user.displayName;
 
     eventTemplate.querySelector('.event-info').append(
       user,
