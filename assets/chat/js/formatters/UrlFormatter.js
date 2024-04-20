@@ -1,26 +1,12 @@
 import $ from 'jquery';
 import { linkregex } from '../regex';
 import { HashLinkConverter } from '../hashlinkconverter';
+import encodeUrl from '../encodeUrl';
 
 export default class UrlFormatter {
   constructor() {
     this.hashLinkConverter = new HashLinkConverter();
     this.elem = $('<div></div>');
-  }
-
-  // stolen from angular.js
-  // https://github.com/angular/angular.js/blob/v1.3.14/src/ngSanitize/sanitize.js#L435
-  encodeUrl(value) {
-    return value
-      .replace(/&/g, '&amp;')
-      .replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, (v) => {
-        const hi = v.charCodeAt(0);
-        const low = v.charCodeAt(1);
-        return `&#${(hi - 0xd800) * 0x400 + (low - 0xdc00) + 0x10000};`;
-      })
-      .replace(/([^#-~| |!])/g, (v) => `&#${v.charCodeAt(0)};`)
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;');
   }
 
   format(chat, str) {
@@ -35,7 +21,7 @@ export default class UrlFormatter {
       const decodedUrl = self.elem.html(url).text();
       const m = decodedUrl.match(linkregex);
       if (m) {
-        const normalizedUrl = self.encodeUrl(this.normalizeUrl(m[0]));
+        const normalizedUrl = encodeUrl(this.normalizeUrl(m[0]));
 
         let embedHashLink = '';
         try {
@@ -53,7 +39,7 @@ export default class UrlFormatter {
           urlText = `${urlText.slice(0, 40)}...${urlText.slice(-40)}`;
         }
 
-        const extra = self.encodeUrl(decodedUrl.substring(m[0].length));
+        const extra = encodeUrl(decodedUrl.substring(m[0].length));
         const href = `${scheme ? '' : 'http://'}${normalizedUrl}`;
 
         const embedTarget = chat.isBigscreenEmbed() ? '_top' : '_blank';
