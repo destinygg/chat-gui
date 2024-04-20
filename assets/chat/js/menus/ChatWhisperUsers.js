@@ -97,7 +97,9 @@ export default class ChatWhisperUsers extends ChatMenu {
       <span class="user">${whisper.nick}</span>
       <div class="right">
         ${unread}
-        <span class="time">${time.format('DD/MM/YY')}</span>
+        <span class="time" title="${time.format(
+          'LLL',
+        )}">${time.fromNow()}</span>
       </div>
     </div>`);
   }
