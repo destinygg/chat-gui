@@ -6,6 +6,7 @@ import UserFeature from './features';
  * @property {string} nick
  * @property {string} createdDate
  * @property {string[]} features
+ * @property {string[]} roles
  */
 
 class ChatUser {
@@ -40,6 +41,12 @@ class ChatUser {
   features = [];
 
   /**
+   * User's roles.
+   * @type {[]string}
+   */
+  roles = [];
+
+  /**
    * User's watching embed.
    * @type {?Object}
    */
@@ -58,6 +65,7 @@ class ChatUser {
       this.username = this.displayName.toLowerCase();
       this.createdDate = user.createdDate || '';
       this.features = user.features || [];
+      this.roles = user.roles || [];
       this.watching = user.watching || null;
     }
   }
@@ -74,8 +82,22 @@ class ChatUser {
     return exists;
   }
 
+  hasAnyRoles(...roles) {
+    let exists = false;
+    roles.forEach((f) => {
+      if (this.roles.indexOf(typeof f !== 'string' ? f.toString() : f) !== -1)
+        exists = true;
+    });
+
+    return exists;
+  }
+
   hasFeature(feature) {
     return this.hasAnyFeatures(feature);
+  }
+
+  hasRole(role) {
+    return this.hasAnyRoles(role);
   }
 
   hasModPowers() {
