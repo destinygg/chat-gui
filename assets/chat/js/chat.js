@@ -2236,7 +2236,13 @@ class Chat {
     const displayName = parts[1];
     let url = parts[0];
 
-    if (!this.user.hasRole(UserRoles.HOST)) {
+    if (
+      !this.user.hasAnyRoles(
+        UserRoles.ADMIN,
+        UserRoles.MODERATOR,
+        UserRoles.HOST,
+      )
+    ) {
       MessageBuilder.error(errorstrings.get('nopermission')).into(this);
       return;
     }
@@ -2278,7 +2284,13 @@ class Chat {
   }
 
   cmdUNHOST() {
-    if (!this.user.hasRole(UserRoles.HOST)) {
+    if (
+      !this.user.hasAnyRoles(
+        UserRoles.ADMIN,
+        UserRoles.MODERATOR,
+        UserRoles.HOST,
+      )
+    ) {
       MessageBuilder.error(errorstrings.get('nopermission')).into(this);
       return;
     }
