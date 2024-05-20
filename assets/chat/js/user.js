@@ -71,16 +71,16 @@ class ChatUser {
   }
 
   hasAnyFeatures(...features) {
-    for (let i = 0; i < features.length; i++) {
-      if (this.features.includes(features[i])) return true;
+    for (const feature of features) {
+      if (this.features.includes(feature)) return true;
     }
 
     return false;
   }
 
   hasAnyRoles(...roles) {
-    for (let i = 0; i < roles.length; i++) {
-      if (this.roles.includes(roles[i])) return true;
+    for (const role of roles) {
+      if (this.roles.includes(role)) return true;
     }
 
     return false;
