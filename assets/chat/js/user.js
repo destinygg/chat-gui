@@ -71,33 +71,27 @@ class ChatUser {
   }
 
   hasAnyFeatures(...features) {
-    let exists = false;
-    features.forEach((f) => {
-      if (
-        this.features.indexOf(typeof f !== 'string' ? f.toString() : f) !== -1
-      )
-        exists = true;
-    });
+    for (let i = 0; i < features.length; i++) {
+      if (this.features.includes(features[i])) return true;
+    }
 
-    return exists;
+    return false;
   }
 
   hasAnyRoles(...roles) {
-    let exists = false;
-    roles.forEach((f) => {
-      if (this.roles.indexOf(typeof f !== 'string' ? f.toString() : f) !== -1)
-        exists = true;
-    });
+    for (let i = 0; i < roles.length; i++) {
+      if (this.roles.includes(roles[i])) return true;
+    }
 
-    return exists;
+    return false;
   }
 
   hasFeature(feature) {
-    return this.hasAnyFeatures(feature);
+    return this.features.includes(feature);
   }
 
   hasRole(role) {
-    return this.hasAnyRoles(role);
+    return this.roles.includes(role);
   }
 
   hasModPowers() {
