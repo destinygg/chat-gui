@@ -2232,8 +2232,8 @@ class Chat {
   }
 
   cmdHOST(parts) {
-    const displayName = parts[1];
     let url = parts[0];
+    const displayName = parts.slice(1).join(' ') || undefined;
 
     if (!this.user.hasAnyFeatures(UserFeatures.ADMIN, UserFeatures.MODERATOR)) {
       MessageBuilder.error(errorstrings.get('nopermission')).into(this);
