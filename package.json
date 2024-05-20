@@ -50,7 +50,7 @@
     "autoprefixer": "^10.2.5",
     "babel-loader": "^9.1.2",
     "css-loader": "^7.1.1",
-    "eslint": "^8.27.0",
+    "eslint": "^9.3.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-import": "^2.26.0",
