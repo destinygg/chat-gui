@@ -42,6 +42,7 @@ import { ChatPoll, parseQuestionAndTime } from './poll';
 import { isMuteActive, MutedTimer } from './mutedtimer';
 import EmoteService from './emotes';
 import UserFeatures from './features';
+import UserRoles from './roles';
 import makeSafeForRegex, {
   regexslashcmd,
   regextime,
@@ -2235,7 +2236,13 @@ class Chat {
     let url = parts[0];
     const displayName = parts.slice(1).join(' ') || undefined;
 
-    if (!this.user.hasAnyFeatures(UserFeatures.ADMIN, UserFeatures.MODERATOR)) {
+    if (
+      !this.user.hasAnyRoles(
+        UserRoles.ADMIN,
+        UserRoles.MODERATOR,
+        UserRoles.HOST,
+      )
+    ) {
       MessageBuilder.error(errorstrings.get('nopermission')).into(this);
       return;
     }
@@ -2277,7 +2284,13 @@ class Chat {
   }
 
   cmdUNHOST() {
-    if (!this.user.hasAnyFeatures(UserFeatures.ADMIN, UserFeatures.MODERATOR)) {
+    if (
+      !this.user.hasAnyRoles(
+        UserRoles.ADMIN,
+        UserRoles.MODERATOR,
+        UserRoles.HOST,
+      )
+    ) {
       MessageBuilder.error(errorstrings.get('nopermission')).into(this);
       return;
     }
