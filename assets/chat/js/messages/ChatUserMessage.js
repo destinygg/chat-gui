@@ -1,3 +1,4 @@
+import encodeUrl from '../encodeUrl';
 import ChatMessage from './ChatMessage';
 import MessageTypes from './MessageTypes';
 
@@ -61,9 +62,9 @@ export default class ChatUserMessage extends ChatMessage {
     else if (this.slashme || this.continued) ctrl = '';
 
     const colorFlair = usernameColorFlair(chat.flairs, this.user);
-    const user = `${this.buildFeatures(this.user, chat)} <a title="${
-      this.title
-    }" class="${['user', colorFlair?.name].filter(Boolean).join(' ')}">${
+    const user = `${this.buildFeatures(this.user, chat)} <a title="${encodeUrl(
+      this.title,
+    )}" class="${['user', colorFlair?.name].filter(Boolean).join(' ')}">${
       this.user.displayName
     }</a>`;
     return this.wrap(
