@@ -7,7 +7,7 @@ const MISSING_VIDEO_ID_ERROR = 'Invalid Youtube link - Missing video id';
 class HashLinkConverter {
   constructor() {
     this.hasHttp = /^http[s]?:\/{0,2}/;
-    this.youtubeRegex = /^(shorts|live|embed)\/([A-Za-z0-9-_]{11})$/;
+    this.youtubeRegex = /^(?:shorts|live|embed)\/([A-Za-z0-9-_]{11})$/;
     this.twitchClipRegex = /^[^/]+\/clip\/([A-Za-z0-9-_]*)$/;
     this.twitchVODRegex = /^videos\/(\d+)$/;
     this.rumbleEmbedRegex = /^embed\/([a-z0-9]+)\/?$/;
@@ -43,7 +43,7 @@ class HashLinkConverter {
       case 'youtube.com':
         match = pathname.match(this.youtubeRegex);
         if (match) {
-          return `#youtube/${match[2]}`;
+          return `#youtube/${match[1]}`;
         }
         videoId = url.searchParams.get('v');
         timestamp = url.searchParams.get('t');
