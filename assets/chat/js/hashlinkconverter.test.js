@@ -60,6 +60,11 @@ describe('Valid embeds', () => {
       '#youtube/Bg1JpTqc0iA',
     ],
     [
+      'Youtube embed link',
+      'https://www.youtube.com/embed/Akala8bkIu8',
+      '#youtube/Akala8bkIu8',
+    ],
+    [
       'Rumble embed',
       'https://rumble.com/embed/v26pcdc/?pub=4',
       '#rumble/v26pcdc',
