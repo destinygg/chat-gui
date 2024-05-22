@@ -348,6 +348,11 @@ hr {
     border-color: transparent transparent $color-underline-nsfl transparent;
     border-width: 1px 0 1px 0;
   }
+  .spoilers-link {
+    border-style: dashed;
+    border-color: transparent transparent $color-underline-spoilers transparent;
+    border-width: 1px 0 1px 0;
+  }
   .hidden {
     display: none !important;
   }

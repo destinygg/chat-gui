@@ -10,7 +10,8 @@ export default class EmbedUrlFormatter {
     let extraclass = '';
 
     if (/\b(?:NSFL)\b/i.test(str)) extraclass = 'nsfl-link';
-    else if (/\b(?:NSFW|SPOILERS?)\b/i.test(str)) extraclass = 'nsfw-link';
+    else if (/\b(?:NSFW)\b/i.test(str)) extraclass = 'nsfw-link';
+    else if (/\b(?:SPOILERS)\b/i.test(str)) extraclass = 'spoilers-link';
 
     const baseUrl = chat.config.dggOrigin + chat.bigscreenPath;
     return str.replace(
