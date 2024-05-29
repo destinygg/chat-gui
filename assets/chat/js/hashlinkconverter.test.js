@@ -55,14 +55,29 @@ describe('Valid embeds', () => {
       '#youtube/EHs-_2ddcUQ',
     ],
     [
+      'Youtube live stream link with timestamp',
+      'https://www.youtube.com/live/XstSLjhzKX8?t=11447',
+      '#youtube/XstSLjhzKX8?t=11447',
+    ],
+    [
       'Youtube shorts link',
       'https://youtube.com/shorts/Bg1JpTqc0iA?si=7pzY1RnY2fEe9A8_',
       '#youtube/Bg1JpTqc0iA',
     ],
     [
+      'Youtube shorts link with timestamp',
+      'https://www.youtube.com/shorts/Bg1JpTqc0iA?t=4&feature=share',
+      '#youtube/Bg1JpTqc0iA?t=4',
+    ],
+    [
       'Youtube embed link',
       'https://www.youtube.com/embed/Akala8bkIu8',
       '#youtube/Akala8bkIu8',
+    ],
+    [
+      'Youtube embed link timestamp',
+      'https://www.youtube.com/embed/Akala8bkIu8?t=5',
+      '#youtube/Akala8bkIu8?t=5',
     ],
     [
       'Rumble embed',
