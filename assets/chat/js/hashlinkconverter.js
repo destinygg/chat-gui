@@ -43,13 +43,9 @@ class HashLinkConverter {
       case 'youtube.com':
         match = pathname.match(this.youtubeRegex);
         timestamp = url.searchParams.get('t');
-        videoId = url.searchParams.get('v');
+        videoId = url.searchParams.get('v') ?? match?.[1];
         if (!videoId) {
-          if (match) {
-            videoId = match[1];
-          } else {
-            throw new Error(MISSING_VIDEO_ID_ERROR);
-          }
+          throw new Error(MISSING_VIDEO_ID_ERROR);
         }
         return timestamp
           ? `#youtube/${videoId}?t=${timestamp}`
