@@ -81,9 +81,10 @@ function selectHelper(ac) {
 }
 
 class ChatAutoComplete {
-  constructor() {
+  constructor(chat) {
+    this.chat = chat;
     /** @member jQuery */
-    this.ui = $(`<div id="chat-auto-complete"><ul></ul></div>`);
+    this.ui = this.chat.ui.find('#chat-auto-complete');
     this.ui.on('click', 'li', (e) =>
       this.select(parseInt(e.currentTarget.getAttribute('data-index'), 10)),
     );
@@ -98,7 +99,6 @@ class ChatAutoComplete {
   bind(chat) {
     this.chat = chat;
     this.input = chat.input;
-    this.ui.insertBefore(chat.input);
     let originval = '';
     let shiftdown = false;
     let keypressed = false;
