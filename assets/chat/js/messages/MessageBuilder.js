@@ -68,8 +68,10 @@ export default class MessageBuilder {
       new ChatUser(data.user),
       data.tier,
       data.tierLabel,
+      data.amount,
       data.streak,
       data.timestamp,
+      data.expiry,
       data.uuid,
     );
   }
@@ -80,8 +82,11 @@ export default class MessageBuilder {
       new ChatUser(data.user),
       data.tier,
       data.tierLabel,
+      data.amount,
       new ChatUser(data.recipient),
+      data.fromMassGift,
       data.timestamp,
+      data.expiry,
       data.uuid,
     );
   }
@@ -92,8 +97,10 @@ export default class MessageBuilder {
       new ChatUser(data.user),
       data.tier,
       data.tierLabel,
+      data.amount,
       data.quantity,
       data.timestamp,
+      data.expiry,
       data.uuid,
     );
   }
@@ -104,6 +111,7 @@ export default class MessageBuilder {
       new ChatUser(data.user),
       data.amount,
       data.timestamp,
+      data.expiry,
       data.uuid,
     );
   }
