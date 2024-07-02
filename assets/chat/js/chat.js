@@ -345,14 +345,16 @@ class Chat {
         this,
       ),
     );
-    this.menus.set(
-      'users',
-      new ChatUserMenu(
-        this.ui.find('#chat-user-list'),
-        this.ui.find('#chat-users-btn'),
-        this,
-      ),
-    );
+    if (this.ui.find('#chat-user-list').length > 0) {
+      this.menus.set(
+        'users',
+        new ChatUserMenu(
+          this.ui.find('#chat-user-list'),
+          this.ui.find('#chat-users-btn'),
+          this,
+        ),
+      );
+    }
     this.menus.set(
       'whisper-users',
       new ChatWhisperUsers(
