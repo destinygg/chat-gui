@@ -574,11 +574,6 @@ hr {
     align-items: center;
     border-top-right-radius: 10px;
     border-top-left-radius: 10px;
-
-    &.no-bottom {
-      border-bottom-right-radius: 10px;
-      border-bottom-left-radius: 10px;
-    }
   }
 
   .event-icon {
@@ -598,6 +593,13 @@ hr {
     background-color: $color-chat-bg;
     border-bottom-right-radius: 10px;
     border-bottom-left-radius: 10px;
+  }
+
+  &:not(:has(.event-bottom)) {
+    .event-top {
+      border-bottom-right-radius: 10px;
+      border-bottom-left-radius: 10px;
+    }
   }
 
   .user {

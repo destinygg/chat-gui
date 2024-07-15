@@ -27,7 +27,6 @@ export default class ChatEventMessage extends ChatMessage {
         this.buildMessageTxt(chat);
     } else {
       eventTemplate.querySelector('.event-bottom').remove();
-      eventTemplate.querySelector('.event-top').classList.toggle('no-bottom');
     }
 
     return eventTemplate;
