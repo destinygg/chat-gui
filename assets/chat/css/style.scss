@@ -273,8 +273,6 @@ hr {
 .chat-lines {
   font-family: $chat-lines-font;
   line-height: 1.65em;
-  backface-visibility: hidden;
-  perspective: 1000px;
   outline: 0 !important;
 }
 
@@ -309,7 +307,6 @@ hr {
   .chat-user {
     cursor: pointer;
     position: relative;
-    z-index: 120;
   }
   .chat-user:hover {
     text-decoration: underline;
@@ -329,7 +326,6 @@ hr {
   .externallink {
     color: $color-link;
     position: relative;
-    z-index: 120;
   }
   .externallink:visited {
     color: $color-link-visited;
@@ -568,7 +564,6 @@ hr {
 
   .event-wrapper {
     border-radius: 10px;
-    overflow: hidden;
   }
 
   .event-top {
@@ -577,6 +572,13 @@ hr {
     background-color: $color-chat-emphasize;
     justify-content: space-between;
     align-items: center;
+    border-top-right-radius: 10px;
+    border-top-left-radius: 10px;
+
+    &.no-bottom {
+      border-bottom-right-radius: 10px;
+      border-bottom-left-radius: 10px;
+    }
   }
 
   .event-icon {
@@ -594,6 +596,8 @@ hr {
   .event-bottom {
     padding: $gutter-xs $gutter-md * 2 $gutter-xs $gutter-md;
     background-color: $color-chat-bg;
+    border-bottom-right-radius: 10px;
+    border-bottom-left-radius: 10px;
   }
 
   .user {
@@ -948,7 +952,6 @@ hr {
   }
 }
 .emote {
-  z-index: 1;
   display: inline-block;
   position: relative;
   overflow: hidden;
