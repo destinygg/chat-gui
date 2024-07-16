@@ -65,19 +65,49 @@ function updateHelpers(ac) {
 }
 function selectHelper(ac) {
   // Positioning
-  if (ac.selected !== -1 && ac.results.length > 0) {
-    const list = ac.ui.find(`li`).get();
-    const offset = ac.container.position().left;
-    const maxwidth = ac.ui.width();
-    $(list[ac.selected + 3]).each((i, e) => {
-      const right = $(e).position().left + offset + $(e).outerWidth();
-      if (right > maxwidth) ac.container.css('left', offset + maxwidth - right);
-    });
-    $(list[Math.max(0, ac.selected - 2)]).each((i, e) => {
-      const left = $(e).position().left + offset;
-      if (left < 0) ac.container.css('left', -$(e).position().left);
-    });
-    list.forEach((e, i) => $(e).toggleClass('active', i === ac.selected));
+  if (ac.results.length === 0) {
+    return;
+  }
+
+  const list = ac.ui.find(`li`).get();
+
+  list.forEach((e, i) => $(e).toggleClass('active', i === ac.selected));
+
+  const fullWidth = ac.container.width();
+  const visibleWidth = ac.ui.width();
+  const selectedItem = list[ac.selected];
+
+  if (visibleWidth > fullWidth) {
+    return;
+  }
+
+  const offset = ac.container.position().left;
+
+  const nearStart = selectedItem.offsetLeft < -offset;
+  const nearEnd =
+    fullWidth - selectedItem.offsetLeft + selectedItem.clientWidth * 2 <
+    visibleWidth;
+  const anywhereElse =
+    selectedItem.offsetLeft + selectedItem.clientWidth * 2 > visibleWidth;
+
+  if (nearEnd) {
+    ac.container.css('left', -fullWidth + visibleWidth);
+    return;
+  }
+
+  if (anywhereElse) {
+    ac.container.css(
+      'left',
+      -selectedItem.offsetLeft -
+        selectedItem.clientWidth / 2 +
+        visibleWidth / 2,
+    );
+    return;
+  }
+
+  // this is needed to properly loop back the list to the beginning
+  if (nearStart) {
+    ac.container.css('left', -selectedItem.offsetLeft);
   }
 }
 
