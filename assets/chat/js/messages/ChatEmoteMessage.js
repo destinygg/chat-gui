@@ -27,9 +27,8 @@ function ChatEmoteMessageCount(message) {
 const ChatEmoteMessageCountThrottle = throttle(63, ChatEmoteMessageCount);
 
 export default class ChatEmoteMessage extends ChatMessage {
-  constructor(emote, user, timestamp, count = 1) {
+  constructor(emote, timestamp, count = 1) {
     super(emote, timestamp, MessageTypes.EMOTE);
-    this.user = user;
     this.emotecount = count;
     this.emoteFormatter = new EmoteFormatter();
   }
