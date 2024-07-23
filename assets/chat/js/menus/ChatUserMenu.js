@@ -165,7 +165,7 @@ export default class ChatUserMenu extends ChatMenu {
   }
 
   addAndRedraw(user) {
-    if (!this.hasElement(user)) {
+    if (!this.getElement(user)) {
       this.addElement(user, true);
       this.filter();
       this.redraw();
@@ -173,15 +173,17 @@ export default class ChatUserMenu extends ChatMenu {
   }
 
   removeAndRedraw(user) {
-    if (this.hasElement(user)) {
-      this.removeElement(user);
+    const el = this.getElement(user);
+    if (el) {
+      this.removeElement(el);
       this.redraw();
     }
   }
 
   replaceAndRedraw(user) {
-    if (this.hasElement(user)) {
-      this.removeElement(user);
+    const el = this.getElement(user);
+    if (el) {
+      this.removeElement(el);
       this.addElement(user, true);
       this.filter();
       this.redraw();
@@ -227,8 +229,9 @@ export default class ChatUserMenu extends ChatMenu {
     this.container.append(section);
   }
 
-  removeElement(user) {
-    this.container.find(`.user-entry[data-user-id="${user.id}"]`).remove();
+  /** @param {HTMLElement} element */
+  removeElement(element) {
+    element.remove();
     this.totalcount -= 1;
   }
 
@@ -264,9 +267,10 @@ export default class ChatUserMenu extends ChatMenu {
     this.totalcount += 1;
   }
 
-  hasElement(user) {
-    return (
-      this.container.find(`.user-entry[data-user-id="${user.id}"]`).length > 0
+  getElement(user) {
+    const section = this.sections.get(this.highestSection(user));
+    return section.users.querySelector(
+      `.user-entry[data-user-id="${user.id}"]`,
     );
   }
 
