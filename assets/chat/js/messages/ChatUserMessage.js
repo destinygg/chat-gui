@@ -125,10 +125,8 @@ export default class ChatUserMessage extends ChatMessage {
   setSlashMe(isSlashMe) {
     this.ui.classList.toggle('msg-me', isSlashMe);
     const ctrl = this.ui.querySelector('.ctrl');
-    if (ctrl) {
-      ctrl.textContent = ': ';
-      if (this.target) ctrl.textContent = ' whispered: ';
-      else if (this.slashme || this.continued) ctrl.textContent = '';
+    if (ctrl && !this.target) {
+      ctrl.textContent = this.slashme || this.continued ? '' : ': ';
     }
 
     this.slashme = isSlashMe;
