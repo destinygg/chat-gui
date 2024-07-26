@@ -783,7 +783,7 @@ hr {
     display: none;
   }
 
-  .msg-event-bar-wrapper {
+  .event-bar-button {
     cursor: pointer;
     transition:
       transform 500ms,
@@ -863,7 +863,7 @@ hr {
 }
 
 /* Hovering frame containing highlighted event from event bar and pinned message */
-#chat-hover-frame {
+#chat-hover-container {
   padding: 4px;
   position: absolute;
   width: 100%;
@@ -871,14 +871,14 @@ hr {
 }
 
 /* Event highlight frame */
-#chat-event-highlight-frame {
-  .msg-event-bar {
+#chat-event-selected {
+  .event-bar-selected {
     margin: $gutter-sm $gutter-sm $gutter-sm $gutter-sm;
   }
 }
 
 /* Pinned Messages */
-#chat-pinned-frame {
+#chat-pinned-message {
   display: none;
 
   &.active {
@@ -987,7 +987,7 @@ hr {
     opacity: 1;
   }
 
-  &.msg-event-bar {
+  &.event-bar-selected {
     opacity: 1;
   }
 }
@@ -2005,7 +2005,7 @@ button.btn {
   #chat-event-bar {
     display: none !important;
   }
-  #chat-hover-frame {
+  #chat-hover-container {
     display: none !important;
   }
 

@@ -58,7 +58,7 @@ export default class PinnedMessage extends ChatUserMessage {
    * @param {boolean} state
    */
   set hidden(state) {
-    const frame = document.getElementById('chat-pinned-frame');
+    const frame = document.getElementById('chat-pinned-message');
     frame.classList.toggle('active', !state);
   }
 
@@ -70,7 +70,7 @@ export default class PinnedMessage extends ChatUserMessage {
     dismissPin(this.uuid);
 
     this.hidden = true;
-    const frame = document.getElementById('chat-pinned-frame');
+    const frame = document.getElementById('chat-pinned-message');
     frame.replaceChildren();
 
     return null;
@@ -135,7 +135,7 @@ export default class PinnedMessage extends ChatUserMessage {
 
     this.ui.prepend(closePin);
 
-    const pinnedFrame = document.getElementById('chat-pinned-frame');
+    const pinnedFrame = document.getElementById('chat-pinned-message');
     pinnedFrame.classList.toggle('active', true);
     pinnedFrame.prepend(this.ui);
     pinnedFrame.prepend(showPin);
