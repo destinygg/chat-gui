@@ -164,10 +164,11 @@ export default class ChatEventBar {
    * @private
    */
   calculateExpiryPercentage(event) {
-    return (
-      ((event.expirationTimestamp - Date.now()) * 100) /
-      (event.expirationTimestamp - event.timestamp)
-    );
+    const currentTimestamp = Date.now();
+    const eventTimeLeft = event.expirationTimestamp - currentTimestamp;
+    const eventFullDuration = event.expirationTimestamp - event.timestamp;
+
+    return (eventTimeLeft * 100) / eventFullDuration;
   }
 
   /**
