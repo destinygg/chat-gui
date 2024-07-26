@@ -54,9 +54,6 @@ export default class ChatEventBar {
     eventButton.append(eventMessageUI);
 
     this.eventBarUI.prepend(eventButton);
-    setTimeout(() => {
-      eventButton.classList.add('active');
-    }, 1);
 
     // Update chat window to fix the scroll position
     this.chat.mainwindow.update();
@@ -68,11 +65,11 @@ export default class ChatEventBar {
       percentageLeft = this.calculateExpiryPercentage(event);
 
       if (percentageLeft <= 0) {
-        eventButton.addEventListener('transitionend', () => {
+        eventButton.addEventListener('animationend', () => {
           eventButton.remove();
           clearInterval(intervalID);
         });
-        eventButton.classList.replace('active', 'removed');
+        eventButton.classList.add('removed');
         return;
       }
 
