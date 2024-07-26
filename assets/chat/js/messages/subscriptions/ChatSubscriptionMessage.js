@@ -3,13 +3,22 @@ import ChatEventMessage from '../ChatEventMessage';
 import features from '../../features';
 
 export default class ChatSubscriptionMessage extends ChatEventMessage {
-  constructor(message, user, tier, tierLabel, amount, timestamp, expiry, uuid) {
+  constructor(
+    message,
+    user,
+    tier,
+    tierLabel,
+    amount,
+    timestamp,
+    expirationTimestamp,
+    uuid,
+  ) {
     super(message, timestamp, uuid);
     this.user = user;
     this.tier = tier;
     this.tierLabel = tierLabel;
     this.amount = amount;
-    this.expiry = expiry;
+    this.expirationTimestamp = expirationTimestamp;
   }
 
   getTierStyles(chat = null) {

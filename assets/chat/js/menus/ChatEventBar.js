@@ -1,3 +1,7 @@
+/**
+ * @typedef {import('../messages/ChatEventMessage').default & {expirationTimestamp: number}} ExpiringEvent
+ */
+
 export default class ChatEventBar {
   constructor(chat) {
     this.chat = chat;
@@ -21,7 +25,7 @@ export default class ChatEventBar {
 
   /**
    * Adds the event to the event bar.
-   * @param {ChatEventMessage} event
+   * @param {ExpiringEvent} event
    */
   add(event) {
     if (!this.isValidEvent(event)) {
@@ -92,7 +96,7 @@ export default class ChatEventBar {
 
   /**
    * Highlights the specified event.
-   * @param {ChatEventMessage} event
+   * @param {ExpiringEvent} event
    */
   highlight(event) {
     /** @type HTMLDivElement */
@@ -108,7 +112,7 @@ export default class ChatEventBar {
 
   /**
    * Checks if the specified event is already in the event bar.
-   * @param {ChatEventMessage} event
+   * @param {ExpiringEvent} event
    * @returns {boolean}
    */
   contains(event) {
@@ -132,7 +136,7 @@ export default class ChatEventBar {
 
   /**
    * Checks if the specified event should appear in the event bar.
-   * @param {ChatEventMessage} event
+   * @param {ExpiringEvent} event
    * @returns {boolean}
    * @private
    */
@@ -141,7 +145,8 @@ export default class ChatEventBar {
       return false;
     }
 
-    if (event.expiry - Date.now() < 0) {
+    const currentTimestamp = Date.now();
+    if (event.expirationTimestamp - currentTimestamp < 0) {
       return false;
     }
 
@@ -154,13 +159,14 @@ export default class ChatEventBar {
 
   /**
    * Calculates percentage left until the specified event expires.
-   * @param {ChatEventMessage} event
+   * @param {ExpiringEvent} event
    * @returns {number}
    * @private
    */
   calculateExpiryPercentage(event) {
     return (
-      ((event.expiry - Date.now()) * 100) / (event.expiry - event.timestamp)
+      ((event.expirationTimestamp - Date.now()) * 100) /
+      (event.expirationTimestamp - event.timestamp)
     );
   }
 

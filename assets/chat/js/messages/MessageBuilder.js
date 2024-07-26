@@ -71,7 +71,7 @@ export default class MessageBuilder {
       data.amount,
       data.streak,
       data.timestamp,
-      data.expiry,
+      data.expirationTimestamp,
       data.uuid,
     );
   }
@@ -86,7 +86,7 @@ export default class MessageBuilder {
       new ChatUser(data.recipient),
       data.fromMassGift,
       data.timestamp,
-      data.expiry,
+      data.expirationTimestamp,
       data.uuid,
     );
   }
@@ -100,7 +100,7 @@ export default class MessageBuilder {
       data.amount,
       data.quantity,
       data.timestamp,
-      data.expiry,
+      data.expirationTimestamp,
       data.uuid,
     );
   }
@@ -111,7 +111,7 @@ export default class MessageBuilder {
       new ChatUser(data.user),
       data.amount,
       data.timestamp,
-      data.expiry,
+      data.expirationTimestamp,
       data.uuid,
     );
   }

@@ -5,12 +5,12 @@ import MessageTypes from './MessageTypes';
 const DONATION_TIERS = [0, 5, 10, 25, 50, 100];
 
 export default class ChatDonationMessage extends ChatEventMessage {
-  constructor(message, user, amount, timestamp, expiry, uuid) {
+  constructor(message, user, amount, timestamp, expirationTimestamp, uuid) {
     super(message, timestamp, uuid);
     this.user = user;
     this.type = MessageTypes.DONATION;
     this.amount = amount;
-    this.expiry = expiry;
+    this.expirationTimestamp = expirationTimestamp;
   }
 
   /**
