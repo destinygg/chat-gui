@@ -11,7 +11,7 @@ class ChatUserFocus {
     this.focused = [];
     this.chat.output.on('click', (e) => {
       this.toggleElement(e.target);
-      this.chat.eventBar.unhighlight();
+      this.chat.eventBar.unselect();
     });
   }
 
