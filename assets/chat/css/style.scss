@@ -1433,37 +1433,6 @@ hr {
       visibility: visible;
       align-items: center;
       display: flex;
-      .user-actions {
-        position: absolute;
-        right: $gutter-md;
-        .mention-nick {
-          background: transparent url('../img/icon-share.svg') no-repeat center
-            center;
-          background-size: contain;
-        }
-        .whisper-nick {
-          background: transparent url('../img/icon-whisper.svg') no-repeat
-            center center;
-          background-size: contain;
-        }
-        .mention-nick,
-        .whisper-nick {
-          visibility: hidden;
-          margin-right: $gutter-xs;
-          margin-top: 0.45em;
-          display: inline-block;
-          opacity: 0.25;
-          width: 1em;
-          height: 1em;
-          &:hover {
-            opacity: 1;
-          }
-        }
-      }
-      &:hover .mention-nick,
-      &:hover .whisper-nick {
-        visibility: visible;
-      }
       &:hover {
         background: #282828;
       }
