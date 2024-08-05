@@ -45,13 +45,21 @@ export default class PinnedMessage extends ChatUserMessage {
   /**
    * Shows/hides the current message.
    * @param {boolean} state
-   * @returns {null} null
    */
-  set visible(state) {
+  set displayed(state) {
     this.ui.classList.toggle('hidden', !state);
     document
       .getElementById('chat-pinned-show-btn')
       ?.classList.toggle('active', !state);
+  }
+
+  /**
+   * Shows/hides the full pinned message frame.
+   * @param {boolean} state
+   */
+  set hidden(state) {
+    const frame = document.getElementById('chat-pinned-message');
+    frame.classList.toggle('active', !state);
   }
 
   /**
@@ -61,8 +69,8 @@ export default class PinnedMessage extends ChatUserMessage {
   unpin() {
     dismissPin(this.uuid);
 
-    const frame = document.getElementById('chat-pinned-frame');
-    frame.classList.toggle('active', false);
+    this.hidden = true;
+    const frame = document.getElementById('chat-pinned-message');
     frame.replaceChildren();
 
     return null;
@@ -77,7 +85,7 @@ export default class PinnedMessage extends ChatUserMessage {
   pin(chat = null, visibility = true) {
     this.ui.id = 'msg-pinned';
     this.ui.classList.toggle('msg-pinned', true);
-    this.visible = visibility;
+    this.displayed = visibility;
     this.ui.querySelector('span.features').classList.toggle('hidden', true);
     chat.mainwindow.update();
 
@@ -108,7 +116,7 @@ export default class PinnedMessage extends ChatUserMessage {
     showPin.title = 'Show Pinned Message';
 
     showPin.addEventListener('click', () => {
-      this.visible = true;
+      this.displayed = true;
     });
 
     const closePin = document.createElement('a');
@@ -122,12 +130,12 @@ export default class PinnedMessage extends ChatUserMessage {
 
     closePin.addEventListener('click', () => {
       dismissPin(this.uuid);
-      this.visible = false;
+      this.displayed = false;
     });
 
     this.ui.prepend(closePin);
 
-    const pinnedFrame = document.getElementById('chat-pinned-frame');
+    const pinnedFrame = document.getElementById('chat-pinned-message');
     pinnedFrame.classList.toggle('active', true);
     pinnedFrame.prepend(this.ui);
     pinnedFrame.prepend(showPin);

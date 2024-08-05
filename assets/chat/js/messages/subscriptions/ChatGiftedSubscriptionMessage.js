@@ -3,10 +3,22 @@ import ChatSubscriptionMessage from './ChatSubscriptionMessage';
 import MessageTypes from '../MessageTypes';
 
 export default class ChatGiftedSubscriptionMessage extends ChatSubscriptionMessage {
-  constructor(message, user, tier, tierLabel, giftee, timestamp) {
-    super(message, user, tier, tierLabel, timestamp);
+  constructor(
+    message,
+    user,
+    tier,
+    tierLabel,
+    amount,
+    giftee,
+    fromMassGift,
+    timestamp,
+    expiry,
+    uuid,
+  ) {
+    super(message, user, tier, tierLabel, amount, timestamp, expiry, uuid);
     this.type = MessageTypes.GIFTSUB;
     this.giftee = giftee;
+    this.fromMassGift = fromMassGift;
   }
 
   html(chat = null) {
