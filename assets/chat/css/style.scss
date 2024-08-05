@@ -785,10 +785,10 @@ hr {
 
   .event-bar-button {
     cursor: pointer;
+    transition: transform 100ms;
     animation: event-bar-appear 500ms linear;
 
     &:hover {
-      transition: transform 100ms;
       transform: scale(1.05);
     }
 
