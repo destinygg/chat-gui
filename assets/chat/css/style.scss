@@ -800,6 +800,7 @@ hr {
   .msg-chat {
     margin: $gutter-sm $gutter-sm $gutter-sm $gutter-sm;
     border-width: 2px;
+    opacity: 1; // setting to 1 to ignore focus mode
   }
 
   .user {
