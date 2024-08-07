@@ -413,6 +413,11 @@ class Chat {
       this.focusIfNothingSelected();
     });
 
+    // Close menus when the input box textarea is clicked
+    this.input.on('click', () => {
+      ChatMenu.closeMenus(this);
+    });
+
     // ESC
     document.addEventListener('keydown', (e) => {
       if (isKeyCode(e, KEYCODES.ESC)) ChatMenu.closeMenus(this); // ESC key
