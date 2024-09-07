@@ -128,7 +128,7 @@ class ChatWindow extends EventEmitter {
       }
 
       if (message.user?.isSystem()) {
-        return;
+        continue;
       }
 
       const username = message.user?.username;
