@@ -799,7 +799,15 @@ class Chat {
     win.addMessage(this, message);
 
     // Hide the message if the user is ignored
-    if (this.ignored(message.user?.username, message.message)) {
+    if (
+      ![
+        MessageTypes.UI,
+        MessageTypes.INFO,
+        MessageTypes.ERROR,
+        MessageTypes.STATUS,
+      ].includes(message.type) &&
+      this.ignored(message.user?.username, message.message)
+    ) {
       message.ignore();
     }
 
