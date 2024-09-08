@@ -1041,9 +1041,10 @@ class Chat {
       if (data.recipient) {
         users.push(this.addUser(data.recipient));
       }
-      users.forEach((u) =>
-        this.autocomplete.add(u.displayName, false, Date.now()),
-      );
+      users.forEach((u) => {
+        if (this.ignored(u.username)) return;
+        this.autocomplete.add(u.displayName, false, Date.now());
+      });
     }
   }
 
@@ -1647,6 +1648,8 @@ class Chat {
       if (!failure) {
         validUsernames.forEach((username) => {
           this.ignore(username, true);
+          const user = this.users.get(username);
+          if (user) this.autocomplete.remove(user.displayName, true);
         });
         const resultArray = Array.from(validUsernames.values());
         const resultMessage =
@@ -1677,6 +1680,8 @@ class Chat {
       if (!failure) {
         validUsernames.forEach((username) => {
           this.ignore(username, false);
+          const user = this.users.get(username);
+          if (user) this.autocomplete.add(user.displayName, false, Date.now());
         });
         const haveOrHas = parts.length === 1 ? 'has' : 'have';
         MessageBuilder.status(
