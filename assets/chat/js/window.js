@@ -128,12 +128,19 @@ class ChatWindow extends EventEmitter {
       }
 
       if (message.user?.isSystem()) {
-        return;
+        continue;
       }
 
       const username = message.user?.username;
 
-      if (message.type !== MessageTypes.UI) {
+      if (
+        ![
+          MessageTypes.UI,
+          MessageTypes.INFO,
+          MessageTypes.ERROR,
+          MessageTypes.STATUS,
+        ].includes(message.type)
+      ) {
         message.ignore(chat.ignored(username, message.message));
       }
 
