@@ -768,17 +768,15 @@ hr {
 /* Event bar */
 #chat-event-bar {
   &:empty {
-    display: none !important;
+    display: none;
   }
 
   display: inline-flex;
-  overflow-x: scroll !important;
+  overflow-x: scroll;
   background: #151515;
   z-index: 6;
 
-  // width = height (lmao firefox)
   scrollbar-width: none;
-  --ms-overflow-style: none;
   &::-webkit-scrollbar {
     display: none;
   }
@@ -798,7 +796,7 @@ hr {
   }
 
   .msg-chat {
-    margin: $gutter-sm $gutter-sm $gutter-sm $gutter-sm;
+    margin: $gutter-sm;
     border-width: 2px;
     opacity: 1; // setting to 1 to ignore focus mode
   }
