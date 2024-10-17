@@ -140,7 +140,7 @@ export default class ChatEventBar {
     }
 
     const currentTimestamp = Date.now();
-    if (event.expirationTimestamp - currentTimestamp < 0) {
+    if (event.expirationTimestamp < currentTimestamp) {
       return false;
     }
 
