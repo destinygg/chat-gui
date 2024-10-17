@@ -144,6 +144,8 @@ export default class ChatEventBar {
       return false;
     }
 
+    // subscriptions from a mass gift event don't appear in the event bar
+    // to avoid overcrowding it (one event showing how many gifts a person bought is enough)
     if (event.fromMassGift) {
       return false;
     }
