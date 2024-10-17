@@ -97,6 +97,12 @@ class ChatSource extends EventEmitter {
   }
 
   parseAndDispatch(event) {
+    const { eventname, data } = this.parse(event);
+    this.emit('DISPATCH', { data, event: eventname }); // Event is used to hook into all dispatched events
+    this.emit(eventname, data);
+  }
+
+  parse(event) {
     const eventname = event.data.split(' ', 1)[0].toUpperCase();
     const payload = event.data.substring(eventname.length + 1);
     let data = null;
@@ -105,8 +111,11 @@ class ChatSource extends EventEmitter {
     } catch (ignored) {
       data = payload;
     }
-    this.emit('DISPATCH', { data, event: eventname }); // Event is used to hook into all dispatched events
-    this.emit(eventname, data);
+
+    return {
+      eventname,
+      data,
+    };
   }
 
   send(eventname, data) {
