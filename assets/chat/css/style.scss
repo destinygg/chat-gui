@@ -1,6 +1,6 @@
-@use '../../../node_modules/normalize.css/normalize.css';
-@use '../../../node_modules/tippy.js/dist/tippy.css';
-@use '../../../node_modules/tippy.js/dist/svg-arrow.css';
+@use '~normalize.css/normalize';
+@use '~tippy.js/dist/tippy';
+@use '~tippy.js/dist/svg-arrow';
 @use 'abstracts' as a;
 
 @use 'chat';
