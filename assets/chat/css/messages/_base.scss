@@ -83,6 +83,10 @@ $link-color-map: (
       opacity: 1;
     }
   }
+
+  .focus & {
+    opacity: 0.3;
+  }
 }
 
 .pref-showtime .time {

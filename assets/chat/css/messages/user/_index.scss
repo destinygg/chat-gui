@@ -17,6 +17,17 @@
   }
 }
 
+.watching-focus:not(.focus) {
+  .msg-user {
+    opacity: 0.3;
+
+    &.watching-same,
+    &.msg-highlight {
+      opacity: 1;
+    }
+  }
+}
+
 .pref-hideflairicons .features {
   display: none;
 }

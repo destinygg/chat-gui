@@ -14,3 +14,14 @@
     @include a.msg-icon(-32px, -0px);
   }
 }
+
+.watching-focus:not(.focus) {
+  .msg-death {
+    opacity: 0.3;
+
+    &.watching-same,
+    &.msg-highlight {
+      opacity: 1;
+    }
+  }
+}

@@ -48,6 +48,10 @@
   #unpin-btn .btn-icon {
     @include a.icon-background('../img/icon-unpin.svg');
   }
+
+  .focus & {
+    opacity: 1;
+  }
 }
 
 .onstreamchat {
