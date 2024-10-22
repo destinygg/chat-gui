@@ -6,6 +6,6 @@
 
 .onstreamchat {
   .msg-status {
-    animation: msg-slide-in 0.15s cubic-bezier(0.72, 0.03, 0.45, 1);
+    @include a.slide-in;
   }
 }
