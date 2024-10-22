@@ -1,10 +1,5 @@
 @use '../abstracts/' as a;
 
-@font-face {
-  font-family: 'Among Us';
-  src: url('../../../fonts/AmongUs-Regular.ttf') format('truetype');
-}
-
 #chat-output-frame {
   flex: 1;
   overflow: hidden;
