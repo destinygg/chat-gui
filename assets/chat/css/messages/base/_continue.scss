@@ -1,0 +1,13 @@
+@use '../../abstracts/' as a;
+
+.msg-continue {
+  .text:before {
+    color: a.$color-chat-disabled;
+    content: '> ';
+  }
+
+  .features,
+  .user {
+    display: none;
+  }
+}

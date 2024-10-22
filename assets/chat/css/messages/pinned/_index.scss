@@ -1,0 +1,51 @@
+@use '../../abstracts/' as a;
+
+@use 'frame';
+
+.msg-pinned {
+  background-color: a.$color-chat-emphasize;
+  padding-top: a.$gutter-md;
+  padding-bottom: a.$gutter-md;
+  border-style: solid;
+  border-radius: 10px;
+  border-color: #505050;
+  transition: all 0.15s ease-in-out;
+
+  &:hover {
+    border-color: a.$color-chat-text3;
+  }
+
+  &.hidden {
+    display: none;
+  }
+
+  .user {
+    text-shadow: none;
+  }
+
+  .chat-tool-btn {
+    width: 1.5em;
+    height: 1.5em;
+    cursor: pointer;
+    color: a.$color-chat-disabled;
+    position: relative;
+    text-decoration: none;
+    float: right;
+    border: unset;
+
+    &:hover,
+    &.active {
+      .btn-icon {
+        opacity: 1;
+      }
+    }
+  }
+
+  #close-pin-btn .btn-icon {
+    @include a.icon-background('../img/icon-close.svg');
+  }
+
+  #unpin-btn .btn-icon {
+    @include a.icon-background('../img/icon-unpin.svg');
+  }
+}

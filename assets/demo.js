@@ -1,5 +1,5 @@
 import $ from 'jquery';
-import './chat/css/style.scss';
+import './chat/css/main.scss';
 import Chat from './chat/js/chat';
 import embedHtml from './views/embed.html';
 import streamHtml from './views/stream.html';

@@ -1,0 +1,11 @@
+@mixin icon-background($url) {
+  background: transparent url($url) no-repeat center center / contain;
+}
+
+@mixin msg-icon($posX, $posY, $width: 16px, $height: 16px) {
+  background-image: url('../../icons/icons.png');
+  background-repeat: no-repeat;
+  width: $width;
+  height: $height;
+  background-position: $posX $posY;
+}

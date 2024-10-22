@@ -1,0 +1,18 @@
+@use '../../abstracts/' as a;
+
+@use 'death';
+@use 'whisper';
+
+.msg-user {
+  .features {
+    display: inline-flex;
+    vertical-align: text-top;
+    align-items: center;
+    margin-left: -(a.$gutter-xs);
+  }
+
+  .flair {
+    cursor: pointer;
+    margin-left: a.$gutter-xs;
+  }
+}

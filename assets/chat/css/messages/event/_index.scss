@@ -1,0 +1,84 @@
+@use '../../abstracts/' as a;
+
+@use 'broadcast';
+@use 'donation';
+@use 'subscription';
+
+.msg-donation,
+.msg-subscription,
+.msg-giftsub,
+.msg-massgift,
+.msg-broadcast {
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 1);
+  font-size: 1.1em;
+  font-weight: 400;
+  padding: unset;
+  border-radius: 10px;
+  border-style: solid;
+  border-color: unset;
+  border-width: 3px;
+  display: flex;
+  flex-direction: column;
+  margin: a.$gutter-sm a.$gutter-md * 2 a.$gutter-sm a.$gutter-sm;
+
+  .event-wrapper {
+    border-radius: 10px;
+  }
+
+  .event-top {
+    display: flex;
+    padding: a.$gutter-xs a.$gutter-md * 2 a.$gutter-xs a.$gutter-md;
+    background-color: a.$color-chat-emphasize;
+    justify-content: space-between;
+    align-items: center;
+    border-top-right-radius: 10px;
+    border-top-left-radius: 10px;
+  }
+
+  .event-icon {
+    width: 2.25em;
+    height: 2.25em;
+    color: a.$color-chat-disabled;
+    position: relative;
+    text-decoration: none;
+    display: inline-block;
+    border: 0.25em solid transparent;
+    flex-shrink: 0;
+    opacity: 0.75;
+  }
+
+  .event-bottom {
+    padding: a.$gutter-xs a.$gutter-md * 2 a.$gutter-xs a.$gutter-md;
+    background-color: a.$color-chat-bg;
+    border-bottom-right-radius: 10px;
+    border-bottom-left-radius: 10px;
+  }
+
+  &:not(:has(.event-bottom)) {
+    .event-top {
+      border-bottom-right-radius: 10px;
+      border-bottom-left-radius: 10px;
+    }
+  }
+
+  .user {
+    margin-left: unset;
+    text-shadow: none;
+  }
+
+  &.censored {
+    .text {
+      display: none;
+    }
+
+    .event-bottom:after {
+      color: a.$color-accent;
+      cursor: pointer;
+      content: '<censored>';
+    }
+
+    .event-bottom:hover:after {
+      color: a.$color-accent-light;
+    }
+  }
+}

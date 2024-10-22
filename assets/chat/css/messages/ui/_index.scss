@@ -1,0 +1,25 @@
+@use '../../abstracts/' as a;
+
+@use 'command';
+@use 'error';
+@use 'info';
+@use 'status';
+
+.msg-command,
+.msg-error,
+.msg-info,
+.msg-status {
+  white-space: pre-wrap;
+  color: a.$color-chat-text1;
+
+  .text:before {
+    content: '';
+    display: inline-block;
+    vertical-align: text-top;
+    margin-right: a.$gutter-sm;
+  }
+
+  &.msg-continue .text:before {
+    content: '';
+  }
+}

@@ -1,0 +1,24 @@
+@use '../abstracts/' as a;
+
+@use 'autocomplete';
+@use 'form-control';
+@use 'input';
+@use 'loading-screen';
+@use 'login-screen';
+@use 'onstreamchat';
+@use 'output';
+@use 'scroll-notify';
+@use 'scrollbar-theme';
+@use 'settings';
+@use 'toolbar';
+@use 'window-select';
+
+#chat {
+  min-width: a.$chat-min-width;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}

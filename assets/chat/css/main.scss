@@ -1,0 +1,141 @@
+@use '../../../node_modules/normalize.css/normalize.css';
+@use '../../../node_modules/tippy.js/dist/tippy.css';
+@use '../../../node_modules/tippy.js/dist/svg-arrow.css';
+@use 'abstracts' as a;
+
+@use 'chat';
+@use 'menus';
+@use 'messages';
+@use 'partials';
+
+@import url('https://fonts.googleapis.com/css?family=Roboto:400,500,600,700');
+
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+}
+
+html {
+  box-sizing: border-box;
+  position: relative;
+  color: a.$text-color1;
+  background: a.$color-chat-bg;
+  font-family: a.$chat-chrome-font;
+  font-size: 13px;
+  line-height: 1.42857143;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: 'kern';
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  position: relative;
+  color: a.$text-color1;
+  background: a.$color-chat-bg;
+  font-family: a.$chat-chrome-font;
+  font-size: 13px;
+  line-height: 1.42857143;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: 'kern';
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+textarea,
+input,
+button {
+  font-size: 1em;
+  line-height: 1.42857143;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: 'kern';
+  font-family: inherit;
+}
+
+/* Default button style */
+button {
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
+  border: none;
+  background: transparent;
+}
+
+a {
+  color: a.$color-accent;
+  text-decoration: none;
+
+  &:hover,
+  &:focus {
+    color: a.$color-accent-light;
+    text-decoration: underline;
+  }
+}
+
+hr {
+  border: 0;
+  margin: 1em 0;
+  border-top: 1px solid darken(a.$color-surface-dark1, 50%);
+  border-bottom: 1px solid a.$color-surface-dark3;
+}
+
+.tippy-box[data-theme~='dgg'] {
+  text-align: center;
+  background-color: white;
+  color: #000;
+}
+
+.tippy-box[data-theme~='dgg'] > .tippy-svg-arrow {
+  fill: white;
+}
+
+/* Small screen, non-retina */
+@media only screen and (min-width: 320px) {
+  body:not(.pref-fontscale) {
+    font-size: 13px;
+  }
+}
+
+/* Small screen, retina, stuff to override above media query */
+@media only screen and (min-device-pixel-ratio: 2) and (min-width: 320px),
+  only screen and (min-resolution: 192dpi) and (min-width: 320px),
+  only screen and (min-resolution: 2dppx) and (min-width: 320px) {
+  body:not(.pref-fontscale) {
+    font-size: 13px;
+  }
+}
+
+/* Medium screen, non-retina */
+@media only screen and (min-width: 700px) {
+  body:not(.pref-fontscale) {
+    font-size: 14px;
+  }
+}
+
+/* Medium screen, retina, stuff to override above media query */
+@media only screen and (min-device-pixel-ratio: 2) and (min-width: 700px),
+  only screen and (min-resolution: 192dpi) and (min-width: 700px),
+  only screen and (min-resolution: 2dppx) and (min-width: 700px) {
+  body:not(.pref-fontscale) {
+    font-size: 15px;
+  }
+}
+
+/* Large screen, non-retina */
+@media only screen and (min-width: 1300px) {
+  body:not(.pref-fontscale) {
+    font-size: 16px;
+  }
+}
+
+/* Large screen, retina, stuff to override above media query */
+@media only screen and (min-device-pixel-ratio: 2) and (min-width: 1300px),
+  only screen and (min-resolution: 192dpi) and (min-width: 1300px),
+  only screen and (min-resolution: 2dppx) and (min-width: 1300px) {
+  body:not(.pref-fontscale) {
+    font-size: 16px;
+  }
+}

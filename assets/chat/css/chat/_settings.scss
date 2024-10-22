@@ -1,0 +1,50 @@
+// show time
+.pref-showtime .time {
+  display: inline !important;
+}
+
+// show flairs
+.pref-hideflairicons .features {
+  display: none !important;
+}
+
+// show autocomplete helper
+#chat:not(.pref-autocompletehelper) #chat-auto-complete {
+  display: none !important;
+}
+
+.pref-autocompletehelper #chat-auto-complete.active {
+  display: block !important;
+}
+
+// disable animations
+.pref-disableanimations {
+  .emote,
+  .emote:hover,
+  .emote::before,
+  .emote::after {
+    animation: none !important;
+  }
+
+  a.user,
+  span.user {
+    animation: none !important;
+  }
+}
+
+// font size
+body {
+  &.pref-fontscale {
+    &[data-fontscale='small'] {
+      font-size: 14px;
+    }
+
+    &[data-fontscale='medium'] {
+      font-size: 15px;
+    }
+
+    &[data-fontscale='large'] {
+      font-size: 16px;
+    }
+  }
+}

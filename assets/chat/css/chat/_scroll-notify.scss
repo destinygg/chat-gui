@@ -1,0 +1,32 @@
+@use '../abstracts/' as a;
+
+.chat-scroll-notify {
+  padding: 0.25em 0;
+  color: a.$color-chat-text3;
+  background: a.$color-surface-dark3;
+  position: absolute;
+  bottom: -2.5em;
+  left: a.$gutter-md;
+  right: a.$gutter-md;
+  text-align: center;
+  cursor: pointer;
+  z-index: 130;
+  border-radius: a.$bradius;
+  opacity: 0;
+  transition: all 250ms;
+  transition-timing-function: cubic-bezier(0.6, 0.08, 0.99, 0.54);
+
+  &:hover {
+    color: a.$color-chat-text1;
+  }
+
+  .chat-unpinned & {
+    transition-timing-function: cubic-bezier(0, 0.99, 0.18, 0.99);
+    opacity: 1;
+    bottom: 0;
+  }
+
+  #chat.chat-autocomplete-in & {
+    display: none !important;
+  }
+}

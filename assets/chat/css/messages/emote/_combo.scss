@@ -1,0 +1,176 @@
+@use '../../abstracts/' as a;
+
+.chat-combo {
+  color: a.$color-chat-text1;
+  display: inline-block;
+  position: relative;
+  line-height: 2em;
+  padding-left: a.$gutter-md;
+
+  i {
+    font-style: normal;
+    display: inline-block;
+    vertical-align: middle;
+  }
+
+  .hit,
+  .combo,
+  .count,
+  .x {
+    text-shadow:
+      -1px -1px 0 #000,
+      1px -1px 0 #000,
+      -1px 1px 0 #000,
+      1px 1px 0 #000;
+  }
+
+  .combo {
+    display: none;
+    color: a.$text-color1;
+    font-weight: normal;
+  }
+
+  .hit {
+    color: a.$color-light;
+    animation: emote-hit 600ms 1;
+    font-style: italic;
+    text-transform: uppercase;
+    margin-left: 0;
+    letter-spacing: 0.05em;
+    display: inline-block;
+  }
+
+  .count {
+    font-size: 1.15em;
+    letter-spacing: -0.05em;
+    font-weight: bold;
+  }
+
+  &.x5 {
+    .count {
+      font-size: 150%;
+    }
+  }
+
+  &.x10 {
+    .count {
+      font-size: 200%;
+    }
+
+    .combo {
+      font-weight: bold;
+    }
+  }
+
+  &.x20 {
+    .count {
+      font-size: 300%;
+    }
+
+    .combo {
+      font-weight: bold;
+    }
+  }
+
+  &.x30 {
+    .count {
+      font-size: 400%;
+    }
+
+    .combo {
+      font-weight: bold;
+    }
+  }
+
+  &.x50 {
+    .count {
+      font-size: 500%;
+    }
+
+    .combo {
+      font-weight: bold;
+    }
+  }
+
+  &.combo-complete {
+    &.x10,
+    &.x20,
+    &.x30,
+    &.x50 {
+      animation: emote-greyout 3500ms 1;
+      background: transparent url('../img/emote-splat.png') no-repeat center
+        center;
+      background-size: 100% 100%;
+      filter: grayscale(100%);
+
+      .combo {
+        color: a.$color-light;
+        margin-left: a.$gutter-md;
+      }
+    }
+
+    .combo {
+      animation: emote-complete 1000ms 1;
+      display: inline-block;
+    }
+
+    .hit {
+      display: none;
+    }
+  }
+}
+
+@keyframes emote-hit {
+  0% {
+    color: #b91010;
+    font-size: 200%;
+  }
+  1% {
+    color: a.$color-light;
+    font-size: 190%;
+  }
+  2% {
+    color: #b91010;
+    font-size: 200%;
+  }
+  3% {
+    color: a.$color-light;
+    font-size: 190%;
+  }
+  4% {
+    color: #b91010;
+    font-size: 200%;
+  }
+  100% {
+    color: a.$color-light;
+    font-size: 120%;
+  }
+}
+
+@keyframes emote-complete {
+  0% {
+    transform: translate(-10px, 0);
+    opacity: 0;
+  }
+  2% {
+    transform: translate(10px, 0);
+    color: white;
+    opacity: 1;
+  }
+  100% {
+    transform: translate(0, 0);
+    opacity: 1;
+  }
+}
+
+@keyframes emote-greyout {
+  0% {
+    filter: grayscale(0);
+  }
+  75% {
+    filter: grayscale(0);
+  }
+  100% {
+    filter: grayscale(100%);
+  }
+}

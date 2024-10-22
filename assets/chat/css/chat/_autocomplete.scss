@@ -1,0 +1,57 @@
+@use '../abstracts/' as a;
+
+#chat-auto-complete {
+  pointer-events: none;
+  transition: opacity 750ms;
+  transition-timing-function: cubic-bezier(0, 0.74, 0.1, 0.99);
+  opacity: 0;
+  z-index: 131;
+  border-radius: a.$bradius a.$bradius 0 0;
+  position: absolute;
+  font-size: 1.1em;
+  line-height: 2em;
+  height: 2em;
+  top: -2em;
+  left: 0;
+  right: 0;
+  overflow: hidden;
+  white-space: nowrap;
+
+  &.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  ul {
+    position: absolute;
+    white-space: nowrap;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  li {
+    padding: 0 a.$gutter-sm;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    color: a.$color-chat-text3;
+    background: rgba(a.$color-surface-dark1, 0.75);
+
+    &:first-child {
+      border-radius: a.$bradius 0 0 0;
+    }
+
+    &:last-child {
+      border-radius: 0 a.$bradius 0 0;
+    }
+
+    &:hover {
+      color: lighten(a.$color-chat-text3, 20);
+    }
+
+    &.active {
+      color: a.$text-color;
+    }
+  }
+}
