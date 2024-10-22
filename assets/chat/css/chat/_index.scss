@@ -4,7 +4,6 @@
 @use 'input';
 @use 'loading-screen';
 @use 'login-screen';
-@use 'onstreamchat';
 @use 'output';
 @use 'scroll-notify';
 @use 'scrollbar-theme';
@@ -19,4 +18,10 @@
   width: 100%;
   height: 100%;
   overflow: hidden;
+}
+
+.onstreamchat {
+  #chat {
+    background: none !important;
+  }
 }

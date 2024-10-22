@@ -20,3 +20,22 @@
 .pref-hideflairicons .features {
   display: none;
 }
+
+.onstreamchat {
+  .msg-user {
+    animation: msg-slide-in 0.15s cubic-bezier(0.72, 0.03, 0.45, 1);
+  }
+
+  .features {
+    display: none !important;
+  }
+}
+
+@keyframes msg-slide-in {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}

@@ -120,6 +120,16 @@
   }
 }
 
+.onstreamchat {
+  .chat-combo {
+    background-image: none !important;
+  }
+
+  .combo {
+    color: a.$text-color;
+  }
+}
+
 @keyframes emote-hit {
   0% {
     color: #b91010;

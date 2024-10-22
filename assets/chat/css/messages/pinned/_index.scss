@@ -49,3 +49,21 @@
     @include a.icon-background('../img/icon-unpin.svg');
   }
 }
+
+.onstreamchat {
+  .msg-pinned {
+    position: unset;
+    text-shadow: unset;
+    background-color: unset;
+    font-size: unset;
+    font-weight: unset;
+    padding-top: unset;
+    padding-bottom: unset;
+    box-shadow: unset;
+    border-radius: unset;
+
+    .chat-tool-btn {
+      display: none !important;
+    }
+  }
+}

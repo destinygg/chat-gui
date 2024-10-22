@@ -173,3 +173,9 @@
     color: a.$text-color;
   }
 }
+
+.onstreamchat {
+  #chat-poll-frame {
+    display: none !important;
+  }
+}

@@ -82,3 +82,45 @@
     }
   }
 }
+
+.onstreamchat {
+  .msg-donation,
+  .msg-subscription,
+  .msg-giftsub,
+  .msg-massgift,
+  .msg-broadcast {
+    text-shadow: none;
+    padding: 0;
+    border-style: none none none solid;
+    border-width: 6px;
+    border-radius: 0;
+
+    .event-top,
+    .event-bottom {
+      padding: 0 0 0 a.$gutter-md;
+      background: none;
+    }
+
+    &.rainbow-border {
+      border-style: none none none solid;
+      border-width: 6px;
+      border-radius: 0;
+
+      &:before {
+        content: '';
+        position: absolute;
+        top: unset;
+        right: 100%;
+        bottom: unset;
+        left: unset;
+        z-index: -1;
+        margin: -1px 0 0 0;
+        border-radius: inherit;
+        background: var(--rainbow-gradient);
+        aspect-ratio: 1/1;
+        height: 100%;
+        transform: rotate(90deg);
+      }
+    }
+  }
+}

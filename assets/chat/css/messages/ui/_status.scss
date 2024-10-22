@@ -3,3 +3,9 @@
 .msg-status .text:before {
   @include a.msg-icon(-50px, -18px);
 }
+
+.onstreamchat {
+  .msg-status {
+    animation: msg-slide-in 0.15s cubic-bezier(0.72, 0.03, 0.45, 1);
+  }
+}

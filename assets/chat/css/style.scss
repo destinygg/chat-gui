@@ -158,3 +158,24 @@ hr {
     font-size: 16px;
   }
 }
+
+$num-size-map: (
+  1: 14px,
+  2: 15px,
+  3: 16px,
+  4: 18px,
+  5: 20px,
+  6: 22px,
+  7: 24px,
+  8: 26px,
+  9: 32px,
+  10: 52px,
+);
+
+.onstreamchat {
+  @each $num, $size in $num-size-map {
+    body.pref-fontscale[data-fontscale='#{$size}'] & {
+      font-size: #{$size};
+    }
+  }
+}

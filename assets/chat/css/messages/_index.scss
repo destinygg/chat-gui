@@ -102,3 +102,37 @@ $link-color-map: (
     animation: none !important;
   }
 }
+
+.onstreamchat {
+  .msg-chat {
+    color: a.$text-color;
+    margin: 0;
+    padding: 1px 20px 1px 5px;
+    filter: drop-shadow(-1px -1px 0 rgba(black, 0.5))
+      drop-shadow(1px -1px 0 rgba(black, 0.5))
+      drop-shadow(-1px 1px 0 rgba(black, 0.5))
+      drop-shadow(1px 1px 0 rgba(black, 0.5));
+    letter-spacing: 0.03em;
+  }
+
+  a.externallink,
+  a.externallink:hover {
+    color: a.$color-accent-light;
+  }
+
+  .greentext {
+    color: a.$text-color;
+  }
+
+  .msg-chat,
+  .msg-chat:not(.rainbow-border):before,
+  .greentext {
+    background: none !important;
+  }
+
+  time,
+  .time,
+  .msg-chat .text:before {
+    display: none !important;
+  }
+}

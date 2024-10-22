@@ -87,3 +87,9 @@
   right: -6px;
   left: -2px;
 }
+
+.onstreamchat {
+  .os-scrollbar {
+    visibility: hidden !important;
+  }
+}

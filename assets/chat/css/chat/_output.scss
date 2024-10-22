@@ -16,3 +16,16 @@
   line-height: 1.65em;
   outline: 0 !important;
 }
+
+.onstreamchat {
+  .chat-lines {
+    font-size: 1.5em;
+    font-family: 'Roboto', Helvetica, 'Trebuchet MS', Verdana, sans-serif;
+    font-weight: 500 !important;
+    color: a.$text-color;
+  }
+
+  #chat-output-frame {
+    margin: 0;
+  }
+}
