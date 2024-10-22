@@ -89,3 +89,14 @@ $link-color-map: (
     }
   }
 }
+
+.pref-showtime .time {
+  display: inline;
+}
+
+.pref-disableanimations {
+  a.user,
+  span.user {
+    animation: none !important;
+  }
+}

@@ -6,3 +6,12 @@
   overflow: hidden;
   text-indent: -999em;
 }
+
+.pref-disableanimations {
+  .emote,
+  .emote:hover,
+  .emote::before,
+  .emote::after {
+    animation: none !important;
+  }
+}

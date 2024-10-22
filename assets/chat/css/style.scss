@@ -48,6 +48,20 @@ body {
   height: 100%;
   margin: 0;
   padding: 0;
+
+  &.pref-fontscale {
+    &[data-fontscale='small'] {
+      font-size: 14px;
+    }
+
+    &[data-fontscale='medium'] {
+      font-size: 15px;
+    }
+
+    &[data-fontscale='large'] {
+      font-size: 16px;
+    }
+  }
 }
 
 textarea,

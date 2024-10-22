@@ -55,3 +55,11 @@
     }
   }
 }
+
+#chat:not(.pref-autocompletehelper) #chat-auto-complete {
+  display: none;
+}
+
+.pref-autocompletehelper #chat-auto-complete.active {
+  display: block;
+}
