@@ -35,6 +35,7 @@
   "dependencies": {
     "dotenv": "^16.0.3",
     "jquery": "^3.6.0",
+    "md5": "^2.3.0",
     "moment": "~2.30.1",
     "normalize.css": "~8.0.1",
     "overlayscrollbars": "^2.0.3",

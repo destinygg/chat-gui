@@ -75,11 +75,31 @@ class ChatWindow extends EventEmitter {
   }
 
   addMessage(chat, message) {
+    if (this.messages.find((m) => m.md5 === message.md5)) return;
+
     message.ui = message.html(chat);
     message.afterRender(chat);
-    this.messages.push(message);
-    this.lastmessage = message;
-    this.lines.append(message.ui);
+
+    const index = this.messages.findLastIndex(
+      (m) => m.timestamp.valueOf() <= message.timestamp.valueOf(),
+    );
+
+    if (index < 0) {
+      this.lines.prepend(message.ui);
+      this.messages = [message, ...this.messages];
+    } else if (index + 1 >= this.messages.length) {
+      this.lines.append(message.ui);
+      this.messages.push(message);
+      this.lastmessage = message;
+    } else {
+      this.lines.insertBefore(message.ui, this.messages[index + 1].ui);
+      this.messages = [
+        ...this.messages.slice(0, index + 1),
+        message,
+        ...this.messages.slice(index + 1),
+      ];
+    }
+
     this.linecount += 1;
     this.cleanupThrottle();
   }
