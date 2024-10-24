@@ -174,8 +174,8 @@ $num-size-map: (
 
 .onstreamchat {
   @each $num, $size in $num-size-map {
-    body.pref-fontscale[data-fontscale='#{$size}'] & {
-      font-size: #{$size};
+    body.pref-fontscale[data-fontscale='#{$num}'] & {
+      font-size: $size;
     }
   }
 }
