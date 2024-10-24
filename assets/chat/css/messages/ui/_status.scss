@@ -1,0 +1,11 @@
+@use '../../abstracts/' as a;
+
+.msg-status .text:before {
+  @include a.msg-icon(-50px, -18px);
+}
+
+.onstreamchat {
+  .msg-status {
+    @include a.slide-in;
+  }
+}

@@ -1,0 +1,51 @@
+@use '../abstracts/' as a;
+
+#chat-input-frame {
+  padding: a.$gutter-md a.$gutter-md 0 a.$gutter-md;
+}
+
+#chat-input-wrap {
+  position: relative;
+}
+
+#chat-input-control {
+  max-height: 140px;
+  position: relative;
+  color: a.$color-chat-text2;
+  background: a.$color-surface-dark2;
+  border: 1px solid a.$color-surface-dark3;
+  outline: none;
+  resize: none;
+  margin: 0;
+  width: 100%;
+  padding: a.$gutter-md;
+  border-radius: a.$bradius;
+  box-shadow: none;
+  box-sizing: border-box;
+  display: block;
+  overflow: hidden;
+
+  &::placeholder {
+    color: a.$color-chat-place;
+  }
+
+  #chat.chat-autocomplete-in & {
+    border-radius: 0 0 a.$bradius a.$bradius;
+  }
+}
+
+#chat-input-subonly {
+  cursor: default;
+  display: none;
+  position: absolute;
+  top: a.$gutter-md;
+  right: a.$gutter-sm;
+  width: 1.5em;
+  height: 1.5em;
+
+  .btn-icon {
+    opacity: 0.75;
+
+    @include a.icon-background('../img/icon-subonly.svg');
+  }
+}

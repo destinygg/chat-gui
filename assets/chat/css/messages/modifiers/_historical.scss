@@ -1,0 +1,25 @@
+@use '../../abstracts/' as a;
+
+.msg-historical {
+  color: a.$text-color1;
+
+  .time {
+    display: inline !important;
+  }
+
+  &:before {
+    background: none !important;
+  }
+}
+
+.chat-output:not(.chat-win-main) {
+  .msg-historical {
+    background-color: a.$color-chat-emphasize;
+    color: a.$color-chat-text1;
+  }
+
+  .msg-historical.msg-own {
+    background: none !important;
+    color: a.$color-chat-text2;
+  }
+}

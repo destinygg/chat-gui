@@ -1,0 +1,98 @@
+@use '../abstracts/' as a;
+
+#chat-user-list {
+  .section {
+    margin: 1.5em 0em 0.5em;
+
+    .title {
+      padding: 0em 0em 0.2em 1em;
+      font-weight: 600;
+      border-bottom: 1px solid;
+
+      .features {
+        float: right;
+        display: inline-flex;
+        vertical-align: text-top;
+        align-items: center;
+        margin-right: a.$gutter-md;
+
+        .flair {
+          cursor: pointer;
+          margin-right: a.$gutter-xs;
+        }
+      }
+    }
+  }
+
+  .content {
+    margin-top: -(a.$gutter-md);
+    padding-bottom: a.$gutter-lg;
+  }
+
+  .scrollable {
+    max-height: calc(100% - 3em);
+  }
+
+  &.search-in {
+    .user-entry {
+      display: none;
+
+      &.found {
+        display: flex;
+      }
+    }
+  }
+
+  input {
+    padding: a.$gutter-lg a.$gutter-lg;
+    border: none;
+    background: none;
+    border-radius: 0;
+  }
+}
+
+.user-entry {
+  margin: 0;
+  cursor: pointer;
+  padding: 0 a.$gutter-lg;
+  text-decoration: none;
+  visibility: visible;
+  align-items: center;
+  display: flex;
+
+  .user-actions {
+    position: absolute;
+    right: a.$gutter-md;
+
+    .mention-nick,
+    .whisper-nick {
+      visibility: hidden;
+      margin-right: a.$gutter-xs;
+      margin-top: 0.45em;
+      display: inline-block;
+      opacity: 0.25;
+      width: 1em;
+      height: 1em;
+      &:hover {
+        opacity: 1;
+      }
+    }
+
+    .mention-nick {
+      @include a.icon-background('../img/icon-share.svg');
+    }
+
+    .whisper-nick {
+      @include a.icon-background('../img/icon-whisper.svg');
+    }
+  }
+
+  &:hover {
+    background: #282828;
+
+    .mention-nick,
+    .whisper-nick {
+      visibility: visible;
+    }
+  }
+}

@@ -1,0 +1,78 @@
+@use '../abstracts/' as a;
+
+#chat-whisper-users {
+  .content > ul {
+    margin: 0;
+    padding: a.$gutter-md 0;
+  }
+
+  .unread-0 {
+    .badge {
+      display: none;
+    }
+
+    .user,
+    .user:hover {
+      color: a.$text-color1;
+    }
+  }
+
+  .empty {
+    color: a.$text-color1;
+    margin: a.$gutter-lg;
+  }
+}
+
+.conversation {
+  list-style: none;
+  position: relative;
+  cursor: pointer;
+  padding-left: a.$gutter-md;
+  display: flex;
+  align-items: center;
+
+  .user {
+    color: a.$color-accent;
+    display: block;
+
+    &:hover {
+      color: a.$color-accent-light;
+
+      .badge {
+        color: a.$color-chat-text1;
+      }
+    }
+  }
+
+  .badge,
+  .remove {
+    float: right;
+    margin-right: a.$gutter-md;
+  }
+
+  .badge {
+    font-size: 0.8em;
+    padding: 0 a.$gutter-md;
+    display: inline-block;
+    background: a.$color-surface-dark4;
+    border-radius: 50%;
+    margin: a.$gutter-xs 0;
+    color: a.$color-chat-text2;
+  }
+
+  .remove {
+    opacity: 0.25;
+    display: inline-block;
+    text-decoration: none;
+    text-align: center;
+    line-height: 1.3em;
+    width: 1.3em;
+    height: 1.3em;
+
+    @include a.icon-background('../img/icon-close.svg');
+
+    &:hover {
+      opacity: 1;
+    }
+  }
+}

@@ -1,0 +1,12 @@
+@use '../abstracts/' as a;
+
+.chat-tool-btn {
+  width: 2.25em;
+  height: 2.25em;
+  cursor: pointer;
+  color: a.$color-chat-disabled;
+  position: relative;
+  text-decoration: none;
+  display: inline-block;
+  border: 0.35em solid transparent; /* used for "padding" */
+}

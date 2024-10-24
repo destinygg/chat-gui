@@ -1,0 +1,11 @@
+@use '../../abstracts/' as a;
+
+.msg-broadcast {
+  border-color: a.$color-text-broadcast;
+
+  .broadcast-icon {
+    filter: invert(100%);
+
+    @include a.icon-background('../img/icon-broadcast.png');
+  }
+}

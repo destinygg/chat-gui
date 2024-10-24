@@ -1,0 +1,15 @@
+@use '../../abstracts/' as a;
+
+.msg-info {
+  color: unset;
+}
+
+.msg-info .text:before {
+  @include a.msg-icon(-50px, -0px);
+}
+
+.onstreamchat {
+  .msg-info {
+    display: none !important;
+  }
+}

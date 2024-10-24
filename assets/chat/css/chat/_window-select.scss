@@ -1,0 +1,77 @@
+@use '../abstracts/' as a;
+
+#chat-windows-select {
+  padding-top: 0.5em;
+  background: a.$color-surface-dark4;
+  white-space: nowrap;
+  display: flex;
+  z-index: 100;
+}
+
+.win-main {
+  width: 3em;
+  flex-shrink: 0;
+
+  span {
+    display: none;
+  }
+
+  .tab-close {
+    display: none !important;
+  }
+
+  .dgg-icon {
+    display: block;
+    width: 100%;
+    height: 100%;
+
+    @include a.icon-background('../img/dgg-icon.svg');
+  }
+}
+
+.tab {
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  border-radius: a.$bradius a.$bradius 0 0;
+  color: a.$color-chat-text3;
+  user-select: none;
+  cursor: pointer;
+  font-size: 1em;
+  padding: a.$gutter-sm a.$gutter-lg;
+
+  &.active {
+    color: a.$color-chat-text1;
+    background: a.$color-surface-dark1;
+    margin-left: 0;
+    margin-right: 0;
+    overflow: visible;
+    text-overflow: unset;
+    min-width: auto;
+    display: flex;
+    align-items: center;
+
+    .tab-close {
+      display: inline-block;
+    }
+  }
+
+  &:hover,
+  &.unread {
+    color: a.$color-chat-text1;
+  }
+}
+
+.tab-close {
+  width: 1em;
+  height: 1em;
+  opacity: 0.25;
+  margin-left: a.$gutter-md;
+  display: none;
+
+  @include a.icon-background('../img/icon-close.svg');
+
+  &:hover {
+    opacity: 1;
+  }
+}

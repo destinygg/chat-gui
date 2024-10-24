@@ -1,0 +1,29 @@
+@use '../abstracts/' as a;
+
+button.btn {
+  display: inline-block;
+  padding: a.$gutter-md a.$gutter-lg;
+  margin-bottom: 0;
+  font-weight: normal;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: middle;
+  touch-action: manipulation;
+  cursor: pointer;
+  user-select: none;
+  background-image: none;
+  border: 1px solid transparent;
+  border-radius: a.$bradius;
+}
+
+.btn-primary {
+  color: a.$text-color;
+  background-color: a.$color-accent;
+  border-color: a.$color-accent;
+}
+
+.btn-default {
+  color: a.$text-color3;
+  background-color: a.$color-surface-light1;
+  border-color: a.$color-surface-light3;
+}

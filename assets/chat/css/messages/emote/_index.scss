@@ -1,0 +1,28 @@
+@use 'combo';
+
+.emote {
+  display: inline-block;
+  position: relative;
+  overflow: hidden;
+  text-indent: -999em;
+}
+
+.watching-focus:not(.focus) {
+  .msg-emote {
+    opacity: 0.3;
+
+    &.watching-same,
+    &.msg-highlight {
+      opacity: 1;
+    }
+  }
+}
+
+.pref-disableanimations {
+  .emote,
+  .emote:hover,
+  .emote::before,
+  .emote::after {
+    animation: none !important;
+  }
+}
