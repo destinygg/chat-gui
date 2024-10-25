@@ -16,6 +16,12 @@ const ADMIN_HELP_HEADER = 'Available admin commands: \n';
 /** @type CommandList */
 const CHAT_COMMANDS = [
   {
+    name: 'addphrase',
+    description: 'Add a banned phrase to chat.',
+    alias: ['addban', 'addmute'],
+    admin: true,
+  },
+  {
     name: 'ban',
     description: 'Stop <nick> from connecting to the chat.',
     admin: true,
@@ -23,6 +29,11 @@ const CHAT_COMMANDS = [
   {
     name: 'baninfo',
     description: 'Check your ban status.',
+  },
+  {
+    name: 'broadcast',
+    description: 'Send a system-wide message to all users present in the chat.',
+    admin: true,
   },
   {
     name: 'die',
@@ -107,6 +118,26 @@ const CHAT_COMMANDS = [
     name: 'postembed',
     description: 'Post a video embed in chat.',
     alias: ['pe'],
+  },
+  {
+    name: 'reloadusers',
+    description: 'Reload all users in chat.',
+    admin: true,
+  },
+  {
+    name: 'removephrase',
+    description: 'Remove a banned phrase from chat.',
+    alias: [
+      'removeban',
+      'removemute',
+      'deletephrase',
+      'deleteban',
+      'deletemute',
+      'dmute',
+      'dban',
+      'dphrase',
+    ],
+    admin: true,
   },
   {
     name: 'reply',

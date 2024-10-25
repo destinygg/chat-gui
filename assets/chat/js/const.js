@@ -79,6 +79,10 @@ const errorstrings = new Map(
     alreadyvoted: 'You have already voted!',
     nochatting:
       "You aren't allowed to chat. Either you haven't picked a username, or a mod disabled your privileges.",
+    duplicatephrase: 'Banned phrase already exists.',
+    nophrase: "Banned phrase doesn't exist.",
+    invalidphrase:
+      'Invalid phrase provided. Either the phrase was empty, or its regex was invalid.',
     cantbanprotected: "Protected users can't die.",
   }),
 );
@@ -124,6 +128,7 @@ const settingsdefault = new Map(
     showremoved: 0, // 0 = false (removes), 1 = true (censor), 2 = do nothing
     showhispersinchat: false,
     ignorenicks: [],
+    favoriteemotes: [],
     focusmentioned: false,
     notificationtimeout: true,
     ignorementions: false,
@@ -133,6 +138,7 @@ const settingsdefault = new Map(
     hidensfl: false,
     fontscale: 'auto',
     censorbadwords: false,
+    disableanimations: false,
   }),
 );
 

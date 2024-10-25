@@ -1,3 +1,14 @@
+$chat-chrome-font: 'Roboto', Helvetica, 'Trebuchet MS', Verdana, sans-serif;
+$chat-lines-font: 'Roboto', Helvetica, 'Trebuchet MS', Verdana, sans-serif;
+$chat-min-width: 300px;
+
+$gutter-xs: 0.2em;
+$gutter-sm: 0.3em;
+$gutter-md: 0.6em;
+$gutter-lg: 0.9em;
+
+$bradius: 0.25em;
+
 $color-light: #fff7f9;
 $color-dark: #201f1e;
 $color-accent: #4a8ecc;
@@ -37,6 +48,7 @@ $color-link-visited: #a66be5;
 $color-text-broadcast: #edea12;
 $color-underline-nsfl: #fff000;
 $color-underline-nsfw: #ff0000;
+$color-underline-spoilers: #ff80ce;
 
 $color-green: #61bd4f;
 $color-darkgreen: #4c7c42;

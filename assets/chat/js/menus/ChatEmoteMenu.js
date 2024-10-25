@@ -5,7 +5,8 @@ export default class ChatEmoteMenu extends ChatMenu {
   constructor(ui, btn, chat) {
     super(ui, btn, chat);
     this.searchterm = '';
-    this.emoteMenuContent = this.ui.find('.content');
+    this.emoteMenuContent = this.ui.find('.all .content');
+    this.favoriteEmoteMenuContent = this.ui.find('.favorite .content');
     this.searchinput = this.ui.find(
       '#chat-emote-list-search .form-control:first',
     );
@@ -22,6 +23,7 @@ export default class ChatEmoteMenu extends ChatMenu {
         () => {
           this.searchterm = this.searchinput.val();
           this.buildEmoteMenu();
+          this.buildFavoriteEmoteMenu();
         },
         { atBegin: false },
       ),
@@ -32,6 +34,27 @@ export default class ChatEmoteMenu extends ChatMenu {
     super.show();
     this.searchinput.focus();
     this.buildEmoteMenu();
+    this.buildFavoriteEmoteMenu();
+  }
+
+  buildFavoriteEmoteMenu() {
+    const favoriteEmotes = [...this.chat.favoriteemotes].filter((e) =>
+      this.chat.emoteService.hasEmote(e),
+    );
+    if (favoriteEmotes.length === 0) {
+      this.favoriteEmoteMenuContent.html(`<div class="emote-container">
+        <div id="emote-subscribe-note">Favorite Emotes</div>
+        <p>Right click an emote and favorite it!</p>
+      </div>`);
+      return;
+    }
+    const emotesStr = favoriteEmotes
+      .map((e) => this.buildEmoteItem(e, false))
+      .join('');
+    this.favoriteEmoteMenuContent.html(`<div class="emote-container">
+      <div id="emote-subscribe-note">Favorite Emotes</div>
+      <div class="emote-group">${emotesStr}</div>
+    </div>`);
   }
 
   buildEmoteMenu() {

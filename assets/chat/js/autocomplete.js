@@ -39,7 +39,7 @@ function buildSearchCriteria(str, offset) {
   if (endCaret > -1) post = post.substring(0, endCaret);
 
   // Ignore the first char as part of the search and flag as a user only search
-  if (pre.lastIndexOf('@') === 0) {
+  if (pre.lastIndexOf('@') === 0 || pre.lastIndexOf('>') === 0) {
     startCaret += 1;
     pre = pre.substring(1);
     useronly = true;
@@ -61,22 +61,53 @@ function timeoutHelpers(ac) {
 function updateHelpers(ac) {
   ac.chat.ui.toggleClass('chat-autocomplete-in', ac.results.length > 0);
   ac.ui.toggleClass('active', ac.results.length > 0);
+  if (ac.selected === -1) ac.container.css('left', 0);
 }
 function selectHelper(ac) {
   // Positioning
-  if (ac.selected !== -1 && ac.results.length > 0) {
-    const list = ac.ui.find(`li`).get();
-    const offset = ac.container.position().left;
-    const maxwidth = ac.ui.width();
-    $(list[ac.selected + 3]).each((i, e) => {
-      const right = $(e).position().left + offset + $(e).outerWidth();
-      if (right > maxwidth) ac.container.css('left', offset + maxwidth - right);
-    });
-    $(list[Math.max(0, ac.selected - 2)]).each((i, e) => {
-      const left = $(e).position().left + offset;
-      if (left < 0) ac.container.css('left', -$(e).position().left);
-    });
-    list.forEach((e, i) => $(e).toggleClass('active', i === ac.selected));
+  if (ac.results.length === 0) {
+    return;
+  }
+
+  const list = ac.ui.find(`li`).get();
+
+  list.forEach((e, i) => $(e).toggleClass('active', i === ac.selected));
+
+  const fullWidth = ac.container.width();
+  const visibleWidth = ac.ui.width();
+  const selectedItem = list[ac.selected];
+
+  if (visibleWidth > fullWidth) {
+    return;
+  }
+
+  const offset = ac.container.position().left;
+
+  const nearStart = selectedItem.offsetLeft < -offset;
+  const nearEnd =
+    fullWidth - selectedItem.offsetLeft + selectedItem.clientWidth * 2 <
+    visibleWidth;
+  const anywhereElse =
+    selectedItem.offsetLeft + selectedItem.clientWidth * 2 > visibleWidth;
+
+  if (nearEnd) {
+    ac.container.css('left', -fullWidth + visibleWidth);
+    return;
+  }
+
+  if (anywhereElse) {
+    ac.container.css(
+      'left',
+      -selectedItem.offsetLeft -
+        selectedItem.clientWidth / 2 +
+        visibleWidth / 2,
+    );
+    return;
+  }
+
+  // this is needed to properly loop back the list to the beginning
+  if (nearStart) {
+    ac.container.css('left', -selectedItem.offsetLeft);
   }
 }
 

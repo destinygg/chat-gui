@@ -35,6 +35,7 @@
   <div id="chat-input-frame">
     <div id="chat-input-wrap">
       <textarea
+        enterkeyhint="send"
         id="chat-input-control"
         placeholder="Getting things ready ..."
         autocomplete="off"
@@ -151,6 +152,12 @@
                 <option value="1">&lt;censored&gt;</option>
                 <option value="2">do nothing</option>
               </select>
+            </div>
+            <div class="form-group checkbox">
+              <label title="Disable animations when possible">
+                <input name="disableanimations" type="checkbox" /> Disable
+                animations when possible
+              </label>
             </div>
 
             <h4>Notifications</h4>
@@ -305,6 +312,9 @@
         <div class="name" title="Emote name"></div>
         <div class="creator" title="Emote creator"></div>
         <div class="tier" title="Emote tier"></div>
+        <button class="favorite" title="Favorite emote">
+          <i class="btn-icon"></i>
+        </button>
       </div>
     </div>
   </div>
@@ -314,7 +324,10 @@
       <div class="toolbar">
         <h5><span>Emotes</span> <i class="chat-menu-close"></i></h5>
       </div>
-      <div class="scrollable">
+      <div class="scrollable all">
+        <div class="content"></div>
+      </div>
+      <div class="scrollable favorite">
         <div class="content"></div>
       </div>
       <div id="chat-emote-list-search">

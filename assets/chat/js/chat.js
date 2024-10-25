@@ -43,6 +43,7 @@ import { ChatPoll, parseQuestionAndTime } from './poll';
 import { isMuteActive, MutedTimer } from './mutedtimer';
 import EmoteService from './emotes';
 import UserFeatures from './features';
+import UserRoles from './roles';
 import makeSafeForRegex, {
   regexslashcmd,
   regextime,
@@ -100,6 +101,7 @@ class Chat {
     this.taggednicks = new Map();
     this.taggednotes = new Map();
     this.ignoring = new Set();
+    this.favoriteemotes = new Set();
     this.mainwindow = null;
     this.regexhighlightcustom = null;
     this.regexhighlightnicks = null;
@@ -135,6 +137,7 @@ class Chat {
     this.source.on('SOCKETERROR', (data) => this.onSOCKETERROR(data));
     this.source.on('SUBONLY', (data) => this.onSUBONLY(data));
     this.source.on('BROADCAST', (data) => this.onBROADCAST(data));
+    this.source.on('RELOAD', () => this.onRELOAD());
     this.source.on('PRIVMSGSENT', (data) => this.onPRIVMSGSENT(data));
     this.source.on('PRIVMSG', (data) => this.onPRIVMSG(data));
     this.source.on('POLLSTART', (data) => this.onPOLLSTART(data));
@@ -145,6 +148,8 @@ class Chat {
     this.source.on('MASSGIFT', (data) => this.onMASSGIFT(data));
     this.source.on('DONATION', (data) => this.onDONATION(data));
     this.source.on('UPDATEUSER', (data) => this.onUPDATEUSER(data));
+    this.source.on('ADDPHRASE', (data) => this.onADDPHRASE(data));
+    this.source.on('REMOVEPHRASE', (data) => this.onREMOVEPHRASE(data));
     this.source.on('DEATH', (data) => this.onDEATH(data));
     this.source.on('PAIDEVENTS', (data) => this.onPAIDEVENTS(data));
 
@@ -170,6 +175,7 @@ class Chat {
     );
     this.control.on('TIMESTAMPFORMAT', (data) => this.cmdTIMESTAMPFORMAT(data));
     this.control.on('BROADCAST', (data) => this.cmdBROADCAST(data));
+    this.control.on('RELOADUSERS', () => this.cmdRELOADUSERS());
     this.control.on('CONNECT', (data) => this.cmdCONNECT(data));
     this.control.on('TAG', (data) => this.cmdTAG(data));
     this.control.on('UNTAG', (data) => this.cmdUNTAG(data));
@@ -210,6 +216,18 @@ class Chat {
     this.control.on('UNMOTD', () => this.cmdUNPIN());
     this.control.on('HOST', (data) => this.cmdHOST(data));
     this.control.on('UNHOST', () => this.cmdUNHOST());
+    this.control.on('ADDPHRASE', (data) => this.cmdADDPHRASE(data));
+    this.control.on('ADDBAN', (data) => this.cmdADDPHRASE(data));
+    this.control.on('ADDMUTE', (data) => this.cmdADDPHRASE(data));
+    this.control.on('REMOVEPHRASE', (data) => this.cmdREMOVEPHRASE(data));
+    this.control.on('REMOVEBAN', (data) => this.cmdREMOVEPHRASE(data));
+    this.control.on('REMOVEMUTE', (data) => this.cmdREMOVEPHRASE(data));
+    this.control.on('DELETEPHRASE', (data) => this.cmdREMOVEPHRASE(data));
+    this.control.on('DELETEBAN', (data) => this.cmdREMOVEPHRASE(data));
+    this.control.on('DELETEMUTE', (data) => this.cmdREMOVEPHRASE(data));
+    this.control.on('DPHRASE', (data) => this.cmdREMOVEPHRASE(data));
+    this.control.on('DBAN', (data) => this.cmdREMOVEPHRASE(data));
+    this.control.on('DMUTE', (data) => this.cmdREMOVEPHRASE(data));
     this.control.on('DIE', () => this.cmdDIE());
     this.control.on('SUICIDE', () => this.cmdDIE());
     this.control.on('BITLY', () => this.cmdDIE());
@@ -225,6 +243,9 @@ class Chat {
       this.user = this.addUser(user);
       this.authenticated = true;
     }
+    this.commands
+      .generateAutocomplete(this.user.hasModPowers())
+      .forEach((command) => this.autocomplete.add(command));
     this.setDefaultPlaceholderText();
     return this;
   }
@@ -257,6 +278,8 @@ class Chat {
     this.taggednicks = new Map(this.settings.get('taggednicks'));
     this.taggednotes = new Map(this.settings.get('taggednotes'));
     this.ignoring = new Set(this.settings.get('ignorenicks'));
+    this.favoriteemotes = new Set(this.settings.get('favoriteemotes'));
+
     return this.applySettings(false);
   }
 
@@ -350,9 +373,6 @@ class Chat {
       ),
     );
 
-    this.commands
-      .generateAutocomplete(this.user.hasModPowers())
-      .forEach((command) => this.autocomplete.add(command));
     this.autocomplete.bind(this);
 
     // Chat input
@@ -782,7 +802,15 @@ class Chat {
     win.addMessage(this, message);
 
     // Hide the message if the user is ignored
-    if (message.user && this.ignored(message.user.username, message.message)) {
+    if (
+      ![
+        MessageTypes.UI,
+        MessageTypes.INFO,
+        MessageTypes.ERROR,
+        MessageTypes.STATUS,
+      ].includes(message.type) &&
+      this.ignored(message.user?.username, message.message)
+    ) {
       message.ignore();
     }
 
@@ -939,6 +967,19 @@ class Chat {
     this.applySettings();
   }
 
+  toggleFavoriteEmote(emote) {
+    const exists = this.favoriteemotes.has(emote);
+    if (!exists) {
+      this.favoriteemotes.add(emote);
+    } else {
+      this.favoriteemotes.delete(emote);
+    }
+    this.settings.set('favoriteemotes', [...this.favoriteemotes]);
+    this.applySettings();
+    this.menus.get('emotes').buildFavoriteEmoteMenu();
+    return !exists;
+  }
+
   focusIfNothingSelected() {
     // If this is a mobile screen, return to avoid focusing input and bringing up the virtual keyboard
     if (window.screen.width <= 768) {
@@ -1003,9 +1044,10 @@ class Chat {
       if (data.recipient) {
         users.push(this.addUser(data.recipient));
       }
-      users.forEach((u) =>
-        this.autocomplete.add(u.displayName, false, Date.now()),
-      );
+      users.forEach((u) => {
+        if (this.ignored(u.username)) return;
+        this.autocomplete.add(u.displayName, false, Date.now());
+      });
     }
   }
 
@@ -1232,6 +1274,12 @@ class Chat {
           `You are temporarily muted! You can chat again ${this.mutedtimer.getReadableDuration()}. Subscribe to remove the mute immediately.`,
         );
         break;
+      case 'bannedphrase': {
+        message = MessageBuilder.error(
+          `Your message was blocked because it contained this banned phrase: "${data.filtered}".`,
+        );
+        break;
+      }
       default:
         message = MessageBuilder.error(errorstrings.get(desc) || desc);
     }
@@ -1262,28 +1310,24 @@ class Chat {
   }
 
   onBROADCAST(data) {
-    // TODO kind of ... hackey
-    if (data.data === 'reload') {
-      if (!this.backlogloading) {
-        const retryMilli = Math.floor(Math.random() * 30000) + 4000;
-        setTimeout(() => window.location.reload(true), retryMilli);
+    MessageBuilder.broadcast(
+      data.data,
+      new ChatUser(data.user),
+      data.timestamp,
+    ).into(this);
+  }
 
-        MessageBuilder.broadcast(
-          `Restart incoming in ${Math.round(retryMilli / 1000)} seconds...`,
-          new ChatUser({
-            nick: 'System',
-            id: -1,
-          }),
-          data.timestamp,
-        ).into(this);
-      }
-    } else {
-      MessageBuilder.broadcast(
-        data.data,
-        new ChatUser(data.user),
-        data.timestamp,
-      ).into(this);
-    }
+  onRELOAD() {
+    const retryMilli = Math.floor(Math.random() * 30000) + 4000;
+    setTimeout(() => window.location.reload(true), retryMilli);
+
+    MessageBuilder.broadcast(
+      `Reload incoming in ${Math.round(retryMilli / 1000)} seconds...`,
+      new ChatUser({
+        nick: 'System',
+        id: -1,
+      }),
+    ).into(this);
   }
 
   onSUBSCRIPTION(data) {
@@ -1335,6 +1379,19 @@ class Chat {
       }
     });
     this.eventBar.sort();
+  }
+
+  onADDPHRASE(data) {
+    MessageBuilder.command(`Phrase "${data.data}" added.`, data.timestamp).into(
+      this,
+    );
+  }
+
+  onREMOVEPHRASE(data) {
+    MessageBuilder.command(
+      `Phrase "${data.data}" removed.`,
+      data.timestamp,
+    ).into(this);
   }
 
   onPRIVMSGSENT() {
@@ -1629,6 +1686,8 @@ class Chat {
       if (!failure) {
         validUsernames.forEach((username) => {
           this.ignore(username, true);
+          const user = this.users.get(username);
+          if (user) this.autocomplete.remove(user.displayName, true);
         });
         const resultArray = Array.from(validUsernames.values());
         const resultMessage =
@@ -1659,6 +1718,8 @@ class Chat {
       if (!failure) {
         validUsernames.forEach((username) => {
           this.ignore(username, false);
+          const user = this.users.get(username);
+          if (user) this.autocomplete.add(user.displayName, false, Date.now());
         });
         const haveOrHas = parts.length === 1 ? 'has' : 'have';
         MessageBuilder.status(
@@ -1823,6 +1884,10 @@ class Chat {
 
   cmdBROADCAST(parts) {
     this.source.send('BROADCAST', { data: parts.join(' ') });
+  }
+
+  cmdRELOADUSERS() {
+    this.source.send('RELOADUSERS', {});
   }
 
   cmdWHISPER(parts) {
@@ -2219,10 +2284,16 @@ class Chat {
   }
 
   cmdHOST(parts) {
-    const displayName = parts[1];
     let url = parts[0];
+    const displayName = parts.slice(1).join(' ') || undefined;
 
-    if (!this.user.hasAnyFeatures(UserFeatures.ADMIN, UserFeatures.MODERATOR)) {
+    if (
+      !this.user.hasAnyRoles(
+        UserRoles.ADMIN,
+        UserRoles.MODERATOR,
+        UserRoles.HOST,
+      )
+    ) {
       MessageBuilder.error(errorstrings.get('nopermission')).into(this);
       return;
     }
@@ -2264,7 +2335,13 @@ class Chat {
   }
 
   cmdUNHOST() {
-    if (!this.user.hasAnyFeatures(UserFeatures.ADMIN, UserFeatures.MODERATOR)) {
+    if (
+      !this.user.hasAnyRoles(
+        UserRoles.ADMIN,
+        UserRoles.MODERATOR,
+        UserRoles.HOST,
+      )
+    ) {
       MessageBuilder.error(errorstrings.get('nopermission')).into(this);
       return;
     }
@@ -2292,6 +2369,38 @@ class Chat {
 
   cmdUNPIN() {
     this.source.send('PIN', { data: '' });
+  }
+
+  cmdADDPHRASE(parts) {
+    if (!this.user.hasAnyFeatures(UserFeatures.ADMIN, UserFeatures.MODERATOR)) {
+      MessageBuilder.error(errorstrings.get('nopermission')).into(this);
+      return;
+    }
+
+    if (!parts.length) {
+      MessageBuilder.error('No phrase provided - /addphrase <phrase>').into(
+        this,
+      );
+      return;
+    }
+
+    this.source.send('ADDPHRASE', { data: parts.join(' ') });
+  }
+
+  cmdREMOVEPHRASE(parts) {
+    if (!this.user.hasAnyFeatures(UserFeatures.ADMIN, UserFeatures.MODERATOR)) {
+      MessageBuilder.error(errorstrings.get('nopermission')).into(this);
+      return;
+    }
+
+    if (!parts.length) {
+      MessageBuilder.error('No phrase provided - /removephrase <phrase>').into(
+        this,
+      );
+      return;
+    }
+
+    this.source.send('REMOVEPHRASE', { data: parts.join(' ') });
   }
 
   cmdDIE() {

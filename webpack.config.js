@@ -27,10 +27,13 @@ function bakeCookies(request) {
 
 module.exports = {
   devServer: {
-    https: true,
+    server: {
+      type: 'https',
+    },
     port: 8282,
-    proxy: {
-      '/api': {
+    proxy: [
+      {
+        context: ['/api'],
         target: 'https://www.destiny.gg',
         secure: false,
         changeOrigin: true,
@@ -38,7 +41,8 @@ module.exports = {
           bakeCookies(proxyReq);
         },
       },
-      '/cdn': {
+      {
+        context: ['/cdn'],
         target: 'https://cdn.destiny.gg',
         pathRewrite: { '^/cdn': '' },
         secure: false,
@@ -47,7 +51,8 @@ module.exports = {
           Host: 'cdn.destiny.gg',
         },
       },
-      '/chat': {
+      {
+        context: ['/chat'],
         target: 'wss://chat.destiny.gg/ws',
         pathRewrite: { '^/chat': '' },
         secure: false,
@@ -60,7 +65,7 @@ module.exports = {
           bakeCookies(proxyReq);
         },
       },
-    },
+    ],
   },
   entry: {
     demo: './assets/demo.js',

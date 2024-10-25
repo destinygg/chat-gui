@@ -127,11 +127,25 @@ class ChatWindow extends EventEmitter {
         message.updateTimeFormat();
       }
 
-      if (message.user && !message.user.isSystem()) {
-        const { username } = message.user;
+      if (message.user?.isSystem()) {
+        continue;
+      }
 
-        message.setOwnMessage(username === chat.user.username);
+      const username = message.user?.username;
+
+      if (
+        ![
+          MessageTypes.UI,
+          MessageTypes.INFO,
+          MessageTypes.ERROR,
+          MessageTypes.STATUS,
+        ].includes(message.type)
+      ) {
         message.ignore(chat.ignored(username, message.message));
+      }
+
+      if (username) {
+        message.setOwnMessage(username === chat.user.username);
         message.highlight(chat.shouldHighlightMessage(message));
         if (message.type === MessageTypes.USER) {
           message.setContinued(this.isContinued(message, this.messages[i - 1]));
