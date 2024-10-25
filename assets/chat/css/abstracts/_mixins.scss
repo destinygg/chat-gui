@@ -1,0 +1,24 @@
+@mixin icon-background($url) {
+  background: transparent url($url) no-repeat center center / contain;
+}
+
+@mixin msg-icon($posX, $posY, $width: 16px, $height: 16px) {
+  background-image: url('../../icons/icons.png');
+  background-repeat: no-repeat;
+  width: $width;
+  height: $height;
+  background-position: $posX $posY;
+}
+
+@mixin slide-in {
+  animation: msg-slide-in 0.15s cubic-bezier(0.72, 0.03, 0.45, 1);
+}
+
+@keyframes msg-slide-in {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
