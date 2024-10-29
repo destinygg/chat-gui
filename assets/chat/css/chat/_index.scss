@@ -9,6 +9,7 @@
 @use 'scrollbar-theme';
 @use 'toolbar';
 @use 'window-select';
+@use 'event-bar';
 
 #chat {
   min-width: a.$chat-min-width;

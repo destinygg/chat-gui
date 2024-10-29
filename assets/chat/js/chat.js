@@ -31,8 +31,8 @@ import {
   ChatEmoteTooltip,
   ChatSettingsMenu,
   ChatUserInfoMenu,
-  ChatEventBar,
 } from './menus';
+import ChatEventBar from './event-bar/EventBar';
 import ChatAutoComplete from './autocomplete';
 import ChatInputHistory from './history';
 import ChatUserFocus from './focus';
@@ -1333,50 +1333,31 @@ class Chat {
   onSUBSCRIPTION(data) {
     const event = MessageBuilder.subscription(data);
     event.into(this);
-    this.eventBar.add(event);
+    this.eventBar.add('SUBSCRIPTION', data);
   }
 
   onGIFTSUB(data) {
     const event = MessageBuilder.gift(data);
     event.into(this);
-    this.eventBar.add(event);
+    this.eventBar.add('GIFTSUB', data);
   }
 
   onMASSGIFT(data) {
     const event = MessageBuilder.massgift(data);
     event.into(this);
-    this.eventBar.add(event);
+    this.eventBar.add('MASSGIFT', data);
   }
 
   onDONATION(data) {
     const event = MessageBuilder.donation(data);
     event.into(this);
-    this.eventBar.add(event);
+    this.eventBar.add('DONATION', data);
   }
 
   onPAIDEVENTS(lines) {
     lines.forEach((line) => {
       const { eventname, data } = this.source.parse({ data: line });
-      switch (eventname) {
-        case 'SUBSCRIPTION': {
-          this.eventBar.add(MessageBuilder.subscription(data));
-          break;
-        }
-        case 'GIFTSUB': {
-          this.eventBar.add(MessageBuilder.gift(data));
-          break;
-        }
-        case 'MASSGIFT': {
-          this.eventBar.add(MessageBuilder.massgift(data));
-          break;
-        }
-        case 'DONATION': {
-          this.eventBar.add(MessageBuilder.donation(data));
-          break;
-        }
-        default:
-          break;
-      }
+      this.eventBar.add(eventname, data);
     });
     this.eventBar.sort();
   }

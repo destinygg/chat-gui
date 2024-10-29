@@ -2,6 +2,20 @@ import { usernameColorFlair } from '../ChatUserMessage';
 import ChatEventMessage from '../ChatEventMessage';
 import features from '../../features';
 
+export function getTierStyles(tier, flairs) {
+  const tierFlair = features[`SUB_TIER_${tier}`];
+  const tierInfo = flairs.find((el) => el.name === tierFlair);
+  const tierColor = tierInfo?.color;
+
+  const tierClass = tierInfo?.rainbowColor ? `user ${tierFlair}` : '';
+
+  return {
+    rainbowColor: tierInfo?.rainbowColor,
+    tierClass,
+    tierColor: tierInfo?.rainbowColor ? '' : tierColor,
+  };
+}
+
 export default class ChatSubscriptionMessage extends ChatEventMessage {
   constructor(
     message,
@@ -21,24 +35,13 @@ export default class ChatSubscriptionMessage extends ChatEventMessage {
     this.expirationTimestamp = expirationTimestamp;
   }
 
-  getTierStyles(chat = null) {
-    const tierFlair = features[`SUB_TIER_${this.tier}`];
-    const tierInfo = chat.flairs.find((el) => el.name === tierFlair);
-    const tierColor = tierInfo?.color;
-
-    const tierClass = tierInfo?.rainbowColor ? `user ${tierFlair}` : '';
-
-    return {
-      rainbowColor: tierInfo?.rainbowColor,
-      tierClass,
-      tierColor: tierInfo?.rainbowColor ? '' : tierColor,
-    };
-  }
-
   html(chat = null) {
     const eventTemplate = super.html(chat);
 
-    const { rainbowColor, tierClass, tierColor } = this.getTierStyles(chat);
+    const { rainbowColor, tierClass, tierColor } = getTierStyles(
+      this.tier,
+      chat.flairs,
+    );
 
     if (tierColor) eventTemplate.style.borderColor = tierColor;
     if (rainbowColor) eventTemplate.classList.add('rainbow-border');
