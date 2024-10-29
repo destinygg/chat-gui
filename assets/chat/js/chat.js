@@ -1331,26 +1331,22 @@ class Chat {
   }
 
   onSUBSCRIPTION(data) {
-    const event = MessageBuilder.subscription(data);
-    event.into(this);
+    MessageBuilder.subscription(data).into(this);
     this.eventBar.add('SUBSCRIPTION', data);
   }
 
   onGIFTSUB(data) {
-    const event = MessageBuilder.gift(data);
-    event.into(this);
+    MessageBuilder.gift(data).into(this);
     this.eventBar.add('GIFTSUB', data);
   }
 
   onMASSGIFT(data) {
-    const event = MessageBuilder.massgift(data);
-    event.into(this);
+    MessageBuilder.massgift(data).into(this);
     this.eventBar.add('MASSGIFT', data);
   }
 
   onDONATION(data) {
-    const event = MessageBuilder.donation(data);
-    event.into(this);
+    MessageBuilder.donation(data).into(this);
     this.eventBar.add('DONATION', data);
   }
 
