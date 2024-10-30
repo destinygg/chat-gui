@@ -57,6 +57,7 @@ import makeSafeForRegex, {
 import { HashLinkConverter, MISSING_ARG_ERROR } from './hashlinkconverter';
 import ChatCommands from './commands';
 import MessageTemplateHTML from '../../views/templates.html';
+import EventBarEvent from './event-bar/EventBarEvent';
 
 class Chat {
   constructor(config) {
@@ -319,8 +320,18 @@ class Chat {
     this.mainwindow = new ChatWindow('main').into(this);
     this.mutedtimer = new MutedTimer(this);
     this.chatpoll = new ChatPoll(this);
-    this.eventBar = new ChatEventBar(this);
+    this.eventBar = new ChatEventBar();
     this.pinnedMessage = null;
+
+    document.addEventListener('eventBarEventSelected', () => {
+      this.userfocus.toggleFocus('', false, true);
+      // Hide full pinned message interface to make everything look nice
+      if (this.pinnedMessage) this.pinnedMessage.hidden = true;
+    });
+
+    document.addEventListener('eventBarEventUnselected', () => {
+      if (this.pinnedMessage) this.pinnedMessage.hidden = false;
+    });
 
     this.windowToFront('main');
 
@@ -1332,28 +1343,37 @@ class Chat {
 
   onSUBSCRIPTION(data) {
     MessageBuilder.subscription(data).into(this);
-    this.eventBar.add('SUBSCRIPTION', data);
+    const eventBarEvent = new EventBarEvent(
+      this,
+      MessageTypes.SUBSCRIPTION,
+      data,
+    );
+    this.eventBar.add(eventBarEvent);
   }
 
   onGIFTSUB(data) {
     MessageBuilder.gift(data).into(this);
-    this.eventBar.add('GIFTSUB', data);
+    const eventBarEvent = new EventBarEvent(this, MessageTypes.GIFTSUB, data);
+    this.eventBar.add(eventBarEvent);
   }
 
   onMASSGIFT(data) {
     MessageBuilder.massgift(data).into(this);
-    this.eventBar.add('MASSGIFT', data);
+    const eventBarEvent = new EventBarEvent(this, MessageTypes.MASSGIFT, data);
+    this.eventBar.add(eventBarEvent);
   }
 
   onDONATION(data) {
     MessageBuilder.donation(data).into(this);
-    this.eventBar.add('DONATION', data);
+    const eventBarEvent = new EventBarEvent(this, MessageTypes.DONATION, data);
+    this.eventBar.add(eventBarEvent);
   }
 
   onPAIDEVENTS(lines) {
     lines.forEach((line) => {
       const { eventname, data } = this.source.parse({ data: line });
-      this.eventBar.add(eventname, data);
+      const eventBarEvent = new EventBarEvent(this, eventname, data);
+      this.eventBar.add(eventBarEvent);
     });
     this.eventBar.sort();
   }

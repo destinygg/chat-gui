@@ -1,13 +1,9 @@
-import EventBarEvent from './EventBarEvent';
-
 /**
  * @typedef {import('../messages/ChatEventMessage').default & {expirationTimestamp: number}} ExpiringEvent
  */
 
 export default class ChatEventBar {
-  constructor(chat) {
-    this.chat = chat;
-
+  constructor() {
     /** @type HTMLDivElement */
     this.eventBarUI = document.getElementById('chat-event-bar');
     /** @type HTMLDivElement */
@@ -25,27 +21,23 @@ export default class ChatEventBar {
 
   /**
    * Adds the event to the event bar.
-   * @param {string} type
-   * @param {ExpiringEvent} data
+   * @param {EventBarEvent} event
    */
-  add(type, data) {
-    if (!this.shouldEventBeDisplayed(data)) {
+  add(event) {
+    if (!this.shouldEventBeDisplayed(event.data)) {
       return;
     }
 
-    const eventBarEvent = new EventBarEvent(this.chat, type, data);
-
-    eventBarEvent.element.addEventListener('click', () => {
-      this.select(eventBarEvent.selectedElement);
-      this.chat.userfocus.toggleFocus('', false, true);
+    event.element.addEventListener('click', () => {
+      this.select(event.selectedElement);
     });
 
-    this.eventBarUI.prepend(eventBarEvent.element);
+    this.eventBarUI.prepend(event.element);
 
-    // Update chat window to fix the scroll position
-    this.chat.mainwindow.update();
-
-    eventBarEvent.startExpiry();
+    // // Update chat window to fix the scroll position
+    // this.chat.mainwindow.update();
+    //
+    event.startExpiry();
   }
 
   /**
@@ -54,8 +46,7 @@ export default class ChatEventBar {
   unselect() {
     if (this.eventSelectUI.hasChildNodes()) {
       this.eventSelectUI.replaceChildren();
-      // Unhide pinned message interface
-      if (this.chat.pinnedMessage) this.chat.pinnedMessage.hidden = false;
+      document.dispatchEvent(new CustomEvent('eventBarEventUnselected'));
     }
   }
 
@@ -70,8 +61,7 @@ export default class ChatEventBar {
     this.eventSelectUI.replaceChildren();
     this.eventSelectUI.append(event);
 
-    // Hide full pinned message interface to make everything look nice
-    if (this.chat.pinnedMessage) this.chat.pinnedMessage.hidden = true;
+    document.dispatchEvent(new CustomEvent('eventBarEventSelected'));
   }
 
   /**
