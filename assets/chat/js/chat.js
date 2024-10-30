@@ -320,18 +320,12 @@ class Chat {
     this.mainwindow = new ChatWindow('main').into(this);
     this.mutedtimer = new MutedTimer(this);
     this.chatpoll = new ChatPoll(this);
+
     this.eventBar = new ChatEventBar();
+    this.eventBar.on('eventSelected', () => this.onEVENTSELECTED());
+    this.eventBar.on('eventUnselected', () => this.onEVENTUNSELECTED());
+
     this.pinnedMessage = null;
-
-    document.addEventListener('eventBarEventSelected', () => {
-      this.userfocus.toggleFocus('', false, true);
-      // Hide full pinned message interface to make everything look nice
-      if (this.pinnedMessage) this.pinnedMessage.hidden = true;
-    });
-
-    document.addEventListener('eventBarEventUnselected', () => {
-      if (this.pinnedMessage) this.pinnedMessage.hidden = false;
-    });
 
     this.windowToFront('main');
 
@@ -1568,6 +1562,16 @@ class Chat {
     }
     this.censor(data.nick);
     MessageBuilder.death(data.data, user, data.timestamp).into(this);
+  }
+
+  onEVENTSELECTED() {
+    this.userfocus.toggleFocus('', false, true);
+    // Hide full pinned message interface to make everything look nice
+    if (this.pinnedMessage) this.pinnedMessage.hidden = true;
+  }
+
+  onEVENTUNSELECTED() {
+    if (this.pinnedMessage) this.pinnedMessage.hidden = false;
   }
 
   cmdSHOWPOLL() {

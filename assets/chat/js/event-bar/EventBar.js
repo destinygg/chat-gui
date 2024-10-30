@@ -1,9 +1,12 @@
+import EventEmitter from '../emitter';
+
 /**
  * @typedef {import('../messages/ChatEventMessage').default & {expirationTimestamp: number}} ExpiringEvent
  */
 
-export default class ChatEventBar {
+export default class ChatEventBar extends EventEmitter {
   constructor() {
+    super();
     /** @type HTMLDivElement */
     this.eventBarUI = document.getElementById('chat-event-bar');
     /** @type HTMLDivElement */
@@ -46,7 +49,7 @@ export default class ChatEventBar {
   unselect() {
     if (this.eventSelectUI.hasChildNodes()) {
       this.eventSelectUI.replaceChildren();
-      document.dispatchEvent(new CustomEvent('eventBarEventUnselected'));
+      this.emit('eventUnselected');
     }
   }
 
@@ -61,7 +64,7 @@ export default class ChatEventBar {
     this.eventSelectUI.replaceChildren();
     this.eventSelectUI.append(event);
 
-    document.dispatchEvent(new CustomEvent('eventBarEventSelected'));
+    this.emit('eventSelected');
   }
 
   /**
