@@ -18,7 +18,7 @@
   }
 }
 
-#chat-hover-container {
+#highlighted-message-wrapper {
   position: absolute;
   width: 100%;
   z-index: 210;
@@ -39,7 +39,7 @@
     display: none;
   }
 
-  #chat-hover-container {
+  #highlighted-message-wrapper {
     display: none;
   }
 }
