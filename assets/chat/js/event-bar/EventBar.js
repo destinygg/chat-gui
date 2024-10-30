@@ -112,4 +112,8 @@ export default class ChatEventBar {
 
     return true;
   }
+
+  get length() {
+    return this.eventBarUI.querySelectorAll(`.event-bar-event`).length;
+  }
 }
