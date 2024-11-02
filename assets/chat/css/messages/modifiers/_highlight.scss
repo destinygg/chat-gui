@@ -8,8 +8,8 @@
   .continue {
     color: a.$color-chat-text3;
   }
+}
 
-  .pref-taggedvisibility & {
-    background-color: a.$color-chat-highlight;
-  }
+.pref-taggedvisibility .msg-tagged {
+  background-color: a.$color-chat-highlight;
 }

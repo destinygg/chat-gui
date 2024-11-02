@@ -27,13 +27,13 @@ $tag-colors: (
     content: '';
   }
 
-  .pref-taggedvisibility & {
-    background-color: a.$color-chat-tagged;
-  }
-
   @each $name, $color in $tag-colors {
     &.msg-tagged-#{$name}:before {
       background-color: $color;
     }
   }
+}
+
+.pref-taggedvisibility .msg-tagged {
+  background-color: a.$color-chat-tagged;
 }
