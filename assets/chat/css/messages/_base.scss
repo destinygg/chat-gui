@@ -58,13 +58,13 @@ $link-color-map: (
     &:focus {
       color: a.$color-link-hover;
     }
+  }
 
-    @each $type, $color in $link-color-map {
-      .#{$type}-link {
-        border-style: dashed;
-        border-width: 1px 0 1px 0;
-        border-color: transparent transparent $color transparent;
-      }
+  @each $type, $color in $link-color-map {
+    .#{$type}-link {
+      border-style: dashed;
+      border-width: 1px 0 1px 0;
+      border-color: transparent transparent $color transparent;
     }
   }
 
