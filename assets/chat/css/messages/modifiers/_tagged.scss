@@ -34,6 +34,7 @@ $tag-colors: (
   }
 }
 
-.pref-taggedvisibility .msg-tagged {
+// Prioritize highlighted message background color
+.pref-taggedvisibility .msg-tagged:not(.msg-highlight) {
   background-color: a.$color-chat-tagged;
 }
