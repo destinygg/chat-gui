@@ -27,13 +27,14 @@ $tag-colors: (
     content: '';
   }
 
-  .pref-taggedvisibility & {
-    background-color: a.$color-chat-tagged;
-  }
-
   @each $name, $color in $tag-colors {
     &.msg-tagged-#{$name}:before {
       background-color: $color;
     }
   }
+}
+
+// Prioritize highlighted message background color
+.pref-taggedvisibility .msg-tagged:not(.msg-highlight) {
+  background-color: a.$color-chat-tagged;
 }
