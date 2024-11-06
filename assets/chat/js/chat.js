@@ -415,7 +415,12 @@ class Chat {
 
     // ESC
     document.addEventListener('keydown', (e) => {
-      if (isKeyCode(e, KEYCODES.ESC)) ChatMenu.closeMenus(this); // ESC key
+      if (isKeyCode(e, KEYCODES.ESC)) {
+        // If any menus are open, close them first
+        if ([...this.menus].some(([, menu]) => menu.visible)) ChatMenu.closeMenus(this);
+        // If chat is not pinned, scroll to bottom
+        else if (!this.mainwindow.scrollplugin.pinned) this.mainwindow.scrollplugin.scrollBottom();
+      }
     });
 
     // Visibility
