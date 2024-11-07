@@ -417,9 +417,10 @@ class Chat {
     document.addEventListener('keydown', (e) => {
       if (isKeyCode(e, KEYCODES.ESC)) {
         // If any menus are open, close them first
-        if ([...this.menus].some(([, menu]) => menu.visible)) ChatMenu.closeMenus(this);
+        if (this.getActiveMenu() !== undefined) ChatMenu.closeMenus(this);
         // If the active window is scrolled up (not pinned), scroll to bottom
-        else if (!this.getActiveWindow().scrollplugin.pinned) this.getActiveWindow().scrollplugin.scrollBottom();
+        else if (!this.getActiveWindow().scrollplugin.pinned)
+          this.getActiveWindow().scrollplugin.scrollBottom();
       }
     });
 
@@ -925,6 +926,10 @@ class Chat {
     this.windowselect.toggle(this.windows.size > 1);
 
     if (this.mainwindow !== null) this.mainwindow.update();
+  }
+
+  getActiveMenu() {
+    return [...this.menus.values()].find((menu) => menu.visible);
   }
 
   censor(nick) {
