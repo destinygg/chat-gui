@@ -417,9 +417,11 @@ class Chat {
     document.addEventListener('keydown', (e) => {
       if (isKeyCode(e, KEYCODES.ESC)) {
         // If any menus are open, close them first
-        if ([...this.menus].some(([, menu]) => menu.visible)) ChatMenu.closeMenus(this);
+        if ([...this.menus].some(([, menu]) => menu.visible))
+          ChatMenu.closeMenus(this);
         // If chat is not pinned, scroll to bottom
-        else if (!this.mainwindow.scrollplugin.pinned) this.mainwindow.scrollplugin.scrollBottom();
+        else if (!this.getActiveWindow().scrollplugin.pinned)
+          this.getActiveWindow().scrollplugin.scrollBottom();
       }
     });
 
