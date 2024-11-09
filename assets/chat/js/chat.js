@@ -418,7 +418,7 @@ class Chat {
       if (isKeyCode(e, KEYCODES.ESC)) {
         const activeView = this.getActiveWindow().scrollplugin;
         // If any menus are open, close them first
-        if (this.getActiveMenu() !== undefined) ChatMenu.closeMenus(this);
+        if (this.getActiveMenu()) ChatMenu.closeMenus(this);
         // If the active window is scrolled up (not pinned), scroll to bottom
         else if (!activeView.pinned) activeView.scrollBottom();
       }
