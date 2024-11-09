@@ -973,7 +973,7 @@ class Chat {
     }
     this.settings.set('favoriteemotes', [...this.favoriteemotes]);
     this.applySettings();
-    this.menus.get('emotes').buildFavoriteEmoteMenu();
+    this.menus.get('emotes').buildEmoteMenu();
     return !exists;
   }
 
