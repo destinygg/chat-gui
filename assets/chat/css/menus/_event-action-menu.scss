@@ -1,0 +1,23 @@
+@use '../abstracts/' as a;
+
+#event-action-menu {
+  height: fit-content;
+  width: fit-content;
+  min-width: 75px;
+  max-width: 250px;
+  z-index: 221;
+
+  .chat-menu-inner {
+    background-color: a.$color-surface-dark3;
+  }
+
+  .event-action {
+    transition: background-color 150ms ease;
+    color: a.$color-light;
+    padding: 0.5rem 1rem;
+
+    &:hover {
+      background-color: a.$color-surface-dark4;
+    }
+  }
+}
