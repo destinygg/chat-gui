@@ -27,6 +27,9 @@ export default class ChatEventBar extends EventEmitter {
         return;
       }
 
+      // Prevent the click from canceling focus, if enabled
+      e.stopPropagation();
+
       this.unselect();
     });
   }
