@@ -1574,7 +1574,6 @@ class Chat {
   }
 
   onEVENTSELECTED() {
-    this.userfocus.toggleFocus('', false, true);
     // Hide full pinned message interface to make everything look nice
     if (this.pinnedMessage) this.pinnedMessage.hidden = true;
   }

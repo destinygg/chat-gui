@@ -20,6 +20,15 @@ export default class ChatEventBar extends EventEmitter {
         });
       }
     });
+
+    this.eventSelectUI.addEventListener('click', (e) => {
+      // Don't unselect if the selected event message is clicked
+      if (e.target !== e.currentTarget) {
+        return;
+      }
+
+      this.unselect();
+    });
   }
 
   /**
@@ -49,6 +58,7 @@ export default class ChatEventBar extends EventEmitter {
   unselect() {
     if (this.eventSelectUI.hasChildNodes()) {
       this.eventSelectUI.replaceChildren();
+      this.eventSelectUI.classList.add('hidden');
       this.emit('eventUnselected');
     }
   }
@@ -63,6 +73,7 @@ export default class ChatEventBar extends EventEmitter {
 
     this.eventSelectUI.replaceChildren();
     this.eventSelectUI.append(event);
+    this.eventSelectUI.classList.remove('hidden');
 
     this.emit('eventSelected');
   }
