@@ -1,6 +1,8 @@
 <div id="chat" class="chat">
   <div id="chat-windows-select"></div>
 
+  <div id="chat-event-bar"></div>
+
   <div id="chat-poll-frame">
     <div class="poll-frame">
       <div class="poll-header">
@@ -24,7 +26,10 @@
   </div>
 
   <div id="chat-output-frame" data-scroll-notify>
-    <div id="chat-pinned-frame"></div>
+    <div id="highlighted-message-wrapper">
+      <div id="chat-event-selected"></div>
+      <div id="chat-pinned-message"></div>
+    </div>
   </div>
 
   <div id="chat-input-frame">

@@ -32,6 +32,7 @@ import {
   ChatSettingsMenu,
   ChatUserInfoMenu,
 } from './menus';
+import ChatEventBar from './event-bar/EventBar';
 import ChatAutoComplete from './autocomplete';
 import ChatInputHistory from './history';
 import ChatUserFocus from './focus';
@@ -56,6 +57,7 @@ import makeSafeForRegex, {
 import { HashLinkConverter, MISSING_ARG_ERROR } from './hashlinkconverter';
 import ChatCommands from './commands';
 import MessageTemplateHTML from '../../views/templates.html';
+import EventBarEvent from './event-bar/EventBarEvent';
 
 class Chat {
   constructor(config) {
@@ -150,6 +152,7 @@ class Chat {
     this.source.on('ADDPHRASE', (data) => this.onADDPHRASE(data));
     this.source.on('REMOVEPHRASE', (data) => this.onREMOVEPHRASE(data));
     this.source.on('DEATH', (data) => this.onDEATH(data));
+    this.source.on('PAIDEVENTS', (data) => this.onPAIDEVENTS(data));
 
     this.control.on('SEND', (data) => this.cmdSEND(data));
     this.control.on('HINT', (data) => this.cmdHINT(data));
@@ -317,6 +320,11 @@ class Chat {
     this.mainwindow = new ChatWindow('main').into(this);
     this.mutedtimer = new MutedTimer(this);
     this.chatpoll = new ChatPoll(this);
+
+    this.eventBar = new ChatEventBar();
+    this.eventBar.on('eventSelected', () => this.onEVENTSELECTED());
+    this.eventBar.on('eventUnselected', () => this.onEVENTUNSELECTED());
+
     this.pinnedMessage = null;
 
     this.windowToFront('main');
@@ -1329,18 +1337,52 @@ class Chat {
 
   onSUBSCRIPTION(data) {
     MessageBuilder.subscription(data).into(this);
+    const eventBarEvent = new EventBarEvent(
+      this,
+      MessageTypes.SUBSCRIPTION,
+      data,
+    );
+    this.eventBar.add(eventBarEvent);
+    if (this.eventBar.length === 1) {
+      this.mainwindow.update();
+    }
   }
 
   onGIFTSUB(data) {
     MessageBuilder.gift(data).into(this);
+    const eventBarEvent = new EventBarEvent(this, MessageTypes.GIFTSUB, data);
+    this.eventBar.add(eventBarEvent);
+    if (this.eventBar.length === 1) {
+      this.mainwindow.update();
+    }
   }
 
   onMASSGIFT(data) {
     MessageBuilder.massgift(data).into(this);
+    const eventBarEvent = new EventBarEvent(this, MessageTypes.MASSGIFT, data);
+    this.eventBar.add(eventBarEvent);
+    if (this.eventBar.length === 1) {
+      this.mainwindow.update();
+    }
   }
 
   onDONATION(data) {
     MessageBuilder.donation(data).into(this);
+    const eventBarEvent = new EventBarEvent(this, MessageTypes.DONATION, data);
+    this.eventBar.add(eventBarEvent);
+    if (this.eventBar.length === 1) {
+      this.mainwindow.update();
+    }
+  }
+
+  onPAIDEVENTS(lines) {
+    lines.forEach((line) => {
+      const { eventname, data } = this.source.parse({ data: line });
+      const eventBarEvent = new EventBarEvent(this, eventname, data);
+      this.eventBar.add(eventBarEvent);
+    });
+    this.mainwindow.update();
+    this.eventBar.sort();
   }
 
   onADDPHRASE(data) {
@@ -1520,6 +1562,16 @@ class Chat {
     }
     this.censor(data.nick);
     MessageBuilder.death(data.data, user, data.timestamp).into(this);
+  }
+
+  onEVENTSELECTED() {
+    this.userfocus.toggleFocus('', false, true);
+    // Hide full pinned message interface to make everything look nice
+    if (this.pinnedMessage) this.pinnedMessage.hidden = true;
+  }
+
+  onEVENTUNSELECTED() {
+    if (this.pinnedMessage) this.pinnedMessage.hidden = false;
   }
 
   cmdSHOWPOLL() {

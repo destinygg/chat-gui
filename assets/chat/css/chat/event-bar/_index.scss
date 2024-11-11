@@ -1,0 +1,45 @@
+@use '../../abstracts/' as a;
+
+@use 'event-bar-event';
+
+#chat-event-bar {
+  &:empty {
+    display: none;
+  }
+
+  display: inline-flex;
+  overflow-x: scroll;
+  background: #111113;
+  z-index: 6;
+
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+#highlighted-message-wrapper {
+  position: absolute;
+  width: 100%;
+  z-index: 210;
+}
+
+#chat-event-selected {
+  .event-bar-selected-message {
+    margin: a.$gutter-sm;
+
+    .focus:not(.watching-focus) & {
+      opacity: 1;
+    }
+  }
+}
+
+.onstreamchat {
+  #chat-event-bar {
+    display: none;
+  }
+
+  #highlighted-message-wrapper {
+    display: none;
+  }
+}

@@ -1,13 +1,14 @@
 import ChatMessage from './ChatMessage';
 
 export default class ChatEventMessage extends ChatMessage {
-  constructor(message, timestamp) {
+  constructor(message, timestamp, uuid) {
     super(message, timestamp);
     this.tag = null;
     this.title = '';
     this.slashme = false;
     this.isown = false;
     this.mentioned = [];
+    this.uuid = uuid;
   }
 
   html(chat = null) {

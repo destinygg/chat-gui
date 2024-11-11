@@ -1,0 +1,143 @@
+@use '../../abstracts/' as a;
+@use '../../messages/event/_donation' as donation;
+
+.event-bar-event {
+  position: relative;
+  cursor: pointer;
+  transition: transform 100ms;
+  animation: event-bar-appear 500ms linear;
+
+  font-size: 1.1em;
+  border-radius: 10px;
+  border-style: solid;
+  border-color: unset;
+  border-width: 2px;
+  margin: a.$gutter-sm;
+
+  .event-contents {
+    display: flex;
+    padding: 0 a.$gutter-xs 0 0.4em;
+    background-color: a.$color-chat-emphasize;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 10px;
+  }
+
+  .event-info {
+    margin-right: a.$gutter-xs;
+    max-width: 12ch;
+    overflow: hidden;
+  }
+
+  .event-icon {
+    width: 2em;
+    height: 2em;
+    border: 0.25em solid transparent;
+    opacity: 0.75;
+
+    &.subscription {
+      @include a.icon-background('../img/sub-regular.svg');
+    }
+
+    &.giftsub {
+      filter: invert(100%);
+
+      @include a.icon-background('../img/sub-gift.png');
+    }
+
+    &.massgift {
+      filter: invert(100%);
+
+      @include a.icon-background('../img/sub-mass-gift.png');
+    }
+  }
+
+  .user {
+    font-weight: 500;
+    color: a.$color-label-user;
+    display: inline-block;
+    animation: scrolling-event-username 12s linear 3s infinite;
+    word-wrap: normal;
+
+    &::before {
+      content: unset;
+    }
+
+    &:hover {
+      text-decoration: none;
+    }
+  }
+
+  &.amount-0 {
+    border-color: #1c5cdb;
+  }
+
+  @each $amount, $color in donation.$amount-color-map {
+    &.amount-#{$amount} {
+      border-color: $color;
+
+      .event-icon {
+        filter: invert(100%);
+
+        @include a.icon-background('../img/donation-amount-#{$amount}.png');
+      }
+    }
+  }
+
+  &.rainbow-border {
+    background-clip: padding-box;
+    border: solid 2px transparent;
+
+    &:before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      margin: -2px;
+      border-radius: inherit;
+      background: var(--rainbow-gradient);
+    }
+  }
+
+  &:hover {
+    transform: scale(1.05);
+  }
+
+  &.removed {
+    animation: event-bar-disappear 500ms linear;
+  }
+}
+
+@keyframes event-bar-appear {
+  0% {
+    transform: scale(0.1);
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes event-bar-disappear {
+  0% {
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(0.1);
+    opacity: 0;
+  }
+}
+
+@keyframes scrolling-event-username {
+  25%,
+  50% {
+    transform: translateX(calc(-1 * max(0px, 100% - 12ch)));
+  }
+
+  75%,
+  100% {
+    transform: translateX(0%);
+  }
+}
