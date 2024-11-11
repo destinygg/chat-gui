@@ -385,6 +385,10 @@ class Chat {
       this,
     );
     eventActionMenu.on('removeEvent', this.handleRemoveEvent.bind(this));
+    eventActionMenu.on(
+      'removeEvent',
+      this.eventBar.unselect.bind(this.eventBar),
+    );
     this.menus.set('event-action-menu', eventActionMenu);
 
     this.autocomplete.bind(this);
