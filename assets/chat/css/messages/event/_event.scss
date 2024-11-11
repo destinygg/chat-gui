@@ -55,10 +55,14 @@
     width: 2.25em;
     height: 2.25em;
 
-    &:hover {
+    &:hover:not(:disabled) {
       .event-icon {
         @include a.icon-background('../img/icon-ellipsis-vertical.svg');
       }
+    }
+
+    &:disabled {
+      cursor: default;
     }
   }
 

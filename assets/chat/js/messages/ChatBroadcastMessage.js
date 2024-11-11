@@ -61,4 +61,8 @@ export default class ChatBroadcastMessage extends ChatEventMessage {
 
     return this.wrap(eventTemplate.innerHTML, classes, attributes);
   }
+
+  get hasActions() {
+    return false;
+  }
 }
