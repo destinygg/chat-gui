@@ -35,6 +35,8 @@ export default class ChatEventMessage extends ChatMessage {
       eventButton.disabled = true;
     }
 
+    eventTemplate.dataset.uuid = this.uuid;
+
     return eventTemplate;
   }
 

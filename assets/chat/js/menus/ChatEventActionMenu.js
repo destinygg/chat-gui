@@ -8,10 +8,17 @@ export default class ChatEventActionMenu extends ChatMenuFloating {
       this.openMenu(e);
       return false;
     });
+
+    this.ui.on('click', '#remove-event-button', this.removeEvent.bind(this));
   }
 
   openMenu(e) {
+    this.eventElement = e.currentTarget.closest('.msg-event');
     this.position(e);
     this.show();
+  }
+
+  removeEvent() {
+    this.emit('removeEvent', this.eventElement.dataset.uuid);
   }
 }

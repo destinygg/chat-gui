@@ -378,14 +378,14 @@ class Chat {
         this,
       ),
     );
-    this.menus.set(
-      'event-action-menu',
-      new ChatEventActionMenu(
-        this.ui.find('#event-action-menu'),
-        this.ui.find('.msg-event .event-button'),
-        this,
-      ),
+
+    const eventActionMenu = new ChatEventActionMenu(
+      this.ui.find('#event-action-menu'),
+      this.ui.find('.msg-event .event-button'),
+      this,
     );
+    eventActionMenu.on('removeEvent', this.handleRemoveEvent.bind(this));
+    this.menus.set('event-action-menu', eventActionMenu);
 
     this.autocomplete.bind(this);
 
@@ -2609,6 +2609,11 @@ class Chat {
     hostname = hostname.split(':')[0];
     hostname = hostname.split('?')[0];
     return hostname;
+  }
+
+  handleRemoveEvent(eventUuid) {
+    ChatMenu.closeMenus(this);
+    this.source.send('REMOVEEVENT', { data: eventUuid });
   }
 }
 
