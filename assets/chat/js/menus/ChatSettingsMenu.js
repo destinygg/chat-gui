@@ -10,7 +10,7 @@ export default class ChatSettingsMenu extends ChatMenu {
     this.notificationEl = this.ui.find(
       '#chat-settings-notification-permissions',
     );
-    this.ui.on('change', 'input[type="checkbox"],select', (e) =>
+    this.ui.on('change', 'input[type="checkbox"],select,input[type="number"]', (e) =>
       this.onSettingsChange(e),
     );
     this.ui.on('keypress blur', 'textarea[name="customhighlight"]', (e) =>
@@ -117,6 +117,7 @@ export default class ChatSettingsMenu extends ChatMenu {
     }
     if (
       e.getAttribute('type') === 'text' ||
+      e.getAttribute('type') === 'number' ||
       e.nodeName.toLocaleLowerCase() === 'select'
     ) {
       return $(e).val();
@@ -132,6 +133,7 @@ export default class ChatSettingsMenu extends ChatMenu {
       );
     } else if (
       e.getAttribute('type') === 'text' ||
+      e.getAttribute('type') === 'number' ||
       e.nodeName.toLocaleLowerCase() === 'select'
     ) {
       $(e).val(val);
