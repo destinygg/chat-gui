@@ -299,9 +299,9 @@ class Chat {
     })();
 
     // Tooltips
+    tippy.setDefaultProps({ delay: [500, 0] });
     tippy('[data-tippy-content]', {
       arrow: roundArrow,
-      delay: 0,
       duration: 0,
       maxWidth: 250,
       hideOnClick: false,
@@ -713,7 +713,7 @@ class Chat {
     $(document.body).attr('data-fontscale', fontscale);
 
     // Link Hitbox Scaling
-    $(document.body).css('--link-size', this.settings.get('linksize'));
+    $(document.body).css('--link-size', this.settings.get('linksize') - 1);
 
     for (const window of this.windows.values()) {
       window.updateMessages(this);

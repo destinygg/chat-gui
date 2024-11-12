@@ -58,6 +58,9 @@ $toolbar-icons-map: (
       }
     }
 
+    width: 2.75em;
+    height: 2.75em;
+
     @each $id, $icon in $toolbar-icons-map {
       &##{$id}-user-btn .btn-icon {
         @include a.icon-background('../img/icon-#{$icon}.svg');
