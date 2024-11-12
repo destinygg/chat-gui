@@ -30,7 +30,7 @@ export default class ChatEventMessage extends ChatMessage {
       eventTemplate.querySelector('.event-bottom').remove();
     }
 
-    if (!this.hasActions) {
+    if (!this.hasActions || !chat.user?.hasModPowers()) {
       const eventButton = eventTemplate.querySelector('.event-button');
       eventButton.disabled = true;
     }
