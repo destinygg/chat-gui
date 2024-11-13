@@ -106,6 +106,7 @@ const hintstrings = new Map(
     bigscreen: `Bigscreen! Did you know you can have the chat on the left or right side of the stream by clicking the swap icon in the top left?`,
     danisold:
       'Destiny is an Amazon Associate. He earns a commission on qualifying purchases of any product on Amazon linked in Destiny.gg chat.',
+    cantremoveevent: 'This event could not be removed.',
   }),
 );
 
