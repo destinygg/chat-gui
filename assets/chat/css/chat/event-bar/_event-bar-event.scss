@@ -102,12 +102,14 @@
     transform: scale(1.05);
   }
 
-  &.removed {
-    animation: event-bar-disappear 500ms linear;
-  }
-
+  // Ensure `removed` can override `enter` because `enter` is not removed from
+  // the event after the animation completes.
   &.enter {
     animation: event-bar-appear 500ms linear;
+  }
+
+  &.removed {
+    animation: event-bar-disappear 500ms linear;
   }
 }
 
