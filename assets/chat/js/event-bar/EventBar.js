@@ -5,6 +5,8 @@ import EventEmitter from '../emitter';
  */
 
 export default class ChatEventBar extends EventEmitter {
+  events = [];
+
   constructor() {
     super();
     /** @type HTMLDivElement */
@@ -43,9 +45,12 @@ export default class ChatEventBar extends EventEmitter {
       return;
     }
 
+    this.events.push(event);
+
     event.element.addEventListener('click', () => {
       this.select(event.selectedElement);
     });
+    event.on('eventExpired', this.removeEvent.bind(this));
 
     this.eventBarUI.prepend(event.element);
 
@@ -128,6 +133,11 @@ export default class ChatEventBar extends EventEmitter {
     }
 
     return true;
+  }
+
+  removeEvent(event) {
+    this.events = this.events.filter((e) => e.uuid !== event.uuid);
+    event.remove();
   }
 
   get length() {
