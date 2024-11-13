@@ -140,6 +140,22 @@ export default class ChatEventBar extends EventEmitter {
     event.remove();
   }
 
+  removeAllEvents() {
+    for (const e of this.events) {
+      e.remove();
+    }
+
+    this.events = [];
+  }
+
+  replaceEvents(events) {
+    this.removeAllEvents();
+
+    for (const e of events) {
+      this.add(e);
+    }
+  }
+
   get length() {
     return this.eventBarUI.querySelectorAll(`.event-bar-event`).length;
   }

@@ -1389,11 +1389,12 @@ class Chat {
   }
 
   onPAIDEVENTS(lines) {
-    lines.forEach((line) => {
-      const { eventname, data } = this.source.parse({ data: line });
-      const eventBarEvent = new EventBarEvent(this, eventname, data);
-      this.eventBar.add(eventBarEvent);
+    const events = lines.map((l) => {
+      const { eventname, data } = this.source.parse({ data: l });
+      return new EventBarEvent(this, eventname, data);
     });
+    this.eventBar.replaceEvents(events);
+
     this.mainwindow.update();
     this.eventBar.sort();
   }
