@@ -1350,41 +1350,63 @@ class Chat {
 
   onSUBSCRIPTION(data) {
     MessageBuilder.subscription(data).into(this);
-    const eventBarEvent = new EventBarEvent(
-      this,
-      MessageTypes.SUBSCRIPTION,
-      data,
-    );
-    this.eventBar.add(eventBarEvent);
-    if (this.eventBar.length === 1) {
-      this.mainwindow.update();
+
+    // Don't add events when loading messages from history because the
+    // `PAIDEVENTS` payload will contain those events
+    if (!this.backlogloading) {
+      const eventBarEvent = new EventBarEvent(
+        this,
+        MessageTypes.SUBSCRIPTION,
+        data,
+      );
+      this.eventBar.add(eventBarEvent);
+      if (this.eventBar.length === 1) {
+        this.mainwindow.update();
+      }
     }
   }
 
   onGIFTSUB(data) {
     MessageBuilder.gift(data).into(this);
-    const eventBarEvent = new EventBarEvent(this, MessageTypes.GIFTSUB, data);
-    this.eventBar.add(eventBarEvent);
-    if (this.eventBar.length === 1) {
-      this.mainwindow.update();
+
+    if (!this.backlogloading) {
+      const eventBarEvent = new EventBarEvent(this, MessageTypes.GIFTSUB, data);
+      this.eventBar.add(eventBarEvent);
+      if (this.eventBar.length === 1) {
+        this.mainwindow.update();
+      }
     }
   }
 
   onMASSGIFT(data) {
     MessageBuilder.massgift(data).into(this);
-    const eventBarEvent = new EventBarEvent(this, MessageTypes.MASSGIFT, data);
-    this.eventBar.add(eventBarEvent);
-    if (this.eventBar.length === 1) {
-      this.mainwindow.update();
+
+    if (!this.backlogloading) {
+      const eventBarEvent = new EventBarEvent(
+        this,
+        MessageTypes.MASSGIFT,
+        data,
+      );
+      this.eventBar.add(eventBarEvent);
+      if (this.eventBar.length === 1) {
+        this.mainwindow.update();
+      }
     }
   }
 
   onDONATION(data) {
     MessageBuilder.donation(data).into(this);
-    const eventBarEvent = new EventBarEvent(this, MessageTypes.DONATION, data);
-    this.eventBar.add(eventBarEvent);
-    if (this.eventBar.length === 1) {
-      this.mainwindow.update();
+
+    if (!this.backlogloading) {
+      const eventBarEvent = new EventBarEvent(
+        this,
+        MessageTypes.DONATION,
+        data,
+      );
+      this.eventBar.add(eventBarEvent);
+      if (this.eventBar.length === 1) {
+        this.mainwindow.update();
+      }
     }
   }
 
