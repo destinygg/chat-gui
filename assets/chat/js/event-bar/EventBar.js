@@ -39,8 +39,9 @@ export default class ChatEventBar extends EventEmitter {
   /**
    * Adds the event to the event bar.
    * @param {EventBarEvent} event
+   * @param {boolean} animate Animate the addition of the event
    */
-  add(event) {
+  add(event, animate = true) {
     if (!this.shouldEventBeDisplayed(event.data)) {
       return;
     }
@@ -51,6 +52,10 @@ export default class ChatEventBar extends EventEmitter {
       this.select(event.selectedElement);
     });
     event.on('eventExpired', this.removeEvent.bind(this));
+
+    if (animate) {
+      event.element.classList.add('enter');
+    }
 
     this.eventBarUI.prepend(event.element);
 
@@ -92,9 +97,7 @@ export default class ChatEventBar extends EventEmitter {
    * @returns {boolean}
    */
   contains(uuid) {
-    return !!this.eventBarUI.querySelector(
-      `.event-bar-event[data-uuid="${uuid}"]`,
-    );
+    return this.events.some((e) => e.uuid === uuid);
   }
 
   /**
@@ -142,7 +145,7 @@ export default class ChatEventBar extends EventEmitter {
 
   removeAllEvents() {
     for (const e of this.events) {
-      e.remove();
+      e.remove(false);
     }
 
     this.events = [];
@@ -152,7 +155,7 @@ export default class ChatEventBar extends EventEmitter {
     this.removeAllEvents();
 
     for (const e of events) {
-      this.add(e);
+      this.add(e, false);
     }
   }
 

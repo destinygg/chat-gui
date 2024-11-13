@@ -141,13 +141,20 @@ export default class EventBarEvent extends EventEmitter {
     this.emit('eventExpired', this);
   }
 
-  remove() {
+  /**
+   * @param {boolean} animate Animate the removal of the event
+   */
+  remove(animate = true) {
     this.stopUpdatingExpirationProgressBar();
 
-    this.element.addEventListener('animationend', () => {
+    if (animate) {
+      this.element.addEventListener('animationend', () => {
+        this.element.remove();
+      });
+      this.element.classList.add('removed');
+    } else {
       this.element.remove();
-    });
-    this.element.classList.add('removed');
+    }
   }
 
   stopUpdatingExpirationProgressBar() {
