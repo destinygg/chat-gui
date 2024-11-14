@@ -2,6 +2,7 @@ import $ from 'jquery';
 import { debounce } from 'throttle-debounce';
 import ChatMenu from './ChatMenu';
 import ChatUser from '../user';
+import tippy, { roundArrow } from 'tippy.js';
 
 // sections in order.
 const UserMenuSections = [
@@ -244,8 +245,18 @@ export default class ChatUserMenu extends ChatMenu {
     const features =
       user.features.length === 0 ? 'nofeature' : user.features.join(' ');
     const usr = $(
-      `<div class="user-entry" data-username="${user.username}" data-user-id="${user.id}"><span class="user ${features}">${label}</span><div class="user-actions"><i class="mention-nick" title="Mention"></i><i class="whisper-nick" title="Whisper"></i></div></div>`,
+      `<div class="user-entry" data-username="${user.username}" data-user-id="${user.id}"><span class="user ${features}">${label}</span><div class="user-actions"><i class="mention-nick" data-tippy-content="Mention"></i><i class="whisper-nick" data-tippy-content="Whisper"></i></div></div>`,
     );
+    usr.find('[data-tippy-content]').each(function () {
+      tippy(this, {
+        content: this.getAttribute('data-tippy-content'),
+        arrow: roundArrow,
+        duration: 0,
+        maxWidth: 250,
+        hideOnClick: false,
+        theme: 'dgg',
+      })
+    });
     const section = this.sections.get(this.highestSection(user));
 
     if (sort && section.users.children.length > 0) {
