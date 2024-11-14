@@ -54,12 +54,13 @@ $link-color-map: (
 
     // Links are over emotes and text but under usernames and the embed button
     z-index: 1;
-    // If this calculation produces fractional pixel values the link can shift by up to half a pixel.
-    // This could be fixed by using pixels instead of em, but we then lose scaling of the hitboxes by
-    // font size
-    padding: calc(var(--link-size) * 1em);
-    margin: calc(var(--link-size) * -1em);
-
+    &::before {
+      content: "";
+      position: absolute;
+      width: calc(100% + var(--link-size) * 1em);
+      height: calc(100% + var(--link-size) * 1em);
+      margin: calc(var(--link-size) * -0.5em + 2px);
+    }
 
     &:visited {
       color: a.$color-link-visited;
