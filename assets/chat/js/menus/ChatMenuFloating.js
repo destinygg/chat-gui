@@ -41,8 +41,9 @@ export default class ChatMenuFloating extends ChatMenu {
       this.draggable.on('mousedown', (e) => {
         e.preventDefault();
         this.mousedown = true;
-        this.x1 = e.clientX;
-        this.y1 = e.clientY;
+        const offset = this.getViewOffset(e.view);
+        this.x1 = e.clientX + offset.x;
+        this.y1 = e.clientY + offset.y;
       });
       this.chat.output.on('mousemove', (e) => {
         this.drag(e);
@@ -74,9 +75,6 @@ export default class ChatMenuFloating extends ChatMenu {
   position(e) {
     this.mousedown = false;
     const rect = this.chat.output[0].getBoundingClientRect();
-    const offset = this.getViewOffset(e.view);
-    e.clientX += offset.x;
-    e.clientY += offset.y;
     // calculating floating window location (if it doesn't fit on screen, adjusting it a bit so it does)
     const x =
       this.ui.width() + e.clientX > rect.width
@@ -89,9 +87,11 @@ export default class ChatMenuFloating extends ChatMenu {
           (rect.height - (this.ui.height() + e.clientY)) -
           12
         : e.clientY - rect.top - 12;
+        
+    const offset = this.getViewOffset(e.view);
 
-    this.ui[0].style.left = `${x}px`;
-    this.ui[0].style.top = `${y}px`;
+    this.ui[0].style.left = `${x + offset.x}px`;
+    this.ui[0].style.top = `${y + offset.y}px`;
   }
 
   getViewOffset(view = window) {
