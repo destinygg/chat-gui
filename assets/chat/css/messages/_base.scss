@@ -48,10 +48,9 @@ $link-color-map: (
   .externallink {
     border-style: solid;
     border-color: transparent;
+    border-width: 1px 0 1px 0;
     color: a.$color-link;
     position: relative;
-    display: inline-block;
-    border-width: 0px;
 
     // Links are over emotes and text but under usernames and the embed button
     z-index: 1;
