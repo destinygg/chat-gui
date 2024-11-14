@@ -712,9 +712,6 @@ class Chat {
     $(document.body).toggleClass(`pref-fontscale`, fontscale !== 'auto');
     $(document.body).attr('data-fontscale', fontscale);
 
-    // Link Hitbox Scaling
-    $(document.body).css('--link-size', this.settings.get('linksize') - 1);
-
     for (const window of this.windows.values()) {
       window.updateMessages(this);
     }

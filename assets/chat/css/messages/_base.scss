@@ -23,8 +23,6 @@ $link-color-map: (
     cursor: pointer;
     margin-left: a.$gutter-sm;
     color: a.$color-label-user;
-    position: relative;
-    z-index: 2;
   }
 
   .chat-user {
@@ -52,15 +50,6 @@ $link-color-map: (
     color: a.$color-link;
     position: relative;
 
-    // Links are over emotes and text but under usernames and the embed button
-    z-index: 1;
-    // If this calculation produces fractional pixel values the link can shift by up to half a pixel.
-    // This could be fixed by using pixels instead of em, but we then lose scaling of the hitboxes by
-    // font size
-    padding: calc(var(--link-size) * 1em);
-    margin: calc(var(--link-size) * -1em);
-
-
     &:visited {
       color: a.$color-link-visited;
     }
@@ -69,10 +58,6 @@ $link-color-map: (
     &:focus {
       color: a.$color-link-hover;
     }
-  }
-  &:last-child .externallink {
-    padding-bottom: 0px;
-    margin-bottom: 0px;
   }
 
   @each $type, $color in $link-color-map {
@@ -93,7 +78,6 @@ $link-color-map: (
     margin-left: a.$gutter-sm;
     margin-right: a.$gutter-xs;
     opacity: 0.5;
-    z-index: 2;
 
     &:hover {
       opacity: 1;
