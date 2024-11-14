@@ -30,10 +30,21 @@ export default class ChatEventMessage extends ChatMessage {
       eventTemplate.querySelector('.event-bottom').remove();
     }
 
+    if (!this.hasActions || !chat.user?.hasModPowers()) {
+      const eventButton = eventTemplate.querySelector('.event-button');
+      eventButton.disabled = true;
+    }
+
+    eventTemplate.dataset.uuid = this.uuid;
+
     return eventTemplate;
   }
 
   updateTimeFormat() {
     // This avoids errors. Timestamps aren't rendered in event messages.
+  }
+
+  get hasActions() {
+    return true;
   }
 }

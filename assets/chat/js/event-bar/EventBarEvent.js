@@ -3,14 +3,17 @@ import { selectDonationTier } from '../messages/ChatDonationMessage';
 import { getTierStyles } from '../messages/subscriptions/ChatSubscriptionMessage';
 import { MessageBuilder, MessageTypes } from '../messages';
 import ChatUser from '../user';
+import EventEmitter from '../emitter';
 
-export default class EventBarEvent {
+export default class EventBarEvent extends EventEmitter {
   /**
    * @param {*} chat
    * @param {string} type
    * @param {import('./EventBar').ExpiringEvent} data
    */
   constructor(chat, type, data) {
+    super();
+
     this.type = type;
     this.data = data;
 
@@ -76,7 +79,7 @@ export default class EventBarEvent {
       const percentageLeft = this.calculateExpiryPercentage();
 
       if (percentageLeft <= 0) {
-        this.remove();
+        this.expire();
         return;
       }
 
@@ -133,11 +136,34 @@ export default class EventBarEvent {
   /**
    * @private
    */
-  remove() {
-    this.element.addEventListener('animationend', () => {
+  expire() {
+    this.stopUpdatingExpirationProgressBar();
+    this.emit('eventExpired', this);
+  }
+
+  /**
+   * @param {boolean} animate Animate the removal of the event
+   */
+  remove(animate = true) {
+    this.stopUpdatingExpirationProgressBar();
+
+    if (animate) {
+      this.element.addEventListener('animationend', () => {
+        this.element.remove();
+      });
+      this.element.classList.add('removed');
+    } else {
       this.element.remove();
-      if (this.intervalID) clearInterval(this.intervalID);
-    });
-    this.element.classList.add('removed');
+    }
+  }
+
+  stopUpdatingExpirationProgressBar() {
+    if (this.intervalID) {
+      clearInterval(this.intervalID);
+    }
+  }
+
+  get uuid() {
+    return this.data.uuid;
   }
 }

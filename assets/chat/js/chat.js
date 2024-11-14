@@ -31,6 +31,7 @@ import {
   ChatEmoteTooltip,
   ChatSettingsMenu,
   ChatUserInfoMenu,
+  ChatEventActionMenu,
 } from './menus';
 import ChatEventBar from './event-bar/EventBar';
 import ChatAutoComplete from './autocomplete';
@@ -377,6 +378,18 @@ class Chat {
         this,
       ),
     );
+
+    const eventActionMenu = new ChatEventActionMenu(
+      this.ui.find('#event-action-menu'),
+      this.ui.find('.msg-event .event-button'),
+      this,
+    );
+    eventActionMenu.on('removeEvent', this.handleRemoveEvent.bind(this));
+    eventActionMenu.on(
+      'removeEvent',
+      this.eventBar.unselect.bind(this.eventBar),
+    );
+    this.menus.set('event-action-menu', eventActionMenu);
 
     this.autocomplete.bind(this);
 
@@ -1337,50 +1350,73 @@ class Chat {
 
   onSUBSCRIPTION(data) {
     MessageBuilder.subscription(data).into(this);
-    const eventBarEvent = new EventBarEvent(
-      this,
-      MessageTypes.SUBSCRIPTION,
-      data,
-    );
-    this.eventBar.add(eventBarEvent);
-    if (this.eventBar.length === 1) {
-      this.mainwindow.update();
+
+    // Don't add events when loading messages from history because the
+    // `PAIDEVENTS` payload will contain those events
+    if (!this.backlogloading) {
+      const eventBarEvent = new EventBarEvent(
+        this,
+        MessageTypes.SUBSCRIPTION,
+        data,
+      );
+      this.eventBar.add(eventBarEvent);
+      if (this.eventBar.length === 1) {
+        this.mainwindow.update();
+      }
     }
   }
 
   onGIFTSUB(data) {
     MessageBuilder.gift(data).into(this);
-    const eventBarEvent = new EventBarEvent(this, MessageTypes.GIFTSUB, data);
-    this.eventBar.add(eventBarEvent);
-    if (this.eventBar.length === 1) {
-      this.mainwindow.update();
+
+    if (!this.backlogloading) {
+      const eventBarEvent = new EventBarEvent(this, MessageTypes.GIFTSUB, data);
+      this.eventBar.add(eventBarEvent);
+      if (this.eventBar.length === 1) {
+        this.mainwindow.update();
+      }
     }
   }
 
   onMASSGIFT(data) {
     MessageBuilder.massgift(data).into(this);
-    const eventBarEvent = new EventBarEvent(this, MessageTypes.MASSGIFT, data);
-    this.eventBar.add(eventBarEvent);
-    if (this.eventBar.length === 1) {
-      this.mainwindow.update();
+
+    if (!this.backlogloading) {
+      const eventBarEvent = new EventBarEvent(
+        this,
+        MessageTypes.MASSGIFT,
+        data,
+      );
+      this.eventBar.add(eventBarEvent);
+      if (this.eventBar.length === 1) {
+        this.mainwindow.update();
+      }
     }
   }
 
   onDONATION(data) {
     MessageBuilder.donation(data).into(this);
-    const eventBarEvent = new EventBarEvent(this, MessageTypes.DONATION, data);
-    this.eventBar.add(eventBarEvent);
-    if (this.eventBar.length === 1) {
-      this.mainwindow.update();
+
+    if (!this.backlogloading) {
+      const eventBarEvent = new EventBarEvent(
+        this,
+        MessageTypes.DONATION,
+        data,
+      );
+      this.eventBar.add(eventBarEvent);
+      if (this.eventBar.length === 1) {
+        this.mainwindow.update();
+      }
     }
   }
 
   onPAIDEVENTS(lines) {
-    lines.forEach((line) => {
-      const { eventname, data } = this.source.parse({ data: line });
-      const eventBarEvent = new EventBarEvent(this, eventname, data);
-      this.eventBar.add(eventBarEvent);
+    const events = lines.map((l) => {
+      const { eventname, data } = this.source.parse({ data: l });
+      return new EventBarEvent(this, eventname, data);
     });
+    this.eventBar.replaceEvents(events);
+
     this.mainwindow.update();
     this.eventBar.sort();
   }
@@ -1565,7 +1601,6 @@ class Chat {
   }
 
   onEVENTSELECTED() {
-    this.userfocus.toggleFocus('', false, true);
     // Hide full pinned message interface to make everything look nice
     if (this.pinnedMessage) this.pinnedMessage.hidden = true;
   }
@@ -2600,6 +2635,11 @@ class Chat {
     hostname = hostname.split(':')[0];
     hostname = hostname.split('?')[0];
     return hostname;
+  }
+
+  handleRemoveEvent(eventUuid) {
+    ChatMenu.closeMenus(this);
+    this.source.send('REMOVEEVENT', { data: eventUuid });
   }
 }
 

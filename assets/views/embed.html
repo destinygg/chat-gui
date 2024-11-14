@@ -26,10 +26,8 @@
   </div>
 
   <div id="chat-output-frame" data-scroll-notify>
-    <div id="highlighted-message-wrapper">
-      <div id="chat-event-selected"></div>
-      <div id="chat-pinned-message"></div>
-    </div>
+    <div id="chat-event-selected" class="hidden"></div>
+    <div id="chat-pinned-message"></div>
   </div>
 
   <div id="chat-input-frame">
@@ -369,6 +367,14 @@
   <div id="chat-loading">
     <div>
       <i class="chat-loading-icon"></i>
+    </div>
+  </div>
+
+  <div id="event-action-menu" class="chat-menu">
+    <div class="chat-menu-inner floating-window">
+      <button id="remove-event-button" class="event-action">
+        Remove Event
+      </button>
     </div>
   </div>
 </div>

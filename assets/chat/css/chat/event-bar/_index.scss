@@ -18,19 +18,22 @@
   }
 }
 
-#highlighted-message-wrapper {
-  position: absolute;
-  width: 100%;
-  z-index: 210;
-}
-
 #chat-event-selected {
+  position: absolute;
+  z-index: 210;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+
   .event-bar-selected-message {
     margin: a.$gutter-sm;
 
     .focus:not(.watching-focus) & {
       opacity: 1;
     }
+  }
+
+  &.hidden {
+    display: none;
   }
 }
 
@@ -39,7 +42,8 @@
     display: none;
   }
 
-  #highlighted-message-wrapper {
+  #chat-event-selected,
+  #chat-pinned-message {
     display: none;
   }
 }

@@ -5,6 +5,8 @@ import EventEmitter from '../emitter';
  */
 
 export default class ChatEventBar extends EventEmitter {
+  events = [];
+
   constructor() {
     super();
     /** @type HTMLDivElement */
@@ -20,20 +22,40 @@ export default class ChatEventBar extends EventEmitter {
         });
       }
     });
+
+    this.eventSelectUI.addEventListener('click', (e) => {
+      // Don't unselect if the selected event message is clicked
+      if (e.target !== e.currentTarget) {
+        return;
+      }
+
+      // Prevent the click from canceling focus, if enabled
+      e.stopPropagation();
+
+      this.unselect();
+    });
   }
 
   /**
    * Adds the event to the event bar.
    * @param {EventBarEvent} event
+   * @param {boolean} animate Animate the addition of the event
    */
-  add(event) {
+  add(event, animate = true) {
     if (!this.shouldEventBeDisplayed(event.data)) {
       return;
     }
 
+    this.events.push(event);
+
     event.element.addEventListener('click', () => {
       this.select(event.selectedElement);
     });
+    event.on('eventExpired', this.removeEvent.bind(this));
+
+    if (animate) {
+      event.element.classList.add('enter');
+    }
 
     this.eventBarUI.prepend(event.element);
 
@@ -49,6 +71,7 @@ export default class ChatEventBar extends EventEmitter {
   unselect() {
     if (this.eventSelectUI.hasChildNodes()) {
       this.eventSelectUI.replaceChildren();
+      this.eventSelectUI.classList.add('hidden');
       this.emit('eventUnselected');
     }
   }
@@ -63,6 +86,7 @@ export default class ChatEventBar extends EventEmitter {
 
     this.eventSelectUI.replaceChildren();
     this.eventSelectUI.append(event);
+    this.eventSelectUI.classList.remove('hidden');
 
     this.emit('eventSelected');
   }
@@ -73,9 +97,7 @@ export default class ChatEventBar extends EventEmitter {
    * @returns {boolean}
    */
   contains(uuid) {
-    return !!this.eventBarUI.querySelector(
-      `.event-bar-event[data-uuid="${uuid}"]`,
-    );
+    return this.events.some((e) => e.uuid === uuid);
   }
 
   /**
@@ -114,6 +136,27 @@ export default class ChatEventBar extends EventEmitter {
     }
 
     return true;
+  }
+
+  removeEvent(event) {
+    this.events = this.events.filter((e) => e.uuid !== event.uuid);
+    event.remove();
+  }
+
+  removeAllEvents() {
+    for (const e of this.events) {
+      e.remove(false);
+    }
+
+    this.events = [];
+  }
+
+  replaceEvents(events) {
+    this.removeAllEvents();
+
+    for (const e of events) {
+      this.add(e, false);
+    }
   }
 
   get length() {

@@ -5,7 +5,6 @@
   position: relative;
   cursor: pointer;
   transition: transform 100ms;
-  animation: event-bar-appear 500ms linear;
 
   font-size: 1.1em;
   border-radius: 10px;
@@ -101,6 +100,12 @@
 
   &:hover {
     transform: scale(1.05);
+  }
+
+  // Ensure `removed` can override `enter` because `enter` is not removed from
+  // the event after the animation completes.
+  &.enter {
+    animation: event-bar-appear 500ms linear;
   }
 
   &.removed {
