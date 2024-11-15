@@ -255,7 +255,7 @@ export default class ChatUserMenu extends ChatMenu {
         maxWidth: 250,
         hideOnClick: false,
         theme: 'dgg',
-      })
+      });
     });
     const section = this.sections.get(this.highestSection(user));
 

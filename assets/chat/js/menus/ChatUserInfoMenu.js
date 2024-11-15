@@ -157,7 +157,10 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
       this.unignoreUserBtn.toggleClass('hidden', true);
     }
 
-    this.rustleUserBtn.attr("href", `https://rustlesearch.dev/?username=${encodeURIComponent(this.clickedNick)}`);
+    this.rustleUserBtn.attr(
+      'href',
+      `https://rustlesearch.dev/?username=${encodeURIComponent(this.clickedNick)}`,
+    );
   }
 
   setInputVisibility(button) {
