@@ -53,6 +53,7 @@ import makeSafeForRegex, {
   nsfwregex,
   nsflregex,
   linkregex,
+  isRegexPhrase,
 } from './regex';
 
 import { HashLinkConverter, MISSING_ARG_ERROR } from './hashlinkconverter';
@@ -692,6 +693,27 @@ class Chat {
         ? new RegExp(`\\b(?:${ignores.join('|')})\\b`, 'i')
         : null;
 
+    const ignoredPhrases = [...(this.settings.get('ignoredphrases') || [])]
+      .filter((phrase) => {
+        if (isRegexPhrase(phrase)) {
+          try {
+            // eslint-disable-next-line no-new
+            new RegExp(phrase, 'i');
+            return true;
+          } catch {
+            return false;
+          }
+        }
+        return phrase !== '';
+      })
+      .map((phrase) =>
+        isRegexPhrase(phrase) ? phrase.slice(1, -1) : makeSafeForRegex(phrase),
+      );
+    this.ignoredPhrasesRegex =
+      ignoredPhrases.length > 0
+        ? new RegExp(`${ignoredPhrases.join('|')}`, 'i')
+        : null;
+
     // Highlight Regex
     const cust = [...(this.settings.get('customhighlight') || [])].filter(
       (a) => a !== '',
@@ -954,17 +976,38 @@ class Chat {
   }
 
   ignored(username, text = null) {
-    const ignore = this.ignoring.has(username);
-    if (!ignore && text !== null) {
-      return (
-        (this.settings.get('ignorementions') &&
-          this.ignoreregex &&
-          this.ignoreregex.test(text)) ||
-        (this.settings.get('hidensfl') && nsflregex.test(text)) ||
-        (this.settings.get('hidensfw') && nsfwregex.test(text))
-      );
+    if (this.ignoring.has(username)) {
+      return true;
     }
-    return ignore;
+
+    if (!text) {
+      return false;
+    }
+
+    if (
+      this.ignoredPhrasesRegex &&
+      this.ignoredPhrasesRegex.test(`${username}: ${text}`)
+    ) {
+      return true;
+    }
+
+    if (
+      this.settings.get('ignorementions') &&
+      this.ignoreregex &&
+      this.ignoreregex.test(text)
+    ) {
+      return true;
+    }
+
+    if (this.settings.get('hidensfl') && nsflregex.test(text)) {
+      return true;
+    }
+
+    if (this.settings.get('hidensfw') && nsfwregex.test(text)) {
+      return true;
+    }
+
+    return false;
   }
 
   ignore(nick, ignore = true) {
