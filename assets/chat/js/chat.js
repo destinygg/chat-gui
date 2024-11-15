@@ -444,6 +444,8 @@ class Chat {
           this.eventBar.unselect();
         } else if (!activeWindow.isScrollPinned()) {
           activeWindow.scrollBottom();
+        } else if (this.userfocus.isFocused()) {
+          this.userfocus.clearFocus();
         }
       }
     });
