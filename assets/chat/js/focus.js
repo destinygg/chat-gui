@@ -24,7 +24,7 @@ class ChatUserFocus {
       this.toggleFocus(t.text());
     } else if (t.hasClass('flair')) {
       this.toggleFocus(t.data('flair'), true);
-    } else if (this.focused.length > 0) {
+    } else if (this.isFocused()) {
       this.clearFocus();
     }
   }
@@ -41,6 +41,10 @@ class ChatUserFocus {
     }
 
     return this;
+  }
+
+  isFocused() {
+    return this.focused.length > 0;
   }
 
   addCssRule(value, isFlair) {
@@ -92,7 +96,7 @@ class ChatUserFocus {
   }
 
   redraw() {
-    this.chat.ui.toggleClass('focus', this.focused.length > 0);
+    this.chat.ui.toggleClass('focus', this.isFocused());
   }
 }
 

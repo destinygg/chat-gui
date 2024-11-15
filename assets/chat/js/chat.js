@@ -436,7 +436,18 @@ class Chat {
 
     // ESC
     document.addEventListener('keydown', (e) => {
-      if (isKeyCode(e, KEYCODES.ESC)) ChatMenu.closeMenus(this); // ESC key
+      if (isKeyCode(e, KEYCODES.ESC)) {
+        const activeWindow = this.getActiveWindow();
+        if (this.getActiveMenu()) {
+          ChatMenu.closeMenus(this);
+        } else if (this.eventBar.isEventSelected()) {
+          this.eventBar.unselect();
+        } else if (!activeWindow.isScrollPinned()) {
+          activeWindow.scrollBottom();
+        } else if (this.userfocus.isFocused()) {
+          this.userfocus.clearFocus();
+        }
+      }
     });
 
     // Visibility
@@ -941,6 +952,10 @@ class Chat {
     this.windowselect.toggle(this.windows.size > 1);
 
     if (this.mainwindow !== null) this.mainwindow.update();
+  }
+
+  getActiveMenu() {
+    return [...this.menus.values()].find((menu) => menu.visible);
   }
 
   censor(nick) {
