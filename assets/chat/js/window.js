@@ -117,6 +117,14 @@ class ChatWindow extends EventEmitter {
     }
   }
 
+  isScrollPinned() {
+    return this.scrollplugin.pinned;
+  }
+
+  scrollBottom() {
+    this.scrollplugin.scrollBottom();
+  }
+
   /**
    * Use chat state (settings and authentication data) to update the messages in
    * this window.
