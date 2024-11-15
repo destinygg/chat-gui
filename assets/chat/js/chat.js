@@ -438,10 +438,13 @@ class Chat {
     document.addEventListener('keydown', (e) => {
       if (isKeyCode(e, KEYCODES.ESC)) {
         const activeWindow = this.getActiveWindow();
-        // If any menus are open, close them first
-        if (this.getActiveMenu()) ChatMenu.closeMenus(this);
-        // If the active window is scrolled up (not pinned), scroll to bottom
-        else if (!activeWindow.isScrollPinned()) activeWindow.scrollBottom();
+        if (this.getActiveMenu()) {
+          ChatMenu.closeMenus(this);
+        } else if (this.eventBar.isEventSelected()) {
+          this.eventBar.unselect();
+        } else if (!activeWindow.isScrollPinned()) {
+          activeWindow.scrollBottom();
+        }
       }
     });
 

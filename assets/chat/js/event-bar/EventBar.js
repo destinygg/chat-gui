@@ -69,7 +69,7 @@ export default class ChatEventBar extends EventEmitter {
    * Unselects the currently highlighted event.
    */
   unselect() {
-    if (this.eventSelectUI.hasChildNodes()) {
+    if (this.isEventSelected()) {
       this.eventSelectUI.replaceChildren();
       this.eventSelectUI.classList.add('hidden');
       this.emit('eventUnselected');
@@ -89,6 +89,13 @@ export default class ChatEventBar extends EventEmitter {
     this.eventSelectUI.classList.remove('hidden');
 
     this.emit('eventSelected');
+  }
+
+  /**
+   * Returns true if an event is currently selected
+   */
+  isEventSelected() {
+    return this.eventSelectUI.hasChildNodes();
   }
 
   /**
