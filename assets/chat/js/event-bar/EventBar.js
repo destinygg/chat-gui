@@ -59,9 +59,6 @@ export default class ChatEventBar extends EventEmitter {
 
     this.eventBarUI.prepend(event.element);
 
-    // // Update chat window to fix the scroll position
-    // this.chat.mainwindow.update();
-    //
     event.startExpiry();
   }
 
