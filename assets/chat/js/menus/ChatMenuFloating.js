@@ -28,11 +28,13 @@ export default class ChatMenuFloating extends ChatMenu {
         }
       }
       this.viewChain.reverse();
-      
+
       // Lift the ui up to the top of the chain
       this.ui.css('pointer-events', 'auto');
-      this.ui.detach().appendTo(this.getContainer(this.viewChain[this.viewChain.length - 1]));
-      
+      this.ui
+        .detach()
+        .appendTo(this.getContainer(this.viewChain[this.viewChain.length - 1]));
+
       this.draggable[0].style.cursor = 'grab';
       this.draggable.on('mouseup', (e) => {
         e.preventDefault();
@@ -61,8 +63,8 @@ export default class ChatMenuFloating extends ChatMenu {
 
       this.x2 = this.x1 - (e.clientX + offset.x);
       this.y2 = this.y1 - (e.clientY + offset.y);
-      this.x1 = (e.clientX + offset.x);
-      this.y1 = (e.clientY + offset.y);
+      this.x1 = e.clientX + offset.x;
+      this.y1 = e.clientY + offset.y;
 
       this.draggable[0].style.cursor = 'grabbing';
       this.ui[0].style.left = `${this.ui[0].offsetLeft - this.x2}px`;
@@ -87,7 +89,7 @@ export default class ChatMenuFloating extends ChatMenu {
           (rect.height - (this.ui.height() + e.clientY)) -
           12
         : e.clientY - rect.top - 12;
-        
+
     const offset = this.getViewOffset(e.view);
 
     this.ui[0].style.left = `${x + offset.x}px`;
@@ -95,7 +97,8 @@ export default class ChatMenuFloating extends ChatMenu {
   }
 
   getViewOffset(view = window) {
-    let x = 0, y = 0;
+    let x = 0,
+      y = 0;
 
     // Iterate up the chain until we find the target view (skip iframes deeper than this one)
     let i = 0;
@@ -113,7 +116,9 @@ export default class ChatMenuFloating extends ChatMenu {
 
   // Not using JQuery here as it doesn't always play nice with shadowDom
   getContainer(view) {
-    let container = view.document.getElementById('#chat-gui__floating-window-container');
+    let container = view.document.getElementById(
+      '#chat-gui__floating-window-container',
+    );
     let shadow = container?.shadowRoot;
     if (!shadow) {
       container = document.createElement('div');
@@ -121,8 +126,9 @@ export default class ChatMenuFloating extends ChatMenu {
       view.document.body.appendChild(container);
 
       shadow = container.attachShadow({ mode: 'open' });
-      shadow.innerHTML = '<div style="position:absolute;left:0;top:0;right:0;bottom:0;pointer-events:none;overflow:hidden;">';
-      
+      shadow.innerHTML =
+        '<div style="position:absolute;left:0;top:0;right:0;bottom:0;pointer-events:none;overflow:hidden;">';
+
       const style = document.createElement('style');
       for (const stylesheet of document.styleSheets) {
         if (stylesheet.href) {
@@ -135,7 +141,7 @@ export default class ChatMenuFloating extends ChatMenu {
           // Inline or embedded stylesheets
           const style = document.createElement('style');
           for (const rule of stylesheet.cssRules) {
-              style.appendChild(document.createTextNode(rule.cssText));
+            style.appendChild(document.createTextNode(rule.cssText));
           }
           shadow.appendChild(style);
         }
@@ -144,12 +150,12 @@ export default class ChatMenuFloating extends ChatMenu {
       {
         const emotes = document.createElement('link');
         emotes.rel = 'stylesheet';
-        emotes.href = `${this.chat.config.cdn.base}/emotes/emotes.css?_=${this.chat.config.cacheKey}`,
-        shadow.appendChild(emotes);
+        (emotes.href = `${this.chat.config.cdn.base}/emotes/emotes.css?_=${this.chat.config.cacheKey}`),
+          shadow.appendChild(emotes);
         const flairs = document.createElement('link');
         flairs.rel = 'stylesheet';
-        flairs.href = `${this.chat.config.cdn.base}/flairs/flairs.css?_=${this.chat.config.cacheKey}`,
-        shadow.appendChild(flairs);
+        (flairs.href = `${this.chat.config.cdn.base}/flairs/flairs.css?_=${this.chat.config.cacheKey}`),
+          shadow.appendChild(flairs);
       }
       shadow.appendChild(style);
     }
