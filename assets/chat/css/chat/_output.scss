@@ -4,6 +4,7 @@
   flex: 1;
   overflow: hidden;
   width: 100%;
+  position: relative;
 }
 
 .chat-output {
@@ -15,6 +16,7 @@
   font-family: a.$chat-lines-font;
   line-height: 1.65em;
   outline: 0 !important;
+  overflow-anchor: none;
 }
 
 .onstreamchat {

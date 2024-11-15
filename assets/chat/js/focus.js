@@ -9,7 +9,9 @@ class ChatUserFocus {
     this.chat = chat;
     this.css = css;
     this.focused = [];
-    this.chat.output.on('click', (e) => this.toggleElement(e.target));
+    this.chat.output.on('click', (e) => {
+      this.toggleElement(e.target);
+    });
   }
 
   toggleElement(target) {

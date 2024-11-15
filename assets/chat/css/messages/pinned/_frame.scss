@@ -1,6 +1,6 @@
 @use '../../abstracts/' as a;
 
-#chat-pinned-frame {
+#chat-pinned-message {
   display: none;
   padding: 4px;
   position: absolute;
@@ -38,7 +38,7 @@
 }
 
 .onstreamchat {
-  #chat-pinned-frame {
+  #chat-pinned-message {
     display: none !important;
   }
 }
