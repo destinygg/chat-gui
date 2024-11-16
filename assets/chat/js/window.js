@@ -75,7 +75,8 @@ class ChatWindow extends EventEmitter {
   }
 
   addMessage(chat, message) {
-    if (this.messages.find((m) => m.md5 === message.md5)) return;
+    // Return if message is already in chat.
+    if (this.containsMessage(message)) return;
 
     message.ui = message.html(chat);
     message.afterRender(chat);
@@ -102,6 +103,10 @@ class ChatWindow extends EventEmitter {
 
     this.linecount += 1;
     this.cleanupThrottle();
+  }
+
+  containsMessage(message) {
+    return this.messages.find((msg) => msg.md5 === message.md5);
   }
 
   getlines(sel) {
