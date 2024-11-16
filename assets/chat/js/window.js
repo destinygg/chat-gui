@@ -81,10 +81,19 @@ class ChatWindow extends EventEmitter {
     message.ui = message.html(chat);
     message.afterRender(chat);
 
+    // Get index of where the message should be based on timestamp.
     const index = this.messages.findLastIndex(
       (m) => m.timestamp.valueOf() <= message.timestamp.valueOf(),
     );
 
+    /**
+     * If message index is < 0 then add message to the top of chat.
+     *
+     * If message index + 1 >= the length of messages array,
+     * it is a new message so add to bottom of chat.
+     *
+     * Otherwise the message is inbetween so insert in correct place.
+     */
     if (index < 0) {
       this.lines.prepend(message.ui);
       this.messages = [message, ...this.messages];
