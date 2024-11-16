@@ -1,6 +1,8 @@
 <div id="chat" class="chat">
   <div id="chat-windows-select"></div>
 
+  <div id="chat-event-bar"></div>
+
   <div id="chat-poll-frame">
     <div class="poll-frame">
       <div class="poll-header">
@@ -24,7 +26,8 @@
   </div>
 
   <div id="chat-output-frame" data-scroll-notify>
-    <div id="chat-pinned-frame"></div>
+    <div id="chat-event-selected" class="hidden"></div>
+    <div id="chat-pinned-message"></div>
   </div>
 
   <div id="chat-input-frame">
@@ -322,9 +325,6 @@
       <div class="scrollable all">
         <div class="content"></div>
       </div>
-      <div class="scrollable favorite">
-        <div class="content"></div>
-      </div>
       <div id="chat-emote-list-search">
         <input
           type="text"
@@ -364,6 +364,14 @@
   <div id="chat-loading">
     <div>
       <i class="chat-loading-icon"></i>
+    </div>
+  </div>
+
+  <div id="event-action-menu" class="chat-menu">
+    <div class="chat-menu-inner floating-window">
+      <button id="remove-event-button" class="event-action">
+        Remove Event
+      </button>
     </div>
   </div>
 </div>

@@ -1,0 +1,97 @@
+@use '../abstracts/' as a;
+
+$toolbar-icons-map: (
+  'mute': 'mute',
+  'ban': 'ban',
+  'logs': 'logs',
+  'whisper': 'whispers',
+  'ignore': 'ignore',
+  'unignore': 'unignore',
+);
+
+#chat-user-info {
+  height: fit-content;
+  bottom: unset;
+  min-width: 250px;
+  max-width: 350px;
+
+  .floating-window {
+    box-shadow: 0px 0px 6px black;
+    border-radius: 6px;
+  }
+
+  .user-info h5 {
+    padding-left: a.$gutter-md;
+    margin-top: unset;
+    margin-bottom: unset;
+    border-bottom: 1px solid a.$color-surface-dark4;
+  }
+
+  .flairs {
+    margin-top: a.$gutter-lg;
+    margin-bottom: a.$gutter-lg;
+    padding-left: a.$gutter-md;
+  }
+
+  .features {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    align-items: center;
+    justify-items: center;
+    margin-left: -0.2em;
+  }
+
+  .stalk {
+    height: 100px;
+
+    .scrollable {
+      background: a.$color-chat-bg;
+    }
+  }
+
+  .chat-tool-btn {
+    &:hover,
+    &.active {
+      .btn-icon {
+        opacity: 1;
+      }
+    }
+
+    @each $id, $icon in $toolbar-icons-map {
+      &##{$id}-user-btn .btn-icon {
+        @include a.icon-background('../img/icon-#{$icon}.svg');
+      }
+    }
+  }
+
+  .hidden {
+    display: none !important;
+  }
+}
+
+.action-buttons {
+  margin: a.$gutter-md 0 a.$gutter-md 0;
+  display: grid;
+  grid-auto-flow: column;
+  justify-content: space-around;
+}
+
+#action-durations {
+  height: calc(20px + 2 * a.$gutter-md);
+  display: flex;
+  justify-content: space-around;
+  text-align: center;
+  font-size: 1.2em;
+
+  .ban-duration-button,
+  .mute-duration-button {
+    opacity: 0.25;
+    transition: opacity 150ms;
+    color: white;
+    width: 100%;
+
+    &:hover {
+      opacity: 1;
+    }
+  }
+}

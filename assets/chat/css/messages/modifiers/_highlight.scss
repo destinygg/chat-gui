@@ -1,0 +1,11 @@
+@use '../../abstracts/' as a;
+
+.msg-highlight {
+  color: a.$color-chat-text1;
+  background-color: a.$color-chat-highlight;
+
+  time,
+  .continue {
+    color: a.$color-chat-text3;
+  }
+}

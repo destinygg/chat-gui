@@ -1,0 +1,40 @@
+@use '../../abstracts/' as a;
+
+$tag-colors: (
+  'green': a.$color-green,
+  'yellow': a.$color-yellow,
+  'orange': a.$color-orange,
+  'red': a.$color-red,
+  'purple': a.$color-purple,
+  'blue': a.$color-blue,
+  'sky': a.$color-sky,
+  'lime': a.$color-lime,
+  'pink': a.$color-pink,
+  'black': a.$color-black,
+);
+
+.msg-tagged {
+  position: relative;
+
+  &:before {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    min-width: 0.45em;
+    display: block;
+    background: a.$color-black;
+    content: '';
+  }
+
+  @each $name, $color in $tag-colors {
+    &.msg-tagged-#{$name}:before {
+      background-color: $color;
+    }
+  }
+}
+
+// Prioritize highlighted message background color
+.pref-taggedvisibility .msg-tagged:not(.msg-highlight) {
+  background-color: a.$color-chat-tagged;
+}

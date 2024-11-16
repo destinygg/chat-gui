@@ -31,7 +31,9 @@ import {
   ChatEmoteTooltip,
   ChatSettingsMenu,
   ChatUserInfoMenu,
+  ChatEventActionMenu,
 } from './menus';
+import ChatEventBar from './event-bar/EventBar';
 import ChatAutoComplete from './autocomplete';
 import ChatInputHistory from './history';
 import ChatUserFocus from './focus';
@@ -56,6 +58,7 @@ import makeSafeForRegex, {
 import { HashLinkConverter, MISSING_ARG_ERROR } from './hashlinkconverter';
 import ChatCommands from './commands';
 import MessageTemplateHTML from '../../views/templates.html';
+import EventBarEvent from './event-bar/EventBarEvent';
 
 class Chat {
   constructor(config) {
@@ -151,6 +154,7 @@ class Chat {
     this.source.on('ADDPHRASE', (data) => this.onADDPHRASE(data));
     this.source.on('REMOVEPHRASE', (data) => this.onREMOVEPHRASE(data));
     this.source.on('DEATH', (data) => this.onDEATH(data));
+    this.source.on('PAIDEVENTS', (data) => this.onPAIDEVENTS(data));
 
     this.control.on('SEND', (data) => this.cmdSEND(data));
     this.control.on('HINT', (data) => this.cmdHINT(data));
@@ -318,6 +322,11 @@ class Chat {
     this.mainwindow = new ChatWindow('main').into(this);
     this.mutedtimer = new MutedTimer(this);
     this.chatpoll = new ChatPoll(this);
+
+    this.eventBar = new ChatEventBar();
+    this.eventBar.on('eventSelected', () => this.onEVENTSELECTED());
+    this.eventBar.on('eventUnselected', () => this.onEVENTUNSELECTED());
+
     this.pinnedMessage = null;
 
     this.windowToFront('main');
@@ -371,6 +380,18 @@ class Chat {
       ),
     );
 
+    const eventActionMenu = new ChatEventActionMenu(
+      this.ui.find('#event-action-menu'),
+      this.ui.find('.msg-event .event-button'),
+      this,
+    );
+    eventActionMenu.on('removeEvent', this.handleRemoveEvent.bind(this));
+    eventActionMenu.on(
+      'removeEvent',
+      this.eventBar.unselect.bind(this.eventBar),
+    );
+    this.menus.set('event-action-menu', eventActionMenu);
+
     this.autocomplete.bind(this);
 
     // Chat input
@@ -416,7 +437,18 @@ class Chat {
 
     // ESC
     document.addEventListener('keydown', (e) => {
-      if (isKeyCode(e, KEYCODES.ESC)) ChatMenu.closeMenus(this); // ESC key
+      if (isKeyCode(e, KEYCODES.ESC)) {
+        const activeWindow = this.getActiveWindow();
+        if (this.getActiveMenu()) {
+          ChatMenu.closeMenus(this);
+        } else if (this.eventBar.isEventSelected()) {
+          this.eventBar.unselect();
+        } else if (!activeWindow.isScrollPinned()) {
+          activeWindow.scrollBottom();
+        } else if (this.userfocus.isFocused()) {
+          this.userfocus.clearFocus();
+        }
+      }
     });
 
     // Visibility
@@ -780,7 +812,15 @@ class Chat {
     win.addMessage(this, message);
 
     // Hide the message if the user is ignored
-    if (this.ignored(message.user?.username, message.message)) {
+    if (
+      ![
+        MessageTypes.UI,
+        MessageTypes.INFO,
+        MessageTypes.ERROR,
+        MessageTypes.STATUS,
+      ].includes(message.type) &&
+      this.ignored(message.user?.username, message.message)
+    ) {
       message.ignore();
     }
 
@@ -895,6 +935,10 @@ class Chat {
     if (this.mainwindow !== null) this.mainwindow.update();
   }
 
+  getActiveMenu() {
+    return [...this.menus.values()].find((menu) => menu.visible);
+  }
+
   censor(nick) {
     for (const message of this.mainwindow.messages) {
       if (message.user?.username === nick.toLowerCase()) {
@@ -946,7 +990,7 @@ class Chat {
     }
     this.settings.set('favoriteemotes', [...this.favoriteemotes]);
     this.applySettings();
-    this.menus.get('emotes').buildFavoriteEmoteMenu();
+    this.menus.get('emotes').buildEmoteMenu();
     return !exists;
   }
 
@@ -1014,9 +1058,10 @@ class Chat {
       if (data.recipient) {
         users.push(this.addUser(data.recipient));
       }
-      users.forEach((u) =>
-        this.autocomplete.add(u.displayName, false, Date.now()),
-      );
+      users.forEach((u) => {
+        if (this.ignored(u.username)) return;
+        this.autocomplete.add(u.displayName, false, Date.now());
+      });
     }
   }
 
@@ -1312,18 +1357,75 @@ class Chat {
 
   onSUBSCRIPTION(data) {
     MessageBuilder.subscription(data).into(this);
+
+    // Don't add events when loading messages from history because the
+    // `PAIDEVENTS` payload will contain those events
+    if (!this.backlogloading) {
+      const eventBarEvent = new EventBarEvent(
+        this,
+        MessageTypes.SUBSCRIPTION,
+        data,
+      );
+      this.eventBar.add(eventBarEvent);
+      if (this.eventBar.length === 1) {
+        this.mainwindow.update();
+      }
+    }
   }
 
   onGIFTSUB(data) {
     MessageBuilder.gift(data).into(this);
+
+    if (!this.backlogloading) {
+      const eventBarEvent = new EventBarEvent(this, MessageTypes.GIFTSUB, data);
+      this.eventBar.add(eventBarEvent);
+      if (this.eventBar.length === 1) {
+        this.mainwindow.update();
+      }
+    }
   }
 
   onMASSGIFT(data) {
     MessageBuilder.massgift(data).into(this);
+
+    if (!this.backlogloading) {
+      const eventBarEvent = new EventBarEvent(
+        this,
+        MessageTypes.MASSGIFT,
+        data,
+      );
+      this.eventBar.add(eventBarEvent);
+      if (this.eventBar.length === 1) {
+        this.mainwindow.update();
+      }
+    }
   }
 
   onDONATION(data) {
     MessageBuilder.donation(data).into(this);
+
+    if (!this.backlogloading) {
+      const eventBarEvent = new EventBarEvent(
+        this,
+        MessageTypes.DONATION,
+        data,
+      );
+      this.eventBar.add(eventBarEvent);
+      if (this.eventBar.length === 1) {
+        this.mainwindow.update();
+      }
+    }
+  }
+
+  onPAIDEVENTS(lines) {
+    const events = lines.map((l) => {
+      const { eventname, data } = this.source.parse({ data: l });
+      return new EventBarEvent(this, eventname, data);
+    });
+    this.eventBar.replaceEvents(events);
+
+    this.mainwindow.update();
+    this.eventBar.sort();
   }
 
   onADDPHRASE(data) {
@@ -1505,6 +1607,15 @@ class Chat {
     MessageBuilder.death(data.data, user, data.timestamp).into(this);
   }
 
+  onEVENTSELECTED() {
+    // Hide full pinned message interface to make everything look nice
+    if (this.pinnedMessage) this.pinnedMessage.hidden = true;
+  }
+
+  onEVENTUNSELECTED() {
+    if (this.pinnedMessage) this.pinnedMessage.hidden = false;
+  }
+
   cmdSHOWPOLL() {
     if (this.chatpoll.poll) {
       this.chatpoll.show();
@@ -1631,6 +1742,8 @@ class Chat {
       if (!failure) {
         validUsernames.forEach((username) => {
           this.ignore(username, true);
+          const user = this.users.get(username);
+          if (user) this.autocomplete.remove(user.displayName, true);
         });
         const resultArray = Array.from(validUsernames.values());
         const resultMessage =
@@ -1661,6 +1774,8 @@ class Chat {
       if (!failure) {
         validUsernames.forEach((username) => {
           this.ignore(username, false);
+          const user = this.users.get(username);
+          if (user) this.autocomplete.add(user.displayName, false, Date.now());
         });
         const haveOrHas = parts.length === 1 ? 'has' : 'have';
         MessageBuilder.status(
@@ -2527,6 +2642,11 @@ class Chat {
     hostname = hostname.split(':')[0];
     hostname = hostname.split('?')[0];
     return hostname;
+  }
+
+  handleRemoveEvent(eventUuid) {
+    ChatMenu.closeMenus(this);
+    this.source.send('REMOVEEVENT', { data: eventUuid });
   }
 }
 
