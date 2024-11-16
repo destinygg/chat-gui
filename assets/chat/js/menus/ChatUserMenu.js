@@ -1,8 +1,8 @@
 import $ from 'jquery';
 import { debounce } from 'throttle-debounce';
+import tippy, { roundArrow } from 'tippy.js';
 import ChatMenu from './ChatMenu';
 import ChatUser from '../user';
-import tippy, { roundArrow } from 'tippy.js';
 
 // sections in order.
 const UserMenuSections = [
@@ -247,7 +247,7 @@ export default class ChatUserMenu extends ChatMenu {
     const usr = $(
       `<div class="user-entry" data-username="${user.username}" data-user-id="${user.id}"><span class="user ${features}">${label}</span><div class="user-actions"><i class="mention-nick" data-tippy-content="Mention"></i><i class="whisper-nick" data-tippy-content="Whisper"></i></div></div>`,
     );
-    usr.find('[data-tippy-content]').each(function () {
+    usr.find('[data-tippy-content]').each(function registerTippy() {
       tippy(this, {
         content: this.getAttribute('data-tippy-content'),
         arrow: roundArrow,
