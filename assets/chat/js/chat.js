@@ -300,9 +300,9 @@ class Chat {
     })();
 
     // Tooltips
+    tippy.setDefaultProps({ delay: [500, 0] });
     tippy('[data-tippy-content]', {
       arrow: roundArrow,
-      delay: 0,
       duration: 0,
       maxWidth: 250,
       hideOnClick: false,

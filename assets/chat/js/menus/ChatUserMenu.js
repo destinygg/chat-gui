@@ -1,5 +1,6 @@
 import $ from 'jquery';
 import { debounce } from 'throttle-debounce';
+import tippy, { roundArrow } from 'tippy.js';
 import ChatMenu from './ChatMenu';
 import ChatUser from '../user';
 
@@ -97,8 +98,15 @@ export default class ChatUserMenu extends ChatMenu {
     userActions.classList.add('user-actions');
     const whisperButton = document.createElement('i');
     whisperButton.classList.add('whisper-nick');
-    whisperButton.title = 'Whisper';
     userActions.append(whisperButton);
+    tippy(whisperButton, {
+      content: 'Whisper',
+      arrow: roundArrow,
+      duration: 0,
+      maxWidth: 250,
+      hideOnClick: false,
+      theme: 'dgg',
+    });
     return userActions;
   }
 

@@ -7,6 +7,7 @@ $toolbar-icons-map: (
   'whisper': 'whispers',
   'ignore': 'ignore',
   'unignore': 'unignore',
+  'rustle': 'rustle',
 );
 
 #chat-user-info {
@@ -56,6 +57,9 @@ $toolbar-icons-map: (
         opacity: 1;
       }
     }
+
+    width: 2.75em;
+    height: 2.75em;
 
     @each $id, $icon in $toolbar-icons-map {
       &##{$id}-user-btn .btn-icon {
