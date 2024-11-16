@@ -34,6 +34,7 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     this.whisperUserBtn = this.ui.find('#whisper-user-btn');
     this.ignoreUserBtn = this.ui.find('#ignore-user-btn');
     this.unignoreUserBtn = this.ui.find('#unignore-user-btn');
+    this.rustleUserBtn = this.ui.find('#rustle-user-btn');
 
     this.actionInputs = this.ui.find('#action-durations');
     this.muteDurations = ['1m', '10m', '1h', '1d'];
@@ -155,6 +156,11 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
       this.ignoreUserBtn.toggleClass('hidden', false);
       this.unignoreUserBtn.toggleClass('hidden', true);
     }
+
+    this.rustleUserBtn.attr(
+      'href',
+      `https://rustlesearch.dev/?username=${encodeURIComponent(this.clickedNick)}`,
+    );
   }
 
   setInputVisibility(button) {

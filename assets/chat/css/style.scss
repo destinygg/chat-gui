@@ -103,12 +103,12 @@ hr {
 
 .tippy-box[data-theme~='dgg'] {
   text-align: center;
-  background-color: white;
-  color: #000;
+  background-color: a.$color-surface-dark4;
+  color: a.$color-chat-text1;
 }
 
 .tippy-box[data-theme~='dgg'] > .tippy-svg-arrow {
-  fill: white;
+  fill: a.$color-surface-dark4;
 }
 
 /* Small screen, non-retina */
