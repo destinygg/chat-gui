@@ -32,6 +32,7 @@ export default class ChatEmoteTooltip extends ChatMenuFloating {
 
     this.ui.favorite.on('click', () => {
       const result = this.chat.toggleFavoriteEmote(this.emote);
+      this.hide();
       this.favorite = result;
     });
   }

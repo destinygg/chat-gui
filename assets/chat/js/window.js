@@ -117,6 +117,14 @@ class ChatWindow extends EventEmitter {
     }
   }
 
+  isScrollPinned() {
+    return this.scrollplugin.pinned;
+  }
+
+  scrollBottom() {
+    this.scrollplugin.scrollBottom();
+  }
+
   /**
    * Use chat state (settings and authentication data) to update the messages in
    * this window.
@@ -128,12 +136,19 @@ class ChatWindow extends EventEmitter {
       }
 
       if (message.user?.isSystem()) {
-        return;
+        continue;
       }
 
       const username = message.user?.username;
 
-      if (message.type !== MessageTypes.UI) {
+      if (
+        ![
+          MessageTypes.UI,
+          MessageTypes.INFO,
+          MessageTypes.ERROR,
+          MessageTypes.STATUS,
+        ].includes(message.type)
+      ) {
         message.ignore(chat.ignored(username, message.message));
       }
 

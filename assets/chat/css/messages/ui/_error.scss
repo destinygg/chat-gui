@@ -1,0 +1,5 @@
+@use '../../abstracts/' as a;
+
+.msg-error .text:before {
+  @include a.msg-icon(-0px, -21px);
+}

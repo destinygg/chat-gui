@@ -1,0 +1,19 @@
+@use '../../abstracts/' as a;
+
+.msg-whisper {
+  background-color: a.$color-chat-emphasize;
+
+  a.user {
+    background: a.$color-accent;
+    padding: a.$gutter-xs a.$gutter-md a.$gutter-xs a.$gutter-md;
+    border-radius: a.$bradius;
+    font-weight: normal;
+    color: white;
+
+    &:hover {
+      text-decoration: none;
+      color: a.$color-accent;
+      background: white;
+    }
+  }
+}

@@ -6,7 +6,6 @@ export default class ChatEmoteMenu extends ChatMenu {
     super(ui, btn, chat);
     this.searchterm = '';
     this.emoteMenuContent = this.ui.find('.all .content');
-    this.favoriteEmoteMenuContent = this.ui.find('.favorite .content');
     this.searchinput = this.ui.find(
       '#chat-emote-list-search .form-control:first',
     );
@@ -23,7 +22,6 @@ export default class ChatEmoteMenu extends ChatMenu {
         () => {
           this.searchterm = this.searchinput.val();
           this.buildEmoteMenu();
-          this.buildFavoriteEmoteMenu();
         },
         { atBegin: false },
       ),
@@ -34,30 +32,13 @@ export default class ChatEmoteMenu extends ChatMenu {
     super.show();
     this.searchinput.focus();
     this.buildEmoteMenu();
-    this.buildFavoriteEmoteMenu();
-  }
-
-  buildFavoriteEmoteMenu() {
-    const favoriteEmotes = [...this.chat.favoriteemotes].filter((e) =>
-      this.chat.emoteService.hasEmote(e),
-    );
-    if (favoriteEmotes.length === 0) {
-      this.favoriteEmoteMenuContent.html(`<div class="emote-container">
-        <div id="emote-subscribe-note">Favorite Emotes</div>
-        <p>Right click an emote and favorite it!</p>
-      </div>`);
-      return;
-    }
-    const emotesStr = favoriteEmotes
-      .map((e) => this.buildEmoteItem(e, false))
-      .join('');
-    this.favoriteEmoteMenuContent.html(`<div class="emote-container">
-      <div id="emote-subscribe-note">Favorite Emotes</div>
-      <div class="emote-group">${emotesStr}</div>
-    </div>`);
   }
 
   buildEmoteMenu() {
+    const favoriteEmotes = [...this.chat.favoriteemotes].filter((e) =>
+      this.chat.emoteService.hasEmote(e),
+    );
+
     this.emoteMenuContent.empty();
 
     this.chat.emoteService.tiers.forEach((tier) => {
@@ -68,7 +49,7 @@ export default class ChatEmoteMenu extends ChatMenu {
       const locked =
         tier > this.chat.user.subTier && !this.chat.user.isPrivileged();
       this.emoteMenuContent.append(
-        this.buildEmoteMenuSection(title, emotes, locked),
+        this.buildEmoteMenuSection(title, emotes, favoriteEmotes, locked),
       );
     });
 
@@ -80,9 +61,19 @@ export default class ChatEmoteMenu extends ChatMenu {
     }
   }
 
-  buildEmoteMenuSection(title, emotes, disabled = false) {
-    const emotesStr = emotes
-      .map((e) => this.buildEmoteItem(e, disabled))
+  buildEmoteMenuSection(title, emotes, favoriteEmotes, disabled = false) {
+    let emotesStr = '';
+    if (favoriteEmotes.length > 0) {
+      emotesStr += favoriteEmotes
+        .map((e) => this.buildEmoteItem(e, true, disabled))
+        .join('');
+    }
+    emotesStr += emotes
+      .map((e) =>
+        !favoriteEmotes.includes(e)
+          ? this.buildEmoteItem(e, false, disabled)
+          : null,
+      )
       .join('');
     if (emotesStr !== '') {
       return `<div>
@@ -97,16 +88,16 @@ export default class ChatEmoteMenu extends ChatMenu {
     return '';
   }
 
-  buildEmoteItem(emote, disabled) {
+  buildEmoteItem(emote, favorite, disabled) {
     if (this.searchterm && this.searchterm.length > 0) {
       if (emote.toLowerCase().indexOf(this.searchterm.toLowerCase()) >= 0) {
-        return `<div class="emote-item"><span title="${emote}" class="emote ${emote}${
+        return `<div class="emote-item${favorite ? ' favorite-emote' : ''}"><span title="${emote}" class="emote ${emote}${
           disabled ? ' disabled' : ''
         }">${emote}</span></div>`;
       }
       return '';
     }
-    return `<div class="emote-item"><span title="${emote}" class="emote ${emote}${
+    return `<div class="emote-item${favorite ? ' favorite-emote' : ''}"><span title="${emote}" class="emote ${emote}${
       disabled ? ' disabled' : ''
     }">${emote}</span></div>`;
   }
