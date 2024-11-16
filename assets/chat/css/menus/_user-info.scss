@@ -50,7 +50,7 @@ $toolbar-icons-map: (
     }
 
     .content {
-      .msg-chat {
+      .msg-chat:first-child {
         margin-top: 0.75em;
       }
     }
