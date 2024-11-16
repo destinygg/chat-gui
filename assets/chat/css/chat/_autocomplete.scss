@@ -1,3 +1,4 @@
+@use 'sass:color';
 @use '../abstracts/' as a;
 
 #chat-auto-complete {
@@ -47,7 +48,7 @@
     }
 
     &:hover {
-      color: lighten(a.$color-chat-text3, 20);
+      color: color.adjust(a.$color-chat-text3, $lightness: 20%);
     }
 
     &.active {
