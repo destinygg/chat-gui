@@ -96,18 +96,14 @@ class ChatWindow extends EventEmitter {
      */
     if (index < 0) {
       this.lines.prepend(message.ui);
-      this.messages = [message, ...this.messages];
+      this.messages.unshift(message);
     } else if (index + 1 >= this.messages.length) {
       this.lines.append(message.ui);
       this.messages.push(message);
       this.lastmessage = message;
     } else {
       this.lines.insertBefore(message.ui, this.messages[index + 1].ui);
-      this.messages = [
-        ...this.messages.slice(0, index + 1),
-        message,
-        ...this.messages.slice(index + 1),
-      ];
+      this.messages.splice(index + 1, 0, message);
     }
 
     this.linecount += 1;
