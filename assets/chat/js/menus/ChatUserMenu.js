@@ -52,6 +52,20 @@ export default class ChatUserMenu extends ChatMenu {
         true,
       ),
     );
+    this.userActionsNode = this.createUserActionNode();
+    this.container.on('mouseenter', '.user-entry', (e) => {
+      e.currentTarget.appendChild(this.userActionsNode);
+    });
+    this.container.on('mouseleave', '.user-entry', (e) => {
+      e.currentTarget.removeChild(this.userActionsNode);
+    });
+    this.container.on('click', '.whisper-nick', (e) => {
+      ChatMenu.closeMenus(this.chat);
+      const value = this.chat.input.val().toString().trim();
+      const username = $(e.target).parent().parent().data('username');
+      this.chat.input.val(`/whisper ${username} ${value}`).focus();
+      return false;
+    });
     this.container.on('contextmenu', '.users .user-entry', (e) => {
       const userinfo = this.chat.menus.get('user-info');
       if (userinfo) {
@@ -76,6 +90,16 @@ export default class ChatUserMenu extends ChatMenu {
         { atBegin: false },
       ),
     );
+  }
+
+  createUserActionNode() {
+    const userActions = document.createElement('div');
+    userActions.classList.add('user-actions');
+    const whisperButton = document.createElement('i');
+    whisperButton.classList.add('whisper-nick');
+    whisperButton.title = 'Whisper';
+    userActions.append(whisperButton);
+    return userActions;
   }
 
   show() {
