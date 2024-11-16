@@ -49,6 +49,13 @@ export default class ChatEventBar extends EventEmitter {
     this.events.push(event);
 
     event.element.addEventListener('click', () => {
+      if (
+        this.eventSelectUI.querySelector(`[data-uuid='${event.data.uuid}']`)
+      ) {
+        this.unselect();
+        return;
+      }
+
       this.select(event.selectedElement);
     });
     event.on('eventExpired', this.removeEvent.bind(this));
@@ -59,9 +66,6 @@ export default class ChatEventBar extends EventEmitter {
 
     this.eventBarUI.prepend(event.element);
 
-    // // Update chat window to fix the scroll position
-    // this.chat.mainwindow.update();
-    //
     event.startExpiry();
   }
 
