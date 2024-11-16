@@ -12,6 +12,7 @@
   border-color: unset;
   border-width: 2px;
   margin: a.$gutter-sm;
+  user-select: none;
 
   .event-contents {
     display: flex;
