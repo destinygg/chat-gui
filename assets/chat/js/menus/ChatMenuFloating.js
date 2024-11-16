@@ -1,4 +1,3 @@
-import $ from 'jquery';
 import ChatMenu from './ChatMenu';
 
 export default class ChatMenuFloating extends ChatMenu {
@@ -20,7 +19,8 @@ export default class ChatMenuFloating extends ChatMenu {
     if (this.draggable?.length) {
       while (this.viewChain[0] !== window.top) {
         try {
-          // Access href to check if we have permissions for parent view
+          // Accessing the parent's url will throw an error if we don't have permissions for the parent view
+          // eslint-disable-next-line no-unused-expressions
           this.viewChain[0].parent.location.href;
           this.viewChain.splice(0, 0, this.viewChain[0].parent);
         } catch {
@@ -29,11 +29,15 @@ export default class ChatMenuFloating extends ChatMenu {
       }
       this.viewChain.reverse();
 
-      // Lift the ui up to the top of the chain
-      this.ui.css('pointer-events', 'auto');
-      this.ui
-        .detach()
-        .appendTo(this.getContainer(this.viewChain[this.viewChain.length - 1]));
+      // Lift the ui up to the top of the chain if we are in an iframe
+      if (this.viewChain.length > 1) {
+        this.ui.css('pointer-events', 'auto');
+        this.ui
+          .detach()
+          .appendTo(
+            this.getContainer(this.viewChain[this.viewChain.length - 1]),
+          );
+      }
 
       this.draggable[0].style.cursor = 'grab';
       this.draggable.on('mouseup', (e) => {
@@ -59,7 +63,7 @@ export default class ChatMenuFloating extends ChatMenu {
   drag(e) {
     if (this.mousedown) {
       const offset = this.getViewOffset(e.view);
-      if (offset === null) return console.log(e.view);
+      if (offset === null) return;
 
       this.x2 = this.x1 - (e.clientX + offset.x);
       this.y2 = this.y1 - (e.clientY + offset.y);
@@ -97,8 +101,8 @@ export default class ChatMenuFloating extends ChatMenu {
   }
 
   getViewOffset(view = window) {
-    let x = 0,
-      y = 0;
+    let x = 0;
+    let y = 0;
 
     // Iterate up the chain until we find the target view (skip iframes deeper than this one)
     let i = 0;
@@ -129,7 +133,6 @@ export default class ChatMenuFloating extends ChatMenu {
       shadow.innerHTML =
         '<div style="position:absolute;left:0;top:0;right:0;bottom:0;pointer-events:none;overflow:hidden;">';
 
-      const style = document.createElement('style');
       for (const stylesheet of document.styleSheets) {
         if (stylesheet.href) {
           // Link to external stylesheets
@@ -147,17 +150,14 @@ export default class ChatMenuFloating extends ChatMenu {
         }
       }
       // Add emotes and flairs as well (these are loaded after GUI is created, so don't exist yet)
-      {
-        const emotes = document.createElement('link');
-        emotes.rel = 'stylesheet';
-        (emotes.href = `${this.chat.config.cdn.base}/emotes/emotes.css?_=${this.chat.config.cacheKey}`),
-          shadow.appendChild(emotes);
-        const flairs = document.createElement('link');
-        flairs.rel = 'stylesheet';
-        (flairs.href = `${this.chat.config.cdn.base}/flairs/flairs.css?_=${this.chat.config.cacheKey}`),
-          shadow.appendChild(flairs);
-      }
-      shadow.appendChild(style);
+      const emotes = document.createElement('link');
+      emotes.rel = 'stylesheet';
+      emotes.href = `${this.chat.config.cdn.base}/emotes/emotes.css?_=${this.chat.config.cacheKey}`;
+      shadow.appendChild(emotes);
+      const flairs = document.createElement('link');
+      flairs.rel = 'stylesheet';
+      flairs.href = `${this.chat.config.cdn.base}/flairs/flairs.css?_=${this.chat.config.cacheKey}`;
+      shadow.appendChild(flairs);
     }
     return shadow.firstChild;
   }
