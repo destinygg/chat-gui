@@ -356,10 +356,18 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
         nextMsg = nextMsg.next('.msg-continue');
       }
       this.messageArray.forEach((element) => {
-        const text = element.find('.text')[0].innerText;
+        const textContainer = element.find('.text')[0];
+        let rawText = '';
+        for (const node of textContainer.childNodes) {
+          if (node instanceof HTMLAnchorElement) {
+            rawText += node.href;
+          } else {
+            rawText += node.textContent;
+          }
+        }
 
         // Create a new `ChatUser` to remove username styles for a cleaner look.
-        const msg = MessageBuilder.message(text, new ChatUser(nick));
+        const msg = MessageBuilder.message(rawText, new ChatUser(nick));
         displayedMessages.push(msg.html(this.chat));
       });
     }
