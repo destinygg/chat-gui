@@ -1,14 +1,15 @@
+@use 'sass:color';
 @use '../abstracts/' as a;
 
 .form-control {
   color: a.$color-chat-text2;
   background: a.$color-surface-dark1;
-  border: 1px solid lighten(a.$color-surface-dark1, 9);
+  border: 1px solid color.adjust(a.$color-surface-dark1, $lightness: 9%);
 
   &:focus {
     color: a.$color-chat-text1;
     background: a.$color-surface-dark1;
-    border: 1px solid lighten(a.$color-surface-dark1, 15);
+    border: 1px solid color.adjust(a.$color-surface-dark1, $lightness: 15%);
     box-shadow: none;
     outline: none;
   }

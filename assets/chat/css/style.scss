@@ -1,3 +1,5 @@
+@use 'sass:color';
+
 @use '~normalize.css/normalize';
 @use '~tippy.js/dist/tippy';
 @use '~tippy.js/dist/svg-arrow';
@@ -97,7 +99,7 @@ a {
 hr {
   border: 0;
   margin: 1em 0;
-  border-top: 1px solid darken(a.$color-surface-dark1, 50%);
+  border-top: 1px solid color.adjust(a.$color-surface-dark1, $lightness: -50%);
   border-bottom: 1px solid a.$color-surface-dark3;
 }
 
