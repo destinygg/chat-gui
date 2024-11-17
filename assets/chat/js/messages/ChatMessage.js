@@ -1,4 +1,5 @@
 import moment from 'moment';
+import md5 from 'md5';
 import ChatUIMessage from './ChatUIMessage';
 import MessageTypes from './MessageTypes';
 import {
@@ -41,6 +42,9 @@ export default class ChatMessage extends ChatUIMessage {
     this.ignored = false;
     this.censorType = null;
     this.watching = null;
+    this.md5 = md5(
+      `${this.timestamp.valueOf()}${this.user?.id ?? ''}${this.message}`,
+    );
   }
 
   html(chat = null) {

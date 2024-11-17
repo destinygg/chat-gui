@@ -75,13 +75,43 @@ class ChatWindow extends EventEmitter {
   }
 
   addMessage(chat, message) {
+    // Return if message is already in chat.
+    if (this.containsMessage(message)) return;
+
     message.ui = message.html(chat);
     message.afterRender(chat);
-    this.messages.push(message);
-    this.lastmessage = message;
-    this.lines.append(message.ui);
+
+    // Get index of where the message should be based on timestamp.
+    const index = this.messages.findLastIndex(
+      (m) => m.timestamp.valueOf() <= message.timestamp.valueOf(),
+    );
+
+    /**
+     * If message index is < 0 then add message to the top of chat.
+     *
+     * If message index + 1 >= the length of messages array,
+     * it is a new message so add to bottom of chat.
+     *
+     * Otherwise the message is inbetween so insert in correct place.
+     */
+    if (index < 0) {
+      this.lines.prepend(message.ui);
+      this.messages.unshift(message);
+    } else if (index + 1 >= this.messages.length) {
+      this.lines.append(message.ui);
+      this.messages.push(message);
+      this.lastmessage = message;
+    } else {
+      this.lines.insertBefore(message.ui, this.messages[index + 1].ui);
+      this.messages.splice(index + 1, 0, message);
+    }
+
     this.linecount += 1;
     this.cleanupThrottle();
+  }
+
+  containsMessage(message) {
+    return this.messages.find((msg) => msg.md5 === message.md5);
   }
 
   getlines(sel) {

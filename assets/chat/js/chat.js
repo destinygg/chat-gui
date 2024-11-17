@@ -128,6 +128,7 @@ class Chat {
     this.source.on('DISPATCH', (data) => this.onDISPATCH(data));
     this.source.on('CLOSE', (data) => this.onCLOSE(data));
     this.source.on('NAMES', (data) => this.onNAMES(data));
+    this.source.on('HISTORY', (data) => this.onHISTORY(data));
     this.source.on('PIN', (data) => this.onPIN(data));
     this.source.on('QUIT', (data) => this.onQUIT(data));
     this.source.on('MSG', (data) => this.onMSG(data));
@@ -607,15 +608,6 @@ class Chat {
       .catch(() => {});
   }
 
-  async loadHistory() {
-    return fetch(`${this.config.api.base}/api/chat/history`)
-      .then((res) => res.json())
-      .then((json) => {
-        this.setHistory(json);
-      })
-      .catch(() => {});
-  }
-
   async loadWhispers() {
     fetch(`${this.config.api.base}/api/messages/unread`, {
       credentials: 'include',
@@ -648,17 +640,6 @@ class Chat {
     this.flairs = flairs;
     this.flairsMap = new Map();
     flairs.forEach((v) => this.flairsMap.set(v.name, v));
-    return this;
-  }
-
-  setHistory(history) {
-    if (history && history.length > 0) {
-      this.backlogloading = true;
-      history.forEach((line) => this.source.parseAndDispatch({ data: line }));
-      this.backlogloading = false;
-      MessageBuilder.element('<hr/>').into(this);
-      this.mainwindow.update(true);
-    }
     return this;
   }
 
@@ -1126,6 +1107,15 @@ class Chat {
     if (this.showmotd) {
       this.cmdHINT([Math.floor(Math.random() * hintstrings.size)]);
       this.showmotd = false;
+    }
+  }
+
+  onHISTORY(messages) {
+    if (messages && messages.length > 0) {
+      this.backlogloading = true;
+      messages.forEach((data) => this.source.parseAndDispatch({ data }));
+      this.backlogloading = false;
+      this.mainwindow.update(true);
     }
   }
 
