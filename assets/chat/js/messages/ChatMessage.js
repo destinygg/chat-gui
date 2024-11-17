@@ -43,7 +43,7 @@ export default class ChatMessage extends ChatUIMessage {
     this.censorType = null;
     this.watching = null;
     this.md5 = md5(
-      `${this.timestamp.valueOf()}${this.user ?? ''}${this.message}`,
+      `${this.timestamp.valueOf()}${this.user?.id ?? ''}${this.message}`,
     );
   }
 
