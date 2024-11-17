@@ -1110,12 +1110,10 @@ class Chat {
     }
   }
 
-  onHISTORY(data) {
-    if (data?.messages && data.messages.length > 0) {
+  onHISTORY(events) {
+    if (events && events.length > 0) {
       this.backlogloading = true;
-      data.messages.forEach((message) =>
-        this.source.dispatch(message.event, message.data),
-      );
+      events.forEach((data) => this.source.parseAndDispatch({ data }));
       this.backlogloading = false;
       this.mainwindow.update(true);
     }
