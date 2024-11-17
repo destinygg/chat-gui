@@ -24,6 +24,9 @@ jobs:
           node-version: 20
           registry-url: https://registry.npmjs.org
 
+      - name: Install Node.js dependencies
+        run: npm ci
+
       - name: Bump version
         id: bump
         env:
