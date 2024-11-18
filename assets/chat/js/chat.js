@@ -757,15 +757,16 @@ class Chat {
   addMessage(message, win = null) {
     // eslint-disable-next-line no-param-reassign
     if (win === null) win = this.mainwindow;
+    const previousMessage = win.getPreviousMessage(message);
 
     // Break the current combo if this message is not an emote
     // We don't need to check what type the current message is, we just know that its a new message, so the combo is invalid.
     if (
-      win.lastmessage &&
-      win.lastmessage.type === MessageTypes.EMOTE &&
-      win.lastmessage.emotecount > 1
+      previousMessage &&
+      previousMessage.type === MessageTypes.EMOTE &&
+      previousMessage.emotecount > 1
     )
-      win.lastmessage.completeCombo();
+      previousMessage.completeCombo();
 
     // Populate the tag and mentioned users for this $message.
     if (
@@ -798,15 +799,10 @@ class Chat {
     // Populate highlight for this $message
     if (message.type === MessageTypes.USER) {
       // check if the last message was from the same user
-      message.continued = win.isContinued(message);
+      message.continued = win.isContinued(message, previousMessage);
       // set highlighted state
       message.highlighted = this.shouldHighlightMessage(message);
     }
-
-    // This looks odd, although it would be a correct implementation
-    /* else if(win.lastmessage && win.lastmessage.type === message.type && [MessageTypes.ERROR,MessageTypes.INFO,MessageTypes.COMMAND,MessageTypes.STATUS].indexOf(message.type)){
-            message.continued = true
-        } */
 
     // The point where we actually add the message dom
     win.addMessage(this, message);
@@ -1147,23 +1143,25 @@ class Chat {
     const textonly = this.removeSlashCmdFromText(data.data);
     const usr = this.users.get(data.nick.toLowerCase());
     const win = this.mainwindow;
+    const message = MessageBuilder.message(data.data, usr, data.timestamp);
+    const previousMessage = win.getPreviousMessage(message);
     const isCombo =
       this.emoteService.canUserUseEmote(usr, textonly) &&
-      this.removeSlashCmdFromText(win.lastmessage?.message) === textonly;
+      this.removeSlashCmdFromText(previousMessage?.message) === textonly;
 
-    if (isCombo && win.lastmessage?.type === MessageTypes.EMOTE) {
-      win.lastmessage.incEmoteCount();
+    if (isCombo && previousMessage?.type === MessageTypes.EMOTE) {
+      previousMessage.incEmoteCount();
 
       if (this.user.equalWatching(usr.watching)) {
-        win.lastmessage.ui.classList.toggle('watching-same', true);
+        previousMessage.ui.classList.toggle('watching-same', true);
       }
 
       this.mainwindow.update();
       return;
     }
 
-    if (isCombo && win.lastmessage?.type === MessageTypes.USER) {
-      win.removeLastMessage();
+    if (isCombo && previousMessage?.type === MessageTypes.USER) {
+      win.removeMessage(previousMessage);
       const msg = MessageBuilder.emote(textonly, data.timestamp, 2).into(this);
 
       if (this.user.equalWatching(usr.watching)) {
@@ -1173,7 +1171,7 @@ class Chat {
     }
 
     if (!this.resolveMessage(data.nick, data.data)) {
-      MessageBuilder.message(data.data, usr, data.timestamp).into(this);
+      message.into(this);
     }
   }
 
