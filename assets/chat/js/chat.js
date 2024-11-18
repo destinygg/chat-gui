@@ -804,11 +804,6 @@ class Chat {
       message.highlighted = this.shouldHighlightMessage(message);
     }
 
-    // This looks odd, although it would be a correct implementation
-    /* else if(lastmessage && lastmessage.type === message.type && [MessageTypes.ERROR,MessageTypes.INFO,MessageTypes.COMMAND,MessageTypes.STATUS].indexOf(message.type)){
-            message.continued = true
-        } */
-
     // The point where we actually add the message dom
     win.addMessage(this, message);
 
