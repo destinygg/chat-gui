@@ -757,15 +757,16 @@ class Chat {
   addMessage(message, win = null) {
     // eslint-disable-next-line no-param-reassign
     if (win === null) win = this.mainwindow;
+    const lastmessage = win.getPreviousMessage(message);
 
     // Break the current combo if this message is not an emote
     // We don't need to check what type the current message is, we just know that its a new message, so the combo is invalid.
     if (
-      win.lastmessage &&
-      win.lastmessage.type === MessageTypes.EMOTE &&
-      win.lastmessage.emotecount > 1
+      lastmessage &&
+      lastmessage.type === MessageTypes.EMOTE &&
+      lastmessage.emotecount > 1
     )
-      win.lastmessage.completeCombo();
+      lastmessage.completeCombo();
 
     // Populate the tag and mentioned users for this $message.
     if (
@@ -804,7 +805,7 @@ class Chat {
     }
 
     // This looks odd, although it would be a correct implementation
-    /* else if(win.lastmessage && win.lastmessage.type === message.type && [MessageTypes.ERROR,MessageTypes.INFO,MessageTypes.COMMAND,MessageTypes.STATUS].indexOf(message.type)){
+    /* else if(lastmessage && lastmessage.type === message.type && [MessageTypes.ERROR,MessageTypes.INFO,MessageTypes.COMMAND,MessageTypes.STATUS].indexOf(message.type)){
             message.continued = true
         } */
 
@@ -1147,23 +1148,25 @@ class Chat {
     const textonly = this.removeSlashCmdFromText(data.data);
     const usr = this.users.get(data.nick.toLowerCase());
     const win = this.mainwindow;
+    const message = MessageBuilder.message(data.data, usr, data.timestamp);
+    const lastmessage = win.getPreviousMessage(message);
     const isCombo =
       this.emoteService.canUserUseEmote(usr, textonly) &&
-      this.removeSlashCmdFromText(win.lastmessage?.message) === textonly;
+      this.removeSlashCmdFromText(lastmessage?.message) === textonly;
 
-    if (isCombo && win.lastmessage?.type === MessageTypes.EMOTE) {
-      win.lastmessage.incEmoteCount();
+    if (isCombo && lastmessage?.type === MessageTypes.EMOTE) {
+      lastmessage.incEmoteCount();
 
       if (this.user.equalWatching(usr.watching)) {
-        win.lastmessage.ui.classList.toggle('watching-same', true);
+        lastmessage.ui.classList.toggle('watching-same', true);
       }
 
       this.mainwindow.update();
       return;
     }
 
-    if (isCombo && win.lastmessage?.type === MessageTypes.USER) {
-      win.removeLastMessage();
+    if (isCombo && lastmessage?.type === MessageTypes.USER) {
+      win.removeMessage(lastmessage);
       const msg = MessageBuilder.emote(textonly, data.timestamp, 2).into(this);
 
       if (this.user.equalWatching(usr.watching)) {
@@ -1173,7 +1176,7 @@ class Chat {
     }
 
     if (!this.resolveMessage(data.nick, data.data)) {
-      MessageBuilder.message(data.data, usr, data.timestamp).into(this);
+      message.into(this);
     }
   }
 

@@ -82,9 +82,7 @@ class ChatWindow extends EventEmitter {
     message.afterRender(chat);
 
     // Get index of where the message should be based on timestamp.
-    const index = this.messages.findLastIndex(
-      (m) => m.timestamp.valueOf() <= message.timestamp.valueOf(),
-    );
+    const index = this.getMessageIndex(message);
 
     /**
      * If message index is < 0 then add message to the top of chat.
@@ -108,6 +106,21 @@ class ChatWindow extends EventEmitter {
 
     this.linecount += 1;
     this.cleanupThrottle();
+  }
+
+  getMessageIndex(message) {
+    return this.messages.findLastIndex(
+      (m) => m.timestamp.valueOf() <= message.timestamp.valueOf(),
+    );
+  }
+
+  getPreviousMessage(message) {
+    const index = this.getMessageIndex(message);
+    if (index < 0 || index > this.messages.length) {
+      return null;
+    }
+
+    return this.messages[index];
   }
 
   containsMessage(message) {
@@ -203,6 +216,11 @@ class ChatWindow extends EventEmitter {
   removeLastMessage() {
     this.lastmessage.remove();
     this.messages = this.messages.filter((m) => m !== this.lastmessage);
+  }
+
+  removeMessage(message) {
+    message.remove();
+    this.messages = this.messages.filter((m) => m !== message);
   }
 
   /**
