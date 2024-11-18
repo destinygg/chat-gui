@@ -85,23 +85,20 @@ class ChatWindow extends EventEmitter {
     const index = this.getMessageIndex(message);
 
     /**
-     * If message index is < 0 then add message to the top of chat.
-     *
-     * If message index + 1 >= the length of messages array,
-     * it is a new message so add to bottom of chat.
-     *
-     * Otherwise the message is inbetween so insert in correct place.
+     * If the index of the message is 0 then prepend.
+     * If it's equal the length of the array then append.
+     * Otherwise insert at index.
      */
-    if (index < 0) {
+    if (index === 0) {
       this.lines.prepend(message.ui);
       this.messages.unshift(message);
-    } else if (index + 1 >= this.messages.length) {
+    } else if (index === this.messages.length) {
       this.lines.append(message.ui);
       this.messages.push(message);
       this.lastmessage = message;
     } else {
-      this.lines.insertBefore(message.ui, this.messages[index + 1].ui);
-      this.messages.splice(index + 1, 0, message);
+      this.lines.insertBefore(message.ui, this.messages[index].ui);
+      this.messages.splice(index, 0, message);
     }
 
     this.linecount += 1;
@@ -109,18 +106,20 @@ class ChatWindow extends EventEmitter {
   }
 
   getMessageIndex(message) {
-    return this.messages.findLastIndex(
-      (m) => m.timestamp.valueOf() <= message.timestamp.valueOf(),
+    return (
+      this.messages.findLastIndex(
+        (m) => m.timestamp.valueOf() <= message.timestamp.valueOf(),
+      ) + 1
     );
   }
 
   getPreviousMessage(message) {
     const index = this.getMessageIndex(message);
-    if (index < 0 || index > this.messages.length) {
+    if (index === 0) {
       return null;
     }
 
-    return this.messages[index];
+    return this.messages[index - 1];
   }
 
   containsMessage(message) {
