@@ -757,16 +757,16 @@ class Chat {
   addMessage(message, win = null) {
     // eslint-disable-next-line no-param-reassign
     if (win === null) win = this.mainwindow;
-    const lastmessage = win.getPreviousMessage(message);
+    const previousMessage = win.getPreviousMessage(message);
 
     // Break the current combo if this message is not an emote
     // We don't need to check what type the current message is, we just know that its a new message, so the combo is invalid.
     if (
-      lastmessage &&
-      lastmessage.type === MessageTypes.EMOTE &&
-      lastmessage.emotecount > 1
+      previousMessage &&
+      previousMessage.type === MessageTypes.EMOTE &&
+      previousMessage.emotecount > 1
     )
-      lastmessage.completeCombo();
+      previousMessage.completeCombo();
 
     // Populate the tag and mentioned users for this $message.
     if (
@@ -799,7 +799,7 @@ class Chat {
     // Populate highlight for this $message
     if (message.type === MessageTypes.USER) {
       // check if the last message was from the same user
-      message.continued = win.isContinued(message, lastmessage);
+      message.continued = win.isContinued(message, previousMessage);
       // set highlighted state
       message.highlighted = this.shouldHighlightMessage(message);
     }
@@ -1149,24 +1149,24 @@ class Chat {
     const usr = this.users.get(data.nick.toLowerCase());
     const win = this.mainwindow;
     const message = MessageBuilder.message(data.data, usr, data.timestamp);
-    const lastmessage = win.getPreviousMessage(message);
+    const previousMessage = win.getPreviousMessage(message);
     const isCombo =
       this.emoteService.canUserUseEmote(usr, textonly) &&
-      this.removeSlashCmdFromText(lastmessage?.message) === textonly;
+      this.removeSlashCmdFromText(previousMessage?.message) === textonly;
 
-    if (isCombo && lastmessage?.type === MessageTypes.EMOTE) {
-      lastmessage.incEmoteCount();
+    if (isCombo && previousMessage?.type === MessageTypes.EMOTE) {
+      previousMessage.incEmoteCount();
 
       if (this.user.equalWatching(usr.watching)) {
-        lastmessage.ui.classList.toggle('watching-same', true);
+        previousMessage.ui.classList.toggle('watching-same', true);
       }
 
       this.mainwindow.update();
       return;
     }
 
-    if (isCombo && lastmessage?.type === MessageTypes.USER) {
-      win.removeMessage(lastmessage);
+    if (isCombo && previousMessage?.type === MessageTypes.USER) {
+      win.removeMessage(previousMessage);
       const msg = MessageBuilder.emote(textonly, data.timestamp, 2).into(this);
 
       if (this.user.equalWatching(usr.watching)) {
