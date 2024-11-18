@@ -213,11 +213,6 @@ class ChatWindow extends EventEmitter {
     }
   }
 
-  removeLastMessage() {
-    this.lastmessage.remove();
-    this.messages = this.messages.filter((m) => m !== this.lastmessage);
-  }
-
   removeMessage(message) {
     message.remove();
     this.messages = this.messages.filter((m) => m !== message);
