@@ -799,7 +799,7 @@ class Chat {
     // Populate highlight for this $message
     if (message.type === MessageTypes.USER) {
       // check if the last message was from the same user
-      message.continued = win.isContinued(message);
+      message.continued = win.isContinued(message, lastmessage);
       // set highlighted state
       message.highlighted = this.shouldHighlightMessage(message);
     }
