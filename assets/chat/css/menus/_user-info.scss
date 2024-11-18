@@ -48,6 +48,12 @@ $toolbar-icons-map: (
     .scrollable {
       background: a.$color-chat-bg;
     }
+
+    .content {
+      .msg-chat:first-child {
+        margin-top: 0.75em;
+      }
+    }
   }
 
   .chat-tool-btn {
