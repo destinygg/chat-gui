@@ -33,7 +33,7 @@ module.exports = {
       },
     ],
     'no-continue': 'off',
-    'curly': ['error', 'all'],
+    curly: ['error', 'all'],
   },
   ignorePatterns: ['postcss.config.js'],
   plugins: ['jest'],
