@@ -45,7 +45,9 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     this.chat.output.on('contextmenu', '.msg-chat .user', (e) => {
       // If the target has this class, it's a sub tier label styled to match the
       // username color of the sub (which requires the `user` class).
-      if (e.currentTarget.classList.contains('tier')) return false;
+      if (e.currentTarget.classList.contains('tier')) {
+        return false;
+      }
 
       const message = $(e.currentTarget).closest('.msg-chat');
       this.showUser(e, message);
@@ -104,12 +106,13 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
       if (win) {
         this.chat.windowToFront(this.clickedNick);
       } else {
-        if (!this.chat.whispers.has(this.clickedNick))
+        if (!this.chat.whispers.has(this.clickedNick)) {
           this.chat.whispers.set(this.clickedNick, {
             nick: this.clickedNick,
             unread: 0,
             open: false,
           });
+        }
         this.chat.openConversation(this.clickedNick);
       }
       this.hide();

@@ -53,8 +53,12 @@ export default class ChatWhisperUsers extends ChatMenu {
       } else {
         [...this.chat.whispers.entries()]
           .sort((a, b) => {
-            if (a[1].unread === 0) return 1;
-            if (b[1].unread === 0) return -1;
+            if (a[1].unread === 0) {
+              return 1;
+            }
+            if (b[1].unread === 0) {
+              return -1;
+            }
             return 0;
           })
           .forEach((e) => this.addConversation(e[0], e[1].unread));

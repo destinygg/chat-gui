@@ -43,7 +43,9 @@ export default class ChatEmoteMenu extends ChatMenu {
 
     this.chat.emoteService.tiers.forEach((tier) => {
       const emotes = this.chat.emoteService.emotePrefixesForTier(tier);
-      if (!emotes.length) return;
+      if (!emotes.length) {
+        return;
+      }
 
       const title = tier === 0 ? 'All Users' : `Tier ${tier} Subscribers`;
       const locked =

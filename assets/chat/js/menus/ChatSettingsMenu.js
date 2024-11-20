@@ -37,16 +37,18 @@ export default class ChatSettingsMenu extends ChatMenu {
     if (val !== undefined) {
       switch (name) {
         case 'profilesettings':
-          if (!val && this.chat.authenticated)
+          if (!val && this.chat.authenticated) {
             fetch(`${this.chat.config.api.base}/api/chat/me/settings`, {
               credentials: 'include',
               method: 'DELETE',
             }).catch();
+          }
           break;
         case 'notificationwhisper':
         case 'notificationhighlight':
-          if (val)
+          if (val) {
             this.notificationPermission().then(() => this.updateNotification());
+          }
           break;
         default:
           break;

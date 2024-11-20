@@ -11,19 +11,27 @@ function getBucketId(id) {
 }
 
 function sortResults(a, b) {
-  if (!a || !b) return 0;
+  if (!a || !b) {
+    return 0;
+  }
 
   // order emotes second
-  if (a.isemote !== b.isemote) return a.isemote && !b.isemote ? -1 : 1;
+  if (a.isemote !== b.isemote) {
+    return a.isemote && !b.isemote ? -1 : 1;
+  }
 
   // order according to recency third
-  if (a.weight !== b.weight) return a.weight > b.weight ? -1 : 1;
+  if (a.weight !== b.weight) {
+    return a.weight > b.weight ? -1 : 1;
+  }
 
   // order lexically fourth
   const lowerA = a.data.toLowerCase();
   const lowerB = b.data.toLowerCase();
 
-  if (lowerA === lowerB) return 0;
+  if (lowerA === lowerB) {
+    return 0;
+  }
 
   return lowerA > lowerB ? 1 : -1;
 }
@@ -34,9 +42,13 @@ function buildSearchCriteria(str, offset) {
   const endCaret = post.indexOf(' ');
   let useronly = false;
 
-  if (startCaret > 0) pre = pre.substring(startCaret);
+  if (startCaret > 0) {
+    pre = pre.substring(startCaret);
+  }
 
-  if (endCaret > -1) post = post.substring(0, endCaret);
+  if (endCaret > -1) {
+    post = post.substring(0, endCaret);
+  }
 
   // Ignore the first char as part of the search and flag as a user only search
   if (pre.lastIndexOf('@') === 0 || pre.lastIndexOf('>') === 0) {
@@ -55,13 +67,17 @@ function buildSearchCriteria(str, offset) {
   };
 }
 function timeoutHelpers(ac) {
-  if (suggestTimeoutId) clearTimeout(suggestTimeoutId);
+  if (suggestTimeoutId) {
+    clearTimeout(suggestTimeoutId);
+  }
   suggestTimeoutId = setTimeout(() => ac.reset(), 15000, ac);
 }
 function updateHelpers(ac) {
   ac.chat.ui.toggleClass('chat-autocomplete-in', ac.results.length > 0);
   ac.ui.toggleClass('active', ac.results.length > 0);
-  if (ac.selected === -1) ac.container.css('left', 0);
+  if (ac.selected === -1) {
+    ac.container.css('left', 0);
+  }
 }
 function selectHelper(ac) {
   // Positioning
@@ -140,10 +156,11 @@ class ChatAutoComplete {
       originval = this.input.val().toString();
       const keycode = getKeyCode(e);
       if (keycode === KEYCODES.TAB) {
-        if (this.results.length > 0)
+        if (this.results.length > 0) {
           this.select(
             this.selected >= this.results.length - 1 ? 0 : this.selected + 1,
           );
+        }
         e.preventDefault();
         e.stopPropagation();
       } else if (shiftdown !== e.shiftKey && this.criteria !== null) {
@@ -180,7 +197,9 @@ class ChatAutoComplete {
       const keycode = getKeyCode(e);
       if (keycode !== KEYCODES.TAB && keycode !== KEYCODES.ENTER) {
         const str = this.input.val().toString();
-        if (str.trim().length === 0) this.reset();
+        if (str.trim().length === 0) {
+          this.reset();
+        }
         // If a key WAS pressed, but keypress event did not fire
         // Check if the value changed between the key down, and key up
         // Keys like `backspace`
@@ -266,7 +285,9 @@ class ChatAutoComplete {
   select(index) {
     this.selected = Math.min(index, this.results.length - 1);
     const result = this.results[this.selected];
-    if (!result) return;
+    if (!result) {
+      return;
+    }
 
     const pre = this.criteria.orig.substr(0, this.criteria.startCaret);
     let post = this.criteria.orig.substr(
@@ -275,7 +296,9 @@ class ChatAutoComplete {
 
     // always add a space after our completion if there isn't one since people
     // would usually add one anyway
-    if (post[0] !== ' ' || post.length === 0) post = ` ${post}`;
+    if (post[0] !== ' ' || post.length === 0) {
+      post = ` ${post}`;
+    }
     this.input.focus().val(pre + result.data + post);
 
     // Move the caret to the end of the replacement string + 1 for the space

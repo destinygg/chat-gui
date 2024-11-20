@@ -10,13 +10,19 @@ export default class UrlFormatter {
   }
 
   format(chat, str) {
-    if (!str) return undefined;
+    if (!str) {
+      return undefined;
+    }
     const self = this;
     let extraclass = '';
 
-    if (/\b(?:NSFL)\b/i.test(str)) extraclass = 'nsfl-link';
-    else if (/\b(?:NSFW)\b/i.test(str)) extraclass = 'nsfw-link';
-    else if (/\b(?:SPOILERS)\b/i.test(str)) extraclass = 'spoilers-link';
+    if (/\b(?:NSFL)\b/i.test(str)) {
+      extraclass = 'nsfl-link';
+    } else if (/\b(?:NSFW)\b/i.test(str)) {
+      extraclass = 'nsfw-link';
+    } else if (/\b(?:SPOILERS)\b/i.test(str)) {
+      extraclass = 'spoilers-link';
+    }
 
     return str.replace(linkregex, (url, scheme) => {
       const decodedUrl = self.elem.html(url).text();

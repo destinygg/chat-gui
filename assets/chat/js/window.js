@@ -76,7 +76,9 @@ class ChatWindow extends EventEmitter {
 
   addMessage(chat, message) {
     // Return if message is already in chat.
-    if (this.containsMessage(message)) return;
+    if (this.containsMessage(message)) {
+      return;
+    }
 
     message.ui = message.html(chat);
     message.afterRender(chat);

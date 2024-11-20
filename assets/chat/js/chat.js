@@ -458,8 +458,11 @@ class Chat {
         100,
         () => {
           this.ishidden = (document.visibilityState || 'visible') !== 'visible';
-          if (!this.ishidden) this.focusIfNothingSelected();
-          else ChatMenu.closeMenus(this);
+          if (!this.ishidden) {
+            this.focusIfNothingSelected();
+          } else {
+            ChatMenu.closeMenus(this);
+          }
         },
         { atBegin: false },
       ),
@@ -672,7 +675,9 @@ class Chat {
 
   // Save settings if save=true then apply current settings to chat
   applySettings(save = true) {
-    if (save) this.saveSettings();
+    if (save) {
+      this.saveSettings();
+    }
 
     // Formats
     DATE_FORMATS.TIME = this.settings.get('timestampformat');
@@ -725,7 +730,9 @@ class Chat {
   }
 
   addUser(data) {
-    if (!data) return null;
+    if (!data) {
+      return null;
+    }
     const normalized = data.nick.toLowerCase();
     let user = this.users.get(normalized);
     if (!user) {
@@ -755,7 +762,7 @@ class Chat {
   }
 
   addMessage(message, win = null) {
-    // eslint-disable-next-line no-param-reassign
+    // eslint-disable-next-line no-param-reassign, curly
     if (win === null) win = this.mainwindow;
     const previousMessage = win.getPreviousMessage(message);
 
@@ -765,8 +772,9 @@ class Chat {
       previousMessage &&
       previousMessage.type === MessageTypes.EMOTE &&
       previousMessage.emotecount > 1
-    )
+    ) {
       previousMessage.completeCombo();
+    }
 
     // Populate the tag and mentioned users for this $message.
     if (
@@ -856,7 +864,9 @@ class Chat {
     const win = this.windows.get(name);
     if (win !== null && win !== this.getActiveWindow()) {
       this.windows.forEach((w) => {
-        if (w.visible) w.hide();
+        if (w.visible) {
+          w.hide();
+        }
       });
       win.show();
       win.update();
@@ -928,7 +938,9 @@ class Chat {
 
     this.windowselect.toggle(this.windows.size > 1);
 
-    if (this.mainwindow !== null) this.mainwindow.update();
+    if (this.mainwindow !== null) {
+      this.mainwindow.update();
+    }
   }
 
   getActiveMenu() {
@@ -1055,19 +1067,25 @@ class Chat {
         users.push(this.addUser(data.recipient));
       }
       users.forEach((u) => {
-        if (this.ignored(u.username)) return;
+        if (this.ignored(u.username)) {
+          return;
+        }
         this.autocomplete.add(u.displayName, false, Date.now());
       });
     }
   }
 
   onCLOSE(retryMilli) {
-    if (this.chatpoll.isPollStarted()) this.chatpoll.endPoll(); // end poll on disconnect so it is not there forever.
-    if (retryMilli > 0)
+    if (this.chatpoll.isPollStarted()) {
+      this.chatpoll.endPoll();
+    } // end poll on disconnect so it is not there forever.
+    if (retryMilli > 0) {
       MessageBuilder.error(
         `Disconnected, retry in ${Math.round(retryMilli / 1000)} seconds ...`,
       ).into(this);
-    else MessageBuilder.error(`Disconnected.`).into(this);
+    } else {
+      MessageBuilder.error(`Disconnected.`).into(this);
+    }
   }
 
   onCONNECTING(url) {
@@ -1116,9 +1134,13 @@ class Chat {
   }
 
   onPIN(msg) {
-    if (this.pinnedMessage?.uuid === msg.uuid) return;
+    if (this.pinnedMessage?.uuid === msg.uuid) {
+      return;
+    }
     this.pinnedMessage?.unpin();
-    if (!msg.data) return;
+    if (!msg.data) {
+      return;
+    }
 
     const usr = this.users.get(msg.nick.toLowerCase()) ?? new ChatUser(msg);
     this.pinnedMessage = MessageBuilder.pinned(
@@ -1446,12 +1468,13 @@ class Chat {
   onPRIVMSG(data) {
     const normalized = data.nick.toLowerCase();
     if (!this.ignored(normalized, data.data)) {
-      if (!this.whispers.has(normalized))
+      if (!this.whispers.has(normalized)) {
         this.whispers.set(normalized, {
           nick: data.nick,
           unread: 0,
           open: false,
         });
+      }
 
       const conv = this.whispers.get(normalized);
       const user = this.users.get(normalized) || new ChatUser(data.nick);
@@ -1459,7 +1482,7 @@ class Chat {
         ? data.messageid
         : null;
 
-      if (this.settings.get('showhispersinchat'))
+      if (this.settings.get('showhispersinchat')) {
         MessageBuilder.whisper(
           data.data,
           user,
@@ -1467,20 +1490,23 @@ class Chat {
           data.timestamp,
           messageid,
         ).into(this);
-      if (this.settings.get('notificationwhisper') && this.ishidden)
+      }
+      if (this.settings.get('notificationwhisper') && this.ishidden) {
         this.showNotification(
           `${data.nick} whispered ...`,
           data.data,
           data.timestamp,
           this.settings.get('notificationtimeout'),
         );
+      }
 
       const win = this.getWindow(normalized);
-      if (win)
+      if (win) {
         MessageBuilder.historical(data.data, user, data.timestamp).into(
           this,
           win,
         );
+      }
       if (win === this.getActiveWindow()) {
         fetch(`${this.config.api.base}/api/messages/msg/${messageid}/open`, {
           credentials: 'include',
@@ -1605,11 +1631,15 @@ class Chat {
 
   onEVENTSELECTED() {
     // Hide full pinned message interface to make everything look nice
-    if (this.pinnedMessage) this.pinnedMessage.hidden = true;
+    if (this.pinnedMessage) {
+      this.pinnedMessage.hidden = true;
+    }
   }
 
   onEVENTUNSELECTED() {
-    if (this.pinnedMessage) this.pinnedMessage.hidden = false;
+    if (this.pinnedMessage) {
+      this.pinnedMessage.hidden = false;
+    }
   }
 
   cmdSHOWPOLL() {
@@ -1739,7 +1769,9 @@ class Chat {
         validUsernames.forEach((username) => {
           this.ignore(username, true);
           const user = this.users.get(username);
-          if (user) this.autocomplete.remove(user.displayName, true);
+          if (user) {
+            this.autocomplete.remove(user.displayName, true);
+          }
         });
         const resultArray = Array.from(validUsernames.values());
         const resultMessage =
@@ -1771,7 +1803,9 @@ class Chat {
         validUsernames.forEach((username) => {
           this.ignore(username, false);
           const user = this.users.get(username);
-          if (user) this.autocomplete.add(user.displayName, false, Date.now());
+          if (user) {
+            this.autocomplete.add(user.displayName, false, Date.now());
+          }
         });
         const haveOrHas = parts.length === 1 ? 'has' : 'have';
         MessageBuilder.status(
@@ -1832,8 +1866,11 @@ class Chat {
         nick: parts[0],
         reason: parts.slice(2, parts.length).join(' '),
       };
-      if (/^perm/i.test(parts[1])) payload.ispermanent = true;
-      else payload.duration = this.parseTimeInterval(parts[1]);
+      if (/^perm/i.test(parts[1])) {
+        payload.ispermanent = true;
+      } else {
+        payload.duration = this.parseTimeInterval(parts[1]);
+      }
 
       payload.banip = command === 'IPBAN';
 
@@ -1883,11 +1920,13 @@ class Chat {
   cmdHIGHLIGHT(parts, command) {
     const highlights = this.settings.get('highlightnicks');
     if (parts.length === 0) {
-      if (highlights.length > 0)
+      if (highlights.length > 0) {
         MessageBuilder.info(
           `Currently highlighted users: ${highlights.join(',')}.`,
         ).into(this);
-      else MessageBuilder.info(`No highlighted users.`).into(this);
+      } else {
+        MessageBuilder.info(`No highlighted users.`).into(this);
+      }
       return;
     }
     if (!nickregex.test(parts[0])) {
@@ -1897,11 +1936,15 @@ class Chat {
     const i = highlights.indexOf(nick);
     switch (command) {
       case 'UNHIGHLIGHT':
-        if (i !== -1) highlights.splice(i, 1);
+        if (i !== -1) {
+          highlights.splice(i, 1);
+        }
         break;
       case 'HIGHLIGHT':
       default:
-        if (i === -1) highlights.push(nick);
+        if (i === -1) {
+          highlights.push(nick);
+        }
         break;
     }
     MessageBuilder.info(
@@ -2172,12 +2215,13 @@ class Chat {
       if (win !== (null || undefined)) {
         this.windowToFront(normalized);
       } else {
-        if (!this.whispers.has(normalized))
+        if (!this.whispers.has(normalized)) {
           this.whispers.set(normalized, {
             nick: normalized,
             unread: 0,
             open: false,
           });
+        }
         this.openConversation(normalized);
       }
     } else {
@@ -2282,7 +2326,9 @@ class Chat {
       parts[1] = parts[0];
       parts[0] = this.user.username;
     }
-    if (!parts[0]) parts[0] = this.user.username;
+    if (!parts[0]) {
+      parts[0] = this.user.username;
+    }
     if (!parts[0] || !nickregex.test(parts[0].toLowerCase())) {
       MessageBuilder.error('Invalid nick - /mentions <nick> <limit>').into(
         this,
@@ -2600,7 +2646,9 @@ class Chat {
         icon: '/notifyicon.png?v2',
         dir: 'auto',
       });
-      if (timeout) setTimeout(() => n.close(), 8000);
+      if (timeout) {
+        setTimeout(() => n.close(), 8000);
+      }
     }
   }
 
@@ -2628,7 +2676,9 @@ class Chat {
     const url = window.location || window.location.href || null;
     const regex = new RegExp(`[?&]${sanitizedName}(=([^&#]*)|&|#|$)`);
     const results = regex.exec(url);
-    if (!results || !results[2]) return null;
+    if (!results || !results[2]) {
+      return null;
+    }
     return decodeURIComponent(results[2].replace(/\+/g, ' '));
   }
 

@@ -5,14 +5,22 @@ import MessageTypes from './MessageTypes';
 import { EmoteFormatter } from '../formatters';
 
 function ChatEmoteMessageCount(message) {
-  if (!message || !message.combo) return;
+  if (!message || !message.combo) {
+    return;
+  }
 
   let stepClass = 'x2';
-  if (message.emotecount >= 50) stepClass = 'x50';
-  else if (message.emotecount >= 30) stepClass = 'x30';
-  else if (message.emotecount >= 20) stepClass = 'x20';
-  else if (message.emotecount >= 10) stepClass = 'x10';
-  else if (message.emotecount >= 5) stepClass = 'x5';
+  if (message.emotecount >= 50) {
+    stepClass = 'x50';
+  } else if (message.emotecount >= 30) {
+    stepClass = 'x30';
+  } else if (message.emotecount >= 20) {
+    stepClass = 'x20';
+  } else if (message.emotecount >= 10) {
+    stepClass = 'x10';
+  } else if (message.emotecount >= 5) {
+    stepClass = 'x5';
+  }
 
   message.ui.setAttribute('data-combo', message.emotecount);
   message.ui.setAttribute('data-combo-group', stepClass);

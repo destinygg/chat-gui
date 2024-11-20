@@ -24,7 +24,9 @@ export default class ChatRegularSubscriptionMessage extends ChatSubscriptionMess
     const attributes = message
       .getAttributeNames()
       .reduce((object, attributeName) => {
-        if (attributeName === 'class') return object;
+        if (attributeName === 'class') {
+          return object;
+        }
         return {
           ...object,
           [attributeName]: message.getAttribute(attributeName),
