@@ -1290,10 +1290,9 @@ class Chat {
       case 'muted':
         this.mutedtimer.setTimer(data.muteTimeLeft);
         this.mutedtimer.startTimer();
+        let messageText = `You are temporarily muted! You can chat again ${this.mutedtimer.getReadableDuration()}. <a href="https://www.destiny.gg/subscribe">Subscribe</a>, or <a href="https://www.destiny.gg/donate">donate</a>, to remove the mute immediately.`
 
-        message = MessageBuilder.error(
-          `You are temporarily muted! You can chat again ${this.mutedtimer.getReadableDuration()}. Subscribe to remove the mute immediately.`,
-        );
+        message = new ChatMessage(messageText, null, MessageTypes.ERROR, true);
         break;
       case 'bannedphrase': {
         message = MessageBuilder.error(
