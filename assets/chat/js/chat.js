@@ -1164,12 +1164,10 @@ class Chat {
     if (isCombo && win.lastmessage?.type === MessageTypes.USER) {
       const lastMessage = win.lastmessage;
       win.removeLastMessage();
-      const msg = MessageBuilder.emote(
-        textonly,
-        lastMessage.timestamp,
-        [lastMessage, message],
-        2,
-      ).into(this);
+      const msg = MessageBuilder.emote(textonly, lastMessage.timestamp, [
+        lastMessage,
+        message,
+      ]).into(this);
 
       if (this.user.equalWatching(usr.watching)) {
         msg.ui.classList.add('watching-same');
