@@ -81,45 +81,12 @@ class ChatWindow extends EventEmitter {
     message.ui = message.html(chat);
     message.afterRender(chat);
 
-    // Get index of where the message should be based on timestamp.
-    const index = this.getMessageIndex(message);
-
-    /**
-     * If the index of the message is 0 then prepend.
-     * If it's equal the length of the array then append.
-     * Otherwise insert at index.
-     */
-    if (index === 0) {
-      this.lines.prepend(message.ui);
-      this.messages.unshift(message);
-    } else if (index === this.messages.length) {
-      this.lines.append(message.ui);
-      this.messages.push(message);
-      this.lastmessage = message;
-    } else {
-      this.lines.insertBefore(message.ui, this.messages[index].ui);
-      this.messages.splice(index, 0, message);
-    }
+    this.lines.append(message.ui);
+    this.messages.push(message);
+    this.lastmessage = message;
 
     this.linecount += 1;
     this.cleanupThrottle();
-  }
-
-  getMessageIndex(message) {
-    return (
-      this.messages.findLastIndex(
-        (m) => m.timestamp.valueOf() <= message.timestamp.valueOf(),
-      ) + 1
-    );
-  }
-
-  getPreviousMessage(message) {
-    const index = this.getMessageIndex(message);
-    if (index === 0) {
-      return null;
-    }
-
-    return this.messages[index - 1];
   }
 
   containsMessage(message) {
@@ -212,9 +179,9 @@ class ChatWindow extends EventEmitter {
     }
   }
 
-  removeMessage(message) {
-    message.remove();
-    this.messages = this.messages.filter((m) => m !== message);
+  removeLastMessage() {
+    this.lastmessage.remove();
+    this.messages = this.messages.filter((m) => m !== this.lastmessage);
   }
 
   /**
