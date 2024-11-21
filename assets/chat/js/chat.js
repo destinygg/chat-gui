@@ -1148,7 +1148,10 @@ class Chat {
     const textonly = this.removeSlashCmdFromText(data.data);
     const usr = this.users.get(data.nick.toLowerCase());
     const win = this.mainwindow;
+
     const message = MessageBuilder.message(data.data, usr, data.timestamp);
+    if (win.containsMessage(message)) return;
+
     const isCombo =
       this.emoteService.canUserUseEmote(usr, textonly) &&
       this.removeSlashCmdFromText(win.lastmessage?.message) === textonly;
