@@ -1157,7 +1157,7 @@ class Chat {
       this.removeSlashCmdFromText(win.lastmessage?.message) === textonly;
 
     if (isCombo && win.lastmessage?.type === MessageTypes.EMOTE) {
-      win.lastmessage.add(message.md5);
+      win.lastmessage.add(message);
 
       if (this.user.equalWatching(usr.watching)) {
         win.lastmessage.ui.classList.toggle('watching-same', true);
@@ -1168,12 +1168,12 @@ class Chat {
     }
 
     if (isCombo && win.lastmessage?.type === MessageTypes.USER) {
-      const lastMessageMd5 = win.lastmessage.md5;
+      const lastMessage = win.lastmessage;
       win.removeLastMessage();
       const msg = MessageBuilder.emote(
         textonly,
-        data.timestamp,
-        [lastMessageMd5, message.md5],
+        lastMessage.timestamp,
+        [lastMessage, message],
         2,
       ).into(this);
 
