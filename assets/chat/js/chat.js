@@ -82,6 +82,7 @@ class Chat {
     this.subonlyicon = null;
     this.loginscrn = null;
     this.loadingscrn = null;
+    this.showwelcome = true;
     this.showmotd = true;
     this.subonly = false;
     this.authenticated = false;
@@ -550,7 +551,6 @@ class Chat {
     this.mainwindow.update(true);
 
     this.setDefaultPlaceholderText();
-    MessageBuilder.status(this.config.welcomeMessage).into(this);
     return Promise.resolve(this);
   }
 
@@ -1092,6 +1092,11 @@ class Chat {
   }
 
   onNAMES(data) {
+    if (this.showwelcome) {
+      MessageBuilder.status(this.config.welcomeMessage).into(this);
+      this.showwelcome = false;
+    }
+
     MessageBuilder.status(
       `Connected as ${
         this.authenticated ? this.user.displayName : 'Guest'
@@ -1099,6 +1104,7 @@ class Chat {
         data.users.length
       } users.`,
     ).into(this);
+
     if (this.showmotd) {
       this.cmdHINT([Math.floor(Math.random() * hintstrings.size)]);
       this.showmotd = false;
