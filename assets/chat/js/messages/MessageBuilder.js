@@ -41,8 +41,8 @@ export default class MessageBuilder {
     return new ChatUserMessage(message, user, timestamp);
   }
 
-  static emote(emote, timestamp, count = 1) {
-    return new ChatEmoteMessage(emote, timestamp, count);
+  static emote(emote, timestamp, messages) {
+    return new ChatEmoteMessage(emote, timestamp, messages);
   }
 
   static whisper(message, user, target, timestamp = null, id = null) {
