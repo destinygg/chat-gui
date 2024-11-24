@@ -11,7 +11,9 @@ const isTouchDevice =
 class ChatScrollPlugin {
   constructor(viewport, target = undefined) {
     this.viewport = $(viewport).get(0);
-    if (!this.viewport) return;
+    if (!this.viewport) {
+      return;
+    }
     this.target = $(target) ?? $(viewport);
 
     this.scroller = OverlayScrollbars(
@@ -82,7 +84,9 @@ class ChatScrollPlugin {
   }
 
   update(forcePin) {
-    if (this.wasPinned || forcePin) this.scrollBottom();
+    if (this.wasPinned || forcePin) {
+      this.scrollBottom();
+    }
   }
 
   reset() {

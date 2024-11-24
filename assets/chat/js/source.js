@@ -64,8 +64,9 @@ class ChatSource extends EventEmitter {
   }
 
   disconnect() {
-    if (this.socket && this.socket.readyState !== this.socket.CLOSED)
+    if (this.socket && this.socket.readyState !== this.socket.CLOSED) {
       this.socket.close();
+    }
   }
 
   onOpen(e) {

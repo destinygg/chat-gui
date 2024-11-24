@@ -17,11 +17,15 @@ export default class ChatEventMessage extends ChatMessage {
       .querySelector('#event-template')
       ?.content.cloneNode(true).firstElementChild;
 
-    if (this.user && this.user.username && !this.user.isSystem())
+    if (this.user && this.user.username && !this.user.isSystem()) {
       eventTemplate.dataset.username = this.user.username;
-    if (this.mentioned && this.mentioned.length > 0)
+    }
+    if (this.mentioned && this.mentioned.length > 0) {
       eventTemplate.dataset.mentioned = this.mentioned.join(' ').toLowerCase();
-    if (this.slashme) eventTemplate.classList.add('msg-me');
+    }
+    if (this.slashme) {
+      eventTemplate.classList.add('msg-me');
+    }
 
     if (this.message) {
       eventTemplate.querySelector('.event-bottom').innerHTML =

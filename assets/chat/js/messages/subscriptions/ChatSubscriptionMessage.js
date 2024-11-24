@@ -43,8 +43,12 @@ export default class ChatSubscriptionMessage extends ChatEventMessage {
       chat.flairs,
     );
 
-    if (tierColor) eventTemplate.style.borderColor = tierColor;
-    if (rainbowColor) eventTemplate.classList.add('rainbow-border');
+    if (tierColor) {
+      eventTemplate.style.borderColor = tierColor;
+    }
+    if (rainbowColor) {
+      eventTemplate.classList.add('rainbow-border');
+    }
 
     const colorFlair = usernameColorFlair(chat.flairs, this.user);
 
@@ -53,7 +57,9 @@ export default class ChatSubscriptionMessage extends ChatEventMessage {
       .querySelector('#user-template')
       ?.content.cloneNode(true).firstElementChild;
     user.title = this.title;
-    if (colorFlair) user.classList.add(colorFlair.name);
+    if (colorFlair) {
+      user.classList.add(colorFlair.name);
+    }
     user.innerText = this.user.displayName;
 
     const tierLabel = this.tierLabel ?? `Tier ${this.tier}`;
@@ -62,7 +68,9 @@ export default class ChatSubscriptionMessage extends ChatEventMessage {
     const tier = document
       .querySelector('#tier-template')
       ?.content.cloneNode(true).firstElementChild;
-    if (tierClass) tier.classList.add(...tierClass.split(' '));
+    if (tierClass) {
+      tier.classList.add(...tierClass.split(' '));
+    }
     tier.style.color = tierColor;
     tier.innerText = tierLabel;
 

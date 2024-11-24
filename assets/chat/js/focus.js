@@ -17,8 +17,9 @@ class ChatUserFocus {
   toggleElement(target) {
     const t = $(target);
     if (t.hasClass('chat-user')) {
-      if (!this.chat.settings.get('focusmentioned'))
+      if (!this.chat.settings.get('focusmentioned')) {
         this.toggleFocus(t.closest('.msg-user').data('username'), false, true);
+      }
       this.toggleFocus(t.text());
     } else if (t.hasClass('user') && !t.hasClass('tier')) {
       this.toggleFocus(t.text());

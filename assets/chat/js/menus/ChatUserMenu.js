@@ -24,8 +24,12 @@ const UserMenuSections = [
 function userComparator(a, b) {
   const u1Nick = a.getAttribute('data-username').toLowerCase();
   const u2Nick = b.getAttribute('data-username').toLowerCase();
-  if (u1Nick < u2Nick) return -1;
-  if (u1Nick > u2Nick) return 1;
+  if (u1Nick < u2Nick) {
+    return -1;
+  }
+  if (u1Nick > u2Nick) {
+    return 1;
+  }
   return 0;
 }
 
@@ -115,8 +119,11 @@ export default class ChatUserMenu extends ChatMenu {
               section.users.children.length === 1 ? '' : 's'
             }${this.buildFeatures(section.data.flairs)}`,
           );
-          if (section.searchcount === 0) $(section.container).hide();
-          else $(section.container).show();
+          if (section.searchcount === 0) {
+            $(section.container).hide();
+          } else {
+            $(section.container).show();
+          }
         });
       } else {
         this.header.text(`Users (${this.totalcount})`);
@@ -126,8 +133,11 @@ export default class ChatUserMenu extends ChatMenu {
               section.users.children.length === 1 ? '' : 's'
             }${this.buildFeatures(section.data.flairs)}`,
           );
-          if (section.users.children.length === 0) $(section.container).hide();
-          else $(section.container).show();
+          if (section.users.children.length === 0) {
+            $(section.container).hide();
+          } else {
+            $(section.container).show();
+          }
         });
       }
       this.ui.toggleClass('search-in', searching);
@@ -206,7 +216,9 @@ export default class ChatUserMenu extends ChatMenu {
             break;
           }
 
-          if (index < lowestIndex) lowestIndex = index;
+          if (index < lowestIndex) {
+            lowestIndex = index;
+          }
         }
       }
       return lowestIndex > flairs.length
@@ -266,12 +278,18 @@ export default class ChatUserMenu extends ChatMenu {
       let max = items.length;
       let index = Math.floor((min + max) / 2);
       while (max > min) {
-        if (userComparator.apply(this, [usr[0], items[index]]) < 0) max = index;
-        else min = index + 1;
+        if (userComparator.apply(this, [usr[0], items[index]]) < 0) {
+          max = index;
+        } else {
+          min = index + 1;
+        }
         index = Math.floor((min + max) / 2);
       }
-      if (index - 1 < 0) usr.insertBefore(items[0]);
-      else usr.insertAfter(items[index - 1]);
+      if (index - 1 < 0) {
+        usr.insertBefore(items[0]);
+      } else {
+        usr.insertAfter(items[index - 1]);
+      }
     } else {
       section.users.append(usr[0]);
     }

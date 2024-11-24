@@ -49,7 +49,9 @@ export default class ChatMessage extends ChatUIMessage {
   html(chat = null) {
     const classes = [];
     const attr = {};
-    if (this.continued) classes.push('msg-continue');
+    if (this.continued) {
+      classes.push('msg-continue');
+    }
     return this.wrap(
       `${this.buildTime()} ${this.buildMessageTxt(chat)}`,
       classes,
@@ -63,10 +65,11 @@ export default class ChatMessage extends ChatUIMessage {
       this.message.substring(0, 4).toLowerCase() === '/me '
         ? this.message.substring(4)
         : this.message;
-    if (!this.unformatted)
+    if (!this.unformatted) {
       formatters.forEach((f) => {
         msg = f.format(chat, msg, this);
       });
+    }
     return `<span class="text">${msg}</span>`;
   }
 
@@ -164,7 +167,9 @@ export default class ChatMessage extends ChatUIMessage {
   setContinued(isContinued) {
     this.ui.classList.toggle('msg-continue', isContinued);
     const ctrl = this.ui.querySelector('.ctrl');
-    if (ctrl) ctrl.textContent = isContinued ? '' : ': ';
+    if (ctrl) {
+      ctrl.textContent = isContinued ? '' : ': ';
+    }
 
     this.continued = isContinued;
   }

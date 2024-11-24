@@ -9,9 +9,13 @@ export default class EmbedUrlFormatter {
     const target = chat.isBigscreenEmbed() ? '_top' : '_blank';
     let extraclass = '';
 
-    if (/\b(?:NSFL)\b/i.test(str)) extraclass = 'nsfl-link';
-    else if (/\b(?:NSFW)\b/i.test(str)) extraclass = 'nsfw-link';
-    else if (/\b(?:SPOILERS)\b/i.test(str)) extraclass = 'spoilers-link';
+    if (/\b(?:NSFL)\b/i.test(str)) {
+      extraclass = 'nsfl-link';
+    } else if (/\b(?:NSFW)\b/i.test(str)) {
+      extraclass = 'nsfw-link';
+    } else if (/\b(?:SPOILERS)\b/i.test(str)) {
+      extraclass = 'spoilers-link';
+    }
 
     const baseUrl = chat.config.dggOrigin + chat.bigscreenPath;
     return str.replace(

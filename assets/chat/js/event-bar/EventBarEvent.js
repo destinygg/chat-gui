@@ -54,8 +54,12 @@ export default class EventBarEvent extends EventEmitter {
           chat.flairs,
         );
 
-        if (tierColor) eventTemplate.style.borderColor = tierColor;
-        if (rainbowColor) eventTemplate.classList.add('rainbow-border');
+        if (tierColor) {
+          eventTemplate.style.borderColor = tierColor;
+        }
+        if (rainbowColor) {
+          eventTemplate.classList.add('rainbow-border');
+        }
         break;
       }
       case MessageTypes.DONATION: {
