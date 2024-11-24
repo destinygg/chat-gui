@@ -1290,7 +1290,7 @@ class Chat {
       case 'muted': {
         this.mutedtimer.setTimer(data.muteTimeLeft);
         this.mutedtimer.startTimer();
-        const messageText = `You are temporarily muted! You can chat again ${this.mutedtimer.getReadableDuration()}. <a href="${this.config.dggOrigin}/subscribe">Subscribe</a>, or <a href="${this.config.dggOrigin}/donate">donate</a>, to remove the mute immediately.`;
+        const messageText = `You are temporarily muted! You can chat again ${this.mutedtimer.getReadableDuration()}. <a href="/subscribe">Subscribe</a>, or <a href="/donate">donate</a>, to remove the mute immediately.`;
 
         message = new ChatMessage(messageText, null, MessageTypes.ERROR, true);
         break;
