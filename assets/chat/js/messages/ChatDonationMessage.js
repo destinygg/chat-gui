@@ -21,6 +21,8 @@ export default class ChatDonationMessage extends ChatEventMessage {
     this.type = MessageTypes.DONATION;
     this.amount = amount;
     this.expirationTimestamp = expirationTimestamp;
+
+    this.generateMessageHash();
   }
 
   html(chat = null) {
