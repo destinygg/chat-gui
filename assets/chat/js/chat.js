@@ -636,10 +636,12 @@ class Chat {
   }
 
   setPreLoginText() {
-    const chatText = ChatStore.read('chat.preLoginText') || '';
+    const chatText = ChatStore.read('chat.preLoginText');
+    if (chatText === null) {
+      return;
+    }
     this.input.val(chatText);
     ChatStore.remove('chat.preLoginText');
-    this.input.focus();
   }
 
   setEmotes(emotes) {
