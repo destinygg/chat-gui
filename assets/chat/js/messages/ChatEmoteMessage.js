@@ -35,9 +35,14 @@ function ChatEmoteMessageCount(message) {
 const ChatEmoteMessageCountThrottle = throttle(63, ChatEmoteMessageCount);
 
 export default class ChatEmoteMessage extends ChatMessage {
-  constructor(emote, timestamp, count = 1) {
+  messages = [];
+
+  emotecount = 0;
+
+  constructor(emote, timestamp, messages) {
     super(emote, timestamp, MessageTypes.EMOTE);
-    this.emotecount = count;
+    this.messages = messages;
+    this.emotecount = messages.length;
     this.emoteFormatter = new EmoteFormatter();
   }
 
@@ -70,9 +75,14 @@ export default class ChatEmoteMessage extends ChatMessage {
     this.ui.append(this.text.get(0), this.combo.get(0));
   }
 
-  incEmoteCount() {
+  add(message) {
+    this.messages.push(message);
     this.emotecount += 1;
     ChatEmoteMessageCountThrottle(this);
+  }
+
+  containsMessage(message) {
+    return this.messages.find((msg) => msg.md5 === message.md5);
   }
 
   completeCombo() {
