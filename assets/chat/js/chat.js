@@ -762,8 +762,10 @@ class Chat {
   }
 
   addMessage(message, win = null) {
-    // eslint-disable-next-line no-param-reassign, curly
-    if (win === null) win = this.mainwindow;
+    if (win === null) {
+      // eslint-disable-next-line no-param-reassign
+      win = this.mainwindow;
+    }
 
     // Break the current combo if this message is not an emote
     // We don't need to check what type the current message is, we just know that its a new message, so the combo is invalid.
