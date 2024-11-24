@@ -61,15 +61,13 @@
   display: flex;
 
   .user-actions {
+    display: flex;
     position: absolute;
     right: a.$gutter-md;
 
-    .mention-nick,
     .whisper-nick {
+      @include a.icon-background('../img/icon-whisper.svg');
       visibility: hidden;
-      margin-right: a.$gutter-xs;
-      margin-top: 0.45em;
-      display: inline-block;
       opacity: 0.25;
       width: 1em;
       height: 1em;
@@ -77,20 +75,11 @@
         opacity: 1;
       }
     }
-
-    .mention-nick {
-      @include a.icon-background('../img/icon-share.svg');
-    }
-
-    .whisper-nick {
-      @include a.icon-background('../img/icon-whisper.svg');
-    }
   }
 
   &:hover {
     background: #282828;
 
-    .mention-nick,
     .whisper-nick {
       visibility: visible;
     }

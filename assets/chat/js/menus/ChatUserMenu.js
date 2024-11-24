@@ -57,15 +57,6 @@ export default class ChatUserMenu extends ChatMenu {
         true,
       ),
     );
-    this.container.on('click', '.mention-nick', (e) => {
-      ChatMenu.closeMenus(this.chat);
-      const value = this.chat.input.val().toString().trim();
-      const username = $(e.target).parent().parent().data('username');
-      this.chat.input
-        .val(`${value + (value === '' ? '' : ' ') + username} `)
-        .focus();
-      return false;
-    });
     this.container.on('click', '.whisper-nick', (e) => {
       ChatMenu.closeMenus(this.chat);
       const value = this.chat.input.val().toString().trim();
@@ -257,7 +248,7 @@ export default class ChatUserMenu extends ChatMenu {
     const features =
       user.features.length === 0 ? 'nofeature' : user.features.join(' ');
     const usr = $(
-      `<div class="user-entry" data-username="${user.username}" data-user-id="${user.id}"><span class="user ${features}">${label}</span><div class="user-actions"><i class="mention-nick" data-tippy-content="Mention"></i><i class="whisper-nick" data-tippy-content="Whisper"></i></div></div>`,
+      `<div class="user-entry" data-username="${user.username}" data-user-id="${user.id}"><span class="user ${features}">${label}</span><div class="user-actions"><i class="whisper-nick" data-tippy-content="Whisper"></i></div></div>`,
     );
     usr.find('[data-tippy-content]').each(function registerTippy() {
       tippy(this, {
