@@ -53,13 +53,6 @@ export default class ChatUserMenu extends ChatMenu {
         true,
       ),
     );
-    this.userActionsNode = this.createUserActionNode();
-    this.container.on('mouseenter', '.user-entry', (e) => {
-      e.currentTarget.appendChild(this.userActionsNode);
-    });
-    this.container.on('mouseleave', '.user-entry', (e) => {
-      e.currentTarget.removeChild(this.userActionsNode);
-    });
     this.container.on('click', '.whisper-nick', (e) => {
       ChatMenu.closeMenus(this.chat);
       const value = this.chat.input.val().toString().trim();
@@ -91,23 +84,6 @@ export default class ChatUserMenu extends ChatMenu {
         { atBegin: false },
       ),
     );
-  }
-
-  createUserActionNode() {
-    const userActions = document.createElement('div');
-    userActions.classList.add('user-actions');
-    const whisperButton = document.createElement('i');
-    whisperButton.classList.add('whisper-nick');
-    userActions.append(whisperButton);
-    tippy(whisperButton, {
-      content: 'Whisper',
-      arrow: roundArrow,
-      duration: 0,
-      maxWidth: 250,
-      hideOnClick: false,
-      theme: 'dgg',
-    });
-    return userActions;
   }
 
   show() {
@@ -260,8 +236,18 @@ export default class ChatUserMenu extends ChatMenu {
     const features =
       user.features.length === 0 ? 'nofeature' : user.features.join(' ');
     const usr = $(
-      `<div class="user-entry" data-username="${user.username}" data-user-id="${user.id}"><span class="user ${features}">${label}</span></div>`,
+      `<div class="user-entry" data-username="${user.username}" data-user-id="${user.id}"><span class="user ${features}">${label}</span><div class="user-actions"><i class="whisper-nick" data-tippy-content="Whisper"></i></div></div>`,
     );
+    usr.find('[data-tippy-content]').each(function registerTippy() {
+      tippy(this, {
+        content: this.getAttribute('data-tippy-content'),
+        arrow: roundArrow,
+        duration: 0,
+        maxWidth: 250,
+        hideOnClick: false,
+        theme: 'dgg',
+      });
+    });
     const section = this.sections.get(this.highestSection(user));
 
     if (sort && section.users.children.length > 0) {
