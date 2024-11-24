@@ -838,13 +838,14 @@ class Chat {
     win.update();
   }
 
-  resolveMessage(nick, str) {
+  resolveMessage(nick, str, timestamp) {
     for (const message of this.unresolved) {
       if (
         this.user.username === nick.toLowerCase() &&
         message.message === str
       ) {
         this.unresolved.splice(this.unresolved.indexOf(message), 1);
+        message.setTimestamp(timestamp);
         return true;
       }
     }
@@ -1175,7 +1176,7 @@ class Chat {
       return;
     }
 
-    if (!this.resolveMessage(data.nick, data.data)) {
+    if (!this.resolveMessage(data.nick, data.data, data.timestamp)) {
       message.into(this);
     }
   }
