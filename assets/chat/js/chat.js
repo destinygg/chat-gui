@@ -630,6 +630,15 @@ class Chat {
       .catch(() => {});
   }
 
+  setPreLoginText() {
+    const chatText = ChatStore.read('chat.preLoginText');
+    if (chatText === null) {
+      return;
+    }
+    this.input.val(chatText);
+    ChatStore.remove('chat.preLoginText');
+  }
+
   setEmotes(emotes) {
     this.emoteService.setEmotes(emotes);
     this.emoteService
@@ -1098,6 +1107,7 @@ class Chat {
 
   onME(data) {
     this.setUser(data);
+    this.setPreLoginText();
     if (data) {
       // If is a logged in user.
       this.loadSettings();
@@ -1569,6 +1579,7 @@ class Chat {
       }
       // LOGIN
       else if (!this.authenticated) {
+        ChatStore.write('chat.preLoginText', raw);
         this.loginscrn.show();
       }
       // WHISPER
