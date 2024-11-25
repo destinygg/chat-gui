@@ -1329,14 +1329,14 @@ class Chat {
         message = new ChatMessage(messageText, null, MessageTypes.ERROR, true);
         break;
       }
-      case 'muted':
+      case 'muted': {
         this.mutedtimer.setTimer(data.muteTimeLeft);
         this.mutedtimer.startTimer();
+        const messageText = `You are temporarily muted! You can chat again ${this.mutedtimer.getReadableDuration()}. <a target="_blank" class="externallink" href="/subscribe" rel="nofollow">Subscribe</a>, or <a target="_blank" class="externallink" href="/donate" rel="nofollow">donate</a>, to remove the mute immediately.`;
 
-        message = MessageBuilder.error(
-          `You are temporarily muted! You can chat again ${this.mutedtimer.getReadableDuration()}. Subscribe to remove the mute immediately.`,
-        );
+        message = new ChatMessage(messageText, null, MessageTypes.ERROR, true);
         break;
+      }
       case 'bannedphrase': {
         message = MessageBuilder.error(
           `Your message was blocked because it contained this banned phrase: "${data.filtered}".`,
