@@ -140,6 +140,7 @@ const settingsdefault = new Map(
     fontscale: 'auto',
     censorbadwords: false,
     disableanimations: false,
+    ignoredphrases: [],
   }),
 );
 

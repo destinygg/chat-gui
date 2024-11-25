@@ -16,6 +16,22 @@ export default class ChatSettingsMenu extends ChatMenu {
     this.ui.on('keypress blur', 'textarea[name="customhighlight"]', (e) =>
       this.onCustomHighlightChange(e),
     );
+    this.ui.on('keypress blur', 'textarea[name="ignoredphrases"]', (e) =>
+      this.onIgnoredPhrasesChange(e),
+    );
+  }
+
+  onIgnoredPhrasesChange(e) {
+    if (e.type === 'focusout' || isKeyCode(e, KEYCODES.ENTER)) {
+      const data = $(e.target)
+        .val()
+        .toString()
+        .split('\n')
+        .map((s) => s.trim());
+      this.chat.settings.set('ignoredphrases', [...new Set(data)]);
+      this.chat.applySettings(false);
+      this.chat.commitSettings();
+    }
   }
 
   onCustomHighlightChange(e) {

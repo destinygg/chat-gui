@@ -44,6 +44,10 @@ const nickregex = /^\w{3,20}$/;
 const nsfwregex = /\bNSFW\b/i;
 const nsflregex = /\bNSFL\b/i;
 
+function isRegexPhrase(str) {
+  return str.startsWith('/') && str.endsWith('/') && str.length > 2;
+}
+
 export {
   regexslashcmd,
   regextime,
@@ -52,6 +56,7 @@ export {
   nsfwregex,
   nsflregex,
   linkregex,
+  isRegexPhrase,
 };
 
 export default function makeSafeForRegex(str) {
