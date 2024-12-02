@@ -29,8 +29,8 @@ export default class MessageBuilder {
     return new ChatMessage(message, timestamp, MessageTypes.INFO);
   }
 
-  static broadcast(message, user, timestamp = null) {
-    return new ChatBroadcastMessage(message, user, timestamp);
+  static broadcast(message, user, uuid, timestamp = null) {
+    return new ChatBroadcastMessage(message, user, uuid, timestamp);
   }
 
   static command(message, timestamp = null) {
