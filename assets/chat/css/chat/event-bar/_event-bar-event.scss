@@ -27,6 +27,7 @@
     margin-right: a.$gutter-xs;
     max-width: 12ch;
     overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .event-icon {
@@ -55,8 +56,6 @@
   .user {
     font-weight: 500;
     color: a.$color-label-user;
-    display: inline-block;
-    animation: scrolling-event-username 12s linear 3s infinite;
     word-wrap: normal;
 
     &::before {
@@ -133,17 +132,5 @@
   100% {
     transform: scale(0.1);
     opacity: 0;
-  }
-}
-
-@keyframes scrolling-event-username {
-  25%,
-  50% {
-    transform: translateX(calc(-1 * max(0px, 100% - 12ch)));
-  }
-
-  75%,
-  100% {
-    transform: translateX(0%);
   }
 }
