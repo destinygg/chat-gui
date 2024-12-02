@@ -1377,6 +1377,7 @@ class Chat {
       data.data,
       new ChatUser(data.user),
       data.timestamp,
+      data.uuid,
     ).into(this);
   }
 
@@ -1390,6 +1391,7 @@ class Chat {
         nick: 'System',
         id: -1,
       }),
+      '',
     ).into(this);
   }
 
