@@ -9,6 +9,8 @@ export default class ChatEventMessage extends ChatMessage {
     this.isown = false;
     this.mentioned = [];
     this.uuid = uuid;
+
+    this.generateMessageHash();
   }
 
   html(chat = null) {

@@ -1373,11 +1373,17 @@ class Chat {
   }
 
   onBROADCAST(data) {
-    MessageBuilder.broadcast(
+    const msg = MessageBuilder.broadcast(
       data.data,
       new ChatUser(data.user),
       data.timestamp,
-    ).into(this);
+    );
+
+    if (this.mainwindow.containsMessage(msg)) {
+      return;
+    }
+
+    msg.into(this);
   }
 
   onRELOAD() {
@@ -1394,7 +1400,12 @@ class Chat {
   }
 
   onSUBSCRIPTION(data) {
-    MessageBuilder.subscription(data).into(this);
+    const msg = MessageBuilder.subscription(data);
+    if (this.mainwindow.containsMessage(msg)) {
+      return;
+    }
+
+    msg.into(this);
 
     // Don't add events when loading messages from history because the
     // `PAIDEVENTS` payload will contain those events
@@ -1412,7 +1423,12 @@ class Chat {
   }
 
   onGIFTSUB(data) {
-    MessageBuilder.gift(data).into(this);
+    const msg = MessageBuilder.gift(data);
+    if (this.mainwindow.containsMessage(msg)) {
+      return;
+    }
+
+    msg.into(this);
 
     if (!this.backlogloading) {
       const eventBarEvent = new EventBarEvent(this, MessageTypes.GIFTSUB, data);
@@ -1424,7 +1440,12 @@ class Chat {
   }
 
   onMASSGIFT(data) {
-    MessageBuilder.massgift(data).into(this);
+    const msg = MessageBuilder.massgift(data);
+    if (this.mainwindow.containsMessage(msg)) {
+      return;
+    }
+
+    msg.into(this);
 
     if (!this.backlogloading) {
       const eventBarEvent = new EventBarEvent(
@@ -1440,7 +1461,12 @@ class Chat {
   }
 
   onDONATION(data) {
-    MessageBuilder.donation(data).into(this);
+    const msg = MessageBuilder.donation(data);
+    if (this.mainwindow.containsMessage(msg)) {
+      return;
+    }
+
+    msg.into(this);
 
     if (!this.backlogloading) {
       const eventBarEvent = new EventBarEvent(
@@ -1647,7 +1673,13 @@ class Chat {
       }
     }
     this.censor(data.nick);
-    MessageBuilder.death(data.data, user, data.timestamp).into(this);
+
+    const msg = MessageBuilder.death(data.data, user, data.timestamp);
+    if (this.mainwindow.containsMessage(msg)) {
+      return;
+    }
+
+    msg.into(this);
   }
 
   onEVENTSELECTED() {
