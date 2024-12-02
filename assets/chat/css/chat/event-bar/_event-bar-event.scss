@@ -34,20 +34,17 @@
     height: 2em;
     border: 0.25em solid transparent;
     opacity: 0.75;
+    filter: invert(100%);
 
     &.subscription {
       @include a.icon-background('../img/sub-regular.svg');
     }
 
     &.giftsub {
-      filter: invert(100%);
-
       @include a.icon-background('../img/sub-gift.png');
     }
 
     &.massgift {
-      filter: invert(100%);
-
       @include a.icon-background('../img/sub-mass-gift.png');
     }
   }
@@ -75,10 +72,9 @@
   @each $amount, $color in donation.$amount-color-map {
     &.amount-#{$amount} {
       border-color: $color;
+      filter: invert(100%);
 
       .event-icon {
-        filter: invert(100%);
-
         @include a.icon-background('../img/donation-amount-#{$amount}.png');
       }
     }

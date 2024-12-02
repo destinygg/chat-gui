@@ -19,9 +19,9 @@ $amount-color-map: (
     }
 
     .donation-icon {
-      &.amount-#{$amount} {
-        filter: invert(100%);
+      filter: invert(100%);
 
+      &.amount-#{$amount} {
         @include a.icon-background('../img/donation-amount-#{$amount}.png');
       }
     }
