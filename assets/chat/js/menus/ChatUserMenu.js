@@ -88,11 +88,21 @@ export default class ChatUserMenu extends ChatMenu {
         { atBegin: false },
       ),
     );
+    this.searchinput.on('click', () => {
+      this.searchinput[0].inputMode = 'text';
+    });
   }
 
   show() {
     super.show();
     this.searchinput.focus();
+  }
+
+  hide() {
+    if (this.visible) {
+      this.searchinput[0].inputMode = 'none';
+    }
+    super.hide();
   }
 
   redraw() {

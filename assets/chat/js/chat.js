@@ -406,9 +406,15 @@ class Chat {
         e.preventDefault();
         e.stopPropagation();
         this.control.emit('SEND', this.input.val().toString().trim());
+        this.input[0].inputMode = 'none';
         this.adjustInputHeight();
         this.input.focus();
       }
+    });
+
+    this.input.on('click', () => {
+      this.input[0].inputMode = 'text';
+      this.adjustInputHeight();
     });
 
     // Watching focus
@@ -428,6 +434,7 @@ class Chat {
         downinoutput = false;
         ChatMenu.closeMenus(this);
         this.focusIfNothingSelected();
+        this.input[0].inputMode = 'none';
       }
     });
     this.ui.on('click', '#chat-tools-wrap', () => {
