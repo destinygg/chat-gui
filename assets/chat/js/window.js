@@ -2,7 +2,7 @@ import $ from 'jquery';
 import { throttle } from 'throttle-debounce';
 import ChatScrollPlugin from './scroll';
 import EventEmitter from './emitter';
-import { MessageTypes } from './messages';
+import { clientOnlyMessages, MessageTypes } from './messages';
 
 const tagcolors = [
   'green',
@@ -152,14 +152,7 @@ class ChatWindow extends EventEmitter {
 
       const username = message.user?.username;
 
-      if (
-        ![
-          MessageTypes.UI,
-          MessageTypes.INFO,
-          MessageTypes.ERROR,
-          MessageTypes.STATUS,
-        ].includes(message.type)
-      ) {
+      if (!clientOnlyMessages.includes(message.type)) {
         message.ignore(chat.ignored(username, message.message));
       }
 
