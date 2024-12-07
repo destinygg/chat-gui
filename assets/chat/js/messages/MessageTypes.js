@@ -1,4 +1,4 @@
-export default {
+const MessageTypes = {
   STATUS: 'STATUS',
   ERROR: 'ERROR',
   INFO: 'INFO',
@@ -15,3 +15,14 @@ export default {
   DONATION: 'DONATION',
   DEATH: 'DEATH',
 };
+
+const clientOnlyMessages = [
+  MessageTypes.STATUS,
+  MessageTypes.ERROR,
+  MessageTypes.INFO,
+  MessageTypes.UI,
+];
+
+export default MessageTypes;
+
+export { clientOnlyMessages };

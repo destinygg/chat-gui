@@ -22,6 +22,7 @@ import {
   ChatMessage,
   ChatUserMessage, // eslint-disable-line no-unused-vars
   checkIfPinWasDismissed,
+  clientOnlyMessages,
 } from './messages';
 import {
   ChatMenu,
@@ -827,12 +828,7 @@ class Chat {
 
     // Hide the message if the user is ignored
     if (
-      ![
-        MessageTypes.UI,
-        MessageTypes.INFO,
-        MessageTypes.ERROR,
-        MessageTypes.STATUS,
-      ].includes(message.type) &&
+      !clientOnlyMessages.includes(message.type) &&
       this.ignored(message.user?.username, message.message)
     ) {
       message.ignore();
@@ -1467,16 +1463,15 @@ class Chat {
   }
 
   onADDPHRASE(data) {
-    MessageBuilder.command(`Phrase "${data.data}" added.`, data.timestamp).into(
+    MessageBuilder.info(`Phrase "${data.data}" added.`, data.timestamp).into(
       this,
     );
   }
 
   onREMOVEPHRASE(data) {
-    MessageBuilder.command(
-      `Phrase "${data.data}" removed.`,
-      data.timestamp,
-    ).into(this);
+    MessageBuilder.info(`Phrase "${data.data}" removed.`, data.timestamp).into(
+      this,
+    );
   }
 
   onPRIVMSGSENT() {

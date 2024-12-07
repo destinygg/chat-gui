@@ -2,7 +2,7 @@ import $ from 'jquery';
 import { throttle } from 'throttle-debounce';
 import ChatScrollPlugin from './scroll';
 import EventEmitter from './emitter';
-import { MessageTypes } from './messages';
+import { clientOnlyMessages, MessageTypes } from './messages';
 
 const tagcolors = [
   'green',
@@ -122,9 +122,26 @@ class ChatWindow extends EventEmitter {
         remove.forEach((element) => {
           element.remove();
         });
-
-        this.messages = this.messages.slice(lines.length - this.maxlines);
       }
+
+      let clientMessages = 0;
+      this.messages = this.messages
+        .reverse()
+        .filter((message, index) => {
+          if (clientOnlyMessages.includes(message.type)) {
+            clientMessages += 1;
+            // remove client only messages if above maxlines
+            if (index >= this.maxlines) {
+              return false;
+            }
+            // remove history message if above maxlines/maxhistory + the clientMessages
+          } else if (index >= Math.max(this.maxlines, 150) + clientMessages) {
+            return false;
+          }
+
+          return true;
+        })
+        .reverse();
     }
   }
 
@@ -152,14 +169,7 @@ class ChatWindow extends EventEmitter {
 
       const username = message.user?.username;
 
-      if (
-        ![
-          MessageTypes.UI,
-          MessageTypes.INFO,
-          MessageTypes.ERROR,
-          MessageTypes.STATUS,
-        ].includes(message.type)
-      ) {
+      if (!clientOnlyMessages.includes(message.type)) {
         message.ignore(chat.ignored(username, message.message));
       }
 
