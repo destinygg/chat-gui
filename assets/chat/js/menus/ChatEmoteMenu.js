@@ -26,12 +26,22 @@ export default class ChatEmoteMenu extends ChatMenu {
         { atBegin: false },
       ),
     );
+    this.searchinput.on('click', () => {
+      this.searchinput[0].inputMode = 'text';
+    });
   }
 
   show() {
     super.show();
     this.searchinput.focus();
     this.buildEmoteMenu();
+  }
+
+  hide() {
+    if (this.visible) {
+      this.searchinput[0].inputMode = 'none';
+    }
+    super.hide();
   }
 
   buildEmoteMenu() {
