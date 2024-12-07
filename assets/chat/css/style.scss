@@ -113,6 +113,14 @@ hr {
   fill: a.$color-surface-dark4;
 }
 
+/* Mobile viewports only */
+@media only screen and (max-width: 450px) {
+  input,
+  textarea {
+    font-size: 16px;
+  }
+}
+
 /* Small screen, non-retina */
 @media only screen and (min-width: 320px) {
   body:not(.pref-fontscale) {
