@@ -776,6 +776,10 @@ class Chat {
       win = this.mainwindow;
     }
 
+    if (win.containsMessage(message)) {
+      return;
+    }
+
     // Break the current combo if this message is not an emote
     // We don't need to check what type the current message is, we just know that its a new message, so the combo is invalid.
     if (
@@ -1373,17 +1377,11 @@ class Chat {
   }
 
   onBROADCAST(data) {
-    const msg = MessageBuilder.broadcast(
+    MessageBuilder.broadcast(
       data.data,
       new ChatUser(data.user),
       data.timestamp,
-    );
-
-    if (this.mainwindow.containsMessage(msg)) {
-      return;
-    }
-
-    msg.into(this);
+    ).into(this);
   }
 
   onRELOAD() {
@@ -1400,12 +1398,7 @@ class Chat {
   }
 
   onSUBSCRIPTION(data) {
-    const msg = MessageBuilder.subscription(data);
-    if (this.mainwindow.containsMessage(msg)) {
-      return;
-    }
-
-    msg.into(this);
+    MessageBuilder.subscription(data).into(this);
 
     // Don't add events when loading messages from history because the
     // `PAIDEVENTS` payload will contain those events
@@ -1423,12 +1416,7 @@ class Chat {
   }
 
   onGIFTSUB(data) {
-    const msg = MessageBuilder.gift(data);
-    if (this.mainwindow.containsMessage(msg)) {
-      return;
-    }
-
-    msg.into(this);
+    MessageBuilder.gift(data).into(this);
 
     if (!this.backlogloading) {
       const eventBarEvent = new EventBarEvent(this, MessageTypes.GIFTSUB, data);
@@ -1440,12 +1428,7 @@ class Chat {
   }
 
   onMASSGIFT(data) {
-    const msg = MessageBuilder.massgift(data);
-    if (this.mainwindow.containsMessage(msg)) {
-      return;
-    }
-
-    msg.into(this);
+    MessageBuilder.massgift(data).into(this);
 
     if (!this.backlogloading) {
       const eventBarEvent = new EventBarEvent(
@@ -1461,12 +1444,7 @@ class Chat {
   }
 
   onDONATION(data) {
-    const msg = MessageBuilder.donation(data);
-    if (this.mainwindow.containsMessage(msg)) {
-      return;
-    }
-
-    msg.into(this);
+    MessageBuilder.donation(data).into(this);
 
     if (!this.backlogloading) {
       const eventBarEvent = new EventBarEvent(
@@ -1673,13 +1651,7 @@ class Chat {
       }
     }
     this.censor(data.nick);
-
-    const msg = MessageBuilder.death(data.data, user, data.timestamp);
-    if (this.mainwindow.containsMessage(msg)) {
-      return;
-    }
-
-    msg.into(this);
+    MessageBuilder.death(data.data, user, data.timestamp).into(this);
   }
 
   onEVENTSELECTED() {
