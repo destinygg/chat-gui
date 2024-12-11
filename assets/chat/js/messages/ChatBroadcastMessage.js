@@ -7,8 +7,6 @@ export default class ChatBroadcastMessage extends ChatEventMessage {
     super(message, timestamp);
     this.type = MessageTypes.BROADCAST;
     this.user = user;
-
-    this.generateMessageHash();
   }
 
   buildUserTemplate(chat = null) {

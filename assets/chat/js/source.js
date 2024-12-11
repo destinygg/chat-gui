@@ -28,6 +28,7 @@ class ChatSource extends EventEmitter {
     this.retryOnDisconnect = true;
     this.retryAttempts = 0;
     this.retryTimer = null;
+    this.lastMessageTimestamp = 0;
   }
 
   isConnected() {
@@ -99,8 +100,20 @@ class ChatSource extends EventEmitter {
 
   parseAndDispatch(event) {
     const { eventname, data } = this.parse(event);
+
+    // If message has a timestamp and it is older than the lastMessageTimestamp,
+    // then it has already been processed and doesn't not need to be sent again.
+    if (data.timestamp && data.timestamp <= this.lastMessageTimestamp) {
+      return;
+    }
+
     this.emit('DISPATCH', { data, event: eventname }); // Event is used to hook into all dispatched events
     this.emit(eventname, data);
+
+    // If message has a timestamp then update lastMessageTimestamp.
+    if (data.timestamp) {
+      this.lastMessageTimestamp = data.timestamp;
+    }
   }
 
   parse(event) {

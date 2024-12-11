@@ -1,5 +1,4 @@
 import moment from 'moment';
-import md5 from 'md5';
 import ChatUIMessage from './ChatUIMessage';
 import MessageTypes from './MessageTypes';
 import {
@@ -42,8 +41,6 @@ export default class ChatMessage extends ChatUIMessage {
     this.ignored = false;
     this.censorType = null;
     this.watching = null;
-
-    this.generateMessageHash();
   }
 
   html(chat = null) {
@@ -176,15 +173,7 @@ export default class ChatMessage extends ChatUIMessage {
 
   setTimestamp(timestamp) {
     this.timestamp = moment.utc(timestamp).local();
-    this.generateMessageHash();
-
     const timeElement = this.ui.querySelector('time');
     timeElement.outerHTML = this.buildTime();
-  }
-
-  generateMessageHash() {
-    this.md5 = md5(
-      `${this.timestamp.valueOf()}${this.user?.id ?? ''}${this.message}`,
-    );
   }
 }
