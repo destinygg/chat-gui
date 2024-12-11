@@ -81,10 +81,6 @@ export default class ChatEmoteMessage extends ChatMessage {
     ChatEmoteMessageCountThrottle(this);
   }
 
-  containsMessage(message) {
-    return this.messages.find((msg) => msg.md5 === message.md5);
-  }
-
   completeCombo() {
     ChatEmoteMessageCount(this);
     this.combo.attr('class', `${this.combo.attr('class')} combo-complete`);

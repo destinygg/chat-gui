@@ -86,15 +86,6 @@ class ChatWindow extends EventEmitter {
     this.cleanupThrottle();
   }
 
-  containsMessage(message) {
-    return this.messages.find((msg) => {
-      if (msg.type === MessageTypes.EMOTE) {
-        return msg.containsMessage(message);
-      }
-      return msg.md5 === message.md5;
-    });
-  }
-
   getlines(sel) {
     return this.lines.querySelectorAll(sel);
   }

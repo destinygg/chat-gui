@@ -1179,9 +1179,6 @@ class Chat {
     const win = this.mainwindow;
 
     const message = MessageBuilder.message(data.data, usr, data.timestamp);
-    if (win.containsMessage(message)) {
-      return;
-    }
 
     const isCombo =
       this.emoteService.canUserUseEmote(usr, textonly) &&
