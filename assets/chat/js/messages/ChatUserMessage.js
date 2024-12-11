@@ -28,8 +28,6 @@ export default class ChatUserMessage extends ChatMessage {
     this.title = '';
     this.slashme = false;
     this.mentioned = [];
-
-    this.generateMessageHash();
   }
 
   html(chat = null) {
