@@ -54,7 +54,9 @@ class ChatSource extends EventEmitter {
         this.socket = null;
       }
       this.emit('CONNECTING', this.url);
-      this.socket = new WebSocket(this.url);
+      this.socket = new WebSocket(
+        `${this.url}?timestamp=${this.lastMessageTimestamp}`,
+      );
       this.socket.onopen = (e) => this.onOpen(e);
       this.socket.onclose = (e) => this.onClose(e);
       this.socket.onmessage = (e) => this.onMsg(e);
@@ -100,20 +102,16 @@ class ChatSource extends EventEmitter {
 
   parseAndDispatch(event) {
     const { eventname, data } = this.parse(event);
+    this.dispatch(eventname, data);
+  }
 
-    // If message has a timestamp and it is older than the lastMessageTimestamp,
-    // then it has already been processed and doesn't not need to be sent again.
-    if (data.timestamp && data.timestamp <= this.lastMessageTimestamp) {
-      return;
+  dispatch(eventname, data) {
+    if (data.timestamp) {
+      this.lastMessageTimestamp = data.timestamp;
     }
 
     this.emit('DISPATCH', { data, event: eventname }); // Event is used to hook into all dispatched events
     this.emit(eventname, data);
-
-    // If message has a timestamp then update lastMessageTimestamp.
-    if (data.timestamp) {
-      this.lastMessageTimestamp = data.timestamp;
-    }
   }
 
   parse(event) {
