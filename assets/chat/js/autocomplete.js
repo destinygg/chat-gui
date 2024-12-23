@@ -263,13 +263,20 @@ class ChatAutoComplete {
     const id = getBucketId(str);
     const bucket =
       this.buckets.get(id) || this.buckets.set(id, new Map()).get(id);
-    const data = Object.assign(bucket.get(str) || {}, {
+
+    const existingData = bucket.get(str);
+    if (existingData && existingData.isemote) {
+      return existingData;
+    }
+
+    const newData = Object.assign(bucket.get(str) || {}, {
       data: str,
       weight,
       isemote,
     });
-    bucket.set(str, data);
-    return data;
+    bucket.set(str, newData);
+
+    return newData;
   }
 
   remove(str, userOnly = false) {
