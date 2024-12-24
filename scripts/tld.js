@@ -16,7 +16,9 @@ function parseTLDs(data) {
   const list = ['bit', 'exit', 'gnu', 'i2p', 'local', 'onion', 'zkey'];
 
   // Make sure data is string
-  if (typeof data !== 'string') return null;
+  if (typeof data !== 'string') {
+    return null;
+  }
 
   // Parse response data by line
   const arr = data.split('\n');
@@ -36,7 +38,9 @@ function parseTLDs(data) {
   }
 
   // Only return fetched list if its larger than default
-  if (list.length <= TLD_MIN) return null;
+  if (list.length <= TLD_MIN) {
+    return null;
+  }
 
   list.sort((x, y) => {
     // Sort by size then alphabetically

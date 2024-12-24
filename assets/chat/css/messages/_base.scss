@@ -1,0 +1,135 @@
+@use '../abstracts' as a;
+
+$link-color-map: (
+  'nsfw': a.$color-underline-nsfw,
+  'nsfl': a.$color-underline-nsfl,
+  'spoilers': a.$color-underline-spoilers,
+);
+
+.msg-chat {
+  word-wrap: break-word;
+  padding: a.$gutter-xs a.$gutter-md * 2 a.$gutter-xs a.$gutter-md;
+  color: a.$color-chat-text2;
+
+  .time {
+    font-size: 0.8em;
+    color: a.$color-chat-disabled;
+    padding-right: a.$gutter-sm;
+    display: none; /* hidden by default */
+  }
+
+  .user {
+    font-weight: 500;
+    cursor: pointer;
+    margin-left: a.$gutter-sm;
+    color: a.$color-label-user;
+  }
+
+  .chat-user {
+    cursor: pointer;
+    position: relative;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  .greentext {
+    color: a.$color-green-text;
+  }
+
+  .sus {
+    text-transform: uppercase;
+    font-family: 'Among Us', a.$chat-lines-font;
+  }
+
+  .externallink {
+    border-style: solid;
+    border-color: transparent;
+    border-width: 1px 0 1px 0;
+    color: a.$color-link;
+    position: relative;
+
+    &:visited {
+      color: a.$color-link-visited;
+    }
+
+    &:hover,
+    &:focus {
+      color: a.$color-link-hover;
+    }
+  }
+
+  @each $type, $color in $link-color-map {
+    .#{$type}-link {
+      border-style: dashed;
+      border-width: 1px 0 1px 0;
+      border-color: transparent transparent $color transparent;
+    }
+  }
+
+  .hidden {
+    display: none !important;
+  }
+
+  .embed-button {
+    position: relative;
+    top: 2.5px;
+    margin-left: a.$gutter-sm;
+    margin-right: a.$gutter-xs;
+    opacity: 0.5;
+
+    &:hover {
+      opacity: 1;
+    }
+  }
+
+  .focus & {
+    opacity: 0.3;
+  }
+}
+
+.pref-showtime .time {
+  display: inline;
+}
+
+.pref-disableanimations {
+  a.user,
+  span.user {
+    animation: none !important;
+  }
+}
+
+.onstreamchat {
+  .msg-chat {
+    color: a.$text-color;
+    margin: 0;
+    padding: 1px 20px 1px 5px;
+    filter: drop-shadow(-1px -1px 0 rgba(black, 0.5))
+      drop-shadow(1px -1px 0 rgba(black, 0.5))
+      drop-shadow(-1px 1px 0 rgba(black, 0.5))
+      drop-shadow(1px 1px 0 rgba(black, 0.5));
+    letter-spacing: 0.03em;
+  }
+
+  a.externallink,
+  a.externallink:hover {
+    color: a.$color-accent-light;
+  }
+
+  .greentext {
+    color: a.$text-color;
+  }
+
+  .msg-chat,
+  .msg-chat:not(.rainbow-border):before,
+  .greentext {
+    background: none !important;
+  }
+
+  time,
+  .time,
+  .msg-chat .text:before {
+    display: none !important;
+  }
+}

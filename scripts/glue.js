@@ -8,7 +8,9 @@ const NEWLINE = '\r\n';
 function glueImages(dir, name, cb) {
   const out = `${dir + name}.png`;
   fs.readdir(`${dir + name}/`, (err, files) => {
-    if (err) throw err;
+    if (err) {
+      throw err;
+    }
     const paths = files.map((a) => `${dir + name}/${a}`);
     Spritesmith.run(
       {
@@ -17,9 +19,13 @@ function glueImages(dir, name, cb) {
         padding: 2,
       },
       (e, result) => {
-        if (e) throw e;
+        if (e) {
+          throw e;
+        }
         fs.writeFileSync(out, result.image);
-        if (cb) cb(dir, name, result.coordinates);
+        if (cb) {
+          cb(dir, name, result.coordinates);
+        }
       },
     );
   });

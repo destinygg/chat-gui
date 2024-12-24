@@ -1,4 +1,5 @@
 import moment from 'moment';
+import md5 from 'md5';
 import ChatUIMessage from './ChatUIMessage';
 import MessageTypes from './MessageTypes';
 import {
@@ -41,12 +42,16 @@ export default class ChatMessage extends ChatUIMessage {
     this.ignored = false;
     this.censorType = null;
     this.watching = null;
+
+    this.generateMessageHash();
   }
 
   html(chat = null) {
     const classes = [];
     const attr = {};
-    if (this.continued) classes.push('msg-continue');
+    if (this.continued) {
+      classes.push('msg-continue');
+    }
     return this.wrap(
       `${this.buildTime()} ${this.buildMessageTxt(chat)}`,
       classes,
@@ -60,10 +65,11 @@ export default class ChatMessage extends ChatUIMessage {
       this.message.substring(0, 4).toLowerCase() === '/me '
         ? this.message.substring(4)
         : this.message;
-    if (!this.unformatted)
+    if (!this.unformatted) {
       formatters.forEach((f) => {
         msg = f.format(chat, msg, this);
       });
+    }
     return `<span class="text">${msg}</span>`;
   }
 
@@ -161,8 +167,24 @@ export default class ChatMessage extends ChatUIMessage {
   setContinued(isContinued) {
     this.ui.classList.toggle('msg-continue', isContinued);
     const ctrl = this.ui.querySelector('.ctrl');
-    if (ctrl) ctrl.textContent = isContinued ? '' : ': ';
+    if (ctrl) {
+      ctrl.textContent = isContinued ? '' : ': ';
+    }
 
     this.continued = isContinued;
+  }
+
+  setTimestamp(timestamp) {
+    this.timestamp = moment.utc(timestamp).local();
+    this.generateMessageHash();
+
+    const timeElement = this.ui.querySelector('time');
+    timeElement.outerHTML = this.buildTime();
+  }
+
+  generateMessageHash() {
+    this.md5 = md5(
+      `${this.timestamp.valueOf()}${this.user?.id ?? ''}${this.message}`,
+    );
   }
 }

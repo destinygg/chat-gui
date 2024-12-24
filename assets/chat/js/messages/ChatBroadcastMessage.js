@@ -3,10 +3,12 @@ import ChatEventMessage from './ChatEventMessage';
 import MessageTypes from './MessageTypes';
 
 export default class ChatBroadcastMessage extends ChatEventMessage {
-  constructor(message, user, timestamp = null) {
-    super(message, timestamp);
+  constructor(message, user, uuid, timestamp = null) {
+    super(message, timestamp, uuid);
     this.type = MessageTypes.BROADCAST;
     this.user = user;
+
+    this.generateMessageHash();
   }
 
   buildUserTemplate(chat = null) {
@@ -21,7 +23,9 @@ export default class ChatBroadcastMessage extends ChatEventMessage {
       .querySelector('#user-template')
       ?.content.cloneNode(true).firstElementChild;
     user.title = this.title;
-    if (colorFlair) user.classList.add(colorFlair.name);
+    if (colorFlair) {
+      user.classList.add(colorFlair.name);
+    }
     user.innerText = this.user.displayName;
 
     const ctrl = document.createElement('span');
@@ -52,7 +56,9 @@ export default class ChatBroadcastMessage extends ChatEventMessage {
     const attributes = eventTemplate
       .getAttributeNames()
       .reduce((object, attributeName) => {
-        if (attributeName === 'class') return object;
+        if (attributeName === 'class') {
+          return object;
+        }
         return {
           ...object,
           [attributeName]: eventTemplate.getAttribute(attributeName),
@@ -60,5 +66,9 @@ export default class ChatBroadcastMessage extends ChatEventMessage {
       }, {});
 
     return this.wrap(eventTemplate.innerHTML, classes, attributes);
+  }
+
+  get hasActions() {
+    return false;
   }
 }

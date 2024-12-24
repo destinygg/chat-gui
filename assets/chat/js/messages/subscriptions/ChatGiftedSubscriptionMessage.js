@@ -3,10 +3,22 @@ import ChatSubscriptionMessage from './ChatSubscriptionMessage';
 import MessageTypes from '../MessageTypes';
 
 export default class ChatGiftedSubscriptionMessage extends ChatSubscriptionMessage {
-  constructor(message, user, tier, tierLabel, giftee, timestamp) {
-    super(message, user, tier, tierLabel, timestamp);
+  constructor(
+    message,
+    user,
+    tier,
+    tierLabel,
+    amount,
+    giftee,
+    fromMassGift,
+    timestamp,
+    expiry,
+    uuid,
+  ) {
+    super(message, user, tier, tierLabel, amount, timestamp, expiry, uuid);
     this.type = MessageTypes.GIFTSUB;
     this.giftee = giftee;
+    this.fromMassGift = fromMassGift;
   }
 
   html(chat = null) {
@@ -15,7 +27,9 @@ export default class ChatGiftedSubscriptionMessage extends ChatSubscriptionMessa
     const attributes = message
       .getAttributeNames()
       .reduce((object, attributeName) => {
-        if (attributeName === 'class') return object;
+        if (attributeName === 'class') {
+          return object;
+        }
         return {
           ...object,
           [attributeName]: message.getAttribute(attributeName),
@@ -32,7 +46,9 @@ export default class ChatGiftedSubscriptionMessage extends ChatSubscriptionMessa
       ?.content.cloneNode(true).firstElementChild;
 
     const gifteeColorFlair = usernameColorFlair(chat.flairs, this.giftee);
-    if (gifteeColorFlair) giftee.classList.add(gifteeColorFlair.name);
+    if (gifteeColorFlair) {
+      giftee.classList.add(gifteeColorFlair.name);
+    }
     giftee.innerText = this.giftee.displayName;
 
     const subscriptionInfo = message.querySelector('.event-info');

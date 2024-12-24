@@ -14,7 +14,9 @@ export default class ChatMenu extends EventEmitter {
     });
     this.ui.on('click', '.close,.chat-menu-close', this.hide.bind(this));
     this.btn.on('click', (e) => {
-      if (this.visible) chat.input.focus();
+      if (this.visible) {
+        chat.input.focus();
+      }
       this.toggle(e);
       return false;
     });
@@ -43,11 +45,15 @@ export default class ChatMenu extends EventEmitter {
   toggle() {
     const wasVisible = this.visible;
     ChatMenu.closeMenus(this.chat);
-    if (!wasVisible) this.show();
+    if (!wasVisible) {
+      this.show();
+    }
   }
 
   redraw() {
-    if (this.visible && this.scrollplugin) this.scrollplugin.reset();
+    if (this.visible && this.scrollplugin) {
+      this.scrollplugin.reset();
+    }
   }
 
   static closeMenus(chat) {

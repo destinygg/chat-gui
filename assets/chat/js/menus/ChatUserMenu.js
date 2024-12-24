@@ -1,5 +1,6 @@
 import $ from 'jquery';
 import { debounce } from 'throttle-debounce';
+import tippy, { roundArrow } from 'tippy.js';
 import ChatMenu from './ChatMenu';
 import ChatUser from '../user';
 
@@ -23,8 +24,12 @@ const UserMenuSections = [
 function userComparator(a, b) {
   const u1Nick = a.getAttribute('data-username').toLowerCase();
   const u2Nick = b.getAttribute('data-username').toLowerCase();
-  if (u1Nick < u2Nick) return -1;
-  if (u1Nick > u2Nick) return 1;
+  if (u1Nick < u2Nick) {
+    return -1;
+  }
+  if (u1Nick > u2Nick) {
+    return 1;
+  }
   return 0;
 }
 
@@ -52,15 +57,6 @@ export default class ChatUserMenu extends ChatMenu {
         true,
       ),
     );
-    this.container.on('click', '.mention-nick', (e) => {
-      ChatMenu.closeMenus(this.chat);
-      const value = this.chat.input.val().toString().trim();
-      const username = $(e.target).parent().parent().data('username');
-      this.chat.input
-        .val(`${value + (value === '' ? '' : ' ') + username} `)
-        .focus();
-      return false;
-    });
     this.container.on('click', '.whisper-nick', (e) => {
       ChatMenu.closeMenus(this.chat);
       const value = this.chat.input.val().toString().trim();
@@ -114,8 +110,11 @@ export default class ChatUserMenu extends ChatMenu {
               section.users.children.length === 1 ? '' : 's'
             }${this.buildFeatures(section.data.flairs)}`,
           );
-          if (section.searchcount === 0) $(section.container).hide();
-          else $(section.container).show();
+          if (section.searchcount === 0) {
+            $(section.container).hide();
+          } else {
+            $(section.container).show();
+          }
         });
       } else {
         this.header.text(`Users (${this.totalcount})`);
@@ -125,8 +124,11 @@ export default class ChatUserMenu extends ChatMenu {
               section.users.children.length === 1 ? '' : 's'
             }${this.buildFeatures(section.data.flairs)}`,
           );
-          if (section.users.children.length === 0) $(section.container).hide();
-          else $(section.container).show();
+          if (section.users.children.length === 0) {
+            $(section.container).hide();
+          } else {
+            $(section.container).show();
+          }
         });
       }
       this.ui.toggleClass('search-in', searching);
@@ -165,7 +167,7 @@ export default class ChatUserMenu extends ChatMenu {
   }
 
   addAndRedraw(user) {
-    if (!this.hasElement(user)) {
+    if (!this.getElement(user)) {
       this.addElement(user, true);
       this.filter();
       this.redraw();
@@ -173,15 +175,17 @@ export default class ChatUserMenu extends ChatMenu {
   }
 
   removeAndRedraw(user) {
-    if (this.hasElement(user)) {
-      this.removeElement(user);
+    const el = this.getElement(user);
+    if (el) {
+      this.removeElement(el);
       this.redraw();
     }
   }
 
   replaceAndRedraw(user) {
-    if (this.hasElement(user)) {
-      this.removeElement(user);
+    const el = this.getElement(user);
+    if (el) {
+      this.removeElement(el);
       this.addElement(user, true);
       this.filter();
       this.redraw();
@@ -203,7 +207,9 @@ export default class ChatUserMenu extends ChatMenu {
             break;
           }
 
-          if (index < lowestIndex) lowestIndex = index;
+          if (index < lowestIndex) {
+            lowestIndex = index;
+          }
         }
       }
       return lowestIndex > flairs.length
@@ -227,8 +233,9 @@ export default class ChatUserMenu extends ChatMenu {
     this.container.append(section);
   }
 
-  removeElement(user) {
-    this.container.find(`.user-entry[data-user-id="${user.id}"]`).remove();
+  /** @param {HTMLElement} element */
+  removeElement(element) {
+    element.remove();
     this.totalcount -= 1;
   }
 
@@ -241,8 +248,18 @@ export default class ChatUserMenu extends ChatMenu {
     const features =
       user.features.length === 0 ? 'nofeature' : user.features.join(' ');
     const usr = $(
-      `<div class="user-entry" data-username="${user.username}" data-user-id="${user.id}"><span class="user ${features}">${label}</span><div class="user-actions"><i class="mention-nick"></i><i class="whisper-nick"></i></div></div>`,
+      `<div class="user-entry" data-username="${user.username}" data-user-id="${user.id}"><span class="user ${features}">${label}</span><div class="user-actions"><i class="whisper-nick" data-tippy-content="Whisper"></i></div></div>`,
     );
+    usr.find('[data-tippy-content]').each(function registerTippy() {
+      tippy(this, {
+        content: this.getAttribute('data-tippy-content'),
+        arrow: roundArrow,
+        duration: 0,
+        maxWidth: 250,
+        hideOnClick: false,
+        theme: 'dgg',
+      });
+    });
     const section = this.sections.get(this.highestSection(user));
 
     if (sort && section.users.children.length > 0) {
@@ -252,21 +269,28 @@ export default class ChatUserMenu extends ChatMenu {
       let max = items.length;
       let index = Math.floor((min + max) / 2);
       while (max > min) {
-        if (userComparator.apply(this, [usr[0], items[index]]) < 0) max = index;
-        else min = index + 1;
+        if (userComparator.apply(this, [usr[0], items[index]]) < 0) {
+          max = index;
+        } else {
+          min = index + 1;
+        }
         index = Math.floor((min + max) / 2);
       }
-      if (index - 1 < 0) usr.insertBefore(items[0]);
-      else usr.insertAfter(items[index - 1]);
+      if (index - 1 < 0) {
+        usr.insertBefore(items[0]);
+      } else {
+        usr.insertAfter(items[index - 1]);
+      }
     } else {
       section.users.append(usr[0]);
     }
     this.totalcount += 1;
   }
 
-  hasElement(user) {
-    return (
-      this.container.find(`.user-entry[data-user-id="${user.id}"]`).length > 0
+  getElement(user) {
+    const section = this.sections.get(this.highestSection(user));
+    return section.users.querySelector(
+      `.user-entry[data-user-id="${user.id}"]`,
     );
   }
 

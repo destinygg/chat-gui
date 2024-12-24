@@ -1,0 +1,22 @@
+@use '../../abstracts/' as a;
+
+.censored {
+  .text {
+    display: none;
+  }
+
+  .ctrl {
+    display: inline-block;
+
+    &:after {
+      color: a.$color-accent;
+      cursor: pointer;
+      padding-left: a.$gutter-md;
+      content: '<censored>';
+    }
+
+    &:hover:after {
+      color: a.$color-accent-light;
+    }
+  }
+}

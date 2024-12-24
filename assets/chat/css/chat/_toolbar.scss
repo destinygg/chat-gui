@@ -1,0 +1,53 @@
+@use '../abstracts/' as a;
+
+$toolbar-icons-map: (
+  'emoticon': 'emotes',
+  'whisper': 'whispers',
+  'watching-focus': 'watching',
+  'settings': 'settings',
+  'users': 'users',
+);
+
+#chat-tools-wrap {
+  display: flex;
+  position: relative;
+  user-select: none;
+  margin: 0 -0.25em;
+}
+
+.chat-tools-group {
+  display: flex;
+
+  &:first-child {
+    flex: 1;
+  }
+}
+
+.chat-tool-btn {
+  @keyframes whisper-pulse {
+    2% {
+      opacity: 1;
+      transform: scale(1.3);
+    }
+  }
+
+  &.ping .btn-icon {
+    animation: whisper-pulse 1.5s ease-in-out;
+  }
+
+  @each $id, $icon in $toolbar-icons-map {
+    &#chat-#{$id}-btn .btn-icon {
+      @include a.icon-background('../img/icon-#{$icon}.svg');
+    }
+  }
+}
+
+#chat-whisper-unread-indicator {
+  left: 100%;
+  color: a.$color-light;
+  font-size: 0.75em;
+  position: absolute;
+  vertical-align: text-bottom;
+  margin-left: 0.5em;
+  top: 6px;
+}
