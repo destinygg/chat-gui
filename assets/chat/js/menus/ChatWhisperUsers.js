@@ -1,10 +1,13 @@
 import moment from 'moment';
 import { debounce } from 'throttle-debounce';
+import tippy, { roundArrow } from 'tippy.js';
 import ChatMenu from './ChatMenu';
 
 export default class ChatWhisperUsers extends ChatMenu {
   constructor(ui, btn, chat) {
     super(ui, btn, chat);
+
+    this.whisperElements = new Map();
     this.unread = 0;
     this.searchterm = '';
     this.notif = this.chat.ui.find('#chat-whisper-unread-indicator');
@@ -16,6 +19,8 @@ export default class ChatWhisperUsers extends ChatMenu {
     this.ui.on('click', '.user-entry', (e) =>
       chat.openConversation(e.currentTarget.getAttribute('data-username')),
     );
+    this.chat.source.on('JOIN', (data) => this.updateOnline(data, true));
+    this.chat.source.on('QUIT', (data) => this.updateOnline(data, false));
     this.searchinput.on(
       'keyup',
       debounce(
@@ -82,25 +87,69 @@ export default class ChatWhisperUsers extends ChatMenu {
   }
 
   addConversation(whisper) {
-    const time = moment.utc(whisper.time).local();
-    const found = whisper.found && this.searchterm.length > 0 ? ' found' : '';
-    const online = this.chat.users.has(whisper.nick.toLowerCase())
-      ? 'online'
-      : 'offline';
-    const unread =
-      whisper.unread > 0
-        ? `<span class="unread">${whisper.unread} new</span>`
-        : '';
+    const ui = this.createElement(whisper);
+    this.whisperElements.set(whisper.nick.toLowerCase(), { ...whisper, ui });
 
-    (whisper.unread > 0 ? this.unreadEl : this.readEl).append(`
-    <div class="user-entry ${online}${found}" title="${online}" data-username="${whisper.nick.toLowerCase()}">
-      <span class="user">${whisper.nick}</span>
-      <div class="right">
-        ${unread}
-        <span class="time" title="${time.format(
-          'LLL',
-        )}">${time.fromNow()}</span>
-      </div>
-    </div>`);
+    const readOrUnreadList = whisper.unread > 0 ? this.unreadEl : this.readEl;
+    readOrUnreadList.append(ui);
+    readOrUnreadList
+      .find('[data-tippy-content]')
+      .each(function registerTippy() {
+        tippy(this, {
+          content: this.getAttribute('data-tippy-content'),
+          arrow: roundArrow,
+          duration: 0,
+          maxWidth: 250,
+          hideOnClick: false,
+          theme: 'dgg',
+        });
+      });
+  }
+
+  createElement(whisper) {
+    const time = moment.utc(whisper.time).local();
+
+    const entry = document.createElement('div');
+    entry.classList.add('user-entry');
+    entry.classList.add(
+      this.chat.users.has(whisper.nick.toLowerCase()) ? 'online' : 'offline',
+    );
+    if (whisper.found && this.searchterm.length > 0) {
+      entry.classList.add('found');
+    }
+    entry.setAttribute('data-username', whisper.nick.toLowerCase());
+
+    const user = document.createElement('span');
+    user.classList.add('user');
+    user.textContent = whisper.nick;
+    entry.appendChild(user);
+
+    const right = document.createElement('div');
+    right.classList.add('right');
+
+    if (whisper.unread > 0) {
+      const unread = document.createElement('span');
+      unread.classList.add('unread');
+      unread.textContent = `${whisper.unread} new`;
+      right.appendChild(unread);
+    }
+
+    const timeSpan = document.createElement('span');
+    timeSpan.classList.add('time');
+    timeSpan.setAttribute('data-tippy-content', time.format('LLL'));
+    timeSpan.textContent = time.fromNow();
+    right.appendChild(timeSpan);
+
+    entry.appendChild(right);
+
+    return entry;
+  }
+
+  updateOnline(data, join) {
+    if (this.whisperElements.has(data.nick.toLowerCase())) {
+      const whisper = this.whisperElements.get(data.nick.toLowerCase());
+      whisper.ui.classList.toggle('offline', !join);
+      whisper.ui.classList.toggle('online', join);
+    }
   }
 }
