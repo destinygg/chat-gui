@@ -6,19 +6,17 @@
   position: relative;
 
   .subscription-icon {
+    filter: invert(100%);
+
     &.regular {
       @include a.icon-background('../img/sub-regular.svg');
     }
 
     &.gift {
-      filter: invert(100%);
-
       @include a.icon-background('../img/sub-gift.png');
     }
 
     &.mass-gift {
-      filter: invert(100%);
-
       @include a.icon-background('../img/sub-mass-gift.png');
     }
   }
