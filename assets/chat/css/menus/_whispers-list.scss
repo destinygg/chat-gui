@@ -1,78 +1,83 @@
 @use '../abstracts/' as a;
 
 #chat-whisper-users {
-  .content > ul {
-    margin: 0;
-    padding: a.$gutter-md 0;
-  }
+  .section {
+    margin: 1.5em 0em 0.5em;
 
-  .unread-0 {
-    .badge {
-      display: none;
+    .title {
+      padding: 0em 0em 0.2em 1em;
+      font-weight: 600;
+      border-bottom: 1px solid;
     }
 
-    .user,
-    .user:hover {
-      color: a.$text-color1;
-    }
-  }
+    .user-entry {
+      margin: 0;
+      cursor: pointer;
+      padding: 0 a.$gutter-lg;
+      text-decoration: none;
+      visibility: visible;
+      align-items: center;
+      display: flex;
 
-  .empty {
-    color: a.$text-color1;
-    margin: a.$gutter-lg;
-  }
-}
+      .right {
+        position: absolute;
+        right: a.$gutter-md;
 
-.conversation {
-  list-style: none;
-  position: relative;
-  cursor: pointer;
-  padding-left: a.$gutter-md;
-  display: flex;
-  align-items: center;
+        .unread {
+          font-size: 0.8em;
+          padding: 0 a.$gutter-md;
+          display: inline-block;
+          background: a.$color-surface-dark4;
+          border-radius: 1em;
+          margin: a.$gutter-xs 0;
+          color: a.$color-chat-text2;
+          margin-right: a.$gutter-md;
+        }
+      }
 
-  .user {
-    color: a.$color-accent;
-    display: block;
+      &:hover {
+        background: #282828;
+      }
 
-    &:hover {
-      color: a.$color-accent-light;
+      &::before {
+        content: '';
+        width: 8px;
+        height: 8px;
+        margin-right: a.$gutter-sm;
+        border-radius: 7.5px;
+      }
 
-      .badge {
-        color: a.$color-chat-text1;
+      &.online::before {
+        background-color: a.$color-green;
+      }
+
+      &.offline::before {
+        background-color: a.$color-black;
       }
     }
   }
 
-  .badge,
-  .remove {
-    float: right;
-    margin-right: a.$gutter-md;
+  .content {
+    margin-top: -(a.$gutter-md);
+    padding-bottom: a.$gutter-lg;
   }
 
-  .badge {
-    font-size: 0.8em;
-    padding: 0 a.$gutter-md;
-    display: inline-block;
-    background: a.$color-surface-dark4;
-    border-radius: 50%;
-    margin: a.$gutter-xs 0;
-    color: a.$color-chat-text2;
+  .scrollable {
+    max-height: calc(100% - 3em);
   }
 
-  .remove {
-    opacity: 0.25;
-    display: inline-block;
-    text-decoration: none;
-    text-align: center;
-    line-height: 1.3em;
-    width: 1.3em;
-    height: 1.3em;
+  &.search-in .user-entry {
+    display: none;
 
-    @include a.icon-background('../img/icon-close.svg');
-
-    &:hover {
-      opacity: 1;
+    &.found {
+      display: flex;
     }
+  }
+
+  input {
+    padding: a.$gutter-lg a.$gutter-lg;
+    border: none;
+    background: none;
+    border-radius: 0;
   }
 }
