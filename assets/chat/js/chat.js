@@ -1376,6 +1376,7 @@ class Chat {
     MessageBuilder.broadcast(
       data.data,
       new ChatUser(data.user),
+      data.uuid,
       data.timestamp,
     ).into(this);
   }
@@ -1390,6 +1391,7 @@ class Chat {
         nick: 'System',
         id: -1,
       }),
+      '',
     ).into(this);
   }
 
