@@ -44,6 +44,9 @@ const nickregex = /^\w{3,20}$/;
 const nsfwregex = /\bNSFW\b/i;
 const nsflregex = /\bNSFL\b/i;
 
+// https://developer.mozilla.org/en-US/docs/Web/HTTP/Browser_detection_using_the_user_agent#mobile_tablet_or_desktop
+const ismobile = /\bMobi/g;
+
 export {
   regexslashcmd,
   regextime,
@@ -52,6 +55,7 @@ export {
   nsfwregex,
   nsflregex,
   linkregex,
+  ismobile,
 };
 
 export default function makeSafeForRegex(str) {

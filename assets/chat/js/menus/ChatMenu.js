@@ -1,5 +1,6 @@
 import ChatScrollPlugin from '../scroll';
 import EventEmitter from '../emitter';
+import { ismobile } from '../regex';
 
 export default class ChatMenu extends EventEmitter {
   constructor(ui, btn, chat) {
@@ -14,12 +15,13 @@ export default class ChatMenu extends EventEmitter {
     });
     this.ui.on('click', '.close,.chat-menu-close', this.hide.bind(this));
     this.btn.on('click', (e) => {
-      if (this.visible) {
+      if (this.visible && !this.ismobile) {
         chat.input.focus();
       }
       this.toggle(e);
       return false;
     });
+    this.ismobile = ismobile.test(window.navigator.userAgent);
   }
 
   show() {
