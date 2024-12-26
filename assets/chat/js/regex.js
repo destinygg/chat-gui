@@ -45,7 +45,7 @@ const nsfwregex = /\bNSFW\b/i;
 const nsflregex = /\bNSFL\b/i;
 
 // https://developer.mozilla.org/en-US/docs/Web/HTTP/Browser_detection_using_the_user_agent#mobile_tablet_or_desktop
-const ismobile = /\bMobi/g;
+const ismobile = /\bMobi/;
 
 export {
   regexslashcmd,
