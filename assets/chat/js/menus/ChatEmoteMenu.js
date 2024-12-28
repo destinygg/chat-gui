@@ -30,7 +30,7 @@ export default class ChatEmoteMenu extends ChatMenu {
 
   show() {
     super.show();
-    if (!this.ismobile) {
+    if (!this.chat.ismobile) {
       this.searchinput.focus();
     }
     this.buildEmoteMenu();
