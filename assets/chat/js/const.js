@@ -140,6 +140,7 @@ const settingsdefault = new Map(
     fontscale: 'auto',
     censorbadwords: false,
     disableanimations: false,
+    autocompletemethod: 0, // 0 = Emotes & Names, 1 = Only Emotes, 2 = Only Names
   }),
 );
 
