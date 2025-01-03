@@ -228,10 +228,18 @@ class ChatAutoComplete {
     });
   }
 
-  search(criteria, useronly = false) {
+  search(criteria, useronly = false, emoteonly = false) {
     this.selected = -1;
     this.results = [];
     this.criteria = criteria;
+    const isUserOnly =
+      this.chat.settings.get('autocompletemethod') === '2' ||
+      useronly ||
+      criteria.useronly;
+    const isEmoteOnly =
+      (this.chat.settings.get('autocompletemethod') === '1' || emoteonly) &&
+      !isUserOnly;
+
     if (criteria.word.length >= minWordLength) {
       const bucket = this.buckets.get(getBucketId(criteria.word)) || new Map();
       const regex = new RegExp(`^${makeSafeForRegex(criteria.pre)}`, 'i');
@@ -241,7 +249,8 @@ class ChatAutoComplete {
         // filter users if user search
         .filter(
           (a) =>
-            (!a.isemote || !(criteria.useronly || useronly)) &&
+            (!a.isemote || !isUserOnly) &&
+            (a.isemote || !isEmoteOnly) &&
             regex.test(a.data),
         )
         .sort(sortResults)
