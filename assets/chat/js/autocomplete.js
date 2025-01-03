@@ -228,7 +228,7 @@ class ChatAutoComplete {
     });
   }
 
-  search(criteria, useronly = false) {
+  search(criteria, useronly = false, emoteonly = false) {
     this.selected = -1;
     this.results = [];
     this.criteria = criteria;
@@ -242,6 +242,7 @@ class ChatAutoComplete {
         .filter(
           (a) =>
             (!a.isemote || !(criteria.useronly || useronly)) &&
+            (a.isemote || !(criteria.emoteonly || emoteonly)) &&
             regex.test(a.data),
         )
         .sort(sortResults)
