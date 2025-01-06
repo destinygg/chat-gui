@@ -16,7 +16,7 @@ export default class ChatWhisperUsers extends ChatMenu {
     this.searchinput = this.ui.find(
       '#chat-whisper-users-search .form-control:first',
     );
-    this.ui.on('click', '.user-entry', (e) =>
+    this.ui.on('click', '.conversation', (e) =>
       chat.openConversation(e.currentTarget.getAttribute('data-username')),
     );
     this.chat.source.on('JOIN', (data) => this.updateOnline(data, true));
@@ -110,35 +110,41 @@ export default class ChatWhisperUsers extends ChatMenu {
     const time = moment.utc(whisper.time).local();
 
     const entry = document.createElement('div');
-    entry.classList.add('user-entry');
+    entry.classList.add('conversation');
     entry.classList.add(
-      this.chat.users.has(whisper.nick.toLowerCase()) ? 'online' : 'offline',
+      this.chat.users.has(whisper.nick.toLowerCase())
+        ? 'conversation--online'
+        : 'conversation--offline',
     );
     if (whisper.found && this.searchterm.length > 0) {
       entry.classList.add('found');
     }
     entry.setAttribute('data-username', whisper.nick.toLowerCase());
 
-    const user = document.createElement('span');
-    user.classList.add('user');
+    const onlineIcon = document.createElement('div');
+    onlineIcon.classList.add('conversation__online-icon');
+    entry.appendChild(onlineIcon);
+
+    const user = document.createElement('div');
+    user.classList.add('conversation__username');
     user.textContent = whisper.nick;
     entry.appendChild(user);
 
     const right = document.createElement('div');
-    right.classList.add('right');
 
     if (whisper.unread > 0) {
       const unread = document.createElement('span');
-      unread.classList.add('unread');
+      unread.classList.add('conversation__unread');
       unread.textContent = `${whisper.unread} new`;
       right.appendChild(unread);
     }
 
-    const timeSpan = document.createElement('span');
-    timeSpan.classList.add('time');
-    timeSpan.setAttribute('data-tippy-content', time.format('LLL'));
-    timeSpan.textContent = time.fromNow();
-    right.appendChild(timeSpan);
+    const timeElement = document.createElement('time');
+    timeElement.classList.add('conversation__time');
+    timeElement.setAttribute('datetime', time);
+    timeElement.setAttribute('data-tippy-content', time.format('LLL'));
+    timeElement.textContent = time.fromNow();
+    right.appendChild(timeElement);
 
     entry.appendChild(right);
 
