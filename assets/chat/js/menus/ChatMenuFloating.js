@@ -52,15 +52,14 @@ export default class ChatMenuFloating extends ChatMenu {
 
   position(e) {
     this.mousedown = false;
-    const rect = this.chat.output[0].getBoundingClientRect();
     // calculating floating window location (if it doesn't fit on screen, adjusting it a bit so it does)
     const x =
-      this.ui.width() + e.clientX - rect.left > rect.width
-        ? e.clientX - this.ui.width() + (rect.right - e.clientX)
+      this.ui.width() + e.clientX > window.innerWidth
+        ? window.innerWidth - this.ui.width()
         : e.clientX;
     const y =
-      this.ui.height() + e.clientY - rect.top > rect.height
-        ? e.clientY - this.ui.height() + (rect.bottom - e.clientY) - 12
+      this.ui.height() + e.clientY > window.innerHeight
+        ? window.innerHeight - this.ui.height() - 12
         : e.clientY - 12;
 
     this.ui[0].style.left = `${x}px`;
