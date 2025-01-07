@@ -37,11 +37,14 @@ class ChatInputHistory {
         // store the typed in message so that we can go back to it
         this.lastinput = this.input.val().toString();
 
-        if (this.index <= 0)
+        if (this.index <= 0) {
           // nothing in the history, bail out
           return;
+        }
         // down arrow, but nothing to show
-      } else return;
+      } else {
+        return;
+      }
     }
 
     const index = this.index + direction;
@@ -66,12 +69,14 @@ class ChatInputHistory {
     if (
       this.history.length > 0 &&
       this.history[this.history.length - 1] === message
-    )
+    ) {
       return;
+    }
     this.history.push(message);
     // limit entries
-    if (this.history.length > this.maxentries)
+    if (this.history.length > this.maxentries) {
       this.history.splice(0, this.history.length - this.maxentries);
+    }
     ChatStore.write('chat.history', this.history);
   }
 }

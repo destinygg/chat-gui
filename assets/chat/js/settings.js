@@ -17,13 +17,19 @@ function upgradeSettings(chat, oldversion) {
       });
     }
     arr = ChatStore.read('chatignorelist');
-    if (arr) chat.settings.set('ignorenicks', Object.keys(arr) || []);
+    if (arr) {
+      chat.settings.set('ignorenicks', Object.keys(arr) || []);
+    }
 
     arr = ChatStore.read('chat.ignoring');
-    if (arr) chat.settings.set('ignorenicks', arr);
+    if (arr) {
+      chat.settings.set('ignorenicks', arr);
+    }
 
     arr = ChatStore.read('inputhistory');
-    if (arr) ChatStore.write('chat.history', arr);
+    if (arr) {
+      ChatStore.write('chat.history', arr);
+    }
 
     arr = chat.settings.get('allowNotifications');
     if (arr !== undefined && arr !== null) {

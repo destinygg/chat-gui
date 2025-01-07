@@ -29,8 +29,8 @@ export default class MessageBuilder {
     return new ChatMessage(message, timestamp, MessageTypes.INFO);
   }
 
-  static broadcast(message, user, timestamp = null) {
-    return new ChatBroadcastMessage(message, user, timestamp);
+  static broadcast(message, user, uuid, timestamp = null) {
+    return new ChatBroadcastMessage(message, user, uuid, timestamp);
   }
 
   static command(message, timestamp = null) {
@@ -41,8 +41,8 @@ export default class MessageBuilder {
     return new ChatUserMessage(message, user, timestamp);
   }
 
-  static emote(emote, timestamp, count = 1) {
-    return new ChatEmoteMessage(emote, timestamp, count);
+  static emote(emote, timestamp, messages) {
+    return new ChatEmoteMessage(emote, timestamp, messages);
   }
 
   static whisper(message, user, target, timestamp = null, id = null) {
@@ -68,8 +68,10 @@ export default class MessageBuilder {
       new ChatUser(data.user),
       data.tier,
       data.tierLabel,
+      data.amount,
       data.streak,
       data.timestamp,
+      data.expirationTimestamp,
       data.uuid,
     );
   }
@@ -80,8 +82,11 @@ export default class MessageBuilder {
       new ChatUser(data.user),
       data.tier,
       data.tierLabel,
+      data.amount,
       new ChatUser(data.recipient),
+      data.fromMassGift,
       data.timestamp,
+      data.expirationTimestamp,
       data.uuid,
     );
   }
@@ -92,8 +97,10 @@ export default class MessageBuilder {
       new ChatUser(data.user),
       data.tier,
       data.tierLabel,
+      data.amount,
       data.quantity,
       data.timestamp,
+      data.expirationTimestamp,
       data.uuid,
     );
   }
@@ -104,6 +111,7 @@ export default class MessageBuilder {
       new ChatUser(data.user),
       data.amount,
       data.timestamp,
+      data.expirationTimestamp,
       data.uuid,
     );
   }

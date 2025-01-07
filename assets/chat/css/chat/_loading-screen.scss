@@ -1,0 +1,31 @@
+@use '../abstracts/' as a;
+
+#chat-loading {
+  opacity: 0.2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+
+  .chat-loading-icon {
+    width: 4em;
+    height: 4em;
+    display: inline-block;
+    animation: spin 2s linear infinite;
+
+    @include a.icon-background('../img/icon-settings.svg');
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

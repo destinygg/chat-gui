@@ -1,0 +1,65 @@
+@use '../../abstracts/' as a;
+
+.msg-subscription,
+.msg-giftsub,
+.msg-massgift {
+  position: relative;
+
+  .subscription-icon {
+    filter: invert(100%);
+
+    &.regular {
+      @include a.icon-background('../img/sub-regular.svg');
+    }
+
+    &.gift {
+      @include a.icon-background('../img/sub-gift.png');
+    }
+
+    &.mass-gift {
+      @include a.icon-background('../img/sub-mass-gift.png');
+    }
+  }
+
+  .streak {
+    display: flex;
+    flex-direction: column;
+    width: calc(100% - 2.25em - a.$gutter-md * 2);
+  }
+
+  .streak-message {
+    border-top-style: solid;
+    border-top-width: 1px;
+    border-top-color: a.$color-chat-place;
+    padding-top: 2px;
+    margin-top: 2px;
+  }
+
+  .tier {
+    font-weight: 500;
+    cursor: unset;
+
+    &:hover {
+      text-decoration: unset;
+      &:before {
+        content: unset !important;
+      }
+    }
+  }
+
+  &.rainbow-border {
+    background-clip: padding-box;
+    border: solid 3px transparent;
+    border-radius: 10px;
+
+    &:before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      margin: -3px;
+      border-radius: inherit;
+      background: var(--rainbow-gradient);
+    }
+  }
+}

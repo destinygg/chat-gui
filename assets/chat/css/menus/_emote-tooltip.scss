@@ -1,0 +1,63 @@
+@use '../abstracts/' as a;
+
+#chat-emote-tooltip {
+  height: fit-content;
+  width: fit-content;
+  min-width: 75px;
+  max-width: 250px;
+  z-index: 221;
+
+  .emote-image {
+    display: flex;
+    justify-content: center;
+    padding: a.$gutter-md;
+  }
+
+  .emote-info {
+    border-top: 1px solid a.$color-surface-dark4;
+    padding: a.$gutter-sm;
+
+    div {
+      display: flex;
+      justify-content: center;
+
+      &.name {
+        font-weight: 500;
+        color: a.$text-color;
+      }
+
+      &.tier,
+      &.creator {
+        color: a.$text-color1;
+      }
+    }
+
+    button.favorite {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      margin-top: 5px;
+
+      .btn-icon {
+        opacity: unset;
+        width: unset;
+        display: unset;
+        transition: background-color 500ms;
+        height: 20px;
+        aspect-ratio: 1;
+        mask-size: 20px;
+        mask-image: url('../img/icon-favorite.svg');
+        background-color: a.$text-color2;
+      }
+
+      &.favorited .btn-icon {
+        mask-size: 20px;
+        mask-image: url('../img/icon-favorite-fill.svg');
+      }
+
+      &:hover .btn-icon {
+        background-color: a.$color-yellow;
+      }
+    }
+  }
+}

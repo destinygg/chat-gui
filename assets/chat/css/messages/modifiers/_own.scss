@@ -1,0 +1,6 @@
+@use '../../abstracts/' as a;
+
+.msg-own {
+  background-color: a.$color-chat-emphasize;
+  color: a.$color-chat-text1;
+}

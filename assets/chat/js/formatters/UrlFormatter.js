@@ -10,13 +10,19 @@ export default class UrlFormatter {
   }
 
   format(chat, str) {
-    if (!str) return undefined;
+    if (!str) {
+      return undefined;
+    }
     const self = this;
     let extraclass = '';
 
-    if (/\b(?:NSFL)\b/i.test(str)) extraclass = 'nsfl-link';
-    else if (/\b(?:NSFW)\b/i.test(str)) extraclass = 'nsfw-link';
-    else if (/\b(?:SPOILERS)\b/i.test(str)) extraclass = 'spoilers-link';
+    if (/\b(?:NSFL)\b/i.test(str)) {
+      extraclass = 'nsfl-link';
+    } else if (/\b(?:NSFW)\b/i.test(str)) {
+      extraclass = 'nsfw-link';
+    } else if (/\b(?:SPOILERS)\b/i.test(str)) {
+      extraclass = 'spoilers-link';
+    }
 
     return str.replace(linkregex, (url, scheme) => {
       const decodedUrl = self.elem.html(url).text();
@@ -46,7 +52,7 @@ export default class UrlFormatter {
         const embedTarget = chat.isBigscreenEmbed() ? '_top' : '_blank';
         const embedUrl = `${chat.config.dggOrigin}${chat.bigscreenPath}${embedHashLink}`;
         return embedHashLink
-          ? `<a target="_blank" class="externallink ${extraclass}" href="${href}" rel="nofollow">${urlText}</a><a target="${embedTarget}" class="embed-button" href="${embedUrl}"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="14.4" viewBox="0 0 640 512"><path d="M64 64V352H576V64H64zM0 64C0 28.7 28.7 0 64 0H576c35.3 0 64 28.7 64 64V352c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V64zM128 448H512c17.7 0 32 14.3 32 32s-14.3 32-32 32H128c-17.7 0-32-14.3-32-32s14.3-32 32-32z"  fill="#fff"/></svg></a>`
+          ? `<a target="_blank" class="externallink ${extraclass}" href="${href}" rel="nofollow">${urlText}</a><a target="${embedTarget}" class="embed-button" href="${embedUrl}"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-tv-minimal"><path d="M7 21h10"/><rect width="20" height="14" x="2" y="3" rx="2"/></svg></a>`
           : `<a target="_blank" class="externallink ${extraclass}" href="${href}" rel="nofollow">${urlText}</a>${extra}`;
       }
       return url;

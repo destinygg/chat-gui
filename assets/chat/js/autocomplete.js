@@ -11,19 +11,27 @@ function getBucketId(id) {
 }
 
 function sortResults(a, b) {
-  if (!a || !b) return 0;
+  if (!a || !b) {
+    return 0;
+  }
 
   // order emotes second
-  if (a.isemote !== b.isemote) return a.isemote && !b.isemote ? -1 : 1;
+  if (a.isemote !== b.isemote) {
+    return a.isemote && !b.isemote ? -1 : 1;
+  }
 
   // order according to recency third
-  if (a.weight !== b.weight) return a.weight > b.weight ? -1 : 1;
+  if (a.weight !== b.weight) {
+    return a.weight > b.weight ? -1 : 1;
+  }
 
   // order lexically fourth
   const lowerA = a.data.toLowerCase();
   const lowerB = b.data.toLowerCase();
 
-  if (lowerA === lowerB) return 0;
+  if (lowerA === lowerB) {
+    return 0;
+  }
 
   return lowerA > lowerB ? 1 : -1;
 }
@@ -34,9 +42,13 @@ function buildSearchCriteria(str, offset) {
   const endCaret = post.indexOf(' ');
   let useronly = false;
 
-  if (startCaret > 0) pre = pre.substring(startCaret);
+  if (startCaret > 0) {
+    pre = pre.substring(startCaret);
+  }
 
-  if (endCaret > -1) post = post.substring(0, endCaret);
+  if (endCaret > -1) {
+    post = post.substring(0, endCaret);
+  }
 
   // Ignore the first char as part of the search and flag as a user only search
   if (pre.lastIndexOf('@') === 0 || pre.lastIndexOf('>') === 0) {
@@ -55,28 +67,63 @@ function buildSearchCriteria(str, offset) {
   };
 }
 function timeoutHelpers(ac) {
-  if (suggestTimeoutId) clearTimeout(suggestTimeoutId);
+  if (suggestTimeoutId) {
+    clearTimeout(suggestTimeoutId);
+  }
   suggestTimeoutId = setTimeout(() => ac.reset(), 15000, ac);
 }
 function updateHelpers(ac) {
   ac.chat.ui.toggleClass('chat-autocomplete-in', ac.results.length > 0);
   ac.ui.toggleClass('active', ac.results.length > 0);
+  if (ac.selected === -1) {
+    ac.container.css('left', 0);
+  }
 }
 function selectHelper(ac) {
   // Positioning
-  if (ac.selected !== -1 && ac.results.length > 0) {
-    const list = ac.ui.find(`li`).get();
-    const offset = ac.container.position().left;
-    const maxwidth = ac.ui.width();
-    $(list[ac.selected + 3]).each((i, e) => {
-      const right = $(e).position().left + offset + $(e).outerWidth();
-      if (right > maxwidth) ac.container.css('left', offset + maxwidth - right);
-    });
-    $(list[Math.max(0, ac.selected - 2)]).each((i, e) => {
-      const left = $(e).position().left + offset;
-      if (left < 0) ac.container.css('left', -$(e).position().left);
-    });
-    list.forEach((e, i) => $(e).toggleClass('active', i === ac.selected));
+  if (ac.results.length === 0) {
+    return;
+  }
+
+  const list = ac.ui.find(`li`).get();
+
+  list.forEach((e, i) => $(e).toggleClass('active', i === ac.selected));
+
+  const fullWidth = ac.container.width();
+  const visibleWidth = ac.ui.width();
+  const selectedItem = list[ac.selected];
+
+  if (visibleWidth > fullWidth) {
+    return;
+  }
+
+  const offset = ac.container.position().left;
+
+  const nearStart = selectedItem.offsetLeft < -offset;
+  const nearEnd =
+    fullWidth - selectedItem.offsetLeft + selectedItem.clientWidth * 2 <
+    visibleWidth;
+  const anywhereElse =
+    selectedItem.offsetLeft + selectedItem.clientWidth * 2 > visibleWidth;
+
+  if (nearEnd) {
+    ac.container.css('left', -fullWidth + visibleWidth);
+    return;
+  }
+
+  if (anywhereElse) {
+    ac.container.css(
+      'left',
+      -selectedItem.offsetLeft -
+        selectedItem.clientWidth / 2 +
+        visibleWidth / 2,
+    );
+    return;
+  }
+
+  // this is needed to properly loop back the list to the beginning
+  if (nearStart) {
+    ac.container.css('left', -selectedItem.offsetLeft);
   }
 }
 
@@ -109,10 +156,11 @@ class ChatAutoComplete {
       originval = this.input.val().toString();
       const keycode = getKeyCode(e);
       if (keycode === KEYCODES.TAB) {
-        if (this.results.length > 0)
+        if (this.results.length > 0) {
           this.select(
             this.selected >= this.results.length - 1 ? 0 : this.selected + 1,
           );
+        }
         e.preventDefault();
         e.stopPropagation();
       } else if (shiftdown !== e.shiftKey && this.criteria !== null) {
@@ -149,7 +197,9 @@ class ChatAutoComplete {
       const keycode = getKeyCode(e);
       if (keycode !== KEYCODES.TAB && keycode !== KEYCODES.ENTER) {
         const str = this.input.val().toString();
-        if (str.trim().length === 0) this.reset();
+        if (str.trim().length === 0) {
+          this.reset();
+        }
         // If a key WAS pressed, but keypress event did not fire
         // Check if the value changed between the key down, and key up
         // Keys like `backspace`
@@ -213,13 +263,20 @@ class ChatAutoComplete {
     const id = getBucketId(str);
     const bucket =
       this.buckets.get(id) || this.buckets.set(id, new Map()).get(id);
-    const data = Object.assign(bucket.get(str) || {}, {
+
+    const existingData = bucket.get(str);
+    if (existingData && existingData.isemote) {
+      return existingData;
+    }
+
+    const newData = Object.assign(bucket.get(str) || {}, {
       data: str,
       weight,
       isemote,
     });
-    bucket.set(str, data);
-    return data;
+    bucket.set(str, newData);
+
+    return newData;
   }
 
   remove(str, userOnly = false) {
@@ -235,7 +292,9 @@ class ChatAutoComplete {
   select(index) {
     this.selected = Math.min(index, this.results.length - 1);
     const result = this.results[this.selected];
-    if (!result) return;
+    if (!result) {
+      return;
+    }
 
     const pre = this.criteria.orig.substr(0, this.criteria.startCaret);
     let post = this.criteria.orig.substr(
@@ -244,7 +303,9 @@ class ChatAutoComplete {
 
     // always add a space after our completion if there isn't one since people
     // would usually add one anyway
-    if (post[0] !== ' ' || post.length === 0) post = ` ${post}`;
+    if (post[0] !== ' ' || post.length === 0) {
+      post = ` ${post}`;
+    }
     this.input.focus().val(pre + result.data + post);
 
     // Move the caret to the end of the replacement string + 1 for the space

@@ -16,7 +16,9 @@ export default class EmoteService {
   }
 
   emotesForUser(user) {
-    if (user.isPrivileged()) return this.emotes;
+    if (user.isPrivileged()) {
+      return this.emotes;
+    }
 
     let emotes = this.emotes.filter(
       (e) => e.minimumSubTier <= user.subTier && !e.twitch,

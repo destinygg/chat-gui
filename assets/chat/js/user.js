@@ -72,7 +72,9 @@ class ChatUser {
 
   hasAnyFeatures(...features) {
     for (const feature of features) {
-      if (this.features.includes(feature)) return true;
+      if (this.features.includes(feature)) {
+        return true;
+      }
     }
 
     return false;
@@ -80,7 +82,9 @@ class ChatUser {
 
   hasAnyRoles(...roles) {
     for (const role of roles) {
-      if (this.roles.includes(role)) return true;
+      if (this.roles.includes(role)) {
+        return true;
+      }
     }
 
     return false;
