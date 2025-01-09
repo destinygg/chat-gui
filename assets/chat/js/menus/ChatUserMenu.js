@@ -92,7 +92,7 @@ export default class ChatUserMenu extends ChatMenu {
 
   show() {
     super.show();
-    if (!this.chat.ismobile) {
+    if (this.chat.shouldFocus) {
       this.searchinput.focus();
     }
   }
