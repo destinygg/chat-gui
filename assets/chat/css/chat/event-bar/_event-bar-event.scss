@@ -71,7 +71,6 @@
   @each $amount, $color in donation.$amount-color-map {
     &.amount-#{$amount} {
       border-color: $color;
-      filter: invert(100%);
 
       .event-icon {
         @include a.icon-background('../img/donation-amount-#{$amount}.png');
