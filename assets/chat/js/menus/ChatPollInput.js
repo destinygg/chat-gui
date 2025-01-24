@@ -5,20 +5,25 @@ class ChatPollInput extends ChatMenu {
   constructor(ui, btn, chat) {
     super(ui, btn, chat);
 
-    this.ui.send = this.ui.find('.chat-poll-input-button-send');
-    this.ui.add = this.ui.find('.chat-poll-input-button-add');
-    this.ui.question = this.ui.find('.chat-poll-input-question');
-    this.ui.answers = this.ui.find('.chat-poll-input-answers');
-    this.ui.answers.options = [];
-    this.ui.time = this.ui.find('.chat-poll-input-time');
-    this.ui.weighted = this.ui.find('.chat-poll-input-weighted');
+    this.ui.question = this.ui.find('#chat-poll-input-question');
 
-    this.ui.send.on('click touch', () => this.send());
+    this.ui.add = this.ui.find('#chat-poll-input-add');
+    this.ui.answers = this.ui.find('#chat-poll-input-answers');
+    this.ui.answers.options = [];
+
+    this.ui.time = this.ui.find('#chat-poll-input-time');
+    this.ui.weighted = this.ui.find('#chat-poll-input-sub-weighted');
+
+    this.ui.submit = this.ui.find('#chat-poll-input-submit');
+    this.ui.cancel = this.ui.find('#chat-poll-input-cancel');
+
+    this.ui.submit.on('click touch', () => this.submit());
+    this.ui.cancel.on('click touch', () => this.hide());
     this.ui.add.on('click touch', () => this.addAnswer());
 
     this.ui.answers.on(
       'click touch',
-      '.chat-poll-input-answer .chat-poll-input-button-remove',
+      '.chat-poll-input-answer .chat-poll-input-answer-remove',
       (e) => {
         e.target.closest('.chat-poll-input-answer').remove();
         this.drawOptions(this.options);
@@ -33,11 +38,17 @@ class ChatPollInput extends ChatMenu {
     this.time = time;
 
     super.show();
+
+    this.ui.question.focus();
   }
 
-  send() {
-    if (this.question === '') return;
-    if (this.options.includes('')) return;
+  submit() {
+    if (this.question === '') {
+      return;
+    }
+    if (this.options.includes('')) {
+      return;
+    }
     if (this.time < 5000 || this.time > 600000) {
       this.ui.time.val('');
       return;
@@ -54,15 +65,15 @@ class ChatPollInput extends ChatMenu {
 
   addAnswer() {
     this.buildOptionHtml('', this.options.length).insertBefore(
-      this.ui.add.closest('.chat-poll-input-row'),
+      this.ui.add.closest('.command-input-menu__content__section__row'),
     );
   }
 
   buildOptionHtml(option, index) {
-    return $(`<div class="chat-poll-input-row chat-poll-input-answer">
+    return $(`<div class="command-input-menu__content__section__row chat-poll-input-answer">
       <span>${index + 1}:</span>
-      <input type="text" placeholder="YEE" value="${option}">
-      <button class="chat-poll-input-button chat-poll-input-button-remove">X</button>
+      <input class="command-input-menu__input" type="text" placeholder="YEE" value="${option}" required>
+      <button class="command-input-menu__button command-input-menu__button--danger chat-poll-input-answer-remove">X</button>
     </div>`);
   }
 
@@ -85,8 +96,11 @@ class ChatPollInput extends ChatMenu {
   set options(rawOptions) {
     let options = rawOptions;
     // always have at least two options.
-    if (options.length === 0) options = ['', ''];
-    else if (options.length === 1) options.push('');
+    if (options.length === 0) {
+      options = ['', ''];
+    } else if (options.length === 1) {
+      options.push('');
+    }
 
     this.drawOptions(options);
   }

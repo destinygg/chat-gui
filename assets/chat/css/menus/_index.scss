@@ -1,5 +1,6 @@
 @use '../abstracts/' as a;
 
+@use 'command-input';
 @use 'emote-list';
 @use 'emote-tooltip';
 @use 'poll';

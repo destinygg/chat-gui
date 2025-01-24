@@ -32,61 +32,76 @@
 
   <div id="chat-input-frame">
     <div id="chat-input-wrap">
-      <div id="chat-poll-input">
-        <div class="chat-poll-input-section chat-poll-input-title">
+      <div class="command-input-menu" id="chat-poll-input">
+        <div class="command-input-menu__title">
           <h2>Create Poll</h2>
         </div>
-        <div class="chat-poll-input-section">
-          <div class="chat-poll-input-row">
-            <span>Question:</span>
-            <input
-              class="chat-poll-input-question"
-              type="text"
-              placeholder="YEE vs PEPE"
-            />
+        <div class="command-input-menu__content">
+          <div class="command-input-menu__content__section">
+            <div class="command-input-menu__content__section__row">
+              <span>Question:</span>
+              <input
+                class="command-input-menu__input"
+                id="chat-poll-input-question"
+                type="text"
+                placeholder="YEE vs PEPE"
+                required
+              />
+            </div>
+          </div>
+          <div
+            class="command-input-menu__content__section"
+            id="chat-poll-input-answers"
+          >
+            <div class="command-input-menu__content__section__row">
+              <button
+                class="command-input-menu__button command-input-menu__button--success"
+                id="chat-poll-input-add"
+              >
+                Add Answer
+              </button>
+            </div>
+          </div>
+          <div class="command-input-menu__content__section">
+            <div class="command-input-menu__content__section__row">
+              <span>Time:</span>
+              <input
+                class="command-input-menu__input"
+                id="chat-poll-input-time"
+                type="number"
+                min="5"
+                max="600"
+                step="5"
+                placeholder="30"
+                value="30"
+                required
+              />
+              <span>seconds</span>
+            </div>
+            <div class="command-input-menu__content__section__row">
+              <span>Sub Weighted:</span>
+              <input
+                class="command-input-menu__input"
+                id="chat-poll-input-sub-weighted"
+                type="checkbox"
+                style="width: auto"
+              />
+            </div>
           </div>
         </div>
-        <div class="chat-poll-input-section chat-poll-input-answers">
-          <div class="chat-poll-input-row">
-            <button class="chat-poll-input-button chat-poll-input-button-add">
-              Add Answer
-            </button>
-          </div>
-        </div>
-        <div class="chat-poll-input-section">
-          <div class="chat-poll-input-row">
-            <span>Time:</span>
-            <input
-              class="chat-poll-input-time"
-              type="number"
-              min="5"
-              max="600"
-              step="5"
-              placeholder="30"
-              value="30"
-            />
-            <span>seconds</span>
-          </div>
-          <div class="chat-poll-input-row">
-            <span>Sub Weighted:</span>
-            <input
-              class="chat-poll-input-weighted"
-              type="checkbox"
-              style="width: auto"
-            />
-          </div>
-        </div>
-        <div class="chat-poll-input-section chat-poll-input-buttons">
-          <div class="chat-poll-input-row">
-            <button class="chat-poll-input-button chat-poll-input-button-send">
-              Send
-            </button>
-            <button
-              class="chat-poll-input-button chat-poll-input-button-cancel chat-menu-close"
-            >
-              Cancel
-            </button>
-          </div>
+        <div class="command-input-menu__actions">
+          <button
+            class="command-input-menu__button command-input-menu__button--success"
+            id="chat-poll-input-submit"
+          >
+            Submit
+          </button>
+          <button
+            class="command-input-menu__button command-input-menu__button--danger"
+            id="chat-poll-input-cancel"
+          >
+            Cancel
+          </button>
         </div>
       </div>
       <div id="chat-auto-complete">
