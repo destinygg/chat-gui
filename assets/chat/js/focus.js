@@ -9,20 +9,23 @@ class ChatUserFocus {
     this.chat = chat;
     this.css = css;
     this.focused = [];
-    this.chat.output.on('click', (e) => this.toggleElement(e.target));
+    this.chat.output.on('click', (e) => {
+      this.toggleElement(e.target);
+    });
   }
 
   toggleElement(target) {
     const t = $(target);
     if (t.hasClass('chat-user')) {
-      if (!this.chat.settings.get('focusmentioned'))
+      if (!this.chat.settings.get('focusmentioned')) {
         this.toggleFocus(t.closest('.msg-user').data('username'), false, true);
+      }
       this.toggleFocus(t.text());
     } else if (t.hasClass('user') && !t.hasClass('tier')) {
       this.toggleFocus(t.text());
     } else if (t.hasClass('flair')) {
       this.toggleFocus(t.data('flair'), true);
-    } else if (this.focused.length > 0) {
+    } else if (this.isFocused()) {
       this.clearFocus();
     }
   }
@@ -39,6 +42,10 @@ class ChatUserFocus {
     }
 
     return this;
+  }
+
+  isFocused() {
+    return this.focused.length > 0;
   }
 
   addCssRule(value, isFlair) {
@@ -90,7 +97,7 @@ class ChatUserFocus {
   }
 
   redraw() {
-    this.chat.ui.toggleClass('focus', this.focused.length > 0);
+    this.chat.ui.toggleClass('focus', this.isFocused());
   }
 }
 

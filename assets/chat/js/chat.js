@@ -31,8 +31,10 @@ import {
   ChatEmoteTooltip,
   ChatSettingsMenu,
   ChatUserInfoMenu,
+  ChatEventActionMenu,
   ChatPollInput,
 } from './menus';
+import ChatEventBar from './event-bar/EventBar';
 import ChatAutoComplete from './autocomplete';
 import ChatInputHistory from './history';
 import ChatUserFocus from './focus';
@@ -43,6 +45,7 @@ import { ChatPoll, parseQuestionAndTime } from './poll';
 import { isMuteActive, MutedTimer } from './mutedtimer';
 import EmoteService from './emotes';
 import UserFeatures from './features';
+import UserRoles from './roles';
 import makeSafeForRegex, {
   regexslashcmd,
   regextime,
@@ -56,6 +59,7 @@ import makeSafeForRegex, {
 import { HashLinkConverter, MISSING_ARG_ERROR } from './hashlinkconverter';
 import ChatCommands from './commands';
 import MessageTemplateHTML from '../../views/templates.html';
+import EventBarEvent from './event-bar/EventBarEvent';
 
 class Chat {
   constructor(config) {
@@ -125,6 +129,7 @@ class Chat {
     this.source.on('DISPATCH', (data) => this.onDISPATCH(data));
     this.source.on('CLOSE', (data) => this.onCLOSE(data));
     this.source.on('NAMES', (data) => this.onNAMES(data));
+    this.source.on('HISTORY', (data) => this.onHISTORY(data));
     this.source.on('PIN', (data) => this.onPIN(data));
     this.source.on('QUIT', (data) => this.onQUIT(data));
     this.source.on('MSG', (data) => this.onMSG(data));
@@ -136,6 +141,7 @@ class Chat {
     this.source.on('SOCKETERROR', (data) => this.onSOCKETERROR(data));
     this.source.on('SUBONLY', (data) => this.onSUBONLY(data));
     this.source.on('BROADCAST', (data) => this.onBROADCAST(data));
+    this.source.on('RELOAD', () => this.onRELOAD());
     this.source.on('PRIVMSGSENT', (data) => this.onPRIVMSGSENT(data));
     this.source.on('PRIVMSG', (data) => this.onPRIVMSG(data));
     this.source.on('POLLSTART', (data) => this.onPOLLSTART(data));
@@ -146,7 +152,10 @@ class Chat {
     this.source.on('MASSGIFT', (data) => this.onMASSGIFT(data));
     this.source.on('DONATION', (data) => this.onDONATION(data));
     this.source.on('UPDATEUSER', (data) => this.onUPDATEUSER(data));
+    this.source.on('ADDPHRASE', (data) => this.onADDPHRASE(data));
+    this.source.on('REMOVEPHRASE', (data) => this.onREMOVEPHRASE(data));
     this.source.on('DEATH', (data) => this.onDEATH(data));
+    this.source.on('PAIDEVENTS', (data) => this.onPAIDEVENTS(data));
 
     this.control.on('SEND', (data) => this.cmdSEND(data));
     this.control.on('HINT', (data) => this.cmdHINT(data));
@@ -170,6 +179,7 @@ class Chat {
     );
     this.control.on('TIMESTAMPFORMAT', (data) => this.cmdTIMESTAMPFORMAT(data));
     this.control.on('BROADCAST', (data) => this.cmdBROADCAST(data));
+    this.control.on('RELOADUSERS', () => this.cmdRELOADUSERS());
     this.control.on('CONNECT', (data) => this.cmdCONNECT(data));
     this.control.on('TAG', (data) => this.cmdTAG(data));
     this.control.on('UNTAG', (data) => this.cmdUNTAG(data));
@@ -210,6 +220,18 @@ class Chat {
     this.control.on('UNMOTD', () => this.cmdUNPIN());
     this.control.on('HOST', (data) => this.cmdHOST(data));
     this.control.on('UNHOST', () => this.cmdUNHOST());
+    this.control.on('ADDPHRASE', (data) => this.cmdADDPHRASE(data));
+    this.control.on('ADDBAN', (data) => this.cmdADDPHRASE(data));
+    this.control.on('ADDMUTE', (data) => this.cmdADDPHRASE(data));
+    this.control.on('REMOVEPHRASE', (data) => this.cmdREMOVEPHRASE(data));
+    this.control.on('REMOVEBAN', (data) => this.cmdREMOVEPHRASE(data));
+    this.control.on('REMOVEMUTE', (data) => this.cmdREMOVEPHRASE(data));
+    this.control.on('DELETEPHRASE', (data) => this.cmdREMOVEPHRASE(data));
+    this.control.on('DELETEBAN', (data) => this.cmdREMOVEPHRASE(data));
+    this.control.on('DELETEMUTE', (data) => this.cmdREMOVEPHRASE(data));
+    this.control.on('DPHRASE', (data) => this.cmdREMOVEPHRASE(data));
+    this.control.on('DBAN', (data) => this.cmdREMOVEPHRASE(data));
+    this.control.on('DMUTE', (data) => this.cmdREMOVEPHRASE(data));
     this.control.on('DIE', () => this.cmdDIE());
     this.control.on('SUICIDE', () => this.cmdDIE());
     this.control.on('BITLY', () => this.cmdDIE());
@@ -280,9 +302,9 @@ class Chat {
     })();
 
     // Tooltips
+    tippy.setDefaultProps({ delay: [500, 0] });
     tippy('[data-tippy-content]', {
       arrow: roundArrow,
-      delay: 0,
       duration: 0,
       maxWidth: 250,
       hideOnClick: false,
@@ -302,6 +324,11 @@ class Chat {
     this.mainwindow = new ChatWindow('main').into(this);
     this.mutedtimer = new MutedTimer(this);
     this.chatpoll = new ChatPoll(this);
+
+    this.eventBar = new ChatEventBar();
+    this.eventBar.on('eventSelected', () => this.onEVENTSELECTED());
+    this.eventBar.on('eventUnselected', () => this.onEVENTUNSELECTED());
+
     this.pinnedMessage = null;
 
     this.windowToFront('main');
@@ -354,6 +381,19 @@ class Chat {
         this,
       ),
     );
+
+    const eventActionMenu = new ChatEventActionMenu(
+      this.ui.find('#event-action-menu'),
+      this.ui.find('.msg-event .event-button'),
+      this,
+    );
+    eventActionMenu.on('removeEvent', this.handleRemoveEvent.bind(this));
+    eventActionMenu.on(
+      'removeEvent',
+      this.eventBar.unselect.bind(this.eventBar),
+    );
+    this.menus.set('event-action-menu', eventActionMenu);
+
     this.menus.set(
       'poll-input',
       new ChatPollInput(this.ui.find('#chat-poll-input'), null, this),
@@ -404,7 +444,18 @@ class Chat {
 
     // ESC
     document.addEventListener('keydown', (e) => {
-      if (isKeyCode(e, KEYCODES.ESC)) ChatMenu.closeMenus(this); // ESC key
+      if (isKeyCode(e, KEYCODES.ESC)) {
+        const activeWindow = this.getActiveWindow();
+        if (this.getActiveMenu()) {
+          ChatMenu.closeMenus(this);
+        } else if (this.eventBar.isEventSelected()) {
+          this.eventBar.unselect();
+        } else if (!activeWindow.isScrollPinned()) {
+          activeWindow.scrollBottom();
+        } else if (this.userfocus.isFocused()) {
+          this.userfocus.clearFocus();
+        }
+      }
     });
 
     // Visibility
@@ -414,8 +465,11 @@ class Chat {
         100,
         () => {
           this.ishidden = (document.visibilityState || 'visible') !== 'visible';
-          if (!this.ishidden) this.focusIfNothingSelected();
-          else ChatMenu.closeMenus(this);
+          if (!this.ishidden) {
+            this.focusIfNothingSelected();
+          } else {
+            ChatMenu.closeMenus(this);
+          }
         },
         { atBegin: false },
       ),
@@ -564,15 +618,6 @@ class Chat {
       .catch(() => {});
   }
 
-  async loadHistory() {
-    return fetch(`${this.config.api.base}/api/chat/history`)
-      .then((res) => res.json())
-      .then((json) => {
-        this.setHistory(json);
-      })
-      .catch(() => {});
-  }
-
   async loadWhispers() {
     fetch(`${this.config.api.base}/api/messages/unread`, {
       credentials: 'include',
@@ -592,6 +637,15 @@ class Chat {
       .catch(() => {});
   }
 
+  setPreLoginText() {
+    const chatText = ChatStore.read('chat.preLoginText');
+    if (chatText === null) {
+      return;
+    }
+    this.input.val(chatText);
+    ChatStore.remove('chat.preLoginText');
+  }
+
   setEmotes(emotes) {
     this.emoteService.setEmotes(emotes);
     this.emoteService
@@ -605,17 +659,6 @@ class Chat {
     this.flairs = flairs;
     this.flairsMap = new Map();
     flairs.forEach((v) => this.flairsMap.set(v.name, v));
-    return this;
-  }
-
-  setHistory(history) {
-    if (history && history.length > 0) {
-      this.backlogloading = true;
-      history.forEach((line) => this.source.parseAndDispatch({ data: line }));
-      this.backlogloading = false;
-      MessageBuilder.element('<hr/>').into(this);
-      this.mainwindow.update(true);
-    }
     return this;
   }
 
@@ -648,7 +691,9 @@ class Chat {
 
   // Save settings if save=true then apply current settings to chat
   applySettings(save = true) {
-    if (save) this.saveSettings();
+    if (save) {
+      this.saveSettings();
+    }
 
     // Formats
     DATE_FORMATS.TIME = this.settings.get('timestampformat');
@@ -701,7 +746,9 @@ class Chat {
   }
 
   addUser(data) {
-    if (!data) return null;
+    if (!data) {
+      return null;
+    }
     const normalized = data.nick.toLowerCase();
     let user = this.users.get(normalized);
     if (!user) {
@@ -731,8 +778,10 @@ class Chat {
   }
 
   addMessage(message, win = null) {
-    // eslint-disable-next-line no-param-reassign
-    if (win === null) win = this.mainwindow;
+    if (win === null) {
+      // eslint-disable-next-line no-param-reassign
+      win = this.mainwindow;
+    }
 
     // Break the current combo if this message is not an emote
     // We don't need to check what type the current message is, we just know that its a new message, so the combo is invalid.
@@ -740,8 +789,9 @@ class Chat {
       win.lastmessage &&
       win.lastmessage.type === MessageTypes.EMOTE &&
       win.lastmessage.emotecount > 1
-    )
+    ) {
       win.lastmessage.completeCombo();
+    }
 
     // Populate the tag and mentioned users for this $message.
     if (
@@ -779,16 +829,19 @@ class Chat {
       message.highlighted = this.shouldHighlightMessage(message);
     }
 
-    // This looks odd, although it would be a correct implementation
-    /* else if(win.lastmessage && win.lastmessage.type === message.type && [MessageTypes.ERROR,MessageTypes.INFO,MessageTypes.COMMAND,MessageTypes.STATUS].indexOf(message.type)){
-            message.continued = true
-        } */
-
     // The point where we actually add the message dom
     win.addMessage(this, message);
 
     // Hide the message if the user is ignored
-    if (message.user && this.ignored(message.user.username, message.message)) {
+    if (
+      ![
+        MessageTypes.UI,
+        MessageTypes.INFO,
+        MessageTypes.ERROR,
+        MessageTypes.STATUS,
+      ].includes(message.type) &&
+      this.ignored(message.user?.username, message.message)
+    ) {
       message.ignore();
     }
 
@@ -811,13 +864,14 @@ class Chat {
     win.update();
   }
 
-  resolveMessage(nick, str) {
+  resolveMessage(nick, str, timestamp) {
     for (const message of this.unresolved) {
       if (
         this.user.username === nick.toLowerCase() &&
         message.message === str
       ) {
         this.unresolved.splice(this.unresolved.indexOf(message), 1);
+        message.setTimestamp(timestamp);
         return true;
       }
     }
@@ -828,7 +882,9 @@ class Chat {
     const win = this.windows.get(name);
     if (win !== null && win !== this.getActiveWindow()) {
       this.windows.forEach((w) => {
-        if (w.visible) w.hide();
+        if (w.visible) {
+          w.hide();
+        }
       });
       win.show();
       win.update();
@@ -900,7 +956,13 @@ class Chat {
 
     this.windowselect.toggle(this.windows.size > 1);
 
-    if (this.mainwindow !== null) this.mainwindow.update();
+    if (this.mainwindow !== null) {
+      this.mainwindow.update();
+    }
+  }
+
+  getActiveMenu() {
+    return [...this.menus.values()].find((menu) => menu.visible);
   }
 
   censor(nick) {
@@ -954,7 +1016,7 @@ class Chat {
     }
     this.settings.set('favoriteemotes', [...this.favoriteemotes]);
     this.applySettings();
-    this.menus.get('emotes').buildFavoriteEmoteMenu();
+    this.menus.get('emotes').buildEmoteMenu();
     return !exists;
   }
 
@@ -1022,19 +1084,26 @@ class Chat {
       if (data.recipient) {
         users.push(this.addUser(data.recipient));
       }
-      users.forEach((u) =>
-        this.autocomplete.add(u.displayName, false, Date.now()),
-      );
+      users.forEach((u) => {
+        if (this.ignored(u.username)) {
+          return;
+        }
+        this.autocomplete.add(u.displayName, false, Date.now());
+      });
     }
   }
 
   onCLOSE(retryMilli) {
-    if (this.chatpoll.isPollStarted()) this.chatpoll.endPoll(); // end poll on disconnect so it is not there forever.
-    if (retryMilli > 0)
+    if (this.chatpoll.isPollStarted()) {
+      this.chatpoll.endPoll();
+    } // end poll on disconnect so it is not there forever.
+    if (retryMilli > 0) {
       MessageBuilder.error(
         `Disconnected, retry in ${Math.round(retryMilli / 1000)} seconds ...`,
       ).into(this);
-    else MessageBuilder.error(`Disconnected.`).into(this);
+    } else {
+      MessageBuilder.error(`Disconnected.`).into(this);
+    }
   }
 
   onCONNECTING(url) {
@@ -1045,6 +1114,7 @@ class Chat {
 
   onME(data) {
     this.setUser(data);
+    this.setPreLoginText();
     if (data) {
       // If is a logged in user.
       this.loadSettings();
@@ -1073,10 +1143,23 @@ class Chat {
     }
   }
 
+  onHISTORY(messages) {
+    if (messages && messages.length > 0) {
+      this.backlogloading = true;
+      messages.forEach((data) => this.source.parseAndDispatch({ data }));
+      this.backlogloading = false;
+      this.mainwindow.update(true);
+    }
+  }
+
   onPIN(msg) {
-    if (this.pinnedMessage?.uuid === msg.uuid) return;
+    if (this.pinnedMessage?.uuid === msg.uuid) {
+      return;
+    }
     this.pinnedMessage?.unpin();
-    if (!msg.data) return;
+    if (!msg.data) {
+      return;
+    }
 
     const usr = this.users.get(msg.nick.toLowerCase()) ?? new ChatUser(msg);
     this.pinnedMessage = MessageBuilder.pinned(
@@ -1101,12 +1184,18 @@ class Chat {
     const textonly = this.removeSlashCmdFromText(data.data);
     const usr = this.users.get(data.nick.toLowerCase());
     const win = this.mainwindow;
+
+    const message = MessageBuilder.message(data.data, usr, data.timestamp);
+    if (win.containsMessage(message)) {
+      return;
+    }
+
     const isCombo =
       this.emoteService.canUserUseEmote(usr, textonly) &&
       this.removeSlashCmdFromText(win.lastmessage?.message) === textonly;
 
     if (isCombo && win.lastmessage?.type === MessageTypes.EMOTE) {
-      win.lastmessage.incEmoteCount();
+      win.lastmessage.add(message);
 
       if (this.user.equalWatching(usr.watching)) {
         win.lastmessage.ui.classList.toggle('watching-same', true);
@@ -1117,8 +1206,12 @@ class Chat {
     }
 
     if (isCombo && win.lastmessage?.type === MessageTypes.USER) {
+      const lastMessage = win.lastmessage;
       win.removeLastMessage();
-      const msg = MessageBuilder.emote(textonly, data.timestamp, 2).into(this);
+      const msg = MessageBuilder.emote(textonly, lastMessage.timestamp, [
+        lastMessage,
+        message,
+      ]).into(this);
 
       if (this.user.equalWatching(usr.watching)) {
         msg.ui.classList.add('watching-same');
@@ -1126,8 +1219,8 @@ class Chat {
       return;
     }
 
-    if (!this.resolveMessage(data.nick, data.data)) {
-      MessageBuilder.message(data.data, usr, data.timestamp).into(this);
+    if (!this.resolveMessage(data.nick, data.data, data.timestamp)) {
+      message.into(this);
     }
   }
 
@@ -1243,14 +1336,20 @@ class Chat {
         message = new ChatMessage(messageText, null, MessageTypes.ERROR, true);
         break;
       }
-      case 'muted':
+      case 'muted': {
         this.mutedtimer.setTimer(data.muteTimeLeft);
         this.mutedtimer.startTimer();
+        const messageText = `You are temporarily muted! You can chat again ${this.mutedtimer.getReadableDuration()}. <a target="_blank" class="externallink" href="/subscribe" rel="nofollow">Subscribe</a>, or <a target="_blank" class="externallink" href="/donate" rel="nofollow">donate</a>, to remove the mute immediately.`;
 
+        message = new ChatMessage(messageText, null, MessageTypes.ERROR, true);
+        break;
+      }
+      case 'bannedphrase': {
         message = MessageBuilder.error(
-          `You are temporarily muted! You can chat again ${this.mutedtimer.getReadableDuration()}. Subscribe to remove the mute immediately.`,
+          `Your message was blocked because it contained this banned phrase: "${data.filtered}".`,
         );
         break;
+      }
       default:
         message = MessageBuilder.error(errorstrings.get(desc) || desc);
     }
@@ -1281,44 +1380,112 @@ class Chat {
   }
 
   onBROADCAST(data) {
-    // TODO kind of ... hackey
-    if (data.data === 'reload') {
-      if (!this.backlogloading) {
-        const retryMilli = Math.floor(Math.random() * 30000) + 4000;
-        setTimeout(() => window.location.reload(true), retryMilli);
+    MessageBuilder.broadcast(
+      data.data,
+      new ChatUser(data.user),
+      data.uuid,
+      data.timestamp,
+    ).into(this);
+  }
 
-        MessageBuilder.broadcast(
-          `Restart incoming in ${Math.round(retryMilli / 1000)} seconds...`,
-          new ChatUser({
-            nick: 'System',
-            id: -1,
-          }),
-          data.timestamp,
-        ).into(this);
-      }
-    } else {
-      MessageBuilder.broadcast(
-        data.data,
-        new ChatUser(data.user),
-        data.timestamp,
-      ).into(this);
-    }
+  onRELOAD() {
+    const retryMilli = Math.floor(Math.random() * 30000) + 4000;
+    setTimeout(() => window.location.reload(true), retryMilli);
+
+    MessageBuilder.broadcast(
+      `Reload incoming in ${Math.round(retryMilli / 1000)} seconds...`,
+      new ChatUser({
+        nick: 'System',
+        id: -1,
+      }),
+      '',
+    ).into(this);
   }
 
   onSUBSCRIPTION(data) {
     MessageBuilder.subscription(data).into(this);
+
+    // Don't add events when loading messages from history because the
+    // `PAIDEVENTS` payload will contain those events
+    if (!this.backlogloading) {
+      const eventBarEvent = new EventBarEvent(
+        this,
+        MessageTypes.SUBSCRIPTION,
+        data,
+      );
+      this.eventBar.add(eventBarEvent);
+      if (this.eventBar.length === 1) {
+        this.mainwindow.update();
+      }
+    }
   }
 
   onGIFTSUB(data) {
     MessageBuilder.gift(data).into(this);
+
+    if (!this.backlogloading) {
+      const eventBarEvent = new EventBarEvent(this, MessageTypes.GIFTSUB, data);
+      this.eventBar.add(eventBarEvent);
+      if (this.eventBar.length === 1) {
+        this.mainwindow.update();
+      }
+    }
   }
 
   onMASSGIFT(data) {
     MessageBuilder.massgift(data).into(this);
+
+    if (!this.backlogloading) {
+      const eventBarEvent = new EventBarEvent(
+        this,
+        MessageTypes.MASSGIFT,
+        data,
+      );
+      this.eventBar.add(eventBarEvent);
+      if (this.eventBar.length === 1) {
+        this.mainwindow.update();
+      }
+    }
   }
 
   onDONATION(data) {
     MessageBuilder.donation(data).into(this);
+
+    if (!this.backlogloading) {
+      const eventBarEvent = new EventBarEvent(
+        this,
+        MessageTypes.DONATION,
+        data,
+      );
+      this.eventBar.add(eventBarEvent);
+      if (this.eventBar.length === 1) {
+        this.mainwindow.update();
+      }
+    }
+  }
+
+  onPAIDEVENTS(lines) {
+    const events = lines.map((l) => {
+      const { eventname, data } = this.source.parse({ data: l });
+      return new EventBarEvent(this, eventname, data);
+    });
+    this.eventBar.replaceEvents(events);
+
+    this.mainwindow.update();
+    this.eventBar.sort();
+  }
+
+  onADDPHRASE(data) {
+    MessageBuilder.command(`Phrase "${data.data}" added.`, data.timestamp).into(
+      this,
+    );
+  }
+
+  onREMOVEPHRASE(data) {
+    MessageBuilder.command(
+      `Phrase "${data.data}" removed.`,
+      data.timestamp,
+    ).into(this);
   }
 
   onPRIVMSGSENT() {
@@ -1330,12 +1497,13 @@ class Chat {
   onPRIVMSG(data) {
     const normalized = data.nick.toLowerCase();
     if (!this.ignored(normalized, data.data)) {
-      if (!this.whispers.has(normalized))
+      if (!this.whispers.has(normalized)) {
         this.whispers.set(normalized, {
           nick: data.nick,
           unread: 0,
           open: false,
         });
+      }
 
       const conv = this.whispers.get(normalized);
       const user = this.users.get(normalized) || new ChatUser(data.nick);
@@ -1343,7 +1511,7 @@ class Chat {
         ? data.messageid
         : null;
 
-      if (this.settings.get('showhispersinchat'))
+      if (this.settings.get('showhispersinchat')) {
         MessageBuilder.whisper(
           data.data,
           user,
@@ -1351,20 +1519,23 @@ class Chat {
           data.timestamp,
           messageid,
         ).into(this);
-      if (this.settings.get('notificationwhisper') && this.ishidden)
+      }
+      if (this.settings.get('notificationwhisper') && this.ishidden) {
         this.showNotification(
           `${data.nick} whispered ...`,
           data.data,
           data.timestamp,
           this.settings.get('notificationtimeout'),
         );
+      }
 
       const win = this.getWindow(normalized);
-      if (win)
+      if (win) {
         MessageBuilder.historical(data.data, user, data.timestamp).into(
           this,
           win,
         );
+      }
       if (win === this.getActiveWindow()) {
         fetch(`${this.config.api.base}/api/messages/msg/${messageid}/open`, {
           credentials: 'include',
@@ -1417,6 +1588,7 @@ class Chat {
       }
       // LOGIN
       else if (!this.authenticated) {
+        ChatStore.write('chat.preLoginText', raw);
         this.loginscrn.show();
       }
       // WHISPER
@@ -1485,6 +1657,19 @@ class Chat {
     }
     this.censor(data.nick);
     MessageBuilder.death(data.data, user, data.timestamp).into(this);
+  }
+
+  onEVENTSELECTED() {
+    // Hide full pinned message interface to make everything look nice
+    if (this.pinnedMessage) {
+      this.pinnedMessage.hidden = true;
+    }
+  }
+
+  onEVENTUNSELECTED() {
+    if (this.pinnedMessage) {
+      this.pinnedMessage.hidden = false;
+    }
   }
 
   cmdSHOWPOLL() {
@@ -1598,6 +1783,10 @@ class Chat {
       if (!failure) {
         validUsernames.forEach((username) => {
           this.ignore(username, true);
+          const user = this.users.get(username);
+          if (user) {
+            this.autocomplete.remove(user.displayName, true);
+          }
         });
         const resultArray = Array.from(validUsernames.values());
         const resultMessage =
@@ -1628,6 +1817,10 @@ class Chat {
       if (!failure) {
         validUsernames.forEach((username) => {
           this.ignore(username, false);
+          const user = this.users.get(username);
+          if (user) {
+            this.autocomplete.add(user.displayName, false, Date.now());
+          }
         });
         const haveOrHas = parts.length === 1 ? 'has' : 'have';
         MessageBuilder.status(
@@ -1688,8 +1881,11 @@ class Chat {
         nick: parts[0],
         reason: parts.slice(2, parts.length).join(' '),
       };
-      if (/^perm/i.test(parts[1])) payload.ispermanent = true;
-      else payload.duration = this.parseTimeInterval(parts[1]);
+      if (/^perm/i.test(parts[1])) {
+        payload.ispermanent = true;
+      } else {
+        payload.duration = this.parseTimeInterval(parts[1]);
+      }
 
       payload.banip = command === 'IPBAN';
 
@@ -1739,11 +1935,13 @@ class Chat {
   cmdHIGHLIGHT(parts, command) {
     const highlights = this.settings.get('highlightnicks');
     if (parts.length === 0) {
-      if (highlights.length > 0)
+      if (highlights.length > 0) {
         MessageBuilder.info(
           `Currently highlighted users: ${highlights.join(',')}.`,
         ).into(this);
-      else MessageBuilder.info(`No highlighted users.`).into(this);
+      } else {
+        MessageBuilder.info(`No highlighted users.`).into(this);
+      }
       return;
     }
     if (!nickregex.test(parts[0])) {
@@ -1753,11 +1951,15 @@ class Chat {
     const i = highlights.indexOf(nick);
     switch (command) {
       case 'UNHIGHLIGHT':
-        if (i !== -1) highlights.splice(i, 1);
+        if (i !== -1) {
+          highlights.splice(i, 1);
+        }
         break;
       case 'HIGHLIGHT':
       default:
-        if (i === -1) highlights.push(nick);
+        if (i === -1) {
+          highlights.push(nick);
+        }
         break;
     }
     MessageBuilder.info(
@@ -1792,6 +1994,10 @@ class Chat {
 
   cmdBROADCAST(parts) {
     this.source.send('BROADCAST', { data: parts.join(' ') });
+  }
+
+  cmdRELOADUSERS() {
+    this.source.send('RELOADUSERS', {});
   }
 
   cmdWHISPER(parts) {
@@ -2024,12 +2230,13 @@ class Chat {
       if (win !== (null || undefined)) {
         this.windowToFront(normalized);
       } else {
-        if (!this.whispers.has(normalized))
+        if (!this.whispers.has(normalized)) {
           this.whispers.set(normalized, {
             nick: normalized,
             unread: 0,
             open: false,
           });
+        }
         this.openConversation(normalized);
       }
     } else {
@@ -2134,7 +2341,9 @@ class Chat {
       parts[1] = parts[0];
       parts[0] = this.user.username;
     }
-    if (!parts[0]) parts[0] = this.user.username;
+    if (!parts[0]) {
+      parts[0] = this.user.username;
+    }
     if (!parts[0] || !nickregex.test(parts[0].toLowerCase())) {
       MessageBuilder.error('Invalid nick - /mentions <nick> <limit>').into(
         this,
@@ -2188,10 +2397,16 @@ class Chat {
   }
 
   cmdHOST(parts) {
-    const displayName = parts[1];
     let url = parts[0];
+    const displayName = parts.slice(1).join(' ') || undefined;
 
-    if (!this.user.hasAnyFeatures(UserFeatures.ADMIN, UserFeatures.MODERATOR)) {
+    if (
+      !this.user.hasAnyRoles(
+        UserRoles.ADMIN,
+        UserRoles.MODERATOR,
+        UserRoles.HOST,
+      )
+    ) {
       MessageBuilder.error(errorstrings.get('nopermission')).into(this);
       return;
     }
@@ -2233,7 +2448,13 @@ class Chat {
   }
 
   cmdUNHOST() {
-    if (!this.user.hasAnyFeatures(UserFeatures.ADMIN, UserFeatures.MODERATOR)) {
+    if (
+      !this.user.hasAnyRoles(
+        UserRoles.ADMIN,
+        UserRoles.MODERATOR,
+        UserRoles.HOST,
+      )
+    ) {
       MessageBuilder.error(errorstrings.get('nopermission')).into(this);
       return;
     }
@@ -2261,6 +2482,38 @@ class Chat {
 
   cmdUNPIN() {
     this.source.send('PIN', { data: '' });
+  }
+
+  cmdADDPHRASE(parts) {
+    if (!this.user.hasAnyFeatures(UserFeatures.ADMIN, UserFeatures.MODERATOR)) {
+      MessageBuilder.error(errorstrings.get('nopermission')).into(this);
+      return;
+    }
+
+    if (!parts.length) {
+      MessageBuilder.error('No phrase provided - /addphrase <phrase>').into(
+        this,
+      );
+      return;
+    }
+
+    this.source.send('ADDPHRASE', { data: parts.join(' ') });
+  }
+
+  cmdREMOVEPHRASE(parts) {
+    if (!this.user.hasAnyFeatures(UserFeatures.ADMIN, UserFeatures.MODERATOR)) {
+      MessageBuilder.error(errorstrings.get('nopermission')).into(this);
+      return;
+    }
+
+    if (!parts.length) {
+      MessageBuilder.error('No phrase provided - /removephrase <phrase>').into(
+        this,
+      );
+      return;
+    }
+
+    this.source.send('REMOVEPHRASE', { data: parts.join(' ') });
   }
 
   cmdDIE() {
@@ -2408,7 +2661,9 @@ class Chat {
         icon: '/notifyicon.png?v2',
         dir: 'auto',
       });
-      if (timeout) setTimeout(() => n.close(), 8000);
+      if (timeout) {
+        setTimeout(() => n.close(), 8000);
+      }
     }
   }
 
@@ -2436,7 +2691,9 @@ class Chat {
     const url = window.location || window.location.href || null;
     const regex = new RegExp(`[?&]${sanitizedName}(=([^&#]*)|&|#|$)`);
     const results = regex.exec(url);
-    if (!results || !results[2]) return null;
+    if (!results || !results[2]) {
+      return null;
+    }
     return decodeURIComponent(results[2].replace(/\+/g, ' '));
   }
 
@@ -2446,6 +2703,11 @@ class Chat {
     hostname = hostname.split(':')[0];
     hostname = hostname.split('?')[0];
     return hostname;
+  }
+
+  handleRemoveEvent(eventUuid) {
+    ChatMenu.closeMenus(this);
+    this.source.send('REMOVEEVENT', { data: eventUuid });
   }
 }
 

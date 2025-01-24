@@ -16,7 +16,9 @@ export default class EmoteService {
   }
 
   emotesForUser(user) {
-    if (user.isPrivileged()) return this.emotes;
+    if (user.isPrivileged()) {
+      return this.emotes;
+    }
 
     let emotes = this.emotes.filter(
       (e) => e.minimumSubTier <= user.subTier && !e.twitch,
@@ -39,6 +41,10 @@ export default class EmoteService {
 
   get twitchEmotePrefixes() {
     return this.emotes.filter((e) => e.twitch).map((e) => e.prefix);
+  }
+
+  hasEmote(emote) {
+    return this.emotesMapped.has(emote);
   }
 
   getEmote(emote) {

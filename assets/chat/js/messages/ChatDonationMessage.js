@@ -4,22 +4,25 @@ import MessageTypes from './MessageTypes';
 
 const DONATION_TIERS = [0, 5, 10, 25, 50, 100];
 
+/**
+ * Toggles the correct classes for a specific donation amount.
+ * @param {number} amount
+ * @returns {array}
+ */
+export function selectDonationTier(amount) {
+  const tier = DONATION_TIERS.findIndex((value) => amount < value * 100);
+  return [`amount-${tier !== -1 ? DONATION_TIERS[tier - 1] : '100'}`];
+}
+
 export default class ChatDonationMessage extends ChatEventMessage {
-  constructor(message, user, amount, timestamp) {
-    super(message, timestamp);
+  constructor(message, user, amount, timestamp, expirationTimestamp, uuid) {
+    super(message, timestamp, uuid);
     this.user = user;
     this.type = MessageTypes.DONATION;
     this.amount = amount;
-  }
+    this.expirationTimestamp = expirationTimestamp;
 
-  /**
-   * Toggles the correct classes for a specific donation amount.
-   * @param {number} amount
-   * @returns {array}
-   */
-  selectDonationTier(amount) {
-    const tier = DONATION_TIERS.findIndex((value) => amount < value * 100);
-    return [`amount-${tier !== -1 ? DONATION_TIERS[tier - 1] : '100'}`];
+    this.generateMessageHash();
   }
 
   html(chat = null) {
@@ -33,7 +36,9 @@ export default class ChatDonationMessage extends ChatEventMessage {
     const colorFlair = usernameColorFlair(chat.flairs, this.user);
 
     user.title = this.title;
-    if (colorFlair) user.classList.add(colorFlair.name);
+    if (colorFlair) {
+      user.classList.add(colorFlair.name);
+    }
     user.innerText = this.user.displayName;
 
     eventTemplate.querySelector('.event-info').append(
@@ -44,7 +49,7 @@ export default class ChatDonationMessage extends ChatEventMessage {
       })}`,
     );
 
-    const donationTier = this.selectDonationTier(this.amount);
+    const donationTier = selectDonationTier(this.amount);
     eventTemplate.classList.add(donationTier[0]);
     eventTemplate
       .querySelector('.event-icon')
@@ -54,7 +59,9 @@ export default class ChatDonationMessage extends ChatEventMessage {
     const attributes = eventTemplate
       .getAttributeNames()
       .reduce((object, attributeName) => {
-        if (attributeName === 'class') return object;
+        if (attributeName === 'class') {
+          return object;
+        }
         return {
           ...object,
           [attributeName]: eventTemplate.getAttribute(attributeName),

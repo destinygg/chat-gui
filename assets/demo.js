@@ -29,7 +29,6 @@ switch ((chat.reqParam('t') || 'embed').toUpperCase()) {
         chat.applySettings(false);
       })
       .then(() => chat.loadEmotesAndFlairs())
-      .then(() => chat.loadHistory())
       .then(() => chat.connect());
     break;
 
@@ -52,7 +51,6 @@ switch ((chat.reqParam('t') || 'embed').toUpperCase()) {
     chat
       .withGui(embedHtml)
       .then(() => chat.loadEmotesAndFlairs())
-      .then(() => chat.loadHistory())
       .then(() => chat.connect());
     break;
 }

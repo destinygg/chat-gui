@@ -5,14 +5,22 @@ import MessageTypes from './MessageTypes';
 import { EmoteFormatter } from '../formatters';
 
 function ChatEmoteMessageCount(message) {
-  if (!message || !message.combo) return;
+  if (!message || !message.combo) {
+    return;
+  }
 
   let stepClass = 'x2';
-  if (message.emotecount >= 50) stepClass = 'x50';
-  else if (message.emotecount >= 30) stepClass = 'x30';
-  else if (message.emotecount >= 20) stepClass = 'x20';
-  else if (message.emotecount >= 10) stepClass = 'x10';
-  else if (message.emotecount >= 5) stepClass = 'x5';
+  if (message.emotecount >= 50) {
+    stepClass = 'x50';
+  } else if (message.emotecount >= 30) {
+    stepClass = 'x30';
+  } else if (message.emotecount >= 20) {
+    stepClass = 'x20';
+  } else if (message.emotecount >= 10) {
+    stepClass = 'x10';
+  } else if (message.emotecount >= 5) {
+    stepClass = 'x5';
+  }
 
   message.ui.setAttribute('data-combo', message.emotecount);
   message.ui.setAttribute('data-combo-group', stepClass);
@@ -27,9 +35,14 @@ function ChatEmoteMessageCount(message) {
 const ChatEmoteMessageCountThrottle = throttle(63, ChatEmoteMessageCount);
 
 export default class ChatEmoteMessage extends ChatMessage {
-  constructor(emote, timestamp, count = 1) {
+  messages = [];
+
+  emotecount = 0;
+
+  constructor(emote, timestamp, messages) {
     super(emote, timestamp, MessageTypes.EMOTE);
-    this.emotecount = count;
+    this.messages = messages;
+    this.emotecount = messages.length;
     this.emoteFormatter = new EmoteFormatter();
   }
 
@@ -62,9 +75,14 @@ export default class ChatEmoteMessage extends ChatMessage {
     this.ui.append(this.text.get(0), this.combo.get(0));
   }
 
-  incEmoteCount() {
+  add(message) {
+    this.messages.push(message);
     this.emotecount += 1;
     ChatEmoteMessageCountThrottle(this);
+  }
+
+  containsMessage(message) {
+    return this.messages.find((msg) => msg.md5 === message.md5);
   }
 
   completeCombo() {

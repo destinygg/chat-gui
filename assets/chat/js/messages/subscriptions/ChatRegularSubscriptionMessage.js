@@ -2,8 +2,18 @@ import ChatSubscriptionMessage from './ChatSubscriptionMessage';
 import MessageTypes from '../MessageTypes';
 
 export default class ChatRegularSubscriptionMessage extends ChatSubscriptionMessage {
-  constructor(message, user, tier, tierLabel, streak, timestamp) {
-    super(message, user, tier, tierLabel, timestamp);
+  constructor(
+    message,
+    user,
+    tier,
+    tierLabel,
+    amount,
+    streak,
+    timestamp,
+    expiry,
+    uuid,
+  ) {
+    super(message, user, tier, tierLabel, amount, timestamp, expiry, uuid);
     this.type = MessageTypes.SUBSCRIPTION;
     this.streak = streak;
   }
@@ -14,7 +24,9 @@ export default class ChatRegularSubscriptionMessage extends ChatSubscriptionMess
     const attributes = message
       .getAttributeNames()
       .reduce((object, attributeName) => {
-        if (attributeName === 'class') return object;
+        if (attributeName === 'class') {
+          return object;
+        }
         return {
           ...object,
           [attributeName]: message.getAttribute(attributeName),

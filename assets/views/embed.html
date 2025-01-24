@@ -1,6 +1,8 @@
 <div id="chat" class="chat">
   <div id="chat-windows-select"></div>
 
+  <div id="chat-event-bar"></div>
+
   <div id="chat-poll-frame">
     <div class="poll-frame">
       <div class="poll-header">
@@ -24,7 +26,8 @@
   </div>
 
   <div id="chat-output-frame" data-scroll-notify>
-    <div id="chat-pinned-frame"></div>
+    <div id="chat-event-selected" class="hidden"></div>
+    <div id="chat-pinned-message"></div>
   </div>
 
   <div id="chat-input-frame">
@@ -90,6 +93,7 @@
         <ul></ul>
       </div>
       <textarea
+        enterkeyhint="send"
         id="chat-input-control"
         placeholder="Getting things ready ..."
         autocomplete="off"
@@ -103,10 +107,20 @@
     </div>
     <div id="chat-tools-wrap">
       <div class="chat-tools-group">
-        <a id="chat-emoticon-btn" class="chat-tool-btn" title="Emotes">
+        <a
+          id="chat-emoticon-btn"
+          class="chat-tool-btn"
+          aria-label="Emotes"
+          data-tippy-content="Emotes"
+        >
           <i class="btn-icon"></i>
         </a>
-        <a id="chat-whisper-btn" class="chat-tool-btn" title="Whispers">
+        <a
+          id="chat-whisper-btn"
+          class="chat-tool-btn"
+          aria-label="Whispers"
+          data-tippy-content="Whispers"
+        >
           <i class="btn-icon"></i>
         </a>
       </div>
@@ -118,10 +132,20 @@
         >
           <i class="btn-icon"></i>
         </a>
-        <a id="chat-settings-btn" class="chat-tool-btn" title="Settings">
+        <a
+          id="chat-settings-btn"
+          class="chat-tool-btn"
+          aria-label="Settings"
+          data-tippy-content="Settings"
+        >
           <i class="btn-icon"></i>
         </a>
-        <a id="chat-users-btn" class="chat-tool-btn" title="Users">
+        <a
+          id="chat-users-btn"
+          class="chat-tool-btn"
+          aria-label="Users"
+          data-tippy-content="Users"
+        >
           <i class="btn-icon"></i>
         </a>
       </div>
@@ -335,22 +359,62 @@
       </div>
       <div class="actions">
         <div class="action-buttons">
-          <a id="mute-user-btn" class="chat-tool-btn" title="Mute User">
+          <a
+            id="mute-user-btn"
+            class="chat-tool-btn"
+            aria-label="Mute"
+            data-tippy-content="Mute"
+          >
             <i class="btn-icon"></i>
           </a>
-          <a id="ban-user-btn" class="chat-tool-btn" title="IP Ban User">
+          <a
+            id="ban-user-btn"
+            class="chat-tool-btn"
+            aria-label="IP Ban"
+            data-tippy-content="IP Ban"
+          >
             <i class="btn-icon"></i>
           </a>
-          <a id="logs-user-btn" class="chat-tool-btn" title="Stalk User">
+          <a
+            id="logs-user-btn"
+            class="chat-tool-btn"
+            aria-label="Stalk"
+            data-tippy-content="Stalk"
+          >
             <i class="btn-icon"></i>
           </a>
-          <a id="whisper-user-btn" class="chat-tool-btn" title="Whisper">
+          <a
+            id="whisper-user-btn"
+            class="chat-tool-btn"
+            aria-label="Whisper"
+            data-tippy-content="Whisper"
+          >
             <i class="btn-icon"></i>
           </a>
-          <a id="ignore-user-btn" class="chat-tool-btn" title="Ignore">
+          <a
+            id="ignore-user-btn"
+            class="chat-tool-btn"
+            aria-label="Ignore"
+            data-tippy-content="Ignore"
+          >
             <i class="btn-icon"></i>
           </a>
-          <a id="unignore-user-btn" class="chat-tool-btn" title="Unignore">
+          <a
+            id="unignore-user-btn"
+            class="chat-tool-btn"
+            aria-label="Unignore"
+            data-tippy-content="Unignore"
+          >
+            <i class="btn-icon"></i>
+          </a>
+          <a
+            id="rustle-user-btn"
+            class="chat-tool-btn"
+            aria-label="Open Logs"
+            data-tippy-content="Open Logs on RustleSearch"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             <i class="btn-icon"></i>
           </a>
         </div>
@@ -379,9 +443,6 @@
         <h5><span>Emotes</span> <i class="chat-menu-close"></i></h5>
       </div>
       <div class="scrollable all">
-        <div class="content"></div>
-      </div>
-      <div class="scrollable favorite">
         <div class="content"></div>
       </div>
       <div id="chat-emote-list-search">
@@ -423,6 +484,14 @@
   <div id="chat-loading">
     <div>
       <i class="chat-loading-icon"></i>
+    </div>
+  </div>
+
+  <div id="event-action-menu" class="chat-menu">
+    <div class="chat-menu-inner floating-window">
+      <button id="remove-event-button" class="event-action">
+        Remove Event
+      </button>
     </div>
   </div>
 </div>

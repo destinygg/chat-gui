@@ -77,11 +77,22 @@ class ChatWindow extends EventEmitter {
   addMessage(chat, message) {
     message.ui = message.html(chat);
     message.afterRender(chat);
+
+    this.lines.append(message.ui);
     this.messages.push(message);
     this.lastmessage = message;
-    this.lines.append(message.ui);
+
     this.linecount += 1;
     this.cleanupThrottle();
+  }
+
+  containsMessage(message) {
+    return this.messages.find((msg) => {
+      if (msg.type === MessageTypes.EMOTE) {
+        return msg.containsMessage(message);
+      }
+      return msg.md5 === message.md5;
+    });
   }
 
   getlines(sel) {
@@ -117,6 +128,14 @@ class ChatWindow extends EventEmitter {
     }
   }
 
+  isScrollPinned() {
+    return this.scrollplugin.pinned;
+  }
+
+  scrollBottom() {
+    this.scrollplugin.scrollBottom();
+  }
+
   /**
    * Use chat state (settings and authentication data) to update the messages in
    * this window.
@@ -127,11 +146,25 @@ class ChatWindow extends EventEmitter {
         message.updateTimeFormat();
       }
 
-      if (message.user && !message.user.isSystem()) {
-        const { username } = message.user;
+      if (message.user?.isSystem()) {
+        continue;
+      }
 
-        message.setOwnMessage(username === chat.user.username);
+      const username = message.user?.username;
+
+      if (
+        ![
+          MessageTypes.UI,
+          MessageTypes.INFO,
+          MessageTypes.ERROR,
+          MessageTypes.STATUS,
+        ].includes(message.type)
+      ) {
         message.ignore(chat.ignored(username, message.message));
+      }
+
+      if (username) {
+        message.setOwnMessage(username === chat.user.username);
         message.highlight(chat.shouldHighlightMessage(message));
         if (message.type === MessageTypes.USER) {
           message.setContinued(this.isContinued(message, this.messages[i - 1]));

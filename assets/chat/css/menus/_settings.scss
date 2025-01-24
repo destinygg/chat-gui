@@ -1,0 +1,53 @@
+@use '../abstracts/' as a;
+
+#chat-settings {
+  #chat-settings-form {
+    margin: a.$gutter-lg 0;
+  }
+
+  .form-group {
+    margin: a.$gutter-lg a.$gutter-lg;
+    display: block;
+    position: relative;
+  }
+
+  h4 {
+    font-size: 0.9em;
+    margin-top: a.$gutter-lg * 2;
+    margin-bottom: a.$gutter-lg;
+    padding-left: a.$gutter-lg;
+    color: a.$text-color-disabled;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+
+  label {
+    display: inline-block;
+    font-weight: normal;
+    max-width: 100%;
+    margin-bottom: a.$gutter-md;
+  }
+
+  .checkbox label {
+    margin-bottom: 0;
+    font-weight: 400;
+    max-width: 100%;
+    cursor: pointer;
+    display: flex;
+    justify-items: center;
+    align-items: center;
+  }
+
+  .checkbox input {
+    margin: 0 a.$gutter-sm 0 0;
+    line-height: normal;
+    box-sizing: border-box;
+    padding: 0;
+  }
+
+  select {
+    border-radius: a.$bradius;
+    padding: a.$gutter-sm;
+    width: 100%;
+  }
+}

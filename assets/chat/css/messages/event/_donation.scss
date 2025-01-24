@@ -1,0 +1,29 @@
+@use '../../abstracts/' as a;
+
+$amount-color-map: (
+  5: #59aeea,
+  10: #2addc8,
+  25: #4db524,
+  50: #dd29d2,
+  100: #e62117,
+);
+
+.msg-donation {
+  &.amount-0 {
+    border-color: #1c5cdb;
+  }
+
+  @each $amount, $color in $amount-color-map {
+    &.amount-#{$amount} {
+      border-color: $color;
+    }
+
+    .donation-icon {
+      filter: invert(100%);
+
+      &.amount-#{$amount} {
+        @include a.icon-background('../img/donation-amount-#{$amount}.png');
+      }
+    }
+  }
+}

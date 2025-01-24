@@ -34,6 +34,7 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     this.whisperUserBtn = this.ui.find('#whisper-user-btn');
     this.ignoreUserBtn = this.ui.find('#ignore-user-btn');
     this.unignoreUserBtn = this.ui.find('#unignore-user-btn');
+    this.rustleUserBtn = this.ui.find('#rustle-user-btn');
 
     this.actionInputs = this.ui.find('#action-durations');
     this.muteDurations = ['1m', '10m', '1h', '1d'];
@@ -44,7 +45,9 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     this.chat.output.on('contextmenu', '.msg-chat .user', (e) => {
       // If the target has this class, it's a sub tier label styled to match the
       // username color of the sub (which requires the `user` class).
-      if (e.currentTarget.classList.contains('tier')) return false;
+      if (e.currentTarget.classList.contains('tier')) {
+        return false;
+      }
 
       const message = $(e.currentTarget).closest('.msg-chat');
       this.showUser(e, message);
@@ -103,12 +106,13 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
       if (win) {
         this.chat.windowToFront(this.clickedNick);
       } else {
-        if (!this.chat.whispers.has(this.clickedNick))
+        if (!this.chat.whispers.has(this.clickedNick)) {
           this.chat.whispers.set(this.clickedNick, {
             nick: this.clickedNick,
             unread: 0,
             open: false,
           });
+        }
         this.chat.openConversation(this.clickedNick);
       }
       this.hide();
@@ -155,6 +159,11 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
       this.ignoreUserBtn.toggleClass('hidden', false);
       this.unignoreUserBtn.toggleClass('hidden', true);
     }
+
+    this.rustleUserBtn.attr(
+      'href',
+      `https://rustlesearch.dev/?username=${encodeURIComponent(this.clickedNick)}`,
+    );
   }
 
   setInputVisibility(button) {
@@ -350,10 +359,18 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
         nextMsg = nextMsg.next('.msg-continue');
       }
       this.messageArray.forEach((element) => {
-        const text = element.find('.text')[0].innerText;
+        const textContainer = element.find('.text')[0];
+        let rawText = '';
+        for (const node of textContainer.childNodes) {
+          if (node instanceof HTMLAnchorElement) {
+            rawText += node.href;
+          } else {
+            rawText += node.textContent;
+          }
+        }
 
         // Create a new `ChatUser` to remove username styles for a cleaner look.
-        const msg = MessageBuilder.message(text, new ChatUser(nick));
+        const msg = MessageBuilder.message(rawText, new ChatUser(nick));
         displayedMessages.push(msg.html(this.chat));
       });
     }

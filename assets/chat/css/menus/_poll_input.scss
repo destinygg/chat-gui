@@ -1,0 +1,73 @@
+#chat-poll-input {
+  &.active {
+    display: block;
+  }
+  display: none;
+  background-color: $color-surface-dark1;
+  z-index: 132;
+  border-radius: $bradius $bradius 0 0;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 0.5em;
+  border: 1px solid $color-surface-dark3;
+  .chat-poll-input-section {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    padding: 0.5em;
+    &:not(:last-child) {
+      border-bottom: 1px solid $color-surface-dark4;
+    }
+    &.chat-poll-input-title h2 {
+      margin: 0 0 0.5em 0;
+    }
+    &.chat-poll-input-buttons .chat-poll-input-row {
+      justify-content: space-between;
+    }
+    .chat-poll-input-row {
+      width: 100%;
+      align-items: center;
+      display: flex;
+      padding: 0.5em 0;
+      justify-content: center;
+      &.chat-poll-input-answer:nth-child(-n + 2) .chat-poll-input-button {
+        display: none;
+      }
+      span {
+        font-weight: 500;
+        padding: 0.25em;
+      }
+      input {
+        width: 100%;
+        padding: 0.25em;
+        margin: 0 0.25em;
+        border-radius: $bradius;
+        color: $color-chat-text2;
+        background-color: $color-surface-dark2;
+        border: 1px solid $color-red;
+        outline: none;
+        resize: none;
+        &:not(:placeholder-shown) {
+          border: 1px solid $color-surface-dark3;
+        }
+      }
+      .chat-poll-input-button {
+        margin: 0 0.5em 0 0.5em;
+        padding: 0.25em 0.75em;
+        border-radius: $bradius;
+        color: #fff;
+        font-weight: 500;
+        &.chat-poll-input-button-add,
+        &.chat-poll-input-button-send {
+          background: $color-green;
+        }
+        &.chat-poll-input-button-remove,
+        &.chat-poll-input-button-cancel {
+          background: $color-red;
+        }
+      }
+    }
+  }
+}
