@@ -1688,12 +1688,12 @@ class Chat {
       return;
     }
 
-    // if (!this.chatpoll.hasPermission(this.user)) {
-    //   MessageBuilder.error('You do not have permission to start a poll.').into(
-    //     this,
-    //   );
-    //   return;
-    // }
+    if (!this.chatpoll.hasPermission(this.user)) {
+      MessageBuilder.error('You do not have permission to start a poll.').into(
+        this,
+      );
+      return;
+    }
 
     const { question, options, time } = parseQuestionAndTime(textOnly);
     this.menus
