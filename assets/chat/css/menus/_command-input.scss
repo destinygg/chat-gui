@@ -1,0 +1,93 @@
+@use '../abstracts/' as a;
+
+.command-input-menu {
+  display: none;
+  background-color: a.$color-surface-dark1;
+  z-index: 132;
+  border-radius: a.$bradius a.$bradius 0 0;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 0.5em;
+  border: 1px solid a.$color-surface-dark3;
+
+  &.active {
+    display: block;
+  }
+
+  &__title {
+    border-bottom: 1px solid a.$color-surface-dark4;
+
+    h2 {
+      text-align: center;
+      margin: 0 0 0.5em 0;
+    }
+  }
+
+  &__content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    &__section {
+      padding: 0.5em;
+
+      &:not(:last-child) {
+        border-bottom: 1px solid a.$color-surface-dark4;
+      }
+
+      &__row {
+        width: 100%;
+        align-items: center;
+        display: flex;
+        padding: 0.5em 0;
+        justify-content: center;
+      }
+    }
+  }
+
+  &__actions {
+    display: flex;
+    padding: 0.5em 0;
+    justify-content: space-between;
+    border-top: 1px solid a.$color-surface-dark4;
+  }
+
+  &__button {
+    margin: 0 0.5em 0 0.5em;
+    padding: 0.25em 0.75em;
+    border-radius: a.$bradius;
+    color: #fff;
+    font-weight: 500;
+
+    &--success {
+      background: a.$color-green;
+    }
+
+    &--danger {
+      background: a.$color-red;
+    }
+  }
+
+  span {
+    font-weight: 500;
+    padding: 0.25em;
+  }
+
+  &__input {
+    width: 100%;
+    padding: 0.25em;
+    margin: 0 0.25em;
+    border-radius: a.$bradius;
+    color: a.$color-chat-text2;
+    background-color: a.$color-surface-dark2;
+    border: 1px solid a.$color-surface-dark3;
+    outline: none;
+    resize: none;
+
+    &:required:placeholder-shown {
+      border-color: a.$color-red;
+    }
+  }
+}

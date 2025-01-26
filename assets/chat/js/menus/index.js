@@ -6,3 +6,4 @@ export { default as ChatEmoteTooltip } from './ChatEmoteTooltip';
 export { default as ChatWhisperUsers } from './ChatWhisperUsers';
 export { default as ChatUserInfoMenu } from './ChatUserInfoMenu';
 export { default as ChatEventActionMenu } from './ChatEventActionMenu';
+export { default as ChatPollInput } from './ChatPollInput';

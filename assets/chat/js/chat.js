@@ -32,6 +32,7 @@ import {
   ChatSettingsMenu,
   ChatUserInfoMenu,
   ChatEventActionMenu,
+  ChatPollInput,
 } from './menus';
 import ChatEventBar from './event-bar/EventBar';
 import ChatAutoComplete from './autocomplete';
@@ -98,7 +99,7 @@ class Chat {
     this.windows = new Map();
     this.settings = new Map(settingsdefault);
     this.commands = new ChatCommands();
-    this.autocomplete = new ChatAutoComplete();
+    this.autocomplete = null;
     this.menus = new Map();
     this.taggednicks = new Map();
     this.taggednotes = new Map();
@@ -317,6 +318,7 @@ class Chat {
     this.loginscrn = this.ui.find('#chat-login-screen');
     this.loadingscrn = this.ui.find('#chat-loading');
     this.windowselect = this.ui.find('#chat-windows-select');
+    this.autocomplete = new ChatAutoComplete(this);
     this.inputhistory = new ChatInputHistory(this);
     this.userfocus = new ChatUserFocus(this, this.css);
     this.mainwindow = new ChatWindow('main').into(this);
@@ -392,6 +394,11 @@ class Chat {
     );
     this.menus.set('event-action-menu', eventActionMenu);
 
+    this.menus.set(
+      'poll-input',
+      new ChatPollInput(this.ui.find('#chat-poll-input'), null, this),
+    );
+
     this.autocomplete.bind(this);
 
     // Chat input
@@ -407,7 +414,7 @@ class Chat {
         e.stopPropagation();
         this.control.emit('SEND', this.input.val().toString().trim());
         this.adjustInputHeight();
-        this.input.focus();
+        // this.input.focus();
       }
     });
 
@@ -1674,18 +1681,7 @@ class Chat {
   }
 
   cmdPOLL(parts, command) {
-    const slashCommand = `/${command.toLowerCase()}`;
     const textOnly = parts.join(' ');
-
-    try {
-      // Assume the command's format is invalid if an exception is thrown.
-      parseQuestionAndTime(textOnly);
-    } catch {
-      MessageBuilder.info(
-        `Usage: ${slashCommand} <question>? <option 1> or <option 2> [or <option 3> [or <option 4> ... [or <option n>]]] [<time>].`,
-      ).into(this);
-      return;
-    }
 
     if (this.chatpoll.isPollStarted()) {
       MessageBuilder.error('Poll already started.').into(this);
@@ -1700,13 +1696,9 @@ class Chat {
     }
 
     const { question, options, time } = parseQuestionAndTime(textOnly);
-    const dataOut = {
-      weighted: slashCommand === '/spoll',
-      time,
-      question,
-      options,
-    };
-    this.source.send('STARTPOLL', dataOut);
+    this.menus
+      .get('poll-input')
+      .show(question, options, time, command === 'SPOLL');
   }
 
   cmdPOLLSTOP() {
