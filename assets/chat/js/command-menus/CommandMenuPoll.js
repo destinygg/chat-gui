@@ -62,12 +62,12 @@ class CommandMenuPoll extends CommandMenu {
 
   addAnswer() {
     this.buildOptionHtml('', this.options.length).insertBefore(
-      this.ui.add.closest('.command-menu__content__section__row'),
+      this.ui.add.closest('.command-menu__section__row'),
     );
   }
 
   buildOptionHtml(option, index) {
-    return $(`<div class="command-menu__content__section__row command-menu-poll-answer">
+    return $(`<div class="command-menu__section__row command-menu-poll-answer">
       <span>${index + 1}:</span>
       <input class="command-menu__input" type="text" placeholder="YEE" value="${option}" required>
       <button class="command-menu__button command-menu__button--danger command-menu-poll-answer-remove">X</button>
