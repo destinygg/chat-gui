@@ -6,9 +6,10 @@
 @use 'abstracts' as a;
 
 @use 'chat';
+@use 'command-menus';
+@use 'components';
 @use 'menus';
 @use 'messages';
-@use 'components';
 
 @import url('https://fonts.googleapis.com/css?family=Roboto:400,500,600,700');
 

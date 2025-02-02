@@ -1,6 +1,8 @@
 @use '../abstracts/' as a;
 
-.command-input-menu {
+@use 'poll';
+
+.command-menu {
   display: none;
   background-color: a.$color-surface-dark1;
   z-index: 132;
@@ -12,7 +14,7 @@
   padding: 0.5em;
   border: 1px solid a.$color-surface-dark3;
 
-  &.active {
+  &--shown {
     display: block;
   }
 

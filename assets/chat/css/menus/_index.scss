@@ -1,10 +1,8 @@
 @use '../abstracts/' as a;
 
-@use 'command-input';
 @use 'emote-list';
 @use 'emote-tooltip';
 @use 'poll';
-@use 'poll_input.scss';
 @use 'settings';
 @use 'user-info';
 @use 'user-list';

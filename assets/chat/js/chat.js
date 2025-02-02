@@ -32,7 +32,6 @@ import {
   ChatSettingsMenu,
   ChatUserInfoMenu,
   ChatEventActionMenu,
-  ChatPollInput,
 } from './menus';
 import ChatEventBar from './event-bar/EventBar';
 import ChatAutoComplete from './autocomplete';
@@ -42,6 +41,7 @@ import ChatStore from './store';
 import Settings from './settings';
 import ChatWindow from './window';
 import { ChatPoll, parseQuestionAndTime } from './poll';
+import { CommandMenuPoll } from './command-menus';
 import { isMuteActive, MutedTimer } from './mutedtimer';
 import EmoteService from './emotes';
 import UserFeatures from './features';
@@ -101,6 +101,7 @@ class Chat {
     this.commands = new ChatCommands();
     this.autocomplete = null;
     this.menus = new Map();
+    this.commandMenus = new Map();
     this.taggednicks = new Map();
     this.taggednotes = new Map();
     this.ignoring = new Set();
@@ -394,9 +395,9 @@ class Chat {
     );
     this.menus.set('event-action-menu', eventActionMenu);
 
-    this.menus.set(
-      'poll-input',
-      new ChatPollInput(this.ui.find('#chat-poll-input'), null, this),
+    this.commandMenus.set(
+      'poll',
+      new CommandMenuPoll(this.ui.find('#command-menu-poll'), this),
     );
 
     this.autocomplete.bind(this);
@@ -1695,8 +1696,8 @@ class Chat {
     }
 
     const { question, options, time } = parseQuestionAndTime(textOnly);
-    this.menus
-      .get('poll-input')
+    this.commandMenus
+      .get('poll')
       .show(question, options, time, command === 'SPOLL');
   }
 

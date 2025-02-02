@@ -32,17 +32,17 @@
 
   <div id="chat-input-frame">
     <div id="chat-input-wrap">
-      <div class="command-input-menu" id="chat-poll-input">
-        <div class="command-input-menu__title">
+      <div class="command-menu" id="command-menu-poll">
+        <div class="command-menu__title">
           <h2>Create Poll</h2>
         </div>
-        <div class="command-input-menu__content">
-          <div class="command-input-menu__content__section">
-            <div class="command-input-menu__content__section__row">
+        <div class="command-menu__content">
+          <div class="command-menu__content__section">
+            <div class="command-menu__content__section__row">
               <span>Question:</span>
               <input
-                class="command-input-menu__input"
-                id="chat-poll-input-question"
+                class="command-menu__input"
+                id="command-menu-poll-question"
                 type="text"
                 placeholder="YEE vs PEPE"
                 required
@@ -50,24 +50,24 @@
             </div>
           </div>
           <div
-            class="command-input-menu__content__section"
-            id="chat-poll-input-answers"
+            class="command-menu__content__section"
+            id="command-menu-poll-answers"
           >
-            <div class="command-input-menu__content__section__row">
+            <div class="command-menu__content__section__row">
               <button
-                class="command-input-menu__button command-input-menu__button--success"
-                id="chat-poll-input-add"
+                class="command-menu__button command-menu__button--success"
+                id="command-menu-poll-add"
               >
                 Add Answer
               </button>
             </div>
           </div>
-          <div class="command-input-menu__content__section">
-            <div class="command-input-menu__content__section__row">
+          <div class="command-menu__content__section">
+            <div class="command-menu__content__section__row">
               <span>Time:</span>
               <input
-                class="command-input-menu__input"
-                id="chat-poll-input-time"
+                class="command-menu__input"
+                id="command-menu-poll-time"
                 type="number"
                 min="5"
                 max="600"
@@ -78,27 +78,25 @@
               />
               <span>seconds</span>
             </div>
-            <div class="command-input-menu__content__section__row">
+            <div class="command-menu__content__section__row">
               <span>Sub Weighted:</span>
               <input
-                class="command-input-menu__input"
-                id="chat-poll-input-sub-weighted"
+                class="command-menu__input"
+                id="command-menu-poll-sub-weighted"
                 type="checkbox"
                 style="width: auto"
               />
             </div>
           </div>
         </div>
-        <div class="command-input-menu__actions">
+        <div class="command-menu__actions">
           <button
-            class="command-input-menu__button command-input-menu__button--success"
-            id="chat-poll-input-submit"
+            class="command-menu__button command-menu__button--success command-menu__button__submit"
           >
             Submit
           </button>
           <button
-            class="command-input-menu__button command-input-menu__button--danger"
-            id="chat-poll-input-cancel"
+            class="command-menu__button command-menu__button--danger command-menu__button__cancel"
           >
             Cancel
           </button>
