@@ -1,4 +1,3 @@
-import $ from 'jquery';
 import CommandMenu from './CommandMenu';
 
 class CommandMenuPoll extends CommandMenu {
@@ -61,17 +60,39 @@ class CommandMenuPoll extends CommandMenu {
   }
 
   addAnswer() {
-    this.buildOptionHtml('', this.options.length).insertBefore(
-      this.ui.add.closest('.command-menu__section__row'),
+    this.ui.answers[0].insertBefore(
+      this.buildOptionHtml('', this.options.length),
+      this.ui.add.closest('.command-menu__section__row')[0],
     );
   }
 
   buildOptionHtml(option, index) {
-    return $(`<div class="command-menu__section__row command-menu-poll-answer">
-      <span>${index + 1}:</span>
-      <input class="command-menu__input" type="text" placeholder="YEE" value="${option}" required>
-      <button class="command-menu__button command-menu__button--danger command-menu-poll-answer-remove">X</button>
-    </div>`);
+    const row = document.createElement('div');
+    row.classList.add('command-menu__section__row', 'command-menu-poll-answer');
+
+    const number = document.createElement('span');
+    number.textContent = `${index + 1}:`;
+
+    const input = document.createElement('input');
+    input.classList.add('command-menu__input');
+    input.type = 'text';
+    input.placeholder = 'YEE';
+    input.value = option;
+    input.required = true;
+
+    const remove = document.createElement('button');
+    remove.classList.add(
+      'command-menu__button',
+      'command-menu__button--danger',
+      'command-menu-poll-answer-remove',
+    );
+    remove.textContent = 'X';
+
+    row.appendChild(number);
+    row.appendChild(input);
+    row.appendChild(remove);
+
+    return row;
   }
 
   get question() {
