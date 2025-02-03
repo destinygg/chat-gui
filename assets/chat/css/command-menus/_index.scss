@@ -19,12 +19,13 @@
   }
 
   &__title {
+    display: flex;
+    justify-content: center;
     border-bottom: 1px solid dgg.$semantic-border-default;
-
-    h2 {
-      text-align: center;
-      margin: 0 0 dgg.$space-2 0;
-    }
+    margin-bottom: dgg.$space-2;
+    padding-bottom: dgg.$space-2;
+    font: dgg.$body-500-bold;
+    color: dgg.$semantic-foreground-default;
   }
 
   &__content {
@@ -46,11 +47,6 @@
     padding: dgg.$space-2 0;
     justify-content: space-between;
     border-top: 1px solid dgg.$semantic-border-default;
-  }
-
-  span {
-    font-weight: 500;
-    padding: dgg.$space-1;
   }
 
   &__input {
