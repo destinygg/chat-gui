@@ -38,19 +38,20 @@
         </div>
         <div class="command-menu__content">
           <div class="command-menu__section">
-            <div class="command-menu__section__row">
-              <span>Question:</span>
-              <input
-                class="command-menu__input"
-                id="command-menu-poll-question"
-                type="text"
-                placeholder="YEE vs PEPE"
-                required
-              />
+            <div
+              class="command-menu__input input"
+              id="command-menu-poll-question"
+            >
+              <label>Question</label>
+              <div class="input__area">
+                <div class="input__container">
+                  <input type="text" placeholder="YEE vs PEPE" />
+                </div>
+              </div>
             </div>
           </div>
           <div class="command-menu__section" id="command-menu-poll-answers">
-            <div class="command-menu__section__row">
+            <div class="command-menu__input">
               <button
                 class="button button--secondary button--small"
                 id="command-menu-poll-add"
@@ -60,29 +61,32 @@
             </div>
           </div>
           <div class="command-menu__section">
-            <div class="command-menu__section__row">
-              <span>Time:</span>
-              <input
-                class="command-menu__input"
-                id="command-menu-poll-time"
-                type="number"
-                min="5"
-                max="600"
-                step="5"
-                placeholder="30"
-                value="30"
-                required
-              />
-              <span>seconds</span>
+            <div class="command-menu__input input" id="command-menu-poll-time">
+              <label>Time</label>
+              <div class="input__area">
+                <div class="input__container">
+                  <input
+                    type="number"
+                    min="5"
+                    max="600"
+                    step="5"
+                    placeholder="30"
+                    value="30"
+                  />
+                </div>
+                <div class="input__suffix">seconds</div>
+              </div>
+              <span class="input__help-text">
+                Must be between 5 and 600 seconds
+              </span>
             </div>
-            <div class="command-menu__section__row">
-              <span>Sub Weighted:</span>
-              <input
-                class="command-menu__input"
-                id="command-menu-poll-sub-weighted"
-                type="checkbox"
-                style="width: auto"
-              />
+            <div class="command-menu__input input">
+              <label>Sub Weighted</label>
+              <div class="input__area">
+                <div class="input__container">
+                  <input id="command-menu-poll-sub-weighted" type="checkbox" />
+                </div>
+              </div>
             </div>
           </div>
         </div>

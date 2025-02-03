@@ -1,5 +1,11 @@
 #command-menu-poll {
-  .command-menu-poll-answer:nth-child(-n + 2) .command-menu-poll-answer-remove {
-    display: none;
+  .command-menu-poll-answer {
+    &:nth-child(-n + 2) .input__suffix {
+      display: none;
+    }
+
+    .input__suffix {
+      padding: 0.2rem;
+    }
   }
 }

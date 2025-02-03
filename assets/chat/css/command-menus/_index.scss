@@ -39,14 +39,6 @@
     &:not(:last-child) {
       border-bottom: 1px solid a.$color-surface-dark4;
     }
-
-    &__row {
-      width: 100%;
-      align-items: center;
-      display: flex;
-      padding: 0.5em 0;
-      justify-content: center;
-    }
   }
 
   &__actions {
@@ -62,18 +54,9 @@
   }
 
   &__input {
+    display: flex;
+    justify-content: center;
     width: 100%;
-    padding: 0.25em;
-    margin: 0 0.25em;
-    border-radius: a.$bradius;
-    color: a.$color-chat-text2;
-    background-color: a.$color-surface-dark2;
-    border: 1px solid a.$color-surface-dark3;
-    outline: none;
-    resize: none;
-
-    &:required:placeholder-shown {
-      border-color: a.$color-red;
-    }
+    margin-bottom: 0.5rem;
   }
 }
