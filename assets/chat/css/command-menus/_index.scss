@@ -1,3 +1,5 @@
+@use '~@destinygg/libstiny' as dgg;
+
 @use '../abstracts/' as a;
 
 @use 'poll';
@@ -11,7 +13,7 @@
   bottom: 0;
   left: 0;
   right: 0;
-  padding: 0.5em;
+  padding: dgg.$space-2;
   border: 1px solid a.$color-surface-dark3;
 
   &--shown {
@@ -23,7 +25,7 @@
 
     h2 {
       text-align: center;
-      margin: 0 0 0.5em 0;
+      margin: 0 0 dgg.$space-2 0;
     }
   }
 
@@ -34,7 +36,7 @@
   }
 
   &__section {
-    padding: 0.5em;
+    padding: dgg.$space-2;
 
     &:not(:last-child) {
       border-bottom: 1px solid a.$color-surface-dark4;
@@ -43,20 +45,20 @@
 
   &__actions {
     display: flex;
-    padding: 0.5em 0;
+    padding: dgg.$space-2 0;
     justify-content: space-between;
     border-top: 1px solid a.$color-surface-dark4;
   }
 
   span {
     font-weight: 500;
-    padding: 0.25em;
+    padding: dgg.$space-1;
   }
 
   &__input {
     display: flex;
     justify-content: center;
     width: 100%;
-    margin-bottom: 0.5rem;
+    margin-bottom: dgg.$space-2;
   }
 }

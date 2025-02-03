@@ -1,3 +1,5 @@
+@use '~@destinygg/libstiny' as dgg;
+
 #command-menu-poll {
   .command-menu-poll-answer {
     &:nth-child(-n + 2) .input__suffix {
@@ -5,7 +7,7 @@
     }
 
     .input__suffix {
-      padding: 0.2rem;
+      padding: dgg.$space-1;
     }
   }
 }
