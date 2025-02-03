@@ -1,12 +1,10 @@
 @use '~@destinygg/libstiny' as dgg;
 
-@use '../abstracts/' as a;
-
 @use 'poll';
 
 .command-menu {
   display: none;
-  background-color: a.$color-surface-dark1;
+  background-color: dgg.$semantic-background-default;
   z-index: 132;
   border-radius: dgg.$semantic-radii-x-small dgg.$semantic-radii-x-small 0 0;
   position: absolute;
@@ -14,14 +12,14 @@
   left: 0;
   right: 0;
   padding: dgg.$space-2;
-  border: 1px solid a.$color-surface-dark3;
+  border: 1px solid dgg.$semantic-border-default;
 
   &--shown {
     display: block;
   }
 
   &__title {
-    border-bottom: 1px solid a.$color-surface-dark4;
+    border-bottom: 1px solid dgg.$semantic-border-default;
 
     h2 {
       text-align: center;
@@ -39,7 +37,7 @@
     padding: dgg.$space-2;
 
     &:not(:last-child) {
-      border-bottom: 1px solid a.$color-surface-dark4;
+      border-bottom: 1px solid dgg.$semantic-border-default;
     }
   }
 
@@ -47,7 +45,7 @@
     display: flex;
     padding: dgg.$space-2 0;
     justify-content: space-between;
-    border-top: 1px solid a.$color-surface-dark4;
+    border-top: 1px solid dgg.$semantic-border-default;
   }
 
   span {
