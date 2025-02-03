@@ -1,3 +1,4 @@
+import { Icons } from '../icons';
 import CommandMenu from './CommandMenu';
 
 class CommandMenuPoll extends CommandMenu {
@@ -82,11 +83,16 @@ class CommandMenuPoll extends CommandMenu {
 
     const remove = document.createElement('button');
     remove.classList.add(
-      'command-menu__button',
-      'command-menu__button--danger',
+      'button',
+      'button--danger',
+      'button--small',
+      'button--icon-only',
       'command-menu-poll-answer-remove',
     );
-    remove.textContent = 'X';
+
+    const removeIcon = this.chat.icons.getNode(Icons.X);
+
+    remove.appendChild(removeIcon);
 
     row.appendChild(number);
     row.appendChild(input);

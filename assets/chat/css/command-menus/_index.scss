@@ -56,22 +56,6 @@
     border-top: 1px solid a.$color-surface-dark4;
   }
 
-  &__button {
-    margin: 0 0.5em 0 0.5em;
-    padding: 0.25em 0.75em;
-    border-radius: a.$bradius;
-    color: #fff;
-    font-weight: 500;
-
-    &--success {
-      background: a.$color-green;
-    }
-
-    &--danger {
-      background: a.$color-red;
-    }
-  }
-
   span {
     font-weight: 500;
     padding: 0.25em;

@@ -33,6 +33,7 @@ import {
   ChatUserInfoMenu,
   ChatEventActionMenu,
 } from './menus';
+import { IconsController } from './icons';
 import ChatEventBar from './event-bar/EventBar';
 import ChatAutoComplete from './autocomplete';
 import ChatInputHistory from './history';
@@ -92,6 +93,8 @@ class Chat {
     this.flairs = [];
     this.flairsMap = new Map();
     this.emoteService = new EmoteService();
+
+    this.icons = new IconsController();
 
     this.user = new ChatUser();
     this.users = new Map();
@@ -292,6 +295,8 @@ class Chat {
     this.ui = $(template);
     this.ui.prependTo(appendTo || 'body');
     $(MessageTemplateHTML).prependTo('body');
+
+    this.icons.renderIcons();
 
     // We use this style sheet to apply GUI updates via css (e.g. user focus)
     this.css = (() => {
