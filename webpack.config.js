@@ -27,6 +27,13 @@ function bakeCookies(request) {
 
 module.exports = {
   devServer: {
+    client: {
+      overlay: {
+        errors: true,
+        warnings: false,
+        runtimeErrors: true,
+      },
+    },
     server: {
       type: 'https',
     },

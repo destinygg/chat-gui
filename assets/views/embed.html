@@ -32,6 +32,78 @@
 
   <div id="chat-input-frame">
     <div id="chat-input-wrap">
+      <div class="command-menu" id="command-menu-poll">
+        <span class="command-menu__title">Create Poll</span>
+        <div class="command-menu__content">
+          <div class="command-menu__section">
+            <div
+              class="command-menu__input input"
+              id="command-menu-poll-question"
+            >
+              <label class="input__label">Question</label>
+              <div class="input__area">
+                <div class="input__container">
+                  <input type="text" placeholder="YEE vs PEPE" />
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="command-menu__section" id="command-menu-poll-answers">
+            <div class="command-menu__input">
+              <button
+                class="button button--secondary button--small"
+                id="command-menu-poll-add"
+              >
+                Add Answer
+              </button>
+            </div>
+          </div>
+          <div class="command-menu__section">
+            <div class="command-menu__input input" id="command-menu-poll-time">
+              <label class="input__label">Time</label>
+              <div class="input__area">
+                <div class="input__container">
+                  <input
+                    type="number"
+                    min="5"
+                    max="600"
+                    step="5"
+                    placeholder="30"
+                    value="30"
+                  />
+                </div>
+                <div class="input__suffix">seconds</div>
+              </div>
+              <span class="input__help-text">
+                Must be between 5 and 600 seconds
+              </span>
+            </div>
+            <div class="command-menu__input input">
+              <label class="input__label">Sub Weighted</label>
+              <div class="input__area">
+                <div class="input__container">
+                  <input id="command-menu-poll-sub-weighted" type="checkbox" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="command-menu__actions">
+          <button
+            class="button button--primary button--small command-menu__button__submit"
+          >
+            Submit
+          </button>
+          <button
+            class="button button--danger button--small command-menu__button__cancel"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+      <div id="chat-auto-complete">
+        <ul></ul>
+      </div>
       <textarea
         enterkeyhint="send"
         id="chat-input-control"

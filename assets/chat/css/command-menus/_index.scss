@@ -1,0 +1,58 @@
+@use '~@destinygg/libstiny' as dgg;
+
+@use 'poll';
+
+.command-menu {
+  display: none;
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 132;
+  border: 1px solid dgg.$semantic-border-default;
+  border-radius: dgg.$semantic-radii-x-small dgg.$semantic-radii-x-small 0 0;
+  background-color: dgg.$semantic-background-default;
+  padding: dgg.$space-2;
+
+  &--shown {
+    display: block;
+  }
+
+  &__title {
+    display: flex;
+    justify-content: center;
+    margin-bottom: dgg.$space-2;
+    border-bottom: 1px solid dgg.$semantic-border-default;
+    padding-bottom: dgg.$space-2;
+    color: dgg.$semantic-foreground-default;
+    font: dgg.$body-500-bold;
+  }
+
+  &__content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  &__section {
+    padding: dgg.$space-2;
+
+    &:not(:last-child) {
+      border-bottom: 1px solid dgg.$semantic-border-default;
+    }
+  }
+
+  &__actions {
+    display: flex;
+    justify-content: space-between;
+    border-top: 1px solid dgg.$semantic-border-default;
+    padding: dgg.$space-2 0;
+  }
+
+  &__input {
+    display: flex;
+    justify-content: center;
+    margin-bottom: dgg.$space-2;
+    width: 100%;
+  }
+}

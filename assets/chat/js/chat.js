@@ -33,6 +33,7 @@ import {
   ChatUserInfoMenu,
   ChatEventActionMenu,
 } from './menus';
+import { IconsController } from './icons';
 import ChatEventBar from './event-bar/EventBar';
 import ChatAutoComplete from './autocomplete';
 import ChatInputHistory from './history';
@@ -41,6 +42,7 @@ import ChatStore from './store';
 import Settings from './settings';
 import ChatWindow from './window';
 import { ChatPoll, parseQuestionAndTime } from './poll';
+import { CommandMenuPoll } from './command-menus';
 import { isMuteActive, MutedTimer } from './mutedtimer';
 import EmoteService from './emotes';
 import UserFeatures from './features';
@@ -92,14 +94,17 @@ class Chat {
     this.flairsMap = new Map();
     this.emoteService = new EmoteService();
 
+    this.icons = new IconsController();
+
     this.user = new ChatUser();
     this.users = new Map();
     this.whispers = new Map();
     this.windows = new Map();
     this.settings = new Map(settingsdefault);
     this.commands = new ChatCommands();
-    this.autocomplete = new ChatAutoComplete();
+    this.autocomplete = null;
     this.menus = new Map();
+    this.commandMenus = new Map();
     this.taggednicks = new Map();
     this.taggednotes = new Map();
     this.ignoring = new Set();
@@ -296,6 +301,8 @@ class Chat {
     this.ui.prependTo(appendTo || 'body');
     $(MessageTemplateHTML).prependTo('body');
 
+    this.icons.renderIcons();
+
     // We use this style sheet to apply GUI updates via css (e.g. user focus)
     this.css = (() => {
       const link = document.createElement('style');
@@ -322,6 +329,7 @@ class Chat {
     this.loginscrn = this.ui.find('#chat-login-screen');
     this.loadingscrn = this.ui.find('#chat-loading');
     this.windowselect = this.ui.find('#chat-windows-select');
+    this.autocomplete = new ChatAutoComplete(this);
     this.inputhistory = new ChatInputHistory(this);
     this.userfocus = new ChatUserFocus(this, this.css);
     this.mainwindow = new ChatWindow('main').into(this);
@@ -397,6 +405,11 @@ class Chat {
     );
     this.menus.set('event-action-menu', eventActionMenu);
 
+    this.commandMenus.set(
+      'poll',
+      new CommandMenuPoll(this.ui.find('#command-menu-poll'), this),
+    );
+
     this.autocomplete.bind(this);
 
     // Chat input
@@ -412,7 +425,6 @@ class Chat {
         e.stopPropagation();
         this.control.emit('SEND', this.input.val().toString().trim());
         this.adjustInputHeight();
-        this.input.focus();
       }
     });
 
@@ -1676,18 +1688,7 @@ class Chat {
   }
 
   cmdPOLL(parts, command) {
-    const slashCommand = `/${command.toLowerCase()}`;
     const textOnly = parts.join(' ');
-
-    try {
-      // Assume the command's format is invalid if an exception is thrown.
-      parseQuestionAndTime(textOnly);
-    } catch {
-      MessageBuilder.info(
-        `Usage: ${slashCommand} <question>? <option 1> or <option 2> [or <option 3> [or <option 4> ... [or <option n>]]] [<time>].`,
-      ).into(this);
-      return;
-    }
 
     if (this.chatpoll.isPollStarted()) {
       MessageBuilder.error('Poll already started.').into(this);
@@ -1702,13 +1703,9 @@ class Chat {
     }
 
     const { question, options, time } = parseQuestionAndTime(textOnly);
-    const dataOut = {
-      weighted: slashCommand === '/spoll',
-      time,
-      question,
-      options,
-    };
-    this.source.send('STARTPOLL', dataOut);
+    this.commandMenus
+      .get('poll')
+      .show(question, options, time, command === 'SPOLL');
   }
 
   cmdPOLLSTOP() {
