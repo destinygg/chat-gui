@@ -95,6 +95,13 @@ class CommandMenuPoll extends CommandMenu {
       'command-menu-poll-answer',
     );
 
+    if (index === 0) {
+      const label = document.createElement('label');
+      label.classList.add('input__label');
+      label.textContent = 'Options';
+      row.appendChild(label);
+    }
+
     const area = document.createElement('div');
     area.classList.add('input__area');
 
