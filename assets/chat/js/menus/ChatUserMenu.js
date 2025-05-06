@@ -1,6 +1,5 @@
 import $ from 'jquery';
 import { debounce } from 'throttle-debounce';
-import tippy, { roundArrow } from 'tippy.js';
 import ChatMenu from './ChatMenu';
 import ChatUser from '../user';
 
@@ -250,18 +249,8 @@ export default class ChatUserMenu extends ChatMenu {
     const features =
       user.features.length === 0 ? 'nofeature' : user.features.join(' ');
     const usr = $(
-      `<div class="user-entry" data-username="${user.username}" data-user-id="${user.id}"><span class="user ${features}">${label}</span><div class="user-actions"><i class="whisper-nick" data-tippy-content="Whisper"></i></div></div>`,
+      `<div class="user-entry" data-username="${user.username}" data-user-id="${user.id}"><span class="user ${features}">${label}</span><div class="user-actions"><i class="whisper-nick" data-controller="tooltip" data-tooltip-content-value="Whisper"></i></div></div>`,
     );
-    usr.find('[data-tippy-content]').each(function registerTippy() {
-      tippy(this, {
-        content: this.getAttribute('data-tippy-content'),
-        arrow: roundArrow,
-        duration: 0,
-        maxWidth: 250,
-        hideOnClick: false,
-        theme: 'dgg',
-      });
-    });
     const section = this.sections.get(this.highestSection(user));
 
     if (sort && section.users.children.length > 0) {

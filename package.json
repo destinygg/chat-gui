@@ -33,6 +33,8 @@
     "assets": "./assets"
   },
   "dependencies": {
+    "@hotwired/stimulus": "^3.2.2",
+    "@hotwired/stimulus-webpack-helpers": "^1.0.1",
     "dotenv": "^16.0.3",
     "jquery": "^3.6.0",
     "md5": "^2.3.0",
