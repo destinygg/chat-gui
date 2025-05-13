@@ -1138,10 +1138,12 @@ class Chat {
     }
   }
 
-  onHISTORY(messages) {
-    if (messages && messages.length > 0) {
+  onHISTORY(history) {
+    if (history?.messages && history.messages.length > 0) {
       this.backlogloading = true;
-      messages.forEach((data) => this.source.parseAndDispatch({ data }));
+      history.messages.forEach((message) =>
+        this.source.dispatch(message.event, message.data),
+      );
       this.backlogloading = false;
       this.mainwindow.update(true);
     }
@@ -1181,9 +1183,6 @@ class Chat {
     const win = this.mainwindow;
 
     const message = MessageBuilder.message(data.data, usr, data.timestamp);
-    if (win.containsMessage(message)) {
-      return;
-    }
 
     const isCombo =
       this.emoteService.canUserUseEmote(usr, textonly) &&
