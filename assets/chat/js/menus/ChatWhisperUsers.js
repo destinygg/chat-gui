@@ -38,7 +38,7 @@ export default class ChatWhisperUsers extends ChatMenu {
     this.notif.toggle(this.unread > 0);
     try {
       // Add the number of unread items to the window title.
-      const t = window.parent.document.title.replace(/^\([0-9]+\) /, '');
+      const t = window.parent.document.title.replace(/\([0-9]+\) /, '');
       window.parent.document.title =
         this.unread > 0 ? `(${this.unread}) ${t}` : `${t}`;
     } catch {} // eslint-disable-line no-empty
