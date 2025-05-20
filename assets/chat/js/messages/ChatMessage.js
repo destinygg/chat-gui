@@ -12,6 +12,7 @@ import {
   BadWordsCensorshipFormatter,
   AmazonAssociatesTagInjector,
   SuspostFormatter,
+  TimestampFormatter,
 } from '../formatters';
 import { DATE_FORMATS } from '../const';
 
@@ -23,6 +24,7 @@ formatters.set('emote', new EmoteFormatter());
 formatters.set('mentioned', new MentionedUserFormatter());
 formatters.set('green', new GreenTextFormatter());
 formatters.set('sus', new SuspostFormatter());
+formatters.set('timestamp', new TimestampFormatter());
 formatters.set('embed', new EmbedUrlFormatter());
 formatters.set('badwordscensor', new BadWordsCensorshipFormatter());
 

@@ -87,6 +87,12 @@ $link-color-map: (
   .focus & {
     opacity: 0.3;
   }
+
+  .timestamp {
+    background-color: a.$color-surface-dark4;
+    border-radius: 0.25rem;
+    padding: 0.15rem;
+  }
 }
 
 .pref-showtime .time {
