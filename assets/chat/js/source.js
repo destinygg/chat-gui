@@ -28,6 +28,7 @@ class ChatSource extends EventEmitter {
     this.retryOnDisconnect = true;
     this.retryAttempts = 0;
     this.retryTimer = null;
+    this.lastMessageTimestamp = 0;
   }
 
   isConnected() {
@@ -53,7 +54,9 @@ class ChatSource extends EventEmitter {
         this.socket = null;
       }
       this.emit('CONNECTING', this.url);
-      this.socket = new WebSocket(this.url);
+      this.socket = new WebSocket(
+        `${this.url}?timestamp=${this.lastMessageTimestamp}`,
+      );
       this.socket.onopen = (e) => this.onOpen(e);
       this.socket.onclose = (e) => this.onClose(e);
       this.socket.onmessage = (e) => this.onMsg(e);
@@ -99,6 +102,14 @@ class ChatSource extends EventEmitter {
 
   parseAndDispatch(event) {
     const { eventname, data } = this.parse(event);
+    this.dispatch(eventname, data);
+  }
+
+  dispatch(eventname, data) {
+    if (data.timestamp) {
+      this.lastMessageTimestamp = data.timestamp;
+    }
+
     this.emit('DISPATCH', { data, event: eventname }); // Event is used to hook into all dispatched events
     this.emit(eventname, data);
   }
