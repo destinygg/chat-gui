@@ -2,7 +2,8 @@ import { fetch } from 'whatwg-fetch';
 import $ from 'jquery';
 import { debounce } from 'throttle-debounce';
 import moment from 'moment';
-import tippy, { roundArrow } from 'tippy.js';
+import { Application } from '@hotwired/stimulus';
+import { definitionsFromContext } from '@hotwired/stimulus-webpack-helpers';
 import {
   KEYCODES,
   DATE_FORMATS,
@@ -59,6 +60,10 @@ import { HashLinkConverter, MISSING_ARG_ERROR } from './hashlinkconverter';
 import ChatCommands from './commands';
 import MessageTemplateHTML from '../../views/templates.html';
 import EventBarEvent from './event-bar/EventBarEvent';
+
+window.Stimulus = Application.start();
+const context = require.context('./controllers', true, /\.js$/);
+window.Stimulus.load(definitionsFromContext(context));
 
 class Chat {
   constructor(config) {
@@ -304,16 +309,6 @@ class Chat {
       document.getElementsByTagName('head')[0].appendChild(link);
       return link.sheet;
     })();
-
-    // Tooltips
-    tippy.setDefaultProps({ delay: [500, 0] });
-    tippy('[data-tippy-content]', {
-      arrow: roundArrow,
-      duration: 0,
-      maxWidth: 250,
-      hideOnClick: false,
-      theme: 'dgg',
-    });
 
     this.ishidden = (document.visibilityState || 'visible') !== 'visible';
     this.output = this.ui.find('#chat-output-frame');
