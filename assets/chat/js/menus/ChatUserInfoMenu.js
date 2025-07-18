@@ -369,8 +369,14 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
           }
         }
 
+        const timestamp = element.find('time').data('unixtimestamp');
+
         // Create a new `ChatUser` to remove username styles for a cleaner look.
-        const msg = MessageBuilder.message(rawText, new ChatUser(nick));
+        const msg = MessageBuilder.message(
+          rawText,
+          new ChatUser(nick),
+          timestamp,
+        );
         displayedMessages.push(msg.html(this.chat));
       });
     }
