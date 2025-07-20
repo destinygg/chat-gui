@@ -295,12 +295,16 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     this.header.addClass(usernameFeatures);
     this.flairList.append(featuresList);
 
-    const messageList = this.createMessages(displayName);
-    messageList.forEach((element) => {
-      this.messagesContainer.append(element);
-    });
-
-    this.redraw();
+    this.createMessages(displayName)
+      .then((messageList) => {
+        messageList.forEach((element) => {
+          this.messagesContainer.append(element);
+        });
+        this.redraw();
+      })
+      .catch(() => {
+        this.redraw();
+      });
   }
 
   buildWatchingEmbed(nick) {
@@ -339,36 +343,22 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     return features !== '' ? `<span class="features">${features}</span>` : '';
   }
 
-  createMessages(nick) {
+  async createMessages(nick) {
     const displayedMessages = [];
-    if (this.messageArray.length > 0) {
-      let nextMsg = this.messageArray[0].next('.msg-continue');
-      while (nextMsg.length > 0) {
-        this.messageArray.push(nextMsg);
-        nextMsg = nextMsg.next('.msg-continue');
-      }
-      this.messageArray.forEach((element) => {
-        const textContainer = element.find('.text')[0];
-        let rawText = '';
-        for (const node of textContainer.childNodes) {
-          if (node instanceof HTMLAnchorElement) {
-            rawText += node.href;
-          } else {
-            rawText += node.textContent;
-          }
-        }
 
-        const timestamp = element.find('time').data('unixtimestamp');
+    const userMessages =
+      await this.chat.userMessageService.getUserMessages(nick);
 
-        // Create a new `ChatUser` to remove username styles for a cleaner look.
-        const msg = MessageBuilder.message(
-          rawText,
-          new ChatUser(nick),
-          timestamp,
-        );
-        displayedMessages.push(msg.html(this.chat));
-      });
-    }
+    userMessages.forEach((userMessage) => {
+      // Create a new `ChatUser` to remove username styles for a cleaner look.
+      const msg = MessageBuilder.message(
+        userMessage.messageText,
+        new ChatUser(userMessage.username),
+        userMessage.timestamp,
+      );
+      displayedMessages.push(msg.html(this.chat));
+    });
+
     return displayedMessages;
   }
 
