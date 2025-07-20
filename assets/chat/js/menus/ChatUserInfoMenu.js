@@ -26,7 +26,6 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
 
     this.messagesList = this.ui.find('.user-info .stalk');
     this.messagesContainer = this.ui.find('.content');
-    this.messagesSubheader = this.ui.find('.user-info h5.stalk-subheader')[0];
 
     this.muteUserBtn = this.ui.find('#mute-user-btn');
     this.banUserBtn = this.ui.find('#ban-user-btn');
@@ -287,18 +286,6 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
       this.flairSubheader.style.display = 'none';
     }
 
-    const messageList = this.createMessages(displayName);
-    if (messageList.length === 0) {
-      this.messagesList.toggleClass('hidden', true);
-      this.messagesSubheader.style.display = 'none';
-    } else {
-      this.messagesList.toggleClass('hidden', false);
-      this.messagesSubheader.innerText = `Selected message${
-        messageList.length === 1 ? '' : 's'
-      }:`;
-      this.messagesSubheader.style.display = '';
-    }
-
     this.header.text('');
     this.header.attr('class', 'username');
     this.messagesContainer.empty();
@@ -307,6 +294,8 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     this.header.text(displayName);
     this.header.addClass(usernameFeatures);
     this.flairList.append(featuresList);
+
+    const messageList = this.createMessages(displayName);
     messageList.forEach((element) => {
       this.messagesContainer.append(element);
     });
