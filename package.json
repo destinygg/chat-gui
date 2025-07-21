@@ -33,7 +33,7 @@
     "assets": "./assets"
   },
   "dependencies": {
-    "dotenv": "^16.0.3",
+    "dotenv": "^17.2.0",
     "jquery": "^3.6.0",
     "md5": "^2.3.0",
     "moment": "~2.30.1",
