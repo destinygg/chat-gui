@@ -301,7 +301,7 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
       .then((messageList) => {
         this.messagesContainer.empty();
         messageList.forEach((element) => {
-          this.messagesContainer.append(element);
+          this.messagesContainer.prepend(element);
         });
       })
       .catch(() => {
@@ -309,6 +309,7 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
       })
       .finally(() => {
         this.redraw();
+        this.scrollplugin.scrollBottom();
       });
   }
 
