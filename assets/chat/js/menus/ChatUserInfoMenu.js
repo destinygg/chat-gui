@@ -295,14 +295,19 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     this.header.addClass(usernameFeatures);
     this.flairList.append(featuresList);
 
+    this.messagesContainer.text('Loading messages...');
+
     this.createMessages(displayName)
       .then((messageList) => {
+        this.messagesContainer.empty();
         messageList.forEach((element) => {
           this.messagesContainer.append(element);
         });
-        this.redraw();
       })
       .catch(() => {
+        this.messagesContainer.text('Failed to load messages');
+      })
+      .finally(() => {
         this.redraw();
       });
   }
