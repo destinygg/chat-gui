@@ -1,3 +1,5 @@
+// @ts-check
+
 import UserMessageService from './UserMessageService';
 import RustleSearchApiClient from './RustleSearchApiClient';
 

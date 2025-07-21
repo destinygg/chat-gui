@@ -1,3 +1,6 @@
+// @ts-check
+
+import fetchMock from 'jest-fetch-mock';
 import RustleSearchApiClient from './RustleSearchApiClient';
 
 describe('RustleSearchApiClient', () => {
@@ -5,7 +8,7 @@ describe('RustleSearchApiClient', () => {
 
   beforeEach(() => {
     apiClient = new RustleSearchApiClient();
-    fetch.resetMocks();
+    fetchMock.resetMocks();
   });
 
   describe('getLogs', () => {
@@ -29,7 +32,7 @@ describe('RustleSearchApiClient', () => {
         },
       };
 
-      fetch.mockResponseOnce(JSON.stringify(mockApiResponse));
+      fetchMock.mockResponseOnce(JSON.stringify(mockApiResponse));
 
       const result = await apiClient.getLogs(
         'testuser',
@@ -38,7 +41,7 @@ describe('RustleSearchApiClient', () => {
         '2024-01-15',
       );
 
-      expect(fetch).toHaveBeenCalledWith(
+      expect(fetchMock).toHaveBeenCalledWith(
         'https://api-v2.rustlesearch.dev/anon/search?username=testuser&channel=TestChannel&start_date=2020-01-01&end_date=2024-01-15',
       );
 
@@ -70,7 +73,7 @@ describe('RustleSearchApiClient', () => {
         },
       };
 
-      fetch.mockResponseOnce(JSON.stringify(mockApiResponse));
+      fetchMock.mockResponseOnce(JSON.stringify(mockApiResponse));
 
       const result = await apiClient.getLogs(
         'testuser',
@@ -79,7 +82,7 @@ describe('RustleSearchApiClient', () => {
         undefined,
       );
 
-      expect(fetch).toHaveBeenCalledWith(
+      expect(fetchMock).toHaveBeenCalledWith(
         'https://api-v2.rustlesearch.dev/anon/search?username=testuser&channel=TestChannel',
       );
 
@@ -98,7 +101,7 @@ describe('RustleSearchApiClient', () => {
         data: null,
       };
 
-      fetch.mockResponseOnce(JSON.stringify(mockApiResponse));
+      fetchMock.mockResponseOnce(JSON.stringify(mockApiResponse));
 
       await expect(
         apiClient.getLogs(
@@ -111,7 +114,7 @@ describe('RustleSearchApiClient', () => {
     });
 
     it('should throw error when API returns invalid JSON', async () => {
-      fetch.mockResponseOnce('invalid json response');
+      fetchMock.mockResponseOnce('invalid json response');
 
       await expect(
         apiClient.getLogs(

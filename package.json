@@ -48,6 +48,7 @@
     "@babel/core": "^7.14.3",
     "@babel/polyfill": "^7.6.0",
     "@babel/preset-env": "^7.14.2",
+    "@types/jest": "^30.0.0",
     "autoprefixer": "^10.2.5",
     "babel-loader": "^10.0.0",
     "css-loader": "^7.1.1",
