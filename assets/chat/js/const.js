@@ -128,7 +128,7 @@ const settingsdefault = new Map(
     taggednotes: [],
     showremoved: 0, // 0 = false (removes), 1 = true (censor), 2 = do nothing
     showhispersinchat: false,
-    ignorenicks: ['cane'], // you're welcome
+    ignorenicks: [],
     favoriteemotes: [],
     focusmentioned: false,
     notificationtimeout: true,
