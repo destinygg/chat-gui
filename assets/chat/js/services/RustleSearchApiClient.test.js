@@ -36,13 +36,13 @@ describe('RustleSearchApiClient', () => {
 
       const result = await apiClient.getLogs(
         'testuser',
-        'TestChannel',
-        '2020-01-01',
-        '2024-01-15',
+        'Destinygg',
+        new Date('2020-01-01'),
+        new Date('2024-01-15'),
       );
 
       expect(fetchMock).toHaveBeenCalledWith(
-        'https://api-v2.rustlesearch.dev/anon/search?username=testuser&channel=TestChannel&start_date=2020-01-01&end_date=2024-01-15',
+        'https://api-v2.rustlesearch.dev/anon/search?username=testuser&channel=Destinygg&start_date=2020-01-01&end_date=2024-01-15',
       );
 
       expect(result).toHaveLength(2);
@@ -77,13 +77,13 @@ describe('RustleSearchApiClient', () => {
 
       const result = await apiClient.getLogs(
         'testuser',
-        'TestChannel',
+        'Destinygg',
         undefined,
         undefined,
       );
 
       expect(fetchMock).toHaveBeenCalledWith(
-        'https://api-v2.rustlesearch.dev/anon/search?username=testuser&channel=TestChannel',
+        'https://api-v2.rustlesearch.dev/anon/search?username=testuser&channel=Destinygg',
       );
 
       expect(result).toHaveLength(1);
@@ -106,9 +106,9 @@ describe('RustleSearchApiClient', () => {
       await expect(
         apiClient.getLogs(
           'testuser',
-          'InvalidChannel',
-          '2020-01-01',
-          '2024-01-15',
+          'Destinygg',
+          new Date('2020-01-01'),
+          new Date('2024-01-15'),
         ),
       ).rejects.toThrow('Invalid channel');
     });
@@ -119,9 +119,9 @@ describe('RustleSearchApiClient', () => {
       await expect(
         apiClient.getLogs(
           'testuser',
-          'TestChannel',
-          '2020-01-01',
-          '2024-01-15',
+          'Destinygg',
+          new Date('2020-01-01'),
+          new Date('2024-01-15'),
         ),
       ).rejects.toThrow('Invalid JSON');
     });

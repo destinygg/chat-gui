@@ -29,9 +29,9 @@ const BASE_URI = 'https://api-v2.rustlesearch.dev';
 export default class RustleSearchApiClient {
   /**
    * @param {string} username
-   * @param {string} channel
-   * @param {string} [startDate]
-   * @param {string} [endDate]
+   * @param {'Destinygg'} channel
+   * @param {Date} [startDate]
+   * @param {Date} [endDate]
    * @returns {Promise<Array<RustleSearchMessage>>}
    * @throws {Error}
    */
@@ -41,10 +41,12 @@ export default class RustleSearchApiClient {
     apiUrl.searchParams.set('channel', channel);
 
     if (startDate) {
-      apiUrl.searchParams.set('start_date', startDate);
+      const startDateStr = startDate.toISOString().split('T')[0];
+      apiUrl.searchParams.set('start_date', startDateStr);
     }
     if (endDate) {
-      apiUrl.searchParams.set('end_date', endDate);
+      const endDateStr = endDate.toISOString().split('T')[0];
+      apiUrl.searchParams.set('end_date', endDateStr);
     }
 
     const response = await fetch(apiUrl.toString());
