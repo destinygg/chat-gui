@@ -45,6 +45,7 @@ import { isMuteActive, MutedTimer } from './mutedtimer';
 import EmoteService from './emotes';
 import UserFeatures from './features';
 import UserRoles from './roles';
+import UserMessageService from './services/UserMessageService';
 import makeSafeForRegex, {
   regexslashcmd,
   regextime,
@@ -91,6 +92,7 @@ class Chat {
     this.flairs = [];
     this.flairsMap = new Map();
     this.emoteService = new EmoteService();
+    this.userMessageService = new UserMessageService();
 
     this.user = new ChatUser();
     this.users = new Map();

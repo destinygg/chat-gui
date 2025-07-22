@@ -48,6 +48,7 @@
     "@babel/core": "^7.14.3",
     "@babel/polyfill": "^7.6.0",
     "@babel/preset-env": "^7.14.2",
+    "@types/jest": "^30.0.0",
     "autoprefixer": "^10.2.5",
     "babel-loader": "^10.0.0",
     "css-loader": "^7.1.1",
@@ -60,6 +61,7 @@
     "html-webpack-plugin": "^5.3.1",
     "jest": "^30.0.4",
     "jest-environment-jsdom": "^30.0.4",
+    "jest-fetch-mock": "^3.0.3",
     "lint-staged": "^16.0.0",
     "postcss-loader": "^8.1.1",
     "prettier": "^3.0.3",
@@ -80,7 +82,10 @@
     "utf-8-validate": "^6.0.3"
   },
   "jest": {
-    "testEnvironment": "jsdom"
+    "testEnvironment": "jsdom",
+    "setupFilesAfterEnv": [
+      "<rootDir>/jest.setup.js"
+    ]
   },
   "lint-staged": {
     "*.js": [
