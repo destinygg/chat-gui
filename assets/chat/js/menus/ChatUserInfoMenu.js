@@ -299,10 +299,14 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
 
     this.createMessages(displayName)
       .then((messageList) => {
-        this.messagesContainer.empty();
-        messageList.forEach((element) => {
-          this.messagesContainer.prepend(element);
-        });
+        if (messageList.length === 0) {
+          this.messagesContainer.text('No messages');
+        } else {
+          this.messagesContainer.empty();
+          messageList.forEach((element) => {
+            this.messagesContainer.prepend(element);
+          });
+        }
       })
       .catch((error) => {
         this.messagesContainer.text(
