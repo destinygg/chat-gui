@@ -304,8 +304,10 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
           this.messagesContainer.prepend(element);
         });
       })
-      .catch(() => {
-        this.messagesContainer.text('Failed to load messages');
+      .catch((error) => {
+        this.messagesContainer.text(
+          `Failed to load messages: ${error.message}`,
+        );
       })
       .finally(() => {
         this.redraw();

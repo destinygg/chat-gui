@@ -123,11 +123,10 @@ describe('UserMessageService', () => {
       expect(result[1].messageText).toBe('msg2');
     });
 
-    it('should return empty array when API client throws', async () => {
+    it('should throw error when API client throws', async () => {
       mockApiClient.mockError = new Error('API error');
 
-      const result = await service.getUserMessages('testuser');
-      expect(result).toEqual([]);
+      await expect(service.getUserMessages('testuser')).rejects.toThrow();
     });
   });
 });

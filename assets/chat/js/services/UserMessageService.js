@@ -37,15 +37,10 @@ export default class UserMessageService {
    * @param {string} username
    * @param {number} messageCount
    * @returns {Promise<Array<UserMessage>>}
+   * @throws {Error}
    */
   async getUserMessages(username, messageCount = 50) {
-    let messages;
-    try {
-      messages = await this.apiClient.getLogs(username, 'Destinygg');
-    } catch (error) {
-      return [];
-    }
-
+    const messages = await this.apiClient.getLogs(username, 'Destinygg');
     const transformedMessages = this.transformMessages(messages);
 
     return transformedMessages.slice(0, messageCount);
