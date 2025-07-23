@@ -139,6 +139,12 @@ function uniqueBy(arr, getter) {
   return [...map.values()];
 }
 
+function shouldOpenHighlightedBy(ac) {
+  const str = ac.input.val().toString();
+  const prevChar = str[ac.input[0].selectionStart - 1];
+  return str.length === 0 || /\s/.test(prevChar);
+}
+
 class ChatAutoComplete {
   constructor() {
     /** @member jQuery */
@@ -172,7 +178,7 @@ class ChatAutoComplete {
           this.select(
             this.selected >= this.results.length - 1 ? 0 : this.selected + 1,
           );
-        } else {
+        } else if (shouldOpenHighlightedBy(this)) {
           const highlightedBy = this.chat.mainwindow.messages
             .filter((m) => m.highlighted)
             .toSorted((a, b) => b.timestamp - a.timestamp);
