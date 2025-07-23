@@ -781,6 +781,10 @@ class Chat {
       win = this.mainwindow;
     }
 
+    if (win.containsMessage(message)) {
+      return;
+    }
+
     // Break the current combo if this message is not an emote
     // We don't need to check what type the current message is, we just know that its a new message, so the combo is invalid.
     if (
