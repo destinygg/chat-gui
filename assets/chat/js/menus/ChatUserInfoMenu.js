@@ -26,7 +26,6 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
 
     this.messagesList = this.ui.find('.user-info .stalk');
     this.messagesContainer = this.ui.find('.content');
-    this.messagesSubheader = this.ui.find('.user-info h5.stalk-subheader')[0];
 
     this.muteUserBtn = this.ui.find('#mute-user-btn');
     this.banUserBtn = this.ui.find('#ban-user-btn');
@@ -287,18 +286,6 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
       this.flairSubheader.style.display = 'none';
     }
 
-    const messageList = this.createMessages(displayName);
-    if (messageList.length === 0) {
-      this.messagesList.toggleClass('hidden', true);
-      this.messagesSubheader.style.display = 'none';
-    } else {
-      this.messagesList.toggleClass('hidden', false);
-      this.messagesSubheader.innerText = `Selected message${
-        messageList.length === 1 ? '' : 's'
-      }:`;
-      this.messagesSubheader.style.display = '';
-    }
-
     this.header.text('');
     this.header.attr('class', 'username');
     this.messagesContainer.empty();
@@ -307,11 +294,29 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     this.header.text(displayName);
     this.header.addClass(usernameFeatures);
     this.flairList.append(featuresList);
-    messageList.forEach((element) => {
-      this.messagesContainer.append(element);
-    });
 
-    this.redraw();
+    this.messagesContainer.text('Loading messages...');
+
+    this.createMessages(displayName)
+      .then((messageList) => {
+        if (messageList.length === 0) {
+          this.messagesContainer.text('No messages');
+        } else {
+          this.messagesContainer.empty();
+          messageList.forEach((element) => {
+            this.messagesContainer.prepend(element);
+          });
+        }
+      })
+      .catch((error) => {
+        this.messagesContainer.text(
+          `Failed to load messages: ${error.message}`,
+        );
+      })
+      .finally(() => {
+        this.redraw();
+        this.scrollplugin.scrollBottom();
+      });
   }
 
   buildWatchingEmbed(nick) {
@@ -350,22 +355,22 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     return features !== '' ? `<span class="features">${features}</span>` : '';
   }
 
-  createMessages(nick) {
+  async createMessages(nick) {
     const displayedMessages = [];
-    if (this.messageArray.length > 0) {
-      let nextMsg = this.messageArray[0].next('.msg-continue');
-      while (nextMsg.length > 0) {
-        this.messageArray.push(nextMsg);
-        nextMsg = nextMsg.next('.msg-continue');
-      }
-      this.messageArray.forEach((element) => {
-        const text = element.find('.text')[0].innerText;
 
-        // Create a new `ChatUser` to remove username styles for a cleaner look.
-        const msg = MessageBuilder.message(text, new ChatUser(nick));
-        displayedMessages.push(msg.html(this.chat));
-      });
-    }
+    const userMessages =
+      await this.chat.userMessageService.getUserMessages(nick);
+
+    userMessages.forEach((userMessage) => {
+      // Create a new `ChatUser` to remove username styles for a cleaner look.
+      const msg = MessageBuilder.message(
+        userMessage.messageText,
+        new ChatUser(userMessage.username),
+        userMessage.timestamp,
+      );
+      displayedMessages.push(msg.html(this.chat));
+    });
+
     return displayedMessages;
   }
 

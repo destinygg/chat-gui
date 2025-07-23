@@ -25,9 +25,10 @@ export default class ChatEmoteTooltip extends ChatMenuFloating {
 
     this.ui.emote.on('click', '.emote', () => {
       const value = this.chat.input.val().toString().trim();
-      this.chat.input
-        .val(`${value + (value === '' ? '' : ' ') + this.emote} `)
-        .focus();
+      this.chat.input.val(`${value + (value === '' ? '' : ' ') + this.emote} `);
+      if (this.chat.shouldFocus) {
+        this.chat.input.focus();
+      }
     });
 
     this.ui.favorite.on('click', () => {

@@ -127,6 +127,18 @@ function selectHelper(ac) {
   }
 }
 
+function uniqueBy(arr, getter) {
+  const map = new Map();
+  for (const v of arr) {
+    const key = getter(v);
+    const prev = map.get(key);
+    if (prev === undefined) {
+      map.set(key, v);
+    }
+  }
+  return [...map.values()];
+}
+
 class ChatAutoComplete {
   constructor() {
     /** @member jQuery */
@@ -160,6 +172,27 @@ class ChatAutoComplete {
           this.select(
             this.selected >= this.results.length - 1 ? 0 : this.selected + 1,
           );
+        } else {
+          const highlightedBy = this.chat.mainwindow.messages
+            .filter((m) => m.highlighted)
+            .toSorted((a, b) => b.timestamp - a.timestamp);
+          if (highlightedBy.length > 0) {
+            const str = this.input.val().toString();
+            const offset = this.input[0].selectionStart;
+            this.criteria = buildSearchCriteria(str, offset);
+            this.selected = -1;
+            this.results = uniqueBy(
+              highlightedBy,
+              (m) => m.user.displayName,
+            ).map((m) => ({
+              data: m.user.displayName,
+              isemote: false,
+              weight: m.timestamp,
+            }));
+            this.buildHelpers();
+            updateHelpers(this);
+            timeoutHelpers(this);
+          }
         }
         e.preventDefault();
         e.stopPropagation();
@@ -263,13 +296,20 @@ class ChatAutoComplete {
     const id = getBucketId(str);
     const bucket =
       this.buckets.get(id) || this.buckets.set(id, new Map()).get(id);
-    const data = Object.assign(bucket.get(str) || {}, {
+
+    const existingData = bucket.get(str);
+    if (existingData && existingData.isemote) {
+      return existingData;
+    }
+
+    const newData = Object.assign(bucket.get(str) || {}, {
       data: str,
       weight,
       isemote,
     });
-    bucket.set(str, data);
-    return data;
+    bucket.set(str, newData);
+
+    return newData;
   }
 
   remove(str, userOnly = false) {

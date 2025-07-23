@@ -45,6 +45,7 @@ import { isMuteActive, MutedTimer } from './mutedtimer';
 import EmoteService from './emotes';
 import UserFeatures from './features';
 import UserRoles from './roles';
+import UserMessageService from './services/UserMessageService';
 import makeSafeForRegex, {
   regexslashcmd,
   regextime,
@@ -91,6 +92,7 @@ class Chat {
     this.flairs = [];
     this.flairsMap = new Map();
     this.emoteService = new EmoteService();
+    this.userMessageService = new UserMessageService();
 
     this.user = new ChatUser();
     this.users = new Map();
@@ -234,6 +236,11 @@ class Chat {
     this.control.on('DIE', () => this.cmdDIE());
     this.control.on('SUICIDE', () => this.cmdDIE());
     this.control.on('BITLY', () => this.cmdDIE());
+  }
+
+  get shouldFocus() {
+    // return true when not in a mobile context
+    return !/\bMobi/.test(window.navigator.userAgent);
   }
 
   setUser(user) {
@@ -480,12 +487,6 @@ class Chat {
       { atBegin: false },
     );
     const onresize = () => {
-      // If this is a mobile screen, don't close menus.
-      // The virtual keyboard triggers a 'resize' event, and menus shouldn't be closed whenever the virtual keyboard is opened
-      if (window.screen.width <= 768) {
-        return;
-      }
-
       if (!resizing) {
         resizing = true;
         ChatMenu.closeMenus(this);
@@ -498,14 +499,18 @@ class Chat {
     this.windowselect.on('click', '.tab-close', (e) => {
       ChatMenu.closeMenus(this);
       this.removeWindow($(e.currentTarget).parent().data('name').toLowerCase());
-      this.input.focus();
+      if (this.shouldFocus) {
+        this.input.focus();
+      }
       return false;
     });
     this.windowselect.on('click', '.tab', (e) => {
       ChatMenu.closeMenus(this);
       this.windowToFront($(e.currentTarget).data('name').toLowerCase());
       this.menus.get('whisper-users').redraw();
-      this.input.focus();
+      if (this.shouldFocus) {
+        this.input.focus();
+      }
       return false;
     });
 
@@ -1018,8 +1023,7 @@ class Chat {
   }
 
   focusIfNothingSelected() {
-    // If this is a mobile screen, return to avoid focusing input and bringing up the virtual keyboard
-    if (window.screen.width <= 768) {
+    if (!this.shouldFocus) {
       return;
     }
 
@@ -1380,6 +1384,7 @@ class Chat {
     MessageBuilder.broadcast(
       data.data,
       new ChatUser(data.user),
+      data.uuid,
       data.timestamp,
     ).into(this);
   }
@@ -1394,6 +1399,7 @@ class Chat {
         nick: 'System',
         id: -1,
       }),
+      '',
     ).into(this);
   }
 
@@ -2540,7 +2546,9 @@ class Chat {
       }
       this.windowToFront(normalized);
       this.menus.get('whisper-users').redraw();
-      this.input.focus();
+      if (this.shouldFocus) {
+        this.input.focus();
+      }
     }
   }
 

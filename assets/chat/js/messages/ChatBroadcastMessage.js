@@ -3,8 +3,8 @@ import ChatEventMessage from './ChatEventMessage';
 import MessageTypes from './MessageTypes';
 
 export default class ChatBroadcastMessage extends ChatEventMessage {
-  constructor(message, user, timestamp = null) {
-    super(message, timestamp);
+  constructor(message, user, uuid, timestamp = null) {
+    super(message, timestamp, uuid);
     this.type = MessageTypes.BROADCAST;
     this.user = user;
 
