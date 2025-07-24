@@ -742,6 +742,8 @@ class Chat {
       window.updateMessages(this);
     }
 
+    this.mentions.flushBacklog();
+
     return Promise.resolve(this);
   }
 
@@ -833,11 +835,6 @@ class Chat {
       message.highlighted = this.shouldHighlightMessage(message);
     }
 
-    // Track mentions for autocomplete
-    if (message.highlighted && !message.ignored) {
-      this.mentions.add(message.user);
-    }
-
     // The point where we actually add the message dom
     win.addMessage(this, message);
 
@@ -852,6 +849,13 @@ class Chat {
       this.ignored(message.user?.username, message.message)
     ) {
       message.ignore();
+    }
+
+    // Track mentions for autocomplete
+    if (this.backlogloading) {
+      this.mentions.queueBacklog(message);
+    } else {
+      this.mentions.processMessage(message);
     }
 
     // Show desktop notification
