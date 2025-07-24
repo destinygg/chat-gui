@@ -60,6 +60,7 @@ import { HashLinkConverter, MISSING_ARG_ERROR } from './hashlinkconverter';
 import ChatCommands from './commands';
 import MessageTemplateHTML from '../../views/templates.html';
 import EventBarEvent from './event-bar/EventBarEvent';
+import Mentions from './mentions';
 
 class Chat {
   constructor(config) {
@@ -101,6 +102,7 @@ class Chat {
     this.settings = new Map(settingsdefault);
     this.commands = new ChatCommands();
     this.autocomplete = new ChatAutoComplete();
+    this.mentions = new Mentions();
     this.menus = new Map();
     this.taggednicks = new Map();
     this.taggednotes = new Map();
@@ -829,6 +831,11 @@ class Chat {
       message.continued = win.isContinued(message);
       // set highlighted state
       message.highlighted = this.shouldHighlightMessage(message);
+    }
+
+    // Track mentions for autocomplete
+    if (message.highlighted && !message.ignored) {
+      this.mentions.add(message.user);
     }
 
     // The point where we actually add the message dom
