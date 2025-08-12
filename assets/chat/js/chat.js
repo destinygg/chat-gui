@@ -3,6 +3,7 @@ import $ from 'jquery';
 import { debounce } from 'throttle-debounce';
 import moment from 'moment';
 import tippy, { roundArrow } from 'tippy.js';
+import * as linkify from 'linkifyjs';
 import {
   KEYCODES,
   DATE_FORMATS,
@@ -53,7 +54,6 @@ import makeSafeForRegex, {
   nickregex,
   nsfwregex,
   nsflregex,
-  linkregex,
 } from './regex';
 
 import { HashLinkConverter, MISSING_ARG_ERROR } from './hashlinkconverter';
@@ -2619,21 +2619,33 @@ class Chat {
    * @param {ChatUserMessage} message
    */
   shouldHighlightMessage(message) {
-    return (
-      /* this.authenticated && */ !message.isown &&
-      // Check current user nick against msg.message (if highlight setting is on)
-      ((this.regexhighlightself &&
-        this.settings.get('highlight') &&
-        this.regexhighlightself.test(message.message.replace(linkregex, ''))) ||
-        // Check /highlight nicks against msg.nick
-        (this.regexhighlightnicks &&
-          this.regexhighlightnicks.test(message.user.username)) ||
-        // Check custom highlight against msg.nick and msg.message
-        (this.regexhighlightcustom &&
-          this.regexhighlightcustom.test(
-            `${message.user.username} ${message.message}`,
-          )))
-    );
+    if (message.isown) {
+      return false;
+    }
+
+    let selfMentioned = false;
+    let someoneElseMentioned = false;
+    let customHighlightMentioned = false;
+
+    if (this.regexhighlightself && this.settings.get('highlight')) {
+      selfMentioned = this.regexhighlightself.test(
+        this.removeLinksFromText(message.message),
+      );
+    }
+
+    if (this.regexhighlightnicks) {
+      someoneElseMentioned = this.regexhighlightnicks.test(
+        message.user.username,
+      );
+    }
+
+    if (this.regexhighlightcustom) {
+      customHighlightMentioned = this.regexhighlightcustom.test(
+        `${message.user.username} ${message.message}`,
+      );
+    }
+
+    return selfMentioned || someoneElseMentioned || customHighlightMentioned;
   }
 
   isBigscreenEmbed() {
@@ -2654,9 +2666,21 @@ class Chat {
 
   extractNicks(text) {
     const uniqueNicks = new Set(
-      text.replace(linkregex, '').match(nickmessageregex),
+      this.removeLinksFromText(text).match(nickmessageregex),
     );
     return [...uniqueNicks];
+  }
+
+  removeLinksFromText(text) {
+    const links = linkify.find(text);
+    if (links.length === 0) {
+      return text;
+    }
+
+    return links.reduceRight(
+      (acc, cur) => acc.slice(0, cur.start) + acc.slice(cur.end),
+      text,
+    );
   }
 
   removeClasses(search, classList) {
