@@ -12,18 +12,20 @@ export default class UrlFormatter {
     if (!str) {
       return undefined;
     }
-    let extraclass = '';
-
-    if (/\b(?:NSFL)\b/i.test(str)) {
-      extraclass = 'nsfl-link';
-    } else if (/\b(?:NSFW)\b/i.test(str)) {
-      extraclass = 'nsfw-link';
-    } else if (/\b(?:SPOILERS)\b/i.test(str)) {
-      extraclass = 'spoilers-link';
-    }
 
     return linkifyHtml(str, {
-      className: `externallink ${extraclass}`,
+      className: () => {
+        switch (true) {
+          case /\b(?:NSFL)\b/i.test(str):
+            return 'externallink nsfl-link';
+          case /\b(?:NSFW)\b/i.test(str):
+            return 'externallink nsfw-link';
+          case /\b(?:SPOILERS)\b/i.test(str):
+            return 'externallink spoilers-link';
+          default:
+            return 'externallink';
+        }
+      },
       rel: 'nofollow',
       format: (content) => {
         const normalizedUrl = this.normalizeUrl(content);
