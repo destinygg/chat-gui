@@ -1,7 +1,8 @@
 import $ from 'jquery';
-import { linkregex } from '../regex';
+import linkifyHtml from 'linkify-html';
 import { HashLinkConverter } from '../hashlinkconverter';
-import encodeUrl from '../encodeUrl';
+
+const MAX_URL_LENGTH = 90;
 
 export default class UrlFormatter {
   constructor() {
@@ -13,7 +14,6 @@ export default class UrlFormatter {
     if (!str) {
       return undefined;
     }
-    const self = this;
     let extraclass = '';
 
     if (/\b(?:NSFL)\b/i.test(str)) {
@@ -24,38 +24,42 @@ export default class UrlFormatter {
       extraclass = 'spoilers-link';
     }
 
-    return str.replace(linkregex, (url, scheme) => {
-      const decodedUrl = self.elem.html(url).text();
-      const m = decodedUrl.match(linkregex);
-      if (m) {
-        const normalizedUrl = encodeUrl(this.normalizeUrl(m[0]));
+    return linkifyHtml(str, {
+      className: `externallink ${extraclass}`,
+      rel: 'nofollow',
+      format: (content) => {
+        const normalizedUrl = this.normalizeUrl(content);
 
+        if (
+          !(chat.settings.get('showentireurl') ?? false) &&
+          normalizedUrl.length > MAX_URL_LENGTH
+        ) {
+          return `${normalizedUrl.slice(0, 40)}...${normalizedUrl.slice(-40)}`;
+        }
+
+        return normalizedUrl;
+      },
+      formatHref: (href) => this.normalizeUrl(href),
+      render: ({ tagName, attributes, content }) => {
         let embedHashLink = '';
         try {
-          embedHashLink = this.hashLinkConverter.convert(decodedUrl);
+          embedHashLink = this.hashLinkConverter.convert(attributes.href);
         } catch (err) {
           // ignore
         }
 
-        const maxUrlLength = 90;
-        let urlText = normalizedUrl;
-        if (
-          !(chat.settings.get('showentireurl') ?? false) &&
-          urlText.length > maxUrlLength
-        ) {
-          urlText = `${urlText.slice(0, 40)}...${urlText.slice(-40)}`;
-        }
-
-        const extra = encodeUrl(decodedUrl.substring(m[0].length));
-        const href = `${scheme ? '' : 'http://'}${normalizedUrl}`;
+        let attrs = '';
+        Object.keys(attributes).forEach((key) => {
+          attrs += ` ${key}=${attributes[key]}`;
+        });
 
         const embedTarget = chat.isBigscreenEmbed() ? '_top' : '_blank';
         const embedUrl = `${chat.config.dggOrigin}${chat.bigscreenPath}${embedHashLink}`;
+
         return embedHashLink
-          ? `<a target="_blank" class="externallink ${extraclass}" href="${href}" rel="nofollow">${urlText}</a><a target="${embedTarget}" class="embed-button" href="${embedUrl}"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-tv-minimal"><path d="M7 21h10"/><rect width="20" height="14" x="2" y="3" rx="2"/></svg></a>`
-          : `<a target="_blank" class="externallink ${extraclass}" href="${href}" rel="nofollow">${urlText}</a>${extra}`;
-      }
-      return url;
+          ? `<${tagName}${attrs}>${content}</${tagName}><a target="${embedTarget}" class="embed-button" href="${embedUrl}"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-tv-minimal"><path d="M7 21h10"/><rect width="20" height="14" x="2" y="3" rx="2"/></svg></a>`
+          : `<${tagName}${attrs}>${content}</${tagName}>`;
+      },
     });
   }
 
