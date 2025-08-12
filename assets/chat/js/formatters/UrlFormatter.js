@@ -1,4 +1,3 @@
-import $ from 'jquery';
 import linkifyHtml from 'linkify-html';
 import { HashLinkConverter } from '../hashlinkconverter';
 
@@ -7,7 +6,6 @@ const MAX_URL_LENGTH = 90;
 export default class UrlFormatter {
   constructor() {
     this.hashLinkConverter = new HashLinkConverter();
-    this.elem = $('<div></div>');
   }
 
   format(chat, str) {
