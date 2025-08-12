@@ -46,10 +46,10 @@ export default class UrlFormatter {
           // ignore
         }
 
-        let attrs = '';
-        Object.keys(attributes).forEach((key) => {
-          attrs += ` ${key}=${attributes[key]}`;
-        });
+        const attrs = Object.keys(attributes).reduce(
+          (acc, cur) => `${acc} ${cur}="${attributes[cur]}"`,
+          '',
+        );
 
         const embedTarget = chat.isBigscreenEmbed() ? '_top' : '_blank';
         const embedUrl = `${chat.config.dggOrigin}${chat.bigscreenPath}${embedHashLink}`;
