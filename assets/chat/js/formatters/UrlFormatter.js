@@ -27,6 +27,7 @@ export default class UrlFormatter {
         }
       },
       rel: 'nofollow',
+      target: '_blank',
       format: (content) => {
         const normalizedUrl = this.normalizeUrl(content);
 
