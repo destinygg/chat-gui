@@ -4,7 +4,6 @@
   "description": "Destiny.gg chat client front-end",
   "main": "destiny",
   "scripts": {
-    "tld": "node scripts/tld.js",
     "glue": "node scripts/glue.js",
     "start": "webpack serve --mode=development",
     "test": "jest",
