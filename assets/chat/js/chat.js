@@ -260,23 +260,23 @@ class Chat {
     return this;
   }
 
-  setSettings(settings) {
-    // If authed and #settings.profilesettings=true use #settings
-    // Else use whats in LocalStorage#chat.settings
-    const stored =
-      settings !== null && this.authenticated && settings.get('profilesettings')
-        ? settings
-        : new Map(ChatStore.read('chat.settings') || []);
+  loadCachedSettings() {
+    const settings = new Map(ChatStore.read('chat.settings') || []);
+    this.setSettings(settings);
+  }
 
-    // Loop through settings and apply any settings found in the #stored data
-    if (stored.size > 0) {
+  setSettings(settings) {
+    // Loop through settings and apply them
+    if (settings.size > 0) {
       [...this.settings.keys()]
-        .filter((k) => stored.get(k) !== undefined && stored.get(k) !== null)
-        .forEach((k) => this.settings.set(k, stored.get(k)));
+        .filter(
+          (k) => settings.get(k) !== undefined && settings.get(k) !== null,
+        )
+        .forEach((k) => this.settings.set(k, settings.get(k)));
     }
     // Upgrade if schema is out of date
-    const oldversion = stored.has('schemaversion')
-      ? parseInt(stored.get('schemaversion'), 10)
+    const oldversion = settings.has('schemaversion')
+      ? parseInt(settings.get('schemaversion'), 10)
       : -1;
     const newversion = settingsdefault.get('schemaversion');
     if (oldversion !== -1 && newversion > oldversion) {
@@ -573,14 +573,15 @@ class Chat {
       .then((res) => res.json())
       .then((data) => {
         // Set user settings.
-        this.setSettings(new Map(data));
+        const settings = new Map(data);
+        if (!settings.get('profilesettings')) {
+          return;
+        }
+        this.setSettings(settings);
+        this.cacheSettings();
         this.getActiveWindow().update(true);
       })
-      .catch(() => {
-        // Set default settings.
-        this.setSettings();
-        this.getActiveWindow().update(true);
-      });
+      .catch();
   }
 
   async loadEmotesAndFlairs() {
@@ -661,20 +662,21 @@ class Chat {
   }
 
   saveSettings() {
-    if (this.authenticated) {
-      if (this.settings.get('profilesettings')) {
-        fetch(`${this.config.api.base}/api/chat/me/settings`, {
-          body: JSON.stringify([...this.settings]),
-          credentials: 'include',
-          method: 'POST',
-          headers: { 'X-CSRF-Guard': 'YEE' },
-        }).catch();
-      } else {
-        ChatStore.write('chat.settings', this.settings);
-      }
-    } else {
-      ChatStore.write('chat.settings', this.settings);
+    this.cacheSettings();
+    if (this.authenticated && this.settings.get('profilesettings')) {
+      fetch(`${this.config.api.base}/api/chat/me/settings`, {
+        body: JSON.stringify([...this.settings]),
+        credentials: 'include',
+        method: 'POST',
+        headers: { 'X-CSRF-Guard': 'YEE' },
+      }).catch();
     }
+  }
+
+  cacheSettings() {
+    const cached = new Map(this.settings);
+    cached.set('profilesettings', false);
+    ChatStore.write('chat.settings', cached);
   }
 
   // De-bounced saveSettings
@@ -1116,13 +1118,12 @@ class Chat {
   onME(data) {
     this.setUser(data);
     this.setPreLoginText();
-    if (data) {
+    // Load locally cached settings
+    this.loadCachedSettings();
+    if (this.authenticated) {
       // If is a logged in user.
       this.loadSettings();
       this.loadWhispers();
-    } else {
-      // If guest load default settings.
-      this.setSettings();
     }
   }
 
