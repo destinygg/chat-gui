@@ -1,3 +1,5 @@
+import { nsflregex, nsfwregex, spoilersregex } from '../regex';
+
 export default class EmbedUrlFormatter {
   constructor() {
     this.bigscreenregex =
@@ -9,11 +11,11 @@ export default class EmbedUrlFormatter {
     const target = chat.isBigscreenEmbed() ? '_top' : '_blank';
     let extraclass = '';
 
-    if (/\b(?:NSFL)\b/i.test(str)) {
+    if (nsflregex.test(str)) {
       extraclass = 'nsfl-link';
-    } else if (/\b(?:NSFW)\b/i.test(str)) {
+    } else if (nsfwregex.test(str)) {
       extraclass = 'nsfw-link';
-    } else if (/\b(?:SPOILERS)\b/i.test(str)) {
+    } else if (spoilersregex.test(str)) {
       extraclass = 'spoilers-link';
     }
 

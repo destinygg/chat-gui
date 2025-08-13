@@ -5,6 +5,7 @@ const nickmessageregex = /(?=[@>]?)(\w{3,20})/g;
 const nickregex = /^\w{3,20}$/;
 const nsfwregex = /\bNSFW\b/i;
 const nsflregex = /\bNSFL\b/i;
+const spoilersregex = /\bSPOILERS\b/i;
 
 export {
   regexslashcmd,
@@ -13,6 +14,7 @@ export {
   nickregex,
   nsfwregex,
   nsflregex,
+  spoilersregex,
 };
 
 export default function makeSafeForRegex(str) {

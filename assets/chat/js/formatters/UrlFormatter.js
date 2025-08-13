@@ -1,5 +1,6 @@
 import linkifyHtml from 'linkify-html';
 import { HashLinkConverter } from '../hashlinkconverter';
+import { nsflregex, nsfwregex, spoilersregex } from '../regex';
 
 const MAX_URL_LENGTH = 90;
 
@@ -16,11 +17,11 @@ export default class UrlFormatter {
     return linkifyHtml(str, {
       className: () => {
         switch (true) {
-          case /\b(?:NSFL)\b/i.test(str):
+          case nsflregex.test(str):
             return 'externallink nsfl-link';
-          case /\b(?:NSFW)\b/i.test(str):
+          case nsfwregex.test(str):
             return 'externallink nsfw-link';
-          case /\b(?:SPOILERS)\b/i.test(str):
+          case spoilersregex.test(str):
             return 'externallink spoilers-link';
           default:
             return 'externallink';
