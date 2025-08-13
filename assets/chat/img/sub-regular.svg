@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <svg
    xml:space="preserve"
@@ -5,8 +6,8 @@
    height="750"
    version="1.1"
    id="svg12"
-   sodipodi:docname="sub-regular.svg"
-   inkscape:version="1.4 (e7c3feb100, 2024-10-09)"
+   sodipodi:docname="regular.svg"
+   inkscape:version="1.2.2 (b0a8486541, 2022-12-01)"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns="http://www.w3.org/2000/svg"
@@ -58,15 +59,15 @@
      showgrid="false"
      inkscape:zoom="0.58089981"
      inkscape:cx="-222.06928"
-     inkscape:cy="291.7887"
+     inkscape:cy="290.92797"
      inkscape:window-width="1920"
-     inkscape:window-height="1008"
-     inkscape:window-x="1920"
+     inkscape:window-height="1007"
+     inkscape:window-x="0"
      inkscape:window-y="0"
      inkscape:window-maximized="1"
      inkscape:current-layer="svg12" /><path
      sodipodi:type="star"
-     style="fill:#000000;stroke-width:25"
+     style="fill:#ffffff;stroke-width:25"
      id="path356"
      inkscape:flatsided="false"
      sodipodi:sides="5"
@@ -82,3 +83,6 @@
      inkscape:transform-center-y="-39.589802"
      transform="matrix(0.99995146,0,0,1.0514112,166.71256,168.43389)"
      inkscape:transform-center-x="-2.7210432e-06" /></svg>
+=======
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-sparkles-icon lucide-sparkles"><path d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z"/><path d="M20 2v4"/><path d="M22 4h-4"/><circle cx="4" cy="20" r="2"/></svg>
+>>>>>>> a767afa (Updated donation icons to match lucide icons style)

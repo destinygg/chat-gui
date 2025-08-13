@@ -6,6 +6,6 @@
   .broadcast-icon {
     filter: invert(100%);
 
-    @include a.icon-background('../img/icon-broadcast.png');
+    @include a.icon-background('../img/icon-broadcast.svg');
   }
 }

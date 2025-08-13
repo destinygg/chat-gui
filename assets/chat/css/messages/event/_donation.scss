@@ -22,7 +22,7 @@ $amount-color-map: (
       filter: invert(100%);
 
       &.amount-#{$amount} {
-        @include a.icon-background('../img/donation-amount-#{$amount}.png');
+        @include a.icon-background('../img/donation-amount-#{$amount}.svg');
       }
     }
   }

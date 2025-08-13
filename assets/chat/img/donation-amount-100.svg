@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:square;stroke-linejoin:round;">
+    <rect id="donation-amount-100" x="0" y="0" width="24" height="24" style="fill:none;"/>
+    <path d="M9.672,5.296C9.234,4.639 9,3.866 9,3.076L9,2.288L15,2.288L15,3.077C15,3.867 14.766,4.639 14.328,5.296" style="fill:none;fill-rule:nonzero;stroke:black;stroke-width:2px;"/>
+    <path d="M14.242,6.562C13.793,6.192 13.228,5.989 12.646,5.989C12.24,5.987 11.758,5.987 11.352,5.987C10.771,5.987 10.209,6.188 9.759,6.556C7.691,8.271 4,11.899 4,16.589C4,18.365 4.592,19.487 5.587,20.532C6.289,21.282 7.271,21.708 8.298,21.708C10.253,21.712 13.747,21.712 15.702,21.712C16.73,21.712 17.713,21.286 18.416,20.534C19.408,19.487 20,18.365 20,16.589C20,11.941 16.297,8.274 14.242,6.562Z" style="fill:none;fill-rule:nonzero;stroke:black;stroke-width:2px;stroke-linecap:butt;"/>
+    <path d="M15,11.388L10.5,11.388C9.677,11.388 9,12.065 9,12.888C9,13.711 9.677,14.388 10.5,14.388L13.5,14.388C14.323,14.388 15,15.065 15,15.888C15,16.711 14.323,17.388 13.5,17.388L9,17.388" style="fill:none;fill-rule:nonzero;stroke:black;stroke-width:1.5px;stroke-linecap:round;"/>
+    <path d="M12,18.888L12,9.888" style="fill:none;fill-rule:nonzero;stroke:black;stroke-width:1.5px;stroke-linecap:round;"/>
+</svg>
