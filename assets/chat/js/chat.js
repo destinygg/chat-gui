@@ -742,7 +742,7 @@ class Chat {
       window.updateMessages(this);
     }
 
-    this.mentions.flushBacklog();
+    this.mentions.resimulateMessages(this.mainwindow.messages);
 
     return Promise.resolve(this);
   }
@@ -852,11 +852,7 @@ class Chat {
     }
 
     // Track mentions for autocomplete
-    if (this.backlogloading) {
-      this.mentions.queueBacklog(message);
-    } else {
-      this.mentions.processMessage(message);
-    }
+    this.mentions.processMessage(message);
 
     // Show desktop notification
     if (

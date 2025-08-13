@@ -167,17 +167,17 @@ class ChatAutoComplete {
             this.selected >= this.results.length - 1 ? 0 : this.selected + 1,
           );
         } else if (
-          chat.mentions.users.length > 0 &&
+          chat.mentions.data.length > 0 &&
           shouldOpenHighlightedBy(this)
         ) {
           const str = this.input.val().toString();
           const offset = this.input[0].selectionStart;
           this.criteria = buildSearchCriteria(str, offset);
           this.selected = -1;
-          this.results = chat.mentions.users.map((user) => ({
-            data: user.displayName,
+          this.results = chat.mentions.data.map((mention) => ({
+            data: mention.user,
             isemote: false,
-            weight: 0,
+            weight: mention.timestamp.valueOf(),
           }));
           this.buildHelpers();
           updateHelpers(this);

@@ -1,46 +1,45 @@
 const maxTrackedMentions = 10;
 
 class Mentions {
-  constructor() {
-    this.users = [];
-    this.backlog = [];
-  }
+  data = [];
 
   processMessage(message) {
     if (!message.highlighted || message.ignored) {
       return;
     }
-    this.add(message.user);
+    this.add(message.user.displayName, message.timestamp);
   }
 
-  add(user) {
-    const idx = this.users.findIndex(
-      (existing) => existing.displayName === user.displayName,
-    );
+  add(user, timestamp) {
+    const idx = this.data.findIndex((existing) => existing.user === user);
+    const mention = { user, timestamp };
     if (idx === -1) {
       // User not already tracked
-      const newLength = this.users.unshift(user);
+      const newLength = this.data.unshift(mention);
       if (newLength > maxTrackedMentions) {
-        this.users.pop();
+        this.data.pop();
       }
     } else {
       // Update recency
-      this.users.splice(idx, 1);
-      this.users.unshift(user);
+      this.data[idx].timestamp = timestamp;
+      this.data.splice(idx, 1);
+      this.data.unshift(mention);
     }
   }
 
-  // Backlog system to work around race condition in issue #679.
-  // This can be completely removed if that issue is resolved.
-  queueBacklog(message) {
-    this.backlog.push(message);
-  }
+  resimulateMessages(messages) {
+    // Only resimulate mentions that are within the time range shown on screen
+    const allTimestamps = messages
+      .map((message) => message.timestamp?.valueOf())
+      .filter(Boolean);
+    const cutoff = allTimestamps.length > 0 ? Math.min(...allTimestamps) : 0;
+    this.data = this.data.filter(
+      (mention) => mention.timestamp.valueOf() < cutoff,
+    );
 
-  flushBacklog() {
-    for (const message of this.backlog) {
+    for (const message of messages) {
       this.processMessage(message);
     }
-    this.backlog = [];
   }
 }
 
