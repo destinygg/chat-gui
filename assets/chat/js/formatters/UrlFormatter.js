@@ -23,7 +23,12 @@ export default class UrlFormatter {
     }
   }
 
-  static async insertOembedData(id, domain, target, insertedItem = 'title') {
+  static async insertOembedData(
+    id,
+    domain,
+    target,
+    insertedItem = 'author_name',
+  ) {
     const element = document.getElementById(id);
     if (!element) {
       setTimeout(() => {
@@ -87,21 +92,15 @@ export default class UrlFormatter {
         if (
           /^(?:(?:https|http):\/\/)?(?:www\.)?youtu(?:be\.com|\.be)/i.test(href)
         ) {
-          let u = href;
-          let id;
-          u = UrlFormatter.untrackYouTube(u);
-          try {
-            id = u.match(/([a-z0-9_-]{11})/i);
-            if (!id || !id[0]) {
-              throw new Error();
-            }
-          } catch (error) {
-            // ignore
+          const u = UrlFormatter.untrackYouTube(href);
+          const videoid = u.match(/([a-z0-9_-]{11})/i);
+          if (!videoid || !videoid[0]) {
+            return `<a target="_blank" class="externallink ${extraclass}" href="${href}" rel="nofollow">${urlText}</a>${extra}`;
           }
 
-          const linkid = `ytlink:${Date.now()}${id[0]}`;
+          const linkid = `ytlink:${Date.now()}${videoid[0]}`;
           UrlFormatter.insertOembedData(linkid, 'youtube.com', u);
-          return `<a target="_blank" class="richlink externallink ${extraclass}" href="${u}"><i class="brand youtube"></i><p class="title" id="${linkid}">${id[0]}</p></a>${extra}`;
+          return `<a target="_blank" class="richlink ${extraclass}" href="${u}"><i class="brand youtube"></i><p class="title" id="${linkid}">${videoid && videoid[0] ? videoid[0] : urlText}</p></a>${extra}`;
         }
 
         const xlink = href.match(
@@ -109,23 +108,7 @@ export default class UrlFormatter {
         );
         if (xlink !== null) {
           const [, name, id] = xlink;
-          return `<a target="_blank" class="richlink externallink ${extraclass}" href="${UrlFormatter.untrackX(href)}"><i class="brand x"></i><p class="title" id="xlink:${id}">${name === 'i' ? id : name}</p></span></a>${extra}`;
-        }
-
-        const redditlink = href.match(
-          /(?:reddit.com)\/r\/(\w{1,21})\/comments\/(\w{2,19})\/(.*)*/i,
-        );
-        if (redditlink !== null) {
-          const [, subreddit, id] = redditlink;
-          return `<a target="_blank" class="richlink externallink ${extraclass}" href="${href}"><i class="brand reddit"></i> <p class="title" id="redditlink:${id}">${subreddit}</p></span></a>${extra}`;
-        }
-
-        const tiktoklink = href.match(
-          /(?:tiktok.com)\/@(\w{1,24})\/video\/(\w{19})\??(?:.*)*/i,
-        );
-        if (tiktoklink !== null) {
-          const [, username, id] = tiktoklink;
-          return `<a target="_blank" class="richlink externallink ${extraclass}" href="${href}"><i class="brand tiktok"></i> <p class="title" id="ttlink:${id}">${username}</p></span></a>${extra}`;
+          return `<a target="_blank" class="richlink ${extraclass}" href="${UrlFormatter.untrackX(href)}"><i class="brand x"></i><p class="title" id="xlink:${id}">${name === 'i' ? id : name}</p></span></a>${extra}`;
         }
 
         const embedTarget = chat.isBigscreenEmbed() ? '_top' : '_blank';
