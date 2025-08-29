@@ -15,13 +15,6 @@
     cursor: pointer;
     margin-left: a.$gutter-xs;
   }
-
-  .richlink:hover {
-    background-color: oklch(59.984% 0.14125 241.578 / 0.2);
-  }
-  .richlink:visited {
-    background-color: oklch(64.348% 0.18159 304.08 / 0.2);
-  }
 }
 
 .watching-focus:not(.focus) {
