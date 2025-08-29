@@ -9,6 +9,20 @@ export default class UrlFormatter {
     this.elem = $('<div></div>');
   }
 
+  static untrackX(url) {
+    return url.split('?')[0];
+  }
+
+  static untrackYouTube(url) {
+    try {
+      const ytLink = new URL(url);
+      ytLink.searchParams.delete('si');
+      return ytLink.href;
+    } catch (error) {
+      return url;
+    }
+  }
+
   static async insertOembedData(id, domain, target, insertedItem = 'title') {
     const element = document.getElementById(id);
     if (!element) {
@@ -75,10 +89,8 @@ export default class UrlFormatter {
         ) {
           let u = href;
           let id;
+          u = UrlFormatter.untrackYouTube(u);
           try {
-            const ytLink = new URL(u);
-            ytLink.searchParams.delete('si');
-            u = ytLink.href;
             id = u.match(/([a-z0-9_-]{11})/i);
             if (!id || !id[0]) {
               throw new Error();
@@ -97,7 +109,7 @@ export default class UrlFormatter {
         );
         if (xlink !== null) {
           const [, name, id] = xlink;
-          return `<a target="_blank" class="richlink externallink ${extraclass}" href="${href.split('?')[0]}"><i class="brand x"></i><p class="title" id="xlink:${id}">${name === 'i' ? id : name}</p></span></a>${extra}`;
+          return `<a target="_blank" class="richlink externallink ${extraclass}" href="${UrlFormatter.untrackX(href)}"><i class="brand x"></i><p class="title" id="xlink:${id}">${name === 'i' ? id : name}</p></span></a>${extra}`;
         }
 
         const redditlink = href.match(
@@ -105,7 +117,7 @@ export default class UrlFormatter {
         );
         if (redditlink !== null) {
           const [, subreddit, id] = redditlink;
-          return `<a target="_blank" class="richlink externallink ${extraclass}" href="${href.split('?')[0]}"><i class="brand reddit"></i> <p class="title" id="redditlink:${id}">${subreddit}</p></span></a>${extra}`;
+          return `<a target="_blank" class="richlink externallink ${extraclass}" href="${href}"><i class="brand reddit"></i> <p class="title" id="redditlink:${id}">${subreddit}</p></span></a>${extra}`;
         }
 
         const tiktoklink = href.match(
