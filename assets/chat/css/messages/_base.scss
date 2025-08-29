@@ -1,3 +1,4 @@
+@use 'sass:color';
 @use '../abstracts' as a;
 
 $link-color-map: (
@@ -130,13 +131,17 @@ $link-color-map: (
     margin-right: 2px;
     max-width: calc(172px - 2em);
   }
-}
 
-.richlink:hover {
-  background-color: oklch(59.984% 0.14125 241.578 / 0.2);
-}
-.richlink:visited {
-  background-color: oklch(64.348% 0.18159 304.08 / 0.2);
+  &:visited {
+    background-color: color.adjust(a.$color-link-visited, $lightness: -20%);
+    color: a.$color-link-visited;
+  }
+
+  &:hover,
+  &:focus {
+    background-color: color.adjust(a.$color-link-hover, $lightness: -20%);
+    color: a.$color-link-hover;
+  }
 }
 
 .pref-showtime .time {
