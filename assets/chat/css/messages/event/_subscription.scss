@@ -13,11 +13,11 @@
     }
 
     &.gift {
-      @include a.icon-background('../img/sub-gift.png');
+      @include a.icon-background('../img/sub-gift.svg');
     }
 
     &.mass-gift {
-      @include a.icon-background('../img/sub-mass-gift.png');
+      @include a.icon-background('../img/sub-mass-gift.svg');
     }
   }
 
