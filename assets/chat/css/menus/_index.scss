@@ -8,6 +8,7 @@
 @use 'user-list';
 @use 'whispers-list';
 @use 'event-action-menu';
+@use 'yt-tooltip';
 
 .chat-menu {
   display: none;

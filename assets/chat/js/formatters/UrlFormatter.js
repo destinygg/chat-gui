@@ -7,6 +7,7 @@ const MAX_URL_LENGTH = 90;
 export default class UrlFormatter {
   constructor() {
     this.hashLinkConverter = new HashLinkConverter();
+    this.ytId = null;
   }
 
   format(chat, str) {
@@ -30,6 +31,7 @@ export default class UrlFormatter {
       rel: 'nofollow',
       target: '_blank',
       format: (content) => {
+        this.ytId = null;
         const normalizedUrl = this.normalizeUrl(content);
 
         if (
@@ -58,9 +60,21 @@ export default class UrlFormatter {
         const embedTarget = chat.isBigscreenEmbed() ? '_top' : '_blank';
         const embedUrl = `${chat.config.dggOrigin}${chat.bigscreenPath}${embedHashLink}`;
 
-        return embedHashLink
-          ? `<${tagName}${attrs}>${content}</${tagName}><a target="${embedTarget}" class="embed-button" href="${embedUrl}"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-tv-minimal"><path d="M7 21h10"/><rect width="20" height="14" x="2" y="3" rx="2"/></svg></a>`
-          : `<${tagName}${attrs}>${content}</${tagName}>`;
+        let html = `<${tagName}${attrs}>${content}</${tagName}>`;
+
+        if (embedHashLink) {
+          html += `<a target="${embedTarget}" class="embed-button" href="${embedUrl}"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-tv-minimal"><path d="M7 21h10"/><rect width="20" height="14" x="2" y="3" rx="2"/></svg></a>`;
+        }
+
+        if (this.ytId !== null) {
+          const tooltip = document
+            .querySelector('#yt-tooltip-template')
+            ?.content.cloneNode(true).firstElementChild.outerHTML;
+
+          html = `<div class='yt-tooltip-parent' id='ytt-${this.ytId}'>${tooltip}${html}</div>`;
+        }
+
+        return html;
       },
     });
   }
@@ -77,6 +91,10 @@ export default class UrlFormatter {
     }
 
     if (/^(?:(?:https|http):\/\/)?(?:www\.)?youtu(?:be\.com|\.be)/i.test(url)) {
+      const id = url.match(/([A-Za-z0-9_-]{11})/);
+      if (id) {
+        this.ytId = id[0];
+      }
       // Same as with xeets, remove the nasty share tracking query param
       // from YouTube links.
       try {

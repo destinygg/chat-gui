@@ -1,0 +1,154 @@
+@use '../abstracts/' as a;
+
+.yt-tooltip-parent {
+  display: inline;
+  position: relative;
+}
+
+.yt-tooltip-parent:hover > .yt-tooltip[data-fetched='true'] {
+  display: inline-flex;
+}
+
+.yt-tooltip {
+  display: none;
+  padding: 0.1em;
+  border-radius: 1em;
+  position: absolute;
+  width: 14em;
+  z-index: 50;
+  background: a.$color-surface-dark3;
+  max-width: 14em;
+  max-height: 16em;
+  border: 2px solid #ff0000;
+}
+
+.yt-tooltip.right {
+  top: 50%;
+  transform: translateY(-50%);
+  left: calc(100% + 0.7em);
+
+  .yt-tooltip-connector {
+    top: 50%;
+    transform: translateY(-50%);
+    left: -0.8em;
+  }
+
+  .yt-tooltip-connector:after {
+    content: '◀';
+  }
+}
+
+.yt-tooltip.left {
+  top: 50%;
+  transform: translateY(-50%);
+  right: calc(100% + 0.7em);
+
+  .yt-tooltip-connector {
+    top: 50%;
+    transform: translateY(-50%);
+    right: -0.8em;
+  }
+
+  .yt-tooltip-connector:after {
+    content: '▶';
+  }
+}
+
+.yt-tooltip.top {
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: calc(100% + 0.55em);
+
+  .yt-tooltip-connector {
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: -1.2em;
+  }
+
+  .yt-tooltip-connector:after {
+    content: '▼';
+  }
+}
+
+.yt-tooltip.bottom {
+  left: 50%;
+  transform: translateX(-50%);
+  top: calc(100% + 0.55em);
+
+  .yt-tooltip-connector {
+    left: 50%;
+    transform: translateX(-50%);
+    top: -1.2em;
+  }
+
+  .yt-tooltip-connector:after {
+    content: '▲';
+  }
+}
+
+.yt-tooltip.default {
+  display: none;
+}
+
+.yt-tooltip-data {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 100%;
+  overflow: hidden;
+  margin: 0;
+}
+
+.yt-tooltip-metadata {
+  width: 100%;
+  overflow: hidden;
+  padding: 0.2em;
+}
+
+.yt-tooltip-thumbnail {
+  width: 100%;
+  aspect-ratio: 16/9;
+  margin-inline: auto;
+  border-top-left-radius: 1em;
+  border-top-right-radius: 1em;
+}
+
+.yt-tooltip-title {
+  font-weight: 600;
+  overflow: hidden;
+  max-width: 100%;
+  font-style: normal;
+  display: block;
+  white-space: wrap;
+  word-wrap: break-word;
+  text-overflow: ellipsis;
+  line-height: 2ch;
+  max-height: 4em;
+}
+
+.yt-tooltip-footer {
+  display: flex;
+  align-items: center;
+  column-gap: 0.25em;
+}
+
+.yt-tooltip-icon {
+  width: 16px;
+  height: 16px;
+  display: inline-block;
+}
+
+.yt-tooltip-channel {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+  display: inline-block;
+}
+
+.yt-tooltip-connector {
+  display: block;
+  position: absolute;
+  z-index: 55;
+  color: #ff0000;
+}
