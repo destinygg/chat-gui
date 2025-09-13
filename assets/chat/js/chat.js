@@ -47,6 +47,7 @@ import EmoteService from './emotes';
 import UserFeatures from './features';
 import UserRoles from './roles';
 import UserMessageService from './services/UserMessageService';
+import YouTubeTooltipService from './services/YouTubeTooltipService';
 import makeSafeForRegex, {
   regexslashcmd,
   regextime,
@@ -238,7 +239,7 @@ class Chat {
     this.control.on('BITLY', () => this.cmdDIE());
   }
 
-  get shouldFocus() {
+  get isDesktop() {
     // return true when not in a mobile context
     return !/\bMobi/.test(window.navigator.userAgent);
   }
@@ -499,7 +500,7 @@ class Chat {
     this.windowselect.on('click', '.tab-close', (e) => {
       ChatMenu.closeMenus(this);
       this.removeWindow($(e.currentTarget).parent().data('name').toLowerCase());
-      if (this.shouldFocus) {
+      if (this.isDesktop) {
         this.input.focus();
       }
       return false;
@@ -508,7 +509,7 @@ class Chat {
       ChatMenu.closeMenus(this);
       this.windowToFront($(e.currentTarget).data('name').toLowerCase());
       this.menus.get('whisper-users').redraw();
-      if (this.shouldFocus) {
+      if (this.isDesktop) {
         this.input.focus();
       }
       return false;
@@ -552,6 +553,83 @@ class Chat {
       const msg = $(e.target).closest('.msg-chat');
       this.openConversation(msg.data('username').toString().toLowerCase());
       return false;
+    });
+
+    // YouTube Tooltip (desktop only for now)
+    this.output.on('mouseover', '.yt-tooltip-parent', (e) => {
+      if (!this.isDesktop) {
+        return;
+      }
+
+      const tooltipParent = e.target.parentElement;
+      const id = tooltipParent.id.substring(4);
+      YouTubeTooltipService.populateTooltips(id);
+
+      const rect = tooltipParent.getBoundingClientRect();
+      const tooltip = tooltipParent.querySelector('div.yt-tooltip');
+      if (!tooltip) {
+        return;
+      }
+
+      const desiredHorizontalSpace = 200;
+      const desiredVerticalSpace = 350;
+
+      const spaceAbove = rect.top;
+      const spaceBelow = window.innerHeight - rect.bottom;
+      const spaceLeft = rect.left;
+      const spaceRight = window.innerWidth - rect.right;
+
+      // Reset classes
+      tooltip.className = 'yt-tooltip';
+
+      // Placement preference: right > left > top > bottom
+      if (spaceRight >= desiredHorizontalSpace) {
+        if (spaceAbove < desiredVerticalSpace / 2) {
+          tooltip.classList.add('bottom');
+          return;
+        }
+        if (spaceBelow < desiredVerticalSpace / 2) {
+          tooltip.classList.add('top');
+          return;
+        }
+        tooltip.classList.add('right');
+        return;
+      }
+
+      if (spaceLeft >= desiredHorizontalSpace) {
+        if (spaceAbove < desiredVerticalSpace / 2) {
+          tooltip.classList.add('bottom');
+          return;
+        }
+        if (spaceBelow < desiredVerticalSpace / 2) {
+          tooltip.classList.add('top');
+          return;
+        }
+        tooltip.classList.add('left');
+        return;
+      }
+
+      if (spaceAbove >= desiredVerticalSpace) {
+        tooltip.classList.add('top');
+        return;
+      }
+
+      if (spaceBelow >= desiredVerticalSpace) {
+        tooltip.classList.add('bottom');
+        return;
+      }
+
+      // Fallback: choose the side with the most available space
+      const maxSpace = Math.max(spaceRight, spaceLeft, spaceBelow, spaceAbove);
+      if (maxSpace === spaceRight) {
+        tooltip.classList.add('right');
+      } else if (maxSpace === spaceLeft) {
+        tooltip.classList.add('left');
+      } else if (maxSpace === spaceBelow) {
+        tooltip.classList.add('bottom');
+      } else {
+        tooltip.classList.add('top');
+      }
     });
 
     this.loadingscrn.fadeOut(250, () => this.loadingscrn.remove());
@@ -1025,7 +1103,7 @@ class Chat {
   }
 
   focusIfNothingSelected() {
-    if (!this.shouldFocus) {
+    if (!this.isDesktop) {
       return;
     }
 
@@ -2547,7 +2625,7 @@ class Chat {
       }
       this.windowToFront(normalized);
       this.menus.get('whisper-users').redraw();
-      if (this.shouldFocus) {
+      if (this.isDesktop) {
         this.input.focus();
       }
     }
