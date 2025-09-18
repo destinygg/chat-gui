@@ -4,7 +4,7 @@ import { debounce } from 'throttle-debounce';
 import moment from 'moment';
 import tippy, { roundArrow } from 'tippy.js';
 import * as linkify from 'linkifyjs';
-import yargsParser from 'yargs-parser';
+import yargsParser from 'yargs-parser/browser';
 import {
   KEYCODES,
   DATE_FORMATS,
