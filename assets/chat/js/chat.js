@@ -2431,7 +2431,7 @@ class Chat {
 
     if (!url) {
       MessageBuilder.error(
-        'No argument provided - /host [--displayName <displayName>] [--title <title>] <url>',
+        'No argument provided - /host [--display-name <display-name>] [--title <title>] <url>',
       ).into(this);
       return;
     }
@@ -2446,7 +2446,7 @@ class Chat {
       new URL(url); // eslint-disable-line no-new
     } catch (e) {
       MessageBuilder.error(
-        'Invalid url - /host [--displayName <displayName>] [--title <title>] <url>',
+        'Invalid url - /host [--display-name <display-name>] [--title <title>] <url>',
       ).into(this);
       return;
     }
