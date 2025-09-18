@@ -2414,9 +2414,9 @@ class Chat {
       });
   }
 
-  cmdHOST(parts) {
-    let url = parts[0];
-    const displayName = parts.slice(1).join(' ') || undefined;
+  cmdHOST(_, args) {
+    let url = _[0];
+    const { displayName, title } = args;
 
     if (
       !this.user.hasAnyRoles(
@@ -2431,7 +2431,7 @@ class Chat {
 
     if (!url) {
       MessageBuilder.error(
-        'No argument provided - /host <url> <displayName optional>',
+        'No argument provided - /host [--displayName <displayName>] [--title <title>] <url>',
       ).into(this);
       return;
     }
@@ -2446,13 +2446,13 @@ class Chat {
       new URL(url); // eslint-disable-line no-new
     } catch (e) {
       MessageBuilder.error(
-        'Invalid url - /host <url> <displayName optional>',
+        'Invalid url - /host [--displayName <displayName>] [--title <title>] <url>',
       ).into(this);
       return;
     }
 
     fetch(`${this.config.api.base}/api/stream/host`, {
-      body: JSON.stringify({ url, displayName }),
+      body: JSON.stringify({ url, displayName, title }),
       credentials: 'include',
       method: 'POST',
       headers: { 'X-CSRF-Guard': 'YEE' },
