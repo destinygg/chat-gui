@@ -220,7 +220,7 @@ class Chat {
     this.control.on('MOTD', (data) => this.cmdPIN(data));
     this.control.on('UNPIN', () => this.cmdUNPIN());
     this.control.on('UNMOTD', () => this.cmdUNPIN());
-    this.control.on('HOST', (data) => this.cmdHOST(data));
+    this.control.on('HOST', (data, args) => this.cmdHOST(data, args));
     this.control.on('UNHOST', () => this.cmdUNHOST());
     this.control.on('ADDPHRASE', (data) => this.cmdADDPHRASE(data));
     this.control.on('ADDBAN', (data) => this.cmdADDPHRASE(data));
