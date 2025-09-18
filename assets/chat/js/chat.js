@@ -4,6 +4,7 @@ import { debounce } from 'throttle-debounce';
 import moment from 'moment';
 import tippy, { roundArrow } from 'tippy.js';
 import * as linkify from 'linkifyjs';
+import yargsParser from 'yargs-parser';
 import {
   KEYCODES,
   DATE_FORMATS,
@@ -1580,10 +1581,10 @@ class Chat {
             `No commands in private windows. Try /exit`,
           ).into(this, win);
         } else if (this.control.listeners.has(normalized)) {
-          const parts = (raw.substring(command.length + 1) || '').match(
-            /([^ ]+)/g,
-          );
-          this.control.emit(normalized, parts || []);
+          const argsString = raw.substring(command.length + 1) || '';
+          const parts = argsString.match(/([^ ]+)/g);
+          const parsedArgs = yargsParser(argsString);
+          this.control.emit(normalized, parts || [], parsedArgs);
         } else {
           MessageBuilder.error(`Unknown command. Try /help`).into(this, win);
         }
