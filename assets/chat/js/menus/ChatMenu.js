@@ -26,7 +26,7 @@ export default class ChatMenu extends EventEmitter {
     if (!this.visible) {
       this.visible = true;
       this.shown = true;
-      this.btn.addClass('active');
+      this.btn.find('.btn-icon').addClass('active');
       this.ui.addClass('active');
       this.redraw();
       this.emit('show');
@@ -36,7 +36,7 @@ export default class ChatMenu extends EventEmitter {
   hide() {
     if (this.visible) {
       this.visible = false;
-      this.btn.removeClass('active');
+      this.btn.find('.btn-icon').removeClass('active');
       this.ui.removeClass('active');
       this.emit('hide');
     }
