@@ -1,3 +1,5 @@
+import { regexslashcmd } from './regex';
+
 const REGULAR_HELP_HEADER = 'Available commands: \n';
 const ADMIN_HELP_HEADER = 'Available admin commands: \n';
 
@@ -260,6 +262,14 @@ export default class ChatCommands {
         } \n`
       : ` /${command.name} - ${command.description} \n`;
   }
+}
+
+export function getSlashCommand(messageText) {
+  return messageText?.match(regexslashcmd)?.[1].toUpperCase();
+}
+
+export function removeSlashCommand(messageText) {
+  return messageText?.replace(regexslashcmd, '').trim();
 }
 
 export { CHAT_COMMANDS };
