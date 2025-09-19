@@ -362,13 +362,8 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
       await this.chat.userMessageService.getUserMessages(nick);
 
     userMessages.forEach((userMessage) => {
-      // Create a new `ChatUser` to remove username styles for a cleaner look.
-      const msg = MessageBuilder.message(
-        userMessage.messageText,
-        new ChatUser(userMessage.username),
-        userMessage.timestamp,
-      );
-      displayedMessages.push(msg.html(this.chat));
+      const msg = this.buildMessageMarkup(userMessage);
+      displayedMessages.push(msg);
     });
 
     return displayedMessages;
@@ -384,5 +379,17 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
         }
         return `${str}<div class="flair" title="${e.label}">${e.label}</div> `;
       }, '');
+  }
+
+  buildMessageMarkup(message) {
+    // Create a new `ChatUser` to remove username styles
+    const user = new ChatUser(message.username);
+    const messageObject = MessageBuilder.message(
+      message.messageText,
+      user,
+      message.timestamp,
+    );
+
+    return messageObject.html(this.chat);
   }
 }
