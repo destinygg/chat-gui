@@ -20,6 +20,18 @@ class EventEmitter {
     }
     return false;
   }
+
+  off(name, fn) {
+    const listeners = this.listeners.get(name);
+    if (listeners && listeners.length) {
+      const index = listeners.indexOf(fn);
+      if (index > -1) {
+        listeners.splice(index, 1);
+        return true;
+      }
+    }
+    return false;
+  }
 }
 
 export default EventEmitter;
