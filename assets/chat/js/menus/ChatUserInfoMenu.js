@@ -252,7 +252,10 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     const watchingEmbed = this.buildWatchingEmbed(this.clickedNick);
     if (watchingEmbed !== '') {
       this.watchingSubheader.style.display = '';
-      this.watchingSubheader.replaceChildren('Watching: ', watchingEmbed);
+      this.watchingSubheader.replaceChildren(
+        'Watching: ',
+        $(watchingEmbed).get()[0],
+      );
     } else {
       this.watchingSubheader.style.display = 'none';
       this.watchingSubheader.replaceChildren();
@@ -324,7 +327,10 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     if (!user?.watching) {
       return '';
     }
-    return `${user.watching.id} on ${user.watching.platform}`;
+    const target = this.chat.isBigscreenEmbed() ? '_top' : '_blank';
+    const baseUrl = this.chat.config.dggOrigin + this.chat.bigscreenPath;
+    const url = `${baseUrl}#${user.watching.platform}/${user.watching.id}`;
+    return `<a href="${url}" target="${target}">${user.watching.id} on ${user.watching.platform}</a>`;
   }
 
   buildCreatedDate(nick) {
