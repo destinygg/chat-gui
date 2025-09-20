@@ -400,7 +400,10 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
 
       this.messagesContainer.append(messageElement);
       this.updateNoMessagesNotice();
-      this.scrollplugin.scrollBottom();
+
+      if (this.scrollplugin.pinned) {
+        this.scrollplugin.scrollBottom();
+      }
     }
   }
 
