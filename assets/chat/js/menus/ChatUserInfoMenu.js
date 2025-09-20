@@ -24,8 +24,11 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     this.flairList = this.ui.find('.user-info .flairs');
     this.flairSubheader = this.ui.find('.user-info h5.flairs-subheader')[0];
 
-    this.messagesList = this.ui.find('.user-info .stalk');
-    this.messagesContainer = this.ui.find('.content');
+    this.messagesContainer = this.ui.find('.content .messages');
+    this.messageHistoryStatus = this.ui.find(
+      '.content .message-history-status',
+    );
+    this.noMessageNotice = this.ui.find('.content .no-messages-notice');
 
     this.muteUserBtn = this.ui.find('#mute-user-btn');
     this.banUserBtn = this.ui.find('#ban-user-btn');
@@ -289,28 +292,26 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     this.header.text('');
     this.header.attr('class', 'username');
     this.messagesContainer.empty();
+    this.updateNoMessagesNotice(true);
     this.flairList.empty();
 
     this.header.text(displayName);
     this.header.addClass(usernameFeatures);
     this.flairList.append(featuresList);
 
-    this.messagesContainer.text('Loading messages...');
-
-    this.createMessages(displayName)
-      .then((messageList) => {
-        if (messageList.length === 0) {
-          this.messagesContainer.text('No messages');
-        } else {
-          this.messagesContainer.empty();
-          messageList.forEach((element) => {
-            this.messagesContainer.prepend(element);
-          });
-        }
+    this.setMessageHistoryStatus('Loading history...');
+    this.loadMessageHistory(displayName)
+      .then((messages) => {
+        messages.forEach((m) => {
+          const messageElement = this.buildMessageMarkup(m);
+          this.messagesContainer.prepend(messageElement);
+        });
+        this.updateNoMessagesNotice();
+        this.setMessageHistoryStatus(null);
       })
       .catch((error) => {
-        this.messagesContainer.text(
-          `Failed to load messages: ${error.message}`,
+        this.setMessageHistoryStatus(
+          `Failed to load history: ${error.message}`,
         );
       })
       .finally(() => {
@@ -355,18 +356,8 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     return features !== '' ? `<span class="features">${features}</span>` : '';
   }
 
-  async createMessages(nick) {
-    const displayedMessages = [];
-
-    const userMessages =
-      await this.chat.userMessageService.getUserMessages(nick);
-
-    userMessages.forEach((userMessage) => {
-      const msg = this.buildMessageMarkup(userMessage);
-      displayedMessages.push(msg);
-    });
-
-    return displayedMessages;
+  async loadMessageHistory(username) {
+    return this.chat.userMessageService.getUserMessages(username);
   }
 
   buildFeatureHTML(featureArray) {
@@ -391,5 +382,43 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     );
 
     return messageObject.html(this.chat);
+  }
+
+  show() {
+    super.show();
+    this.newMessageHandler = this.handleNewMessage.bind(this);
+    this.chat.source.on('MSG', this.newMessageHandler);
+  }
+
+  hide() {
+    super.hide();
+    this.chat.source.off('MSG', this.newMessageHandler);
+  }
+
+  handleNewMessage(message) {
+    if (message.nick?.toLowerCase() === this.clickedNick) {
+      const messageElement = this.buildMessageMarkup({
+        username: message.nick,
+        messageText: message.data,
+        timestamp: message.timestamp,
+      });
+
+      this.messagesContainer.append(messageElement);
+      this.updateNoMessagesNotice();
+      this.scrollplugin.scrollBottom();
+    }
+  }
+
+  setMessageHistoryStatus(message) {
+    this.messageHistoryStatus.text(message);
+    this.messageHistoryStatus.toggleClass('hidden', !message);
+  }
+
+  updateNoMessagesNotice(forceHide = false) {
+    this.noMessageNotice.toggleClass('hidden', this.hasMessages() || forceHide);
+  }
+
+  hasMessages() {
+    return this.messagesContainer.children().length > 0;
   }
 }
