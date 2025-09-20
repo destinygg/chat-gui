@@ -305,7 +305,11 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     this.loadMessageHistory(displayName)
       .then((messages) => {
         messages.forEach((m) => {
-          const messageElement = this.buildMessageMarkup(m);
+          const messageElement = this.buildMessageMarkup({
+            username: displayName,
+            messageText: m.messageText,
+            timestamp: m.timestamp,
+          });
           this.messagesContainer.prepend(messageElement);
         });
         this.updateNoMessagesNotice();
