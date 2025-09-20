@@ -62,6 +62,8 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     this.chat.output.on('mouseup', '.msg-chat .user', (e) => {
       e.stopPropagation();
     });
+
+    this.chat.source.on('MSG', this.handleNewMessage.bind(this));
   }
 
   showUser(e, message) {
@@ -384,18 +386,11 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     return messageObject.html(this.chat);
   }
 
-  show() {
-    super.show();
-    this.newMessageHandler = this.handleNewMessage.bind(this);
-    this.chat.source.on('MSG', this.newMessageHandler);
-  }
-
-  hide() {
-    super.hide();
-    this.chat.source.off('MSG', this.newMessageHandler);
-  }
-
   handleNewMessage(message) {
+    if (!this.visible) {
+      return;
+    }
+
     if (message.nick?.toLowerCase() === this.clickedNick) {
       const messageElement = this.buildMessageMarkup({
         username: message.nick,
