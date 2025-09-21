@@ -402,10 +402,12 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
         timestamp: message.timestamp,
       });
 
+      const wasPinned = this.scrollplugin.pinned;
+
       this.messagesContainer.append(messageElement);
       this.updateNoMessagesNotice();
 
-      if (this.scrollplugin.pinned) {
+      if (wasPinned) {
         this.scrollplugin.scrollBottom();
       }
     }
