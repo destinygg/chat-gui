@@ -49,16 +49,14 @@ import UserFeatures from './features';
 import UserRoles from './roles';
 import UserMessageService from './services/UserMessageService';
 import makeSafeForRegex, {
-  regexslashcmd,
   regextime,
   nickmessageregex,
   nickregex,
   nsfwregex,
   nsflregex,
 } from './regex';
-
 import { HashLinkConverter, MISSING_ARG_ERROR } from './hashlinkconverter';
-import ChatCommands from './commands';
+import ChatCommands, { getSlashCommand, removeSlashCommand } from './commands';
 import MessageTemplateHTML from '../../views/templates.html';
 import EventBarEvent from './event-bar/EventBarEvent';
 
@@ -1186,7 +1184,7 @@ class Chat {
   }
 
   onMSG(data) {
-    const textonly = this.removeSlashCmdFromText(data.data);
+    const textonly = removeSlashCommand(data.data);
     const usr = this.users.get(data.nick.toLowerCase());
     const win = this.mainwindow;
 
@@ -1197,7 +1195,7 @@ class Chat {
 
     const isCombo =
       this.emoteService.canUserUseEmote(usr, textonly) &&
-      this.removeSlashCmdFromText(win.lastmessage?.message) === textonly;
+      removeSlashCommand(win.lastmessage?.message) === textonly;
 
     if (isCombo && win.lastmessage?.type === MessageTypes.EMOTE) {
       win.lastmessage.add(message);
@@ -1563,30 +1561,26 @@ class Chat {
   cmdSEND(raw) {
     if (raw !== '') {
       const win = this.getActiveWindow();
-      const matches = raw.match(regexslashcmd);
-      const iscommand = matches && matches.length > 1;
-      const ismecmd = iscommand && matches[1].toLowerCase() === 'me';
-      const textonly = this.removeSlashCmdFromText(raw);
+      const slashCommand = getSlashCommand(raw);
+      const isMeCommand = slashCommand === 'ME';
+      const textOnly = removeSlashCommand(raw);
 
       // COMMAND
-      if (iscommand && !ismecmd) {
-        const command = matches[1].toUpperCase();
-        const normalized = command.toUpperCase();
-
+      if (slashCommand && !isMeCommand) {
         // Clear the input and add to history, before we do the emit
         // This makes it possible for commands to change the input.value, else it would be cleared after the command is run.
         this.inputhistory.add(raw);
         this.input.val('');
 
-        if (win !== this.mainwindow && normalized !== 'EXIT') {
+        if (win !== this.mainwindow && slashCommand !== 'EXIT') {
           MessageBuilder.error(
             `No commands in private windows. Try /exit`,
           ).into(this, win);
-        } else if (this.control.listeners.has(normalized)) {
-          const argsString = raw.substring(command.length + 1) || '';
+        } else if (this.control.listeners.has(slashCommand)) {
+          const argsString = raw.substring(slashCommand.length + 1) || '';
           const parts = argsString.match(/([^ ]+)/g);
           const parsedArgs = yargsParser(argsString);
-          this.control.emit(normalized, parts || [], parsedArgs);
+          this.control.emit(slashCommand, parts || [], parsedArgs);
         } else {
           MessageBuilder.error(`Unknown command. Try /help`).into(this, win);
         }
@@ -1605,7 +1599,7 @@ class Chat {
       // VOTE
       else if (
         this.chatpoll.isPollStarted() &&
-        this.chatpoll.isMsgVoteCastFmt(textonly)
+        this.chatpoll.isMsgVoteCastFmt(textOnly)
       ) {
         if (this.chatpoll.poll.canVote) {
           MessageBuilder.info(`Your vote has been cast!`).into(this);
@@ -1619,7 +1613,7 @@ class Chat {
       // EMOTE SPAM
       else if (
         this.source.isConnected() &&
-        this.emoteService.getEmote(textonly)
+        this.emoteService.getEmote(textOnly)
       ) {
         // Its easier to deal with combos with the this.unresolved flow
         this.source.send('MSG', { data: raw });
@@ -2662,10 +2656,6 @@ class Chat {
 
   get bigscreenPath() {
     return '/bigscreen';
-  }
-
-  removeSlashCmdFromText(msg) {
-    return msg?.replace(regexslashcmd, '').trim();
   }
 
   extractNicks(text) {
