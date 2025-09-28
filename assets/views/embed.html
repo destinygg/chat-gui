@@ -62,6 +62,7 @@
           data-tippy-content="Whispers"
         >
           <i class="btn-icon"></i>
+          <span id="chat-whisper-unread-indicator"></span>
         </a>
       </div>
       <div class="chat-tools-group">
@@ -409,8 +410,18 @@
       </div>
       <div class="scrollable">
         <div class="content">
-          <ul></ul>
+          <div class="section whispers-unread">
+            <p class="section__title">Unread</p>
+            <div class="whispers"></div>
+          </div>
+          <div class="section whispers-read">
+            <p class="section__title">Read</p>
+            <div class="whispers"></div>
+          </div>
         </div>
+      </div>
+      <div id="chat-whisper-users-search">
+        <input class="form-control" placeholder="Username search ..." />
       </div>
     </div>
   </div>
