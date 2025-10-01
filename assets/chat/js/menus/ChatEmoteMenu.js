@@ -53,7 +53,12 @@ export default class ChatEmoteMenu extends ChatMenu {
       const locked =
         tier > this.chat.user.subTier && !this.chat.user.isPrivileged();
       this.emoteMenuContent.append(
-        this.buildEmoteMenuSection(title, emotes, favoriteEmotes, locked),
+        this.buildEmoteMenuSection(
+          title,
+          emotes,
+          favoriteEmotes.filter((fav) => emotes.includes(fav)),
+          locked,
+        ),
       );
     });
 
