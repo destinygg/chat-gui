@@ -600,6 +600,7 @@ class Chat {
       .then((res) => res.json())
       .then((json) => {
         this.setEmotes(json);
+        this.refreshEmoteAutocomplete();
       })
       .catch(() => {});
   }
@@ -648,11 +649,14 @@ class Chat {
 
   setEmotes(emotes) {
     this.emoteService.setEmotes(emotes);
+    return this;
+  }
+
+  refreshEmoteAutocomplete() {
     this.emoteService
       .emotesForUser(this.user)
       .map((e) => e.prefix)
       .forEach((e) => this.autocomplete.add(e, true));
-    return this;
   }
 
   setFlairs(flairs) {
@@ -1125,6 +1129,7 @@ class Chat {
       // If is a logged in user.
       this.loadSettings();
       this.loadWhispers();
+      this.refreshEmoteAutocomplete();
     }
   }
 
