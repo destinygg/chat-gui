@@ -6,6 +6,8 @@ const nickregex = /^\w{3,20}$/;
 const nsfwregex = /\bNSFW\b/i;
 const nsflregex = /\bNSFL\b/i;
 const spoilersregex = /\bSPOILERS\b/i;
+const youtubeidregex =
+  /(?:youtube\.com\/(?:watch\?v=|shorts\/)|youtu\.be\/|#youtube\/)([A-Za-z0-9_-]{11})/;
 
 export {
   regexslashcmd,
@@ -15,6 +17,7 @@ export {
   nsfwregex,
   nsflregex,
   spoilersregex,
+  youtubeidregex,
 };
 
 export default function makeSafeForRegex(str) {

@@ -30,7 +30,7 @@ export default class ChatEmoteMenu extends ChatMenu {
 
   show() {
     super.show();
-    if (this.chat.shouldFocus) {
+    if (this.chat.isDesktop) {
       this.searchinput.focus();
     }
     this.buildEmoteMenu();
@@ -109,7 +109,7 @@ export default class ChatEmoteMenu extends ChatMenu {
   selectEmote(emote) {
     const value = this.chat.input.val().toString().trim();
     this.chat.input.val(`${value + (value === '' ? '' : ' ') + emote} `);
-    if (this.chat.shouldFocus) {
+    if (this.chat.isDesktop) {
       this.chat.input.focus();
     }
   }
