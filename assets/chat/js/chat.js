@@ -47,7 +47,7 @@ import { isMuteActive, MutedTimer } from './mutedtimer';
 import EmoteService from './emotes';
 import UserFeatures from './features';
 import UserRoles from './roles';
-import UserMessageService from './services/UserMessageService';
+import { UserMessageService, YouTubeOEmbedService } from './services';
 import makeSafeForRegex, {
   regextime,
   nickmessageregex,
@@ -92,6 +92,7 @@ class Chat {
     this.flairsMap = new Map();
     this.emoteService = new EmoteService();
     this.userMessageService = new UserMessageService();
+    this.youtubeOEmbedService = new YouTubeOEmbedService();
 
     this.user = new ChatUser();
     this.users = new Map();
@@ -441,6 +442,69 @@ class Chat {
     this.ui.on('click', '#chat-tools-wrap', () => {
       ChatMenu.closeMenus(this);
       this.focusIfNothingSelected();
+    });
+
+    // Youtube oEmbed tooltip
+    this.ui.on('mouseover', 'a.externallink', async (e) => {
+      const { target } = e;
+
+      // Is on mobile
+      if (!this.isDesktop) {
+        return;
+      }
+
+      // Already processed
+      if (target.dataset.tipped) {
+        return;
+      }
+
+      const regex =
+        /(?:youtube\.com\/watch\?v=|youtu\.be\/|#youtube\/)([A-Za-z0-9_-]{11})/;
+      const match = target.href.match(regex);
+
+      // Not a youtube id
+      if (!match) {
+        return;
+      }
+
+      try {
+        const result = await this.youtubeOEmbedService.getOEmbed(match[1]);
+
+        const container = document.createElement('div');
+        container.style.display = 'flex';
+        container.style.flexDirection = 'column';
+        container.style.marginTop = '4px';
+        container.style.gap = '0.25em';
+
+        const img = document.createElement('img');
+        img.src = result.thumbnail_url;
+
+        const title = document.createElement('strong');
+        title.textContent = result.title;
+
+        const author = document.createElement('span');
+        author.textContent = result.author_name;
+
+        container.append(img, title, author);
+
+        const youtubeTippy = tippy(target, {
+          content: container,
+          allowHTML: true,
+          arrow: roundArrow,
+          duration: 0,
+          theme: 'dgg',
+          maxWidth: 250,
+        });
+
+        target.dataset.tipped = true;
+
+        // If still hovering show immediately.
+        if (target.matches(':hover')) {
+          youtubeTippy.show();
+        }
+      } catch (error) {
+        /* Do nothing */
+      }
     });
 
     // ESC
