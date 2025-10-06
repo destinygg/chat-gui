@@ -54,6 +54,7 @@ import makeSafeForRegex, {
   nickregex,
   nsfwregex,
   nsflregex,
+  youtubeidregex,
 } from './regex';
 import { HashLinkConverter, MISSING_ARG_ERROR } from './hashlinkconverter';
 import ChatCommands, { getSlashCommand, removeSlashCommand } from './commands';
@@ -458,9 +459,7 @@ class Chat {
         return;
       }
 
-      const regex =
-        /(?:youtube\.com\/watch\?v=|youtu\.be\/|#youtube\/)([A-Za-z0-9_-]{11})/;
-      const match = target.href.match(regex);
+      const match = target.href.match(youtubeidregex);
 
       // Not a youtube id
       if (!match) {
