@@ -14,7 +14,7 @@ export default class ChatMenu extends EventEmitter {
     });
     this.ui.on('click', '.close,.chat-menu-close', this.hide.bind(this));
     this.btn.on('click', (e) => {
-      if (this.visible && this.chat.shouldFocus) {
+      if (this.visible && this.chat.isDesktop) {
         chat.input.focus();
       }
       this.toggle(e);

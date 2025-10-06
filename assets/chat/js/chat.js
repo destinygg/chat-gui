@@ -237,7 +237,7 @@ class Chat {
     this.control.on('BITLY', () => this.cmdDIE());
   }
 
-  get shouldFocus() {
+  get isDesktop() {
     // return true when not in a mobile context
     return !/\bMobi/.test(window.navigator.userAgent);
   }
@@ -500,7 +500,7 @@ class Chat {
     this.windowselect.on('click', '.tab-close', (e) => {
       ChatMenu.closeMenus(this);
       this.removeWindow($(e.currentTarget).parent().data('name').toLowerCase());
-      if (this.shouldFocus) {
+      if (this.isDesktop) {
         this.input.focus();
       }
       return false;
@@ -509,7 +509,7 @@ class Chat {
       ChatMenu.closeMenus(this);
       this.windowToFront($(e.currentTarget).data('name').toLowerCase());
       this.menus.get('whisper-users').redraw();
-      if (this.shouldFocus) {
+      if (this.isDesktop) {
         this.input.focus();
       }
       return false;
@@ -1026,7 +1026,7 @@ class Chat {
   }
 
   focusIfNothingSelected() {
-    if (!this.shouldFocus) {
+    if (!this.isDesktop) {
       return;
     }
 
@@ -2544,7 +2544,7 @@ class Chat {
       }
       this.windowToFront(normalized);
       this.menus.get('whisper-users').redraw();
-      if (this.shouldFocus) {
+      if (this.isDesktop) {
         this.input.focus();
       }
     }
