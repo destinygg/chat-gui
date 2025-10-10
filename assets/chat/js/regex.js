@@ -6,6 +6,8 @@ const nickregex = /^\w{3,20}$/;
 const nsfwregex = /\bNSFW\b/i;
 const nsflregex = /\bNSFL\b/i;
 const spoilersregex = /\bSPOILERS\b/i;
+const embedregex =
+  /(^|\s)(#(kick|twitch|twitch-vod|twitch-clip|youtube|youtube-live|facebook|rumble|vimeo)\/([\w\d]{3,64}\/videos\/\d{10,20}|[\w-]{3,64}|\w{7}\/\?pub=\w{5})(?:\?t=(\d+)s?)?)\b/;
 
 export {
   regexslashcmd,
@@ -15,6 +17,7 @@ export {
   nsfwregex,
   nsflregex,
   spoilersregex,
+  embedregex,
 };
 
 export default function makeSafeForRegex(str) {

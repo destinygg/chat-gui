@@ -83,6 +83,10 @@ const errorstrings = new Map(
     nophrase: "Banned phrase doesn't exist.",
     invalidphrase:
       'Invalid phrase provided. Either the phrase was empty, or its regex was invalid.',
+    duplicatebannedembed: 'Banned embed already exists.',
+    nobannedembed: "Banned embed doesn't exist.",
+    managedbannedembed: 'Banned embed is managed automatically.',
+    invalidbannedembed: 'Invalid banned embed.',
     cantbanprotected: "Protected users can't die.",
   }),
 );
