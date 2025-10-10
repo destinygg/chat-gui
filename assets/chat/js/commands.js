@@ -29,6 +29,11 @@ const CHAT_COMMANDS = [
     admin: true,
   },
   {
+    name: 'banembed',
+    description: 'Add embed to banned embed list.',
+    admin: true,
+  },
+  {
     name: 'baninfo',
     description: 'Check your ban status.',
   },
@@ -177,6 +182,11 @@ const CHAT_COMMANDS = [
   {
     name: 'unban',
     description: 'Unban <nick>.',
+    admin: true,
+  },
+  {
+    name: 'unbanembed',
+    description: 'Remove embed from banned embed list.',
     admin: true,
   },
   {

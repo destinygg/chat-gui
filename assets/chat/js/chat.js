@@ -54,6 +54,7 @@ import makeSafeForRegex, {
   nickregex,
   nsfwregex,
   nsflregex,
+  embedregex,
 } from './regex';
 import { HashLinkConverter, MISSING_ARG_ERROR } from './hashlinkconverter';
 import ChatCommands, { getSlashCommand, removeSlashCommand } from './commands';
@@ -154,6 +155,8 @@ class Chat {
     this.source.on('UPDATEUSER', (data) => this.onUPDATEUSER(data));
     this.source.on('ADDPHRASE', (data) => this.onADDPHRASE(data));
     this.source.on('REMOVEPHRASE', (data) => this.onREMOVEPHRASE(data));
+    this.source.on('BANEMBED', (data) => this.onBANEMBED(data));
+    this.source.on('UNBANEMBED', (data) => this.onUNBANEMBED(data));
     this.source.on('DEATH', (data) => this.onDEATH(data));
     this.source.on('PAIDEVENTS', (data) => this.onPAIDEVENTS(data));
 
@@ -169,6 +172,8 @@ class Chat {
     this.control.on('IPBAN', (data) => this.cmdBAN(data, 'IPBAN'));
     this.control.on('UNMUTE', (data) => this.cmdUNBAN(data, 'UNMUTE'));
     this.control.on('UNBAN', (data) => this.cmdUNBAN(data, 'UNBAN'));
+    this.control.on('BANEMBED', (data) => this.cmdBANEMBED(data));
+    this.control.on('UNBANEMBED', (data) => this.cmdUNBANEMBED(data));
     this.control.on('SUBONLY', (data) => this.cmdSUBONLY(data, 'SUBONLY'));
     this.control.on('MAXLINES', (data) => this.cmdMAXLINES(data, 'MAXLINES'));
     this.control.on('UNHIGHLIGHT', (data) =>
@@ -1491,6 +1496,20 @@ class Chat {
     ).into(this);
   }
 
+  onBANEMBED(data) {
+    MessageBuilder.command(
+      `Added embed "${data.data}" to banned embeds.`,
+      data.timestamp,
+    ).into(this);
+  }
+
+  onUNBANEMBED(data) {
+    MessageBuilder.command(
+      `Removed embed "${data.data}" from banned embeds.`,
+      data.timestamp,
+    ).into(this);
+  }
+
   onPRIVMSGSENT() {
     if (this.mainwindow.visible) {
       MessageBuilder.info('Your message has been sent.').into(this);
@@ -1915,6 +1934,58 @@ class Chat {
     } else {
       this.source.send(command, { data: parts[0] });
     }
+  }
+
+  cmdBANEMBED(parts) {
+    if (parts.length === 0) {
+      MessageBuilder.info(
+        `Usage: /banembed [#]<platform>/<id> [<reason>].`,
+      ).into(this);
+      return;
+    }
+
+    const embed = parts[0].startsWith('#') ? parts[0] : `#${parts[0]}`;
+    const match = embed.match(embedregex);
+    if (!match || match.length !== 6) {
+      MessageBuilder.info('Invalid embed.').into(this);
+      return;
+    }
+
+    const platform = match[3];
+    const id = match[4];
+
+    let reason = '';
+    if (parts.length > 1) {
+      reason = parts.slice(1, parts.length).join(' ');
+    }
+
+    this.source.send('BANEMBED', {
+      platform,
+      id,
+      reason,
+    });
+  }
+
+  cmdUNBANEMBED(parts) {
+    if (parts.length === 0) {
+      MessageBuilder.info(`Usage: /unbanembed [#]<platform>/<id>.`).into(this);
+      return;
+    }
+
+    const embed = parts[0].startsWith('#') ? parts[0] : `#${parts[0]}`;
+    const match = embed.match(embedregex);
+    if (!match || match.length !== 6) {
+      MessageBuilder.info('Invalid embed.').into(this);
+      return;
+    }
+
+    const platform = match[3];
+    const id = match[4];
+
+    this.source.send('UNBANEMBED', {
+      platform,
+      id,
+    });
   }
 
   cmdSUBONLY(parts, command) {
