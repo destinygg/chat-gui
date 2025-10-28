@@ -147,6 +147,7 @@ class Chat {
     this.source.on('POLLSTART', (data) => this.onPOLLSTART(data));
     this.source.on('POLLSTOP', (data) => this.onPOLLSTOP(data));
     this.source.on('VOTECAST', (data) => this.onVOTECAST(data));
+    this.source.on('VOTECOUNTED', (data) => this.onVOTECOUNTED(data));
     this.source.on('SUBSCRIPTION', (data) => this.onSUBSCRIPTION(data));
     this.source.on('GIFTSUB', (data) => this.onGIFTSUB(data));
     this.source.on('MASSGIFT', (data) => this.onMASSGIFT(data));
@@ -1241,11 +1242,11 @@ class Chat {
   }
 
   onVOTECAST(data) {
-    const usr = this.users.get(data.nick.toLowerCase());
-    this.chatpoll.castVote(data, usr);
-    if (data.nick.toLowerCase() === this.user.username) {
-      this.chatpoll.markVote(data.vote);
-    }
+    this.chatpoll.castVote(data);
+  }
+
+  onVOTECOUNTED(data) {
+    this.chatpoll.markVote(data.vote);
   }
 
   onMUTE(data) {
