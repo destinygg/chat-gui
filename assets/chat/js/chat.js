@@ -309,7 +309,7 @@ class Chat {
     })();
 
     // Tooltips
-    tippy.setDefaultProps({ delay: [500, 0] });
+    tippy.setDefaultProps({ delay: 0 });
     tippy('[data-tippy-content]', {
       arrow: roundArrow,
       duration: 0,
