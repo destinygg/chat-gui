@@ -7,7 +7,7 @@ const nsfwregex = /\bNSFW\b/i;
 const nsflregex = /\bNSFL\b/i;
 const spoilersregex = /\bSPOILERS\b/i;
 const youtubeidregex =
-  /(?:youtube\.com\/(?:watch\?v=|shorts\/)|youtu\.be\/|#youtube\/)([A-Za-z0-9_-]{11})/;
+  /(?:youtube\.com\/(?:watch\?v=|shorts\/|live\/)|youtu\.be\/|#youtube\/)([A-Za-z0-9_-]{11})/;
 
 export {
   regexslashcmd,
