@@ -47,13 +47,14 @@ import { isMuteActive, MutedTimer } from './mutedtimer';
 import EmoteService from './emotes';
 import UserFeatures from './features';
 import UserRoles from './roles';
-import UserMessageService from './services/UserMessageService';
+import { UserMessageService, YouTubeOEmbedService } from './services';
 import makeSafeForRegex, {
   regextime,
   nickmessageregex,
   nickregex,
   nsfwregex,
   nsflregex,
+  youtubeidregex,
 } from './regex';
 import { HashLinkConverter, MISSING_ARG_ERROR } from './hashlinkconverter';
 import ChatCommands, { getSlashCommand, removeSlashCommand } from './commands';
@@ -92,6 +93,7 @@ class Chat {
     this.flairsMap = new Map();
     this.emoteService = new EmoteService();
     this.userMessageService = new UserMessageService();
+    this.youtubeOEmbedService = new YouTubeOEmbedService();
 
     this.user = new ChatUser();
     this.users = new Map();
@@ -238,7 +240,7 @@ class Chat {
     this.control.on('BITLY', () => this.cmdDIE());
   }
 
-  get shouldFocus() {
+  get isDesktop() {
     // return true when not in a mobile context
     return !/\bMobi/.test(window.navigator.userAgent);
   }
@@ -308,7 +310,7 @@ class Chat {
     })();
 
     // Tooltips
-    tippy.setDefaultProps({ delay: [500, 0] });
+    tippy.setDefaultProps({ delay: 0 });
     tippy('[data-tippy-content]', {
       arrow: roundArrow,
       duration: 0,
@@ -444,6 +446,67 @@ class Chat {
       this.focusIfNothingSelected();
     });
 
+    // Youtube oEmbed tooltip
+    this.ui.on('mouseover', 'a.externallink', async (e) => {
+      const { target } = e;
+
+      // Is on mobile
+      if (!this.isDesktop) {
+        return;
+      }
+
+      // Already processed
+      if (target.dataset.tipped) {
+        return;
+      }
+
+      const match = target.href.match(youtubeidregex);
+
+      // Not a youtube id
+      if (!match) {
+        return;
+      }
+
+      try {
+        const result = await this.youtubeOEmbedService.getOEmbed(match[1]);
+
+        const container = document.createElement('div');
+        container.style.display = 'flex';
+        container.style.flexDirection = 'column';
+        container.style.marginTop = '4px';
+        container.style.gap = '0.25em';
+
+        const img = document.createElement('img');
+        img.src = result.thumbnail_url;
+
+        const title = document.createElement('strong');
+        title.textContent = result.title;
+
+        const author = document.createElement('span');
+        author.textContent = result.author_name;
+
+        container.append(img, title, author);
+
+        const youtubeTippy = tippy(target, {
+          content: container,
+          allowHTML: true,
+          arrow: roundArrow,
+          duration: 0,
+          theme: 'dgg',
+          maxWidth: 250,
+        });
+
+        target.dataset.tipped = true;
+
+        // If still hovering show immediately.
+        if (target.matches(':hover')) {
+          youtubeTippy.show();
+        }
+      } catch (error) {
+        /* Do nothing */
+      }
+    });
+
     // ESC
     document.addEventListener('keydown', (e) => {
       if (isKeyCode(e, KEYCODES.ESC)) {
@@ -501,7 +564,7 @@ class Chat {
     this.windowselect.on('click', '.tab-close', (e) => {
       ChatMenu.closeMenus(this);
       this.removeWindow($(e.currentTarget).parent().data('name').toLowerCase());
-      if (this.shouldFocus) {
+      if (this.isDesktop) {
         this.input.focus();
       }
       return false;
@@ -510,7 +573,7 @@ class Chat {
       ChatMenu.closeMenus(this);
       this.windowToFront($(e.currentTarget).data('name').toLowerCase());
       this.menus.get('whisper-users').redraw();
-      if (this.shouldFocus) {
+      if (this.isDesktop) {
         this.input.focus();
       }
       return false;
@@ -1031,7 +1094,7 @@ class Chat {
   }
 
   focusIfNothingSelected() {
-    if (!this.shouldFocus) {
+    if (!this.isDesktop) {
       return;
     }
 
@@ -2550,7 +2613,7 @@ class Chat {
       }
       this.windowToFront(normalized);
       this.menus.get('whisper-users').redraw();
-      if (this.shouldFocus) {
+      if (this.isDesktop) {
         this.input.focus();
       }
     }
