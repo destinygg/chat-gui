@@ -88,6 +88,17 @@ export default class UrlFormatter {
       }
     }
 
+    if (/^(?:(?:https?):\/\/)?(?:www\.)?instagram\.com/i.test(url)) {
+      // Remove igsh query that shows the account that shared the instagram post.
+      try {
+        const instagramLink = new URL(url);
+        instagramLink.searchParams.delete('igsh');
+        return instagramLink.href;
+      } catch {
+        return url;
+      }
+    }
+
     return url;
   }
 }

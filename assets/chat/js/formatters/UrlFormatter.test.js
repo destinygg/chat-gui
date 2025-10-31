@@ -51,7 +51,21 @@ describe('Normalizing URLs', () => {
     );
   });
 
-  test("Don't modify a URL that isn't Twitter, X or YouTube", () => {
+  test('Remove the share tracking query param from a instagram.com link', () => {
+    expect(
+      urlFormatter.normalizeUrl(
+        'https://www.instagram.com/reel/DMv28huPlan?igsh=cW93Y2FheGtxMmJi',
+      ),
+    ).toBe('https://www.instagram.com/reel/DMv28huPlan');
+  });
+
+  test("Don't modify a instagram.com link that doesn't contain the share tracking query param", () => {
+    expect(
+      urlFormatter.normalizeUrl('https://www.instagram.com/reel/DMv28huPlan'),
+    ).toBe('https://www.instagram.com/reel/DMv28huPlan');
+  });
+
+  test("Don't modify a URL that isn't Twitter, X, YouTube or Instagram", () => {
     expect(
       urlFormatter.normalizeUrl('https://www.twitch.tv/search?term=vtuber'),
     ).toBe('https://www.twitch.tv/search?term=vtuber');
