@@ -742,6 +742,8 @@ class Chat {
       window.updateMessages(this);
     }
 
+    // Update ignoring set as it may have been reassigned within chat
+    this.mentions.ignoring = this.ignoring;
     this.mentions.resimulateMessages(this.mainwindow.messages);
 
     return Promise.resolve(this);

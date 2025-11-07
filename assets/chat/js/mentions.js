@@ -1,6 +1,8 @@
 const maxTrackedMentions = 10;
 
 class Mentions {
+  ignoring = new Set();
+
   data = [];
 
   processMessage(message) {
@@ -34,7 +36,9 @@ class Mentions {
       .filter(Boolean);
     const cutoff = allTimestamps.length > 0 ? Math.min(...allTimestamps) : 0;
     this.data = this.data.filter(
-      (mention) => mention.timestamp.valueOf() < cutoff,
+      (mention) =>
+        mention.timestamp.valueOf() < cutoff &&
+        !this.ignoring.has(mention.user.toLowerCase()),
     );
 
     for (const message of messages) {
