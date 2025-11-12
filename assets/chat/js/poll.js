@@ -1,6 +1,7 @@
 import $ from 'jquery';
 import { throttle } from 'throttle-debounce';
 import UserFeatures from './features';
+import UserRoles from './roles';
 import { MessageBuilder } from './messages';
 
 const POLL_CONJUNCTION = /\bor\b/i;
@@ -106,10 +107,12 @@ class ChatPoll {
   }
 
   hasPermission(user) {
-    return user.hasAnyFeatures(
-      UserFeatures.ADMIN,
-      UserFeatures.BOT,
-      UserFeatures.MODERATOR,
+    return (
+      user.hasAnyFeatures(
+        UserFeatures.ADMIN,
+        UserFeatures.BOT,
+        UserFeatures.MODERATOR,
+      ) || user.hasRole(UserRoles.POLLS)
     );
   }
 
