@@ -1,8 +1,7 @@
 const maxTrackedMentions = 10;
 
+// This class tracks recent mentions in chat messages for use in autocompletion
 class Mentions {
-  ignoring = new Set();
-
   data = [];
 
   processMessage(message) {
@@ -13,32 +12,29 @@ class Mentions {
   }
 
   add(user, timestamp) {
+    // Remove existing entry if present
     const idx = this.data.findIndex((existing) => existing.user === user);
-    const mention = { user, timestamp };
-    if (idx === -1) {
-      // User not already tracked
-      const newLength = this.data.unshift(mention);
-      if (newLength > maxTrackedMentions) {
-        this.data.pop();
-      }
-    } else {
-      // Update recency
-      this.data[idx].timestamp = timestamp;
+    if (idx >= 0) {
       this.data.splice(idx, 1);
-      this.data.unshift(mention);
+    }
+
+    // Add to front and trim to maximum number of tracked mentions
+    this.data.unshift({ user, timestamp });
+    if (this.data.length > maxTrackedMentions) {
+      this.data.pop();
     }
   }
 
   resimulateMessages(messages) {
-    // Only resimulate mentions that are within the time range shown on screen
+    // Get the timestamp of the earliest message still loaded
     const allTimestamps = messages
       .map((message) => message.timestamp?.valueOf())
-      .filter(Boolean);
+      .filter(Boolean); // Filter out messages without timestamps
     const cutoff = allTimestamps.length > 0 ? Math.min(...allTimestamps) : 0;
+
+    // Keep only mentions older than this timestamp - newer ones can be resimulated as they are still loaded
     this.data = this.data.filter(
-      (mention) =>
-        mention.timestamp.valueOf() < cutoff &&
-        !this.ignoring.has(mention.user.toLowerCase()),
+      (mention) => mention.timestamp.valueOf() < cutoff,
     );
 
     for (const message of messages) {
