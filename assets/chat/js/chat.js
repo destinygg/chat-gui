@@ -60,6 +60,7 @@ import { HashLinkConverter, MISSING_ARG_ERROR } from './hashlinkconverter';
 import ChatCommands, { getSlashCommand, removeSlashCommand } from './commands';
 import MessageTemplateHTML from '../../views/templates.html';
 import EventBarEvent from './event-bar/EventBarEvent';
+import Mentions from './mentions';
 
 class Chat {
   constructor(config) {
@@ -102,6 +103,7 @@ class Chat {
     this.settings = new Map(settingsdefault);
     this.commands = new ChatCommands();
     this.autocomplete = new ChatAutoComplete();
+    this.mentions = new Mentions();
     this.menus = new Map();
     this.taggednicks = new Map();
     this.taggednotes = new Map();
@@ -811,6 +813,8 @@ class Chat {
       window.updateMessages(this);
     }
 
+    this.mentions.resimulateMessages(this.mainwindow.messages);
+
     return Promise.resolve(this);
   }
 
@@ -917,6 +921,9 @@ class Chat {
     ) {
       message.ignore();
     }
+
+    // Track mentions for autocomplete
+    this.mentions.processMessage(message);
 
     // Show desktop notification
     if (
