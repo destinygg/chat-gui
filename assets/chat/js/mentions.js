@@ -26,15 +26,13 @@ class Mentions {
   }
 
   resimulateMessages(messages) {
-    // Get the timestamp of the earliest message still loaded
-    const allTimestamps = messages
-      .map((message) => message.timestamp?.valueOf())
-      .filter(Boolean); // Filter out messages without timestamps
-    const cutoff = allTimestamps.length > 0 ? Math.min(...allTimestamps) : 0;
-
-    // Keep only mentions older than this timestamp - newer ones can be resimulated as they are still loaded
+    // Keep any mentions older than the oldest loaded message, as they cannot be resimulated
+    const oldestTimestamp = messages.reduce(
+      (min, message) => Math.min(min, message.timestamp?.valueOf()),
+      Infinity,
+    );
     this.data = this.data.filter(
-      (mention) => mention.timestamp.valueOf() < cutoff,
+      (mention) => mention.timestamp.valueOf() < oldestTimestamp,
     );
 
     for (const message of messages) {

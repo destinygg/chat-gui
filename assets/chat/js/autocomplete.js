@@ -130,7 +130,11 @@ function selectHelper(ac) {
 function shouldOpenHighlightedBy(ac) {
   const str = ac.input.val().toString();
   const prevChar = str[ac.input[0].selectionStart - 1];
-  return str.length === 0 || /\s/.test(prevChar);
+  return (
+    str.length === 0 ||
+    /\s/.test(prevChar) ||
+    (str.length === 1 && prevChar === '>')
+  );
 }
 
 class ChatAutoComplete {
