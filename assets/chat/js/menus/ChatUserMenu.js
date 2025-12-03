@@ -8,8 +8,8 @@ import ChatUser from '../user';
 const UserMenuSections = [
   { name: 'Admin', flairs: ['admin'] },
   { name: 'Moderator', flairs: ['moderator'] },
+  { name: 'Micro', flairs: ['flair17'] },
   { name: 'Broadcaster', flairs: ['flair12'] },
-  { name: 'Vip', flairs: ['vip'] },
   { name: 'Trusted User', flairs: ['flair4'] },
   { name: 'Contributor', flairs: ['flair5', 'flair16'] }, // Contributor & Emote Contributor.
   { name: 'Subscriber Tier 5', flairs: ['flair42'] },
