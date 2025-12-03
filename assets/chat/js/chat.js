@@ -1049,6 +1049,9 @@ class Chat {
   }
 
   ignored(username, text = null) {
+    if (username === this.user.username) {
+      return false;
+    }
     const ignore = this.ignoring.has(username);
     if (!ignore && text !== null) {
       return (
