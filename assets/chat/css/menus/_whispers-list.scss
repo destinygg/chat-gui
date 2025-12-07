@@ -1,78 +1,84 @@
 @use '../abstracts/' as a;
 
 #chat-whisper-users {
-  .content > ul {
-    margin: 0;
-    padding: a.$gutter-md 0;
-  }
+  .section {
+    margin-block: 1.5em 0.5em;
 
-  .unread-0 {
-    .badge {
-      display: none;
-    }
-
-    .user,
-    .user:hover {
-      color: a.$text-color1;
+    &__title {
+      padding: 0em 0em 0.2em 1em;
+      font-weight: 600;
+      border-bottom: 1px solid;
     }
   }
 
-  .empty {
-    color: a.$text-color1;
-    margin: a.$gutter-lg;
-  }
-}
+  .conversation {
+    cursor: pointer;
+    padding-inline: a.$gutter-lg;
+    align-items: center;
+    display: flex;
 
-.conversation {
-  list-style: none;
-  position: relative;
-  cursor: pointer;
-  padding-left: a.$gutter-md;
-  display: flex;
-  align-items: center;
+    &__online-icon {
+      width: 8px;
+      height: 8px;
+      margin-right: a.$gutter-sm;
+      border-radius: 100%;
+    }
 
-  .user {
-    color: a.$color-accent;
-    display: block;
+    &__username {
+      flex: 1;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
 
-    &:hover {
-      color: a.$color-accent-light;
+    &__unread {
+      white-space: nowrap;
+      font-size: 0.8rem;
+      padding-inline: a.$gutter-md;
+      background: a.$color-surface-dark4;
+      border-radius: 1rem;
+      margin-block: a.$gutter-xs;
+      color: a.$color-chat-text2;
+      margin-inline-end: a.$gutter-md;
+    }
 
-      .badge {
-        color: a.$color-chat-text1;
+    &__time {
+      white-space: nowrap;
+    }
+
+    &--online {
+      .conversation {
+        &__online-icon {
+          background-color: a.$color-green;
+        }
       }
     }
-  }
 
-  .badge,
-  .remove {
-    float: right;
-    margin-right: a.$gutter-md;
-  }
-
-  .badge {
-    font-size: 0.8em;
-    padding: 0 a.$gutter-md;
-    display: inline-block;
-    background: a.$color-surface-dark4;
-    border-radius: 50%;
-    margin: a.$gutter-xs 0;
-    color: a.$color-chat-text2;
-  }
-
-  .remove {
-    opacity: 0.25;
-    display: inline-block;
-    text-decoration: none;
-    text-align: center;
-    line-height: 1.3em;
-    width: 1.3em;
-    height: 1.3em;
-
-    @include a.icon-background('../img/icon-close.svg');
+    &--offline {
+      .conversation {
+        &__online-icon {
+          background-color: a.$color-black;
+        }
+      }
+    }
 
     &:hover {
-      opacity: 1;
+      background: #282828;
     }
+  }
+
+  &.search-in .conversation {
+    display: none;
+
+    &.found {
+      display: flex;
+    }
+  }
+
+  input {
+    padding: a.$gutter-lg a.$gutter-lg;
+    border: none;
+    background: none;
+    border-radius: 0;
   }
 }
