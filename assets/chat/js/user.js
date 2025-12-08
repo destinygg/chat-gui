@@ -109,6 +109,7 @@ class ChatUser {
       UserFeature.ADMIN,
       UserFeature.BROADCASTER,
       UserFeature.VIP,
+      UserFeature.MICRO,
     );
   }
 
