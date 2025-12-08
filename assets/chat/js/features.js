@@ -13,4 +13,5 @@ export default {
   SUB_TIER_3: 'flair3',
   SUB_TIER_4: 'flair8',
   SUB_TIER_5: 'flair42',
+  MICRO: 'flair17',
 };

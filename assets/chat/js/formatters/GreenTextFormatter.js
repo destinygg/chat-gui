@@ -2,7 +2,7 @@ export default class GreenTextFormatter {
   format(chat, str, message = null) {
     if (
       message.user &&
-      message.user.isSubscriber() &&
+      (message.user.isSubscriber() || message.user.isPrivileged()) &&
       str.indexOf('&gt;') === 0
     ) {
       return `<span class="greentext">${str}</span>`;
