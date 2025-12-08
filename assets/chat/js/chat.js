@@ -835,6 +835,12 @@ class Chat {
         user.features = data.features;
       }
       if (
+        Object.hasOwn(data, 'roles') &&
+        !this.isArraysEqual(data.roles, user.roles)
+      ) {
+        user.roles = data.roles;
+      }
+      if (
         Object.hasOwn(data, 'createdDate') &&
         data.createdDate !== user.createdDate
       ) {
