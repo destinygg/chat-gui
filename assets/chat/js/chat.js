@@ -2319,29 +2319,44 @@ class Chat {
       MessageBuilder.error(
         'No username specified - /open <username> OR /o <username>',
       ).into(this);
-    } else if (parts.length > 1) {
+      return;
+    }
+
+    if (parts.length > 1) {
       MessageBuilder.error(
         'Too many arguments provided - /open <username> OR /o <username>',
       ).into(this);
-    } else if (parts[0] !== this.user.username) {
-      const normalized = parts[0].toLowerCase();
-      const win = this.getWindow(normalized);
-      if (win !== (null || undefined)) {
-        this.windowToFront(normalized);
-      } else {
-        if (!this.whispers.has(normalized)) {
-          this.whispers.set(normalized, {
-            nick: normalized,
-            unread: 0,
-            open: false,
-          });
-        }
-        this.openConversation(normalized);
-      }
-    } else {
+      return;
+    }
+
+    const normalized = parts[0].toLowerCase();
+
+    if (!nickregex.test(normalized)) {
+      MessageBuilder.error(
+        'Invalid username - /open <username> OR /o <username>',
+      ).into(this);
+      return;
+    }
+
+    if (normalized === this.user.username) {
       MessageBuilder.error(
         "Can't open a convo with yourself - /open <username> OR /o <username>",
       ).into(this);
+      return;
+    }
+
+    const win = this.getWindow(normalized);
+    if (win !== (null || undefined)) {
+      this.windowToFront(normalized);
+    } else {
+      if (!this.whispers.has(normalized)) {
+        this.whispers.set(normalized, {
+          nick: normalized,
+          unread: 0,
+          open: false,
+        });
+      }
+      this.openConversation(normalized);
     }
   }
 
