@@ -2317,14 +2317,14 @@ class Chat {
   cmdOPEN(parts) {
     if (!parts[0]) {
       MessageBuilder.error(
-        'No username specified - /open <username> OR /o <username>',
+        'No nick specified - /open <nick> OR /o <nick>',
       ).into(this);
       return;
     }
 
     if (parts.length > 1) {
       MessageBuilder.error(
-        'Too many arguments provided - /open <username> OR /o <username>',
+        'Too many arguments provided - /open <nick> OR /o <nick>',
       ).into(this);
       return;
     }
@@ -2332,15 +2332,15 @@ class Chat {
     const normalized = parts[0].toLowerCase();
 
     if (!nickregex.test(normalized)) {
-      MessageBuilder.error(
-        'Invalid username - /open <username> OR /o <username>',
-      ).into(this);
+      MessageBuilder.error('Invalid nick - /open <nick> OR /o <nick>').into(
+        this,
+      );
       return;
     }
 
     if (normalized === this.user.username) {
       MessageBuilder.error(
-        "Can't open a convo with yourself - /open <username> OR /o <username>",
+        "Can't open a convo with yourself - /open <nick> OR /o <nick>",
       ).into(this);
       return;
     }
