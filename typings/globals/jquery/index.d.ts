@@ -546,7 +546,8 @@ interface JQueryKeyEventObject extends JQueryInputEventObject {
 }
 
 interface JQueryEventObject
-  extends BaseJQueryEventObject,
+  extends
+    BaseJQueryEventObject,
     JQueryInputEventObject,
     JQueryMouseEventObject,
     JQueryKeyEventObject {}
