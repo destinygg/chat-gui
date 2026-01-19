@@ -33,7 +33,7 @@
   },
   "dependencies": {
     "dotenv": "^17.2.0",
-    "jquery": "^3.6.0",
+    "jquery": "^4.0.0",
     "linkify-html": "^4.3.2",
     "linkifyjs": "^4.3.2",
     "md5": "^2.3.0",
