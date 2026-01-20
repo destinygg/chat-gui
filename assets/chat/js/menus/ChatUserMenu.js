@@ -321,9 +321,9 @@ export default class ChatUserMenu extends ChatMenu {
 
   sort() {
     [...this.sections.values()].forEach((section) => {
-      [...$(section.users.children).sort(userComparator.bind(this))].forEach(
-        (a) => a.parentNode.appendChild(a),
-      );
+      [...$(section.users.children)]
+        .sort(userComparator.bind(this))
+        .forEach((a) => a.parentNode.appendChild(a));
     });
   }
 }
