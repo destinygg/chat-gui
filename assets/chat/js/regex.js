@@ -8,6 +8,8 @@ const nsflregex = /\bNSFL\b/i;
 const spoilersregex = /\bSPOILERS\b/i;
 const youtubeidregex =
   /(?:youtube\.com\/(?:watch\?v=|shorts\/|live\/)|youtu\.be\/|#youtube\/)([A-Za-z0-9_-]{11})/;
+const xcomregex =
+  /(?:https?:\/\/)?(?:www\.)?(?:twitter\.com|x\.com)\/\w{1,15}\/status\/(\d{2,19})/i;
 
 export {
   regexslashcmd,
@@ -18,6 +20,7 @@ export {
   nsflregex,
   spoilersregex,
   youtubeidregex,
+  xcomregex,
 };
 
 export default function makeSafeForRegex(str) {

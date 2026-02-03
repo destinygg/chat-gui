@@ -47,7 +47,11 @@ import { isMuteActive, MutedTimer } from './mutedtimer';
 import EmoteService from './emotes';
 import UserFeatures from './features';
 import UserRoles from './roles';
-import { UserMessageService, YouTubeOEmbedService } from './services';
+import {
+  UserMessageService,
+  YouTubeOEmbedService,
+  XComOEmbedService,
+} from './services';
 import makeSafeForRegex, {
   regextime,
   nickmessageregex,
@@ -55,6 +59,7 @@ import makeSafeForRegex, {
   nsfwregex,
   nsflregex,
   youtubeidregex,
+  xcomregex,
 } from './regex';
 import { HashLinkConverter, MISSING_ARG_ERROR } from './hashlinkconverter';
 import ChatCommands, { getSlashCommand, removeSlashCommand } from './commands';
@@ -95,6 +100,7 @@ class Chat {
     this.emoteService = new EmoteService();
     this.userMessageService = new UserMessageService();
     this.youtubeOEmbedService = new YouTubeOEmbedService();
+    this.xComOEmbedService = new XComOEmbedService();
 
     this.user = new ChatUser();
     this.users = new Map();
@@ -448,7 +454,7 @@ class Chat {
       this.focusIfNothingSelected();
     });
 
-    // Youtube oEmbed tooltip
+    // Youtube oEmbed tooltip and X.com post tooltip
     this.ui.on('mouseover', 'a.externallink', async (e) => {
       const { target } = e;
 
@@ -462,50 +468,93 @@ class Chat {
         return;
       }
 
-      const match = target.href.match(youtubeidregex);
+      // Check for YouTube URLs
+      const youtubeMatch = target.href.match(youtubeidregex);
+      if (youtubeMatch) {
+        try {
+          const result = await this.youtubeOEmbedService.getOEmbed(
+            youtubeMatch[1],
+          );
 
-      // Not a youtube id
-      if (!match) {
+          const container = document.createElement('div');
+          container.style.display = 'flex';
+          container.style.flexDirection = 'column';
+          container.style.marginTop = '4px';
+          container.style.gap = '0.25em';
+
+          const img = document.createElement('img');
+          img.src = result.thumbnail_url;
+
+          const title = document.createElement('strong');
+          title.textContent = result.title;
+
+          const author = document.createElement('span');
+          author.textContent = result.author_name;
+
+          container.append(img, title, author);
+
+          const youtubeTippy = tippy(target, {
+            content: container,
+            allowHTML: true,
+            arrow: roundArrow,
+            duration: 0,
+            theme: 'dgg',
+            maxWidth: 250,
+          });
+
+          target.dataset.tipped = true;
+
+          // If still hovering show immediately.
+          if (target.matches(':hover')) {
+            youtubeTippy.show();
+          }
+        } catch (error) {
+          /* Do nothing */
+        }
         return;
       }
 
-      try {
-        const result = await this.youtubeOEmbedService.getOEmbed(match[1]);
+      // Check for X.com URLs
+      const xcomMatch = target.href.match(xcomregex);
+      if (xcomMatch) {
+        try {
+          const result = await this.xComOEmbedService.getOEmbed(xcomMatch[1]);
 
-        const container = document.createElement('div');
-        container.style.display = 'flex';
-        container.style.flexDirection = 'column';
-        container.style.marginTop = '4px';
-        container.style.gap = '0.25em';
+          const container = document.createElement('div');
+          container.style.display = 'flex';
+          container.style.flexDirection = 'column';
+          container.style.marginTop = '4px';
+          container.style.gap = '0.25em';
+          container.style.padding = '8px';
 
-        const img = document.createElement('img');
-        img.src = result.thumbnail_url;
+          const author = document.createElement('strong');
+          author.textContent = result.author_name;
+          author.style.color = '#ffffff';
 
-        const title = document.createElement('strong');
-        title.textContent = result.title;
+          const title = document.createElement('div');
+          title.innerHTML = result.html;
+          title.style.marginTop = '4px';
 
-        const author = document.createElement('span');
-        author.textContent = result.author_name;
+          container.append(author, title);
 
-        container.append(img, title, author);
+          const xcomTippy = tippy(target, {
+            content: container,
+            allowHTML: true,
+            arrow: roundArrow,
+            duration: 0,
+            theme: 'dgg',
+            maxWidth: 250,
+          });
 
-        const youtubeTippy = tippy(target, {
-          content: container,
-          allowHTML: true,
-          arrow: roundArrow,
-          duration: 0,
-          theme: 'dgg',
-          maxWidth: 250,
-        });
+          target.dataset.tipped = true;
 
-        target.dataset.tipped = true;
-
-        // If still hovering show immediately.
-        if (target.matches(':hover')) {
-          youtubeTippy.show();
+          // If still hovering show immediately.
+          if (target.matches(':hover')) {
+            xcomTippy.show();
+          }
+        } catch (error) {
+          /* Do nothing */
         }
-      } catch (error) {
-        /* Do nothing */
       }
     });
 
