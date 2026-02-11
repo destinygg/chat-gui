@@ -2151,6 +2151,17 @@ class Chat {
       MessageBuilder.error('User must be present in chat to tag.').into(this);
       return;
     }
+    if (this.taggednicks.has(n)) {
+      const note = this.taggednotes.has(n) ? this.taggednotes.get(n) : '';
+      const color = this.taggednicks.get(n);
+      MessageBuilder.info(`${n} (${color}) ${note}`).into(this);
+      MessageBuilder.info(
+        `Usage. /tag <nick> [<color>, <note>]\n(Available colors: ${tagcolors.join(
+          ', ',
+        )})`,
+      ).into(this);
+      return;
+    }
 
     let color = '';
     let note = '';
