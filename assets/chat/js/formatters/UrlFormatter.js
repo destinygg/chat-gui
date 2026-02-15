@@ -46,7 +46,7 @@ export default class UrlFormatter {
         let embedHashLink = '';
         try {
           embedHashLink = this.hashLinkConverter.convert(attributes.href);
-        } catch (err) {
+        } catch {
           // ignore
         }
 

@@ -25,7 +25,7 @@ export default class YouTubeOEmbedService {
       /** @type {YouTubeOembedResponse} */
       return await response.json();
     } catch (error) {
-      throw new Error('Invalid JSON');
+      throw new Error('Invalid JSON', { cause: error });
     }
   }
 }

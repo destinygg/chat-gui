@@ -56,7 +56,7 @@ export default class RustleSearchApiClient {
       /** @type {RustleSearchResponse} */
       data = await response.json();
     } catch (error) {
-      throw new Error('Invalid JSON');
+      throw new Error('Invalid JSON', { cause: error });
     }
 
     if (data.type !== 'Success') {

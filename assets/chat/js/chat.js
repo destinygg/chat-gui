@@ -22,7 +22,6 @@ import {
   MessageBuilder,
   MessageTypes,
   ChatMessage,
-  ChatUserMessage, // eslint-disable-line no-unused-vars
   checkIfPinWasDismissed,
 } from './messages';
 import {
@@ -504,7 +503,7 @@ class Chat {
         if (target.matches(':hover')) {
           youtubeTippy.show();
         }
-      } catch (error) {
+      } catch {
         /* Do nothing */
       }
     });
@@ -595,7 +594,7 @@ class Chat {
       this.loginscrn.hide();
       try {
         window.top.showLoginModal();
-      } catch (e) {
+      } catch {
         const uri = `${window.location.protocol}//${window.location.hostname}${
           window.location.port ? `:${window.location.port}` : ''
         }`;
@@ -608,7 +607,7 @@ class Chat {
             window.location.href = `${uri}/login`;
           }
           return false;
-        } catch (ignored) {} // eslint-disable-line no-empty
+        } catch {} // eslint-disable-line no-empty
         window.location.href = `${uri}/login`;
       }
       return false;
@@ -2152,7 +2151,7 @@ class Chat {
       return;
     }
 
-    let color = '';
+    let color;
     let note = '';
     if (parts[1]) {
       if (tagcolors.indexOf(parts[1].toLowerCase()) !== -1) {
@@ -2346,7 +2345,7 @@ class Chat {
     }
 
     const win = this.getWindow(normalized);
-    if (win !== (null || undefined)) {
+    if (win != null) {
       this.windowToFront(normalized);
     } else {
       if (!this.whispers.has(normalized)) {
@@ -2539,8 +2538,8 @@ class Chat {
         url = `https://${url}`;
       }
 
-      new URL(url); // eslint-disable-line no-new
-    } catch (e) {
+      new URL(url);
+    } catch {
       MessageBuilder.error(
         'Invalid url - /host [--display-name <display-name>] [--title <title>] <url>',
       ).into(this);
@@ -2749,7 +2748,7 @@ class Chat {
   isBigscreenEmbed() {
     try {
       return this.bigscreenPath === window.top.location.pathname;
-    } catch (_) {
+    } catch {
       return false;
     }
   }
