@@ -2150,16 +2150,27 @@ class Chat {
       MessageBuilder.error('User must be present in chat to tag.').into(this);
       return;
     }
+    if (this.taggednicks.has(n) && parts.length === 1) {
+      const note = this.taggednotes.has(n) ? this.taggednotes.get(n) : '';
+      const color = this.taggednicks.get(n);
+      MessageBuilder.info(`${n} (${color}) ${note}`).into(this);
+      MessageBuilder.info(
+        `Usage. /tag <nick> [<color>, <note>]\n(Available colors: ${tagcolors.join(
+          ', ',
+        )})`,
+      ).into(this);
+      return;
+    }
 
     let color;
-    let note = '';
+    let note = this.taggednotes.has(n) ? this.taggednotes.get(n) : '';
     if (parts[1]) {
       if (tagcolors.indexOf(parts[1].toLowerCase()) !== -1) {
         color = parts[1].toLowerCase();
-        note = parts[2] ? parts.slice(2, parts.length).join(' ') : '';
+        note = parts[2] ? parts.slice(2, parts.length).join(' ') : note;
       } else {
         color = tagcolors[Math.floor(Math.random() * tagcolors.length)];
-        note = parts[1] ? parts.slice(1, parts.length).join(' ') : '';
+        note = parts[1] ? parts.slice(1, parts.length).join(' ') : note;
       }
       if (note.length > 100) {
         note = note.substr(0, 100);
