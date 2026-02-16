@@ -106,10 +106,10 @@ class ChatSource extends EventEmitter {
   parse(event) {
     const eventname = event.data.split(' ', 1)[0].toUpperCase();
     const payload = event.data.substring(eventname.length + 1);
-    let data = null;
+    let data;
     try {
       data = JSON.parse(payload);
-    } catch (ignored) {
+    } catch {
       data = payload;
     }
 

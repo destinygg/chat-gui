@@ -20,7 +20,7 @@ export default class AmazonAssociatesTagInjector {
 
         parsedAmazonLink.searchParams.set('tag', tag);
         return parsedAmazonLink.toString();
-      } catch (_) {
+      } catch {
         return amazonLink;
       }
     });

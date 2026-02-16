@@ -31,13 +31,11 @@ export default class ChatUIMessage {
     return wrapped;
   }
 
-  // eslint-disable-next-line no-unused-vars
-  html(chat = null) {
+  html() {
     return this.wrap(this.message);
   }
 
-  // eslint-disable-next-line no-unused-vars
-  afterRender(chat = null) {}
+  afterRender() {}
 
   hide(shouldHide = true) {
     this.ui.style.display = shouldHide ? 'none' : null;

@@ -1,6 +1,5 @@
 import $ from 'jquery';
 import { debounce } from 'throttle-debounce';
-// eslint-disable-next-line import/no-unresolved
 import 'overlayscrollbars/overlayscrollbars.css';
 import { OverlayScrollbars } from 'overlayscrollbars';
 

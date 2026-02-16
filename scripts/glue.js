@@ -1,4 +1,3 @@
-/* eslint-disable no-console, import/no-extraneous-dependencies */
 const fs = require('fs');
 const path = require('path');
 const Spritesmith = require('spritesmith');
