@@ -1,21 +1,50 @@
-import $ from 'jquery';
+import moment from 'moment';
+import { debounce } from 'throttle-debounce';
+import tippy, { roundArrow } from 'tippy.js';
 import ChatMenu from './ChatMenu';
-import ChatUser from '../user';
 
 export default class ChatWhisperUsers extends ChatMenu {
   constructor(ui, btn, chat) {
     super(ui, btn, chat);
+
+    this.whisperElements = new Map();
     this.unread = 0;
-    this.empty = $(`<span class="empty">No new whispers :(</span>`);
-    this.notif = $(`<span id="chat-whisper-unread-indicator"></span>`);
-    this.btn.append(this.notif);
-    this.usersEl = ui.find('ul:first');
-    this.usersEl.on('click', '.user', (e) =>
-      chat.openConversation(e.target.getAttribute('data-username')),
+    this.searchterm = '';
+    this.notif = this.chat.ui.find('#chat-whisper-unread-indicator');
+    this.unreadEl = this.ui.find('.whispers-unread .whispers');
+    this.readEl = this.ui.find('.whispers-read .whispers');
+    this.searchinput = this.ui.find(
+      '#chat-whisper-users-search .form-control:first',
     );
-    this.usersEl.on('click', '.remove', (e) =>
-      this.removeConversation(e.target.getAttribute('data-username')),
+    this.ui.on('click', '.conversation', (e) =>
+      chat.openConversation(e.currentTarget.getAttribute('data-username')),
     );
+    this.chat.source.on('JOIN', (data) => this.updateOnline(data, true));
+    this.chat.source.on('QUIT', (data) => this.updateOnline(data, false));
+    this.searchinput.on(
+      'keyup',
+      debounce(
+        100,
+        () => {
+          this.searchterm = this.searchinput.val();
+          this.filter();
+          this.redraw();
+        },
+        { atBegin: false },
+      ),
+    );
+  }
+
+  filter() {
+    [...this.chat.whispers.values()].forEach((whisper) => {
+      if (
+        whisper.nick.toLowerCase().indexOf(this.searchterm.toLowerCase()) >= 0
+      ) {
+        whisper.found = true;
+      } else {
+        whisper.found = false;
+      }
+    });
   }
 
   removeConversation(nick) {
@@ -27,8 +56,8 @@ export default class ChatWhisperUsers extends ChatMenu {
 
   updateNotification() {
     const wasunread = this.unread;
-    this.unread = [...this.chat.whispers.entries()]
-      .map((e) => parseInt(e[1].unread, 10))
+    this.unread = [...this.chat.whispers.values()]
+      .map((e) => parseInt(e.unread, 10))
       .reduce((a, b) => a + b, 0);
     if (wasunread < this.unread) {
       this.btn.addClass('ping');
@@ -46,35 +75,87 @@ export default class ChatWhisperUsers extends ChatMenu {
 
   redraw() {
     this.updateNotification(); // its always visible
-    if (this.visible) {
-      this.usersEl.empty();
-      if (this.chat.whispers.size === 0) {
-        this.usersEl.append(this.empty);
-      } else {
-        [...this.chat.whispers.entries()]
-          .sort((a, b) => {
-            if (a[1].unread === 0) {
-              return 1;
-            }
-            if (b[1].unread === 0) {
-              return -1;
-            }
-            return 0;
-          })
-          .forEach((e) => this.addConversation(e[0], e[1].unread));
-      }
+    this.unreadEl.empty();
+    this.readEl.empty();
+    if (this.chat.whispers.size > 0) {
+      [...this.chat.whispers.values()]
+        .sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())
+        .forEach((whisper) => this.addConversation(whisper));
     }
+    this.ui.toggleClass('search-in', this.searchterm.length > 0);
     super.redraw();
   }
 
-  addConversation(nick, unread) {
-    const user = this.chat.users.get(nick.toLowerCase()) || new ChatUser(nick);
-    this.usersEl.append(`
-            <li class="conversation unread-${unread}">
-                <a style="flex: 1;" data-username="${user.username}" class="user">${user.displayName}</a>
-                <span class="badge">${unread}</span>
-                <a data-username="${user.username}" title="Hide" class="remove"></a>
-            </li>
-        `);
+  addConversation(whisper) {
+    const ui = this.createElement(whisper);
+    this.whisperElements.set(whisper.nick.toLowerCase(), { ...whisper, ui });
+
+    const readOrUnreadList = whisper.unread > 0 ? this.unreadEl : this.readEl;
+    readOrUnreadList.append(ui);
+    readOrUnreadList
+      .find('[data-tippy-content]')
+      .each(function registerTippy() {
+        tippy(this, {
+          content: this.getAttribute('data-tippy-content'),
+          arrow: roundArrow,
+          duration: 0,
+          maxWidth: 250,
+          hideOnClick: false,
+          theme: 'dgg',
+        });
+      });
+  }
+
+  createElement(whisper) {
+    const time = moment.utc(whisper.time).local();
+
+    const entry = document.createElement('div');
+    entry.classList.add('conversation');
+    entry.classList.add(
+      this.chat.users.has(whisper.nick.toLowerCase())
+        ? 'conversation--online'
+        : 'conversation--offline',
+    );
+    if (whisper.found && this.searchterm.length > 0) {
+      entry.classList.add('found');
+    }
+    entry.setAttribute('data-username', whisper.nick.toLowerCase());
+
+    const onlineIcon = document.createElement('div');
+    onlineIcon.classList.add('conversation__online-icon');
+    entry.appendChild(onlineIcon);
+
+    const user = document.createElement('div');
+    user.classList.add('conversation__username');
+    user.textContent = whisper.nick;
+    entry.appendChild(user);
+
+    const right = document.createElement('div');
+
+    if (whisper.unread > 0) {
+      const unread = document.createElement('span');
+      unread.classList.add('conversation__unread');
+      unread.textContent = `${whisper.unread} new`;
+      right.appendChild(unread);
+    }
+
+    const timeElement = document.createElement('time');
+    timeElement.classList.add('conversation__time');
+    timeElement.setAttribute('datetime', time);
+    timeElement.setAttribute('data-tippy-content', time.format('LLL'));
+    timeElement.textContent = time.fromNow();
+    right.appendChild(timeElement);
+
+    entry.appendChild(right);
+
+    return entry;
+  }
+
+  updateOnline(data, join) {
+    if (this.whisperElements.has(data.nick.toLowerCase())) {
+      const whisper = this.whisperElements.get(data.nick.toLowerCase());
+      whisper.ui.classList.toggle('offline', !join);
+      whisper.ui.classList.toggle('online', join);
+    }
   }
 }
