@@ -186,7 +186,7 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
       this.adminUserBtn.toggleClass('hidden', false);
       this.adminUserBtn.attr(
         'href',
-        `https://www.destiny.gg/admin/user/${clickedUserId}/edit`,
+        `${this.chat.config.dggOrigin}/admin/user/${clickedUserId}/edit`,
       );
     } else {
       this.adminUserBtn.toggleClass('hidden', true);
