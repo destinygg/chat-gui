@@ -2,6 +2,7 @@ import $ from 'jquery';
 import moment from 'moment';
 import { MessageBuilder } from '../messages';
 import ChatUser from '../user';
+import UserFeatures from '../features';
 import ChatMenuFloating from './ChatMenuFloating';
 
 export default class ChatUserInfoMenu extends ChatMenuFloating {
@@ -156,7 +157,12 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     this.banUserBtn.removeClass('active');
     this.muteUserBtn.removeClass('active');
 
-    if (this.chat.ignoring.has(this.clickedNick.toLowerCase())) {
+    const clickedUser = this.chat.users.get(this.clickedNick);
+    const isBot = clickedUser?.hasFeature(UserFeatures.BOT);
+    if (isBot) {
+      this.ignoreUserBtn.toggleClass('hidden', true);
+      this.unignoreUserBtn.toggleClass('hidden', true);
+    } else if (this.chat.ignoring.has(this.clickedNick.toLowerCase())) {
       this.ignoreUserBtn.toggleClass('hidden', true);
       this.unignoreUserBtn.toggleClass('hidden', false);
     } else {

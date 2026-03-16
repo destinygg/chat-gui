@@ -1079,6 +1079,12 @@ class Chat {
 
   ignore(nick, ignore = true) {
     const normalizedNick = nick.toLowerCase();
+    if (ignore) {
+      const user = this.users.get(normalizedNick);
+      if (user?.hasFeature(UserFeatures.BOT)) {
+        return;
+      }
+    }
     const exists = this.ignoring.has(normalizedNick);
     if (ignore && !exists) {
       this.ignoring.add(normalizedNick);
@@ -1880,13 +1886,23 @@ class Chat {
       });
       if (!failure) {
         validUsernames.forEach((username) => {
-          this.ignore(username, true);
           const user = this.users.get(username);
+          if (user?.hasFeature(UserFeatures.BOT)) {
+            MessageBuilder.info(
+              `You cannot ignore ${username} because they are a bot.`,
+            ).into(this);
+            validUsernames.delete(username);
+            return;
+          }
+          this.ignore(username, true);
           if (user) {
             this.autocomplete.remove(user.displayName, true);
           }
         });
         const resultArray = Array.from(validUsernames.values());
+        if (validUsernames.size === 0) {
+          return;
+        }
         const resultMessage =
           validUsernames.size === 1
             ? `Ignoring ${resultArray[0]}`
