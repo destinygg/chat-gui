@@ -3,6 +3,7 @@ import moment from 'moment';
 import { MessageBuilder } from '../messages';
 import ChatUser from '../user';
 import UserFeatures from '../features';
+import UserRoles from '../roles';
 import ChatMenuFloating from './ChatMenuFloating';
 
 export default class ChatUserInfoMenu extends ChatMenuFloating {
@@ -38,6 +39,7 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     this.ignoreUserBtn = this.ui.find('#ignore-user-btn');
     this.unignoreUserBtn = this.ui.find('#unignore-user-btn');
     this.rustleUserBtn = this.ui.find('#rustle-user-btn');
+    this.adminUserBtn = this.ui.find('#admin-user-btn');
 
     this.actionInputs = this.ui.find('#action-durations');
     this.muteDurations = ['1m', '10m', '1h', '1d'];
@@ -174,6 +176,21 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
       'href',
       `https://rustlesearch.dev/?username=${encodeURIComponent(this.clickedNick)}`,
     );
+
+    const clickedUserId = clickedUser?.id;
+    if (
+      (this.chat.user.hasModPowers() ||
+        this.chat.user.hasRole(UserRoles.MODERATOR)) &&
+      clickedUserId
+    ) {
+      this.adminUserBtn.toggleClass('hidden', false);
+      this.adminUserBtn.attr(
+        'href',
+        `https://www.destiny.gg/admin/user/${clickedUserId}/edit`,
+      );
+    } else {
+      this.adminUserBtn.toggleClass('hidden', true);
+    }
   }
 
   setInputVisibility(button) {
