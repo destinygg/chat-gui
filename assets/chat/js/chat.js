@@ -1891,6 +1891,7 @@ class Chat {
             MessageBuilder.info(
               `You cannot ignore ${username} because they are a bot.`,
             ).into(this);
+            validUsernames.delete(username);
             return;
           }
           this.ignore(username, true);
@@ -1899,6 +1900,9 @@ class Chat {
           }
         });
         const resultArray = Array.from(validUsernames.values());
+        if (validUsernames.size === 0) {
+          return;
+        }
         const resultMessage =
           validUsernames.size === 1
             ? `Ignoring ${resultArray[0]}`
