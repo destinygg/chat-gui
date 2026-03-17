@@ -76,8 +76,8 @@ $toolbar-icons-map: (
 
 .action-buttons {
   margin: a.$gutter-md 0 a.$gutter-md 0;
-  display: grid;
-  grid-auto-flow: column;
+  display: flex;
+  flex-wrap: wrap;
   justify-content: space-around;
 }
 
