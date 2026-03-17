@@ -11,6 +11,8 @@ class HashLinkConverter {
     this.twitchClipRegex = /^[^/]+\/clip\/([A-Za-z0-9-_]*)$/;
     this.twitchVODRegex = /^videos\/(\d+)$/;
     this.rumbleEmbedRegex = /^embed\/([a-z0-9]+)\/?$/;
+    this.kickVODRegex =
+      /^([\w-]+)\/videos\/([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})$/;
   }
 
   convert(urlString) {
@@ -65,8 +67,12 @@ class HashLinkConverter {
         throw new Error(RUMBLE_EMBED_ERROR);
       case 'www.kick.com':
       case 'kick.com':
-        if (url.searchParams.has('clip') || pathname.startsWith('video/')) {
+        if (url.searchParams.has('clip')) {
           throw new Error(INVALID_LINK_ERROR);
+        }
+        match = pathname.match(this.kickVODRegex);
+        if (match) {
+          return `#kick-vod/${match[1]}/${match[2]}`;
         }
         return `#kick/${pathname}`;
       default:
