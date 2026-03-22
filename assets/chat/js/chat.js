@@ -84,7 +84,7 @@ class Chat {
     this.loginscrn = null;
     this.loadingscrn = null;
     this.showmotd = true;
-    this.subonly = false;
+    this.subonly = 0;
     this.authenticated = false;
     this.backlogloading = false;
     this.unresolved = [];
@@ -1437,6 +1437,14 @@ class Chat {
         message = new ChatMessage(messageText, null, MessageTypes.ERROR, true);
         break;
       }
+      case 'submode': {
+        const tier = data.tier || 1;
+        const smTierText = tier > 1 ? ` (Tier ${tier}+)` : '';
+        message = MessageBuilder.error(
+          `The channel is currently in subscriber only mode${smTierText}`,
+        );
+        break;
+      }
       case 'bannedphrase': {
         message = MessageBuilder.error(
           `Your message was blocked because it contained this banned phrase: "${data.filtered}".`,
@@ -1458,14 +1466,26 @@ class Chat {
   }
 
   onSUBONLY(data) {
-    this.subonly = data.data === 'on';
+    const isOn = data.data === 'on';
+    this.subonly = isOn ? data.tier || 1 : 0;
+    const tierText = this.subonly > 1 ? ` (Tier ${this.subonly}+)` : '';
     MessageBuilder.command(
-      `Subscriber only mode ${this.subonly ? 'enabled' : 'disabled'}${
+      `Subscriber only mode${tierText} ${isOn ? 'enabled' : 'disabled'}${
         data.nick ? ` by ${data.nick}` : ''
       }.`,
       data.timestamp,
     ).into(this);
-    if (this.subonly && !this.user.isSubscriber()) {
+    if (
+      this.subonly &&
+      !this.user.isPrivileged() &&
+      this.user.subTier < this.subonly
+    ) {
+      this.subonlyicon.attr(
+        'title',
+        this.subonly > 1
+          ? `Subscriber only mode (Tier ${this.subonly}+)`
+          : 'Subscriber only mode',
+      );
       this.subonlyicon.show();
     } else {
       this.subonlyicon.hide();
@@ -2018,11 +2038,18 @@ class Chat {
   }
 
   cmdSUBONLY(parts, command) {
-    if (/on|off/i.test(parts[0])) {
-      this.source.send(command.toUpperCase(), { data: parts[0].toLowerCase() });
+    if (/^off$/i.test(parts[0])) {
+      this.source.send(command.toUpperCase(), { data: 'off' });
+    } else if (/^on$/i.test(parts[0])) {
+      this.source.send(command.toUpperCase(), { data: 'on', tier: 1 });
+    } else if (/^[1-5]$/.test(parts[0])) {
+      this.source.send(command.toUpperCase(), {
+        data: 'on',
+        tier: parseInt(parts[0], 10),
+      });
     } else {
       MessageBuilder.error(
-        `Invalid argument - /${command.toLowerCase()} on | off`,
+        `Invalid argument - /${command.toLowerCase()} on | off | <tier 1-5>`,
       ).into(this);
     }
   }
