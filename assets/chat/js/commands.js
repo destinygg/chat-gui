@@ -163,7 +163,8 @@ const CHAT_COMMANDS = [
   },
   {
     name: 'subonly',
-    description: 'Turn the subscribers-only chat mode <on> or <off>.',
+    description:
+      'Set subscriber-only chat mode <on>, <off>, or to a specific <tier> (1-5).',
     admin: true,
   },
   {
