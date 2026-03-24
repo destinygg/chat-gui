@@ -65,6 +65,8 @@ class HashLinkConverter {
           return `#rumble/${match[1]}`;
         }
         throw new Error(RUMBLE_EMBED_ERROR);
+      case 'angelthump.com':
+        return `#angelthump/${pathname}`;
       case 'www.kick.com':
       case 'kick.com':
         if (url.searchParams.has('clip')) {

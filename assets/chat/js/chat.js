@@ -2283,7 +2283,7 @@ class Chat {
     } catch (error) {
       MessageBuilder.error(error.message).into(this);
       MessageBuilder.info(
-        'Usage: /embed <link> OR /e <link> (Valid links: Twitch streams, VODs, clips, Youtube, Rumble, Kick streams)',
+        'Usage: /embed <link> OR /e <link> (Valid links: Twitch streams, VODs, clips, Youtube, Rumble, Kick streams, AngelThump streams)',
       ).into(this);
     }
   }
@@ -2307,7 +2307,7 @@ class Chat {
           MessageBuilder.error(error.message).into(this);
         }
         MessageBuilder.info(
-          'Usage: /postembed [<link>] [<message>] (Alias: /pe) (Valid links: Twitch streams, VODs, clips, Youtube, Rumble, Kick streams)',
+          'Usage: /postembed [<link>] [<message>] (Alias: /pe) (Valid links: Twitch streams, VODs, clips, Youtube, Rumble, Kick streams, AngelThump streams)',
         ).into(this);
       }
     }

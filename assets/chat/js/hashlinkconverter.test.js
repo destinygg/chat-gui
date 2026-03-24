@@ -84,6 +84,11 @@ describe('Valid embeds', () => {
       'https://rumble.com/embed/v26pcdc/?pub=4',
       '#rumble/v26pcdc',
     ],
+    [
+      'AngelThump stream',
+      'https://angelthump.com/harkonnen1',
+      '#angelthump/harkonnen1',
+    ],
     ['Kick stream link', 'https://kick.com/destiny', '#kick/destiny'],
     [
       'Kick VOD link',
