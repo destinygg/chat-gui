@@ -22,6 +22,12 @@ const chat = new Chat({
   ...(mock ? { source: new MockChatSource() } : {}),
 });
 
+if (mock) {
+  chat.control.on('MOCK', (parts) => {
+    chat.source.send('MSG', { data: `/mock ${(parts || []).join(' ')}` });
+  });
+}
+
 function connectOrMock() {
   if (mock) {
     chat.source.start();
