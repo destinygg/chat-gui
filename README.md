@@ -1,6 +1,4 @@
 # Destinygg Chat GUI
-## Requirements
-- Node.js
 
 ## Development
 1. Install Node.js dependencies
@@ -8,42 +6,68 @@
 npm ci
 ```
 
-2. Create a copy of the example `.env` file
-```
-cp .env.example .env
-```
-
-3. (Optional) Use the developer tools in your web browser to access your cookies and obtain your Destiny.gg session tokens: `sid` and `rememberme`
-
-4. (Optional) Add the tokens to your `.env` file
-```
-vim .env
-```
->Note: Save and exit vim with `:wq`.
-
-5. Run the Webpack development server
+2. Run the Webpack development server
 ```
 npm run start
 ```
 
-## Development server
-Navigate to `https://localhost:8282` in your web browser of choice to access a local instance of Dgg Chat GUI connected to production Destiny.gg chat.
+3. Navigate to `https://localhost:8282` in your web browser
 
-If you supplied your session tokens by following steps 3 and 4 above, you'll be authenticated and can chat like normal. Note that the tokens will eventually expire and won't automatically renew in this environment.
+> Note: Chat GUI starts in mock mode with simulated chat messages by default.
+
+### Mock mode
+Mock mode simulates a live chat environment so you can develop and test UI changes without a real WebSocket connection or session tokens. It generates random messages, subscriptions, donations, bans, polls, and other events at random intervals.
+
+Type `/mock` in the chat input with no arguments to see available commands. The following subcommands are supported:
+
+| Command | Description |
+|---------|-------------|
+| `/mock stop` | Stop the mock event loop |
+| `/mock start` | Start the mock event loop |
+| `/mock ban` | Emit a ban event |
+| `/mock sub` | Emit a subscription event |
+| `/mock combo` | Emit a combo event |
+| `/mock poll` | Emit a poll event |
+| `/mock flood` | Send 20 messages rapidly |
+| `/mock donation` | Emit a donation event |
+| `/mock gift` | Emit a gift sub event |
+| `/mock massgift` | Emit a mass gift sub event |
+| `/mock mute` | Emit a mute event |
+| `/mock broadcast` | Emit a broadcast event |
+| `/mock death` | Emit a death event |
+
+### Connecting to real chat
+1. Create a copy of the example `.env` file
+```
+cp .env.example .env
+```
+
+2. Use the developer tools in your web browser to access your cookies and obtain your Destiny.gg session tokens: `sid` and `rememberme`
+
+> Note: The tokens will eventually expire and won't automatically renew in this environment.
+
+3. Add the tokens to your `.env` file
+```
+vim .env
+```
+
+4. Navigate to `https://localhost:8282?live=1` in your web browser
+
 
 ### Query string parameters
-- `t`
-  - Embed type
-  - Possible values: `embed` for Bigscreen chat, `stream` for on-stream chat
-  - Default: `embed`
+| Parameter | Description | Values | Default |
+|-----------|-------------|--------|---------|
+| `live` | Disable mock mode and connect to the real WebSocket | `1` | — |
+| `t` | Embed type | `embed` (Bigscreen chat), `stream` (on-stream chat) | `embed` |
+| `f` | Chat font scale (only works for `stream` embed type) | `1` to `10` | — |
 
-- `f`
-  - Chat font scale
-  - Possible values: An integer from `1` to `10`
-  - Note: Only works for the `stream` embed type
-
-### Examples
+#### Examples
 - Open the on-stream chat with a font scale of `5`
 ```
 https://localhost:8282/?t=stream&f=5
+```
+
+- Connect to real chat (disable mock mode)
+```
+https://localhost:8282/?live=1
 ```
