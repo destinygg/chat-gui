@@ -123,7 +123,7 @@ class Chat {
     this.hashLinkConverter = new HashLinkConverter();
 
     // The websocket connection, emits events from the chat server
-    this.source = new ChatSource();
+    this.source = config.source || new ChatSource();
 
     this.source.on('PING', (data) => this.source.send('PONG', data));
     this.source.on('CONNECTING', (data) => this.onCONNECTING(data));

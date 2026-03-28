@@ -3,19 +3,38 @@ import './chat/css/style.scss';
 import Chat from './chat/js/chat';
 import embedHtml from './views/embed.html';
 import streamHtml from './views/stream.html';
+import MockChatSource from './chat/js/MockChatSource';
 
 /**
  * GET Params
- * t:   template [EMBED | STREAM]
- * f:   font scale on STREAM layout [1 ... 10]
+ * t:      template [EMBED | STREAM]
+ * f:      font scale on STREAM layout [1 ... 10]
+ * live:   set to 1 to connect to real websocket (mock mode is default)
  * @type {Chat}
  */
+
+const mock = new URLSearchParams(window.location.search).get('live') !== '1';
 
 const chat = new Chat({
   url: 'wss://localhost:8282/chat',
   api: { base: 'https://localhost:8282' },
   cdn: { base: 'https://localhost:8282/cdn' },
+  ...(mock ? { source: new MockChatSource() } : {}),
 });
+
+if (mock) {
+  chat.control.on('MOCK', (parts) => {
+    chat.source.send('MSG', { data: `/mock ${(parts || []).join(' ')}` });
+  });
+}
+
+function connectOrMock() {
+  if (mock) {
+    chat.source.start();
+  } else {
+    chat.connect();
+  }
+}
 
 const html = $('body,html');
 
@@ -29,7 +48,7 @@ switch ((chat.reqParam('t') || 'embed').toUpperCase()) {
         chat.applySettings(false);
       })
       .then(() => chat.loadEmotesAndFlairs())
-      .then(() => chat.connect());
+      .then(() => connectOrMock());
     break;
 
   case 'VOTE':
@@ -43,7 +62,7 @@ switch ((chat.reqParam('t') || 'embed').toUpperCase()) {
                 </div>
             `,
       )
-      .then(() => chat.connect());
+      .then(() => connectOrMock());
     break;
 
   case 'EMBED':
@@ -51,6 +70,6 @@ switch ((chat.reqParam('t') || 'embed').toUpperCase()) {
     chat
       .withGui(embedHtml)
       .then(() => chat.loadEmotesAndFlairs())
-      .then(() => chat.connect());
+      .then(() => connectOrMock());
     break;
 }
