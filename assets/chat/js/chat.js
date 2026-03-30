@@ -2564,7 +2564,7 @@ class Chat {
   }
 
   cmdHOST(_, args) {
-    let url = _[0];
+    let url = args._[0];
     const { displayName, title } = args;
 
     if (
