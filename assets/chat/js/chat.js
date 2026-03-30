@@ -2469,20 +2469,20 @@ class Chat {
     )
       .then((res) => res.json())
       .then((d) => {
-        if (!d || !d.lines || d.lines.length === 0) {
+        if (!d.success || !d.data?.lines || d.data.lines.length === 0) {
           MessageBuilder.info(`No messages from ${parts[0]}.`).into(this);
         } else {
           const date = moment
-            .utc(d.lines[d.lines.length - 1].timestamp * 1000)
+            .utc(d.data.lines[d.data.lines.length - 1].timestamp * 1000)
             .local()
             .format(DATE_FORMATS.FULL);
           MessageBuilder.info(`Stalked ${parts[0]} last seen ${date}.`).into(
             this,
           );
-          d.lines.forEach((a) =>
+          d.data.lines.forEach((a) =>
             MessageBuilder.historical(
               a.text,
-              new ChatUser(d.nick),
+              new ChatUser(d.data.nick),
               a.timestamp * 1000,
             ).into(this),
           );
@@ -2534,17 +2534,17 @@ class Chat {
     )
       .then((res) => res.json())
       .then((d) => {
-        if (!d || d.length === 0) {
+        if (!d.success || !d.data || d.data.length === 0) {
           MessageBuilder.info(`No mentions for ${parts[0]}.`).into(this);
         } else {
           const date = moment
-            .utc(d[d.length - 1].date * 1000)
+            .utc(d.data[d.data.length - 1].date * 1000)
             .local()
             .format(DATE_FORMATS.FULL);
           MessageBuilder.info(
             `Mentions for ${parts[0]} last seen ${date}.`,
           ).into(this);
-          d.forEach((a) =>
+          d.data.forEach((a) =>
             MessageBuilder.historical(
               a.text,
               new ChatUser(a.nick),
