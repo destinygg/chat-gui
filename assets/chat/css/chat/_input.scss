@@ -6,6 +6,9 @@
 
 #chat-input-wrap {
   position: relative;
+  display: flex;
+  align-items: stretch;
+  gap: 4px;
 }
 
 #chat-input-control {
@@ -17,7 +20,7 @@
   outline: none;
   resize: none;
   margin: 0;
-  width: 100%;
+  flex: 1;
   padding: 4px;
   border-radius: 0;
   box-shadow: none;

@@ -420,6 +420,12 @@ class Chat {
       }
     });
 
+    document.getElementById('chat-send-btn')?.addEventListener('click', () => {
+      this.control.emit('SEND', this.input.val().toString().trim());
+      this.adjustInputHeight();
+      this.input.focus();
+    });
+
     // Watching focus
     this.ui.on('click touch', '#chat-watching-focus-btn', () => {
       this.watchingfocus = !this.watchingfocus;
