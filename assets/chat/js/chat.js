@@ -52,6 +52,7 @@ import {
   readSettings as readSoundSettings,
   writeSettings as writeSoundSettings,
 } from './aimSounds';
+import initFormatToolbar from './formatToolbar';
 import UserRoles from './roles';
 import { UserMessageService, YouTubeOEmbedService } from './services';
 import makeSafeForRegex, {
@@ -427,6 +428,9 @@ class Chat {
       settings[e.target.name] = e.target.checked;
       writeSoundSettings(settings);
     });
+
+    // Format toolbar
+    initFormatToolbar();
 
     this.input.on('keypress', (e) => {
       if (isKeyCode(e, KEYCODES.ENTER) && !e.shiftKey && !e.ctrlKey) {

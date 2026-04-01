@@ -40,6 +40,59 @@
   }
 }
 
+#chat-format-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 24px;
+  padding: 2px;
+  gap: 1px;
+  margin-bottom: 4px;
+  background: a.$win95-bg;
+  @include a.win95-sunken;
+}
+
+.fmt-btn {
+  width: 22px;
+  height: 20px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 2px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover:not(:disabled) {
+    @include a.win95-button-raised;
+  }
+
+  &:active:not(:disabled) {
+    @include a.win95-button-pressed;
+  }
+
+  &:disabled {
+    cursor: default;
+
+    img {
+      opacity: 0.35;
+    }
+  }
+
+  img {
+    image-rendering: pixelated;
+    display: block;
+  }
+}
+
+.fmt-divider {
+  width: 1px;
+  height: 16px;
+  border-left: 1px solid a.$win95-darkgrey;
+  border-right: 1px solid a.$win95-white;
+  margin: 0 2px;
+}
+
 #chat-input-subonly {
   cursor: default;
   display: none;

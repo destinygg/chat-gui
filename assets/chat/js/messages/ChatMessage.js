@@ -12,11 +12,13 @@ import {
   BadWordsCensorshipFormatter,
   AmazonAssociatesTagInjector,
   SuspostFormatter,
+  BBCodeFormatter,
 } from '../formatters';
 import { DATE_FORMATS } from '../const';
 
 const formatters = new Map();
 formatters.set('html', new HtmlTextFormatter());
+formatters.set('bbcode', new BBCodeFormatter());
 formatters.set('amazon', new AmazonAssociatesTagInjector());
 formatters.set('url', new UrlFormatter());
 formatters.set('emote', new EmoteFormatter());

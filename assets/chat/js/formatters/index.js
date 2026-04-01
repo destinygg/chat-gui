@@ -1,4 +1,5 @@
 export { default as HtmlTextFormatter } from './HtmlTextFormatter';
+export { default as BBCodeFormatter } from './BBCodeFormatter';
 export { default as EmoteFormatter } from './EmoteFormatter';
 export { default as GreenTextFormatter } from './GreenTextFormatter';
 export { default as MentionedUserFormatter } from './MentionedUserFormatter';
