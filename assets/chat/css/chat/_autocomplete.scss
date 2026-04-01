@@ -12,8 +12,6 @@
   height: 22px;
   top: -52px;
   left: 0;
-  right: 0;
-  overflow: hidden;
   white-space: nowrap;
   background-color: a.$win95-bg;
   @include a.win95-raised;
@@ -24,11 +22,11 @@
   }
 
   ul {
-    position: absolute;
     white-space: nowrap;
     list-style: none;
     padding: 0;
     margin: 0;
+    display: flex;
   }
 
   li {
