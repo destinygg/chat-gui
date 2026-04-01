@@ -44,6 +44,7 @@ import ChatWindow from './window';
 import { ChatPoll, parseQuestionAndTime } from './poll';
 import { isMuteActive, MutedTimer } from './mutedtimer';
 import EmoteService from './emotes';
+import EMOTES from './emoteData';
 import UserFeatures from './features';
 import UserRoles from './roles';
 import { UserMessageService, YouTubeOEmbedService } from './services';
@@ -648,19 +649,9 @@ class Chat {
       .catch();
   }
 
-  async loadEmotes() {
-    this.loadCss(
-      `${this.config.cdn.base}/emotes/emotes.css?_=${this.config.cacheKey}`,
-    );
-    return fetch(
-      `${this.config.cdn.base}/emotes/emotes.json?_=${this.config.cacheKey}`,
-    )
-      .then((res) => res.json())
-      .then((json) => {
-        this.setEmotes(json);
-        this.refreshEmoteAutocomplete();
-      })
-      .catch(() => {});
+  loadEmotes() {
+    this.setEmotes(EMOTES);
+    this.refreshEmoteAutocomplete();
   }
 
   async loadWhispers() {

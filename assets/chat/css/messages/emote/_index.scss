@@ -13,3 +13,32 @@
     animation: none !important;
   }
 }
+
+$smileys: (
+  'smiley-smile': 'smile_m.png',
+  'smiley-frown': 'frown_m.png',
+  'smiley-wink': 'wink_m.png',
+  'smiley-tongue': 'tongue_m.png',
+  'smiley-surprised': 'oface_m.png',
+  'smiley-kiss': 'kiss_m.png',
+  'smiley-yelling': 'angry_m.png',
+  'smiley-cool': 'glasses_m.png',
+  'smiley-money': 'money_m.png',
+  'smiley-foot': 'foot_m.png',
+  'smiley-embarrassed': 'embarassed_m.png',
+  'smiley-innocent': 'halo_m.png',
+  'smiley-undecided': 'slant_m.png',
+  'smiley-cry': 'cry_m.png',
+  'smiley-silent': 'silent_m.png',
+  'smiley-grin': 'grin_m.png',
+);
+
+@each $name, $file in $smileys {
+  .emote.#{$name} {
+    width: 16px;
+    height: 16px;
+    vertical-align: middle;
+    background: url('../img/smileys/#{$file}') no-repeat center;
+    background-size: contain;
+  }
+}

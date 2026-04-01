@@ -11,7 +11,9 @@ export default class ChatEmoteMenu extends ChatMenu {
     );
     this.ui.on('click', '.emote', (e) => {
       ChatMenu.closeMenus(chat);
-      this.selectEmote(e.currentTarget.innerText);
+      this.selectEmote(
+        e.currentTarget.dataset.prefix || e.currentTarget.innerText,
+      );
     });
     this.searchinput.on(
       'keyup',
@@ -41,7 +43,7 @@ export default class ChatEmoteMenu extends ChatMenu {
 
     this.emoteMenuContent.empty();
 
-    const emotes = this.chat.emoteService.prefixes;
+    const { emotes } = this.chat.emoteService;
     if (!emotes.length) {
       return;
     }
@@ -55,12 +57,17 @@ export default class ChatEmoteMenu extends ChatMenu {
     let emotesStr = '';
     if (favoriteEmotes.length > 0) {
       emotesStr += favoriteEmotes
-        .map((e) => this.buildEmoteItem(e, true))
+        .map((prefix) => {
+          const emote = this.chat.emoteService.getEmote(prefix);
+          return emote ? this.buildEmoteItem(emote, true) : '';
+        })
         .join('');
     }
     emotesStr += emotes
       .map((e) =>
-        !favoriteEmotes.includes(e) ? this.buildEmoteItem(e, false) : null,
+        !favoriteEmotes.includes(e.prefix)
+          ? this.buildEmoteItem(e, false)
+          : null,
       )
       .join('');
     if (emotesStr !== '') {
@@ -72,13 +79,14 @@ export default class ChatEmoteMenu extends ChatMenu {
   }
 
   buildEmoteItem(emote, favorite) {
+    const { prefix, name } = emote;
     if (this.searchterm && this.searchterm.length > 0) {
-      if (emote.toLowerCase().indexOf(this.searchterm.toLowerCase()) >= 0) {
-        return `<div class="emote-item${favorite ? ' favorite-emote' : ''}"><span title="${emote}" class="emote ${emote}">${emote}</span></div>`;
+      if (prefix.toLowerCase().indexOf(this.searchterm.toLowerCase()) >= 0) {
+        return `<div class="emote-item${favorite ? ' favorite-emote' : ''}"><span title="${prefix}" class="emote ${name}" data-prefix="${prefix}">${prefix}</span></div>`;
       }
       return '';
     }
-    return `<div class="emote-item${favorite ? ' favorite-emote' : ''}"><span title="${emote}" class="emote ${emote}">${emote}</span></div>`;
+    return `<div class="emote-item${favorite ? ' favorite-emote' : ''}"><span title="${prefix}" class="emote ${name}" data-prefix="${prefix}">${prefix}</span></div>`;
   }
 
   selectEmote(emote) {

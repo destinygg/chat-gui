@@ -38,7 +38,8 @@ export default class ChatEmoteTooltip extends ChatMenuFloating {
   }
 
   contextmenu(e) {
-    const emote = $(e.currentTarget).closest('.emote')[0].innerText;
+    const el = $(e.currentTarget).closest('.emote')[0];
+    const emote = el.dataset.prefix || el.innerText;
     const { creator } = this.chat.emoteService.getEmote(emote) ?? {};
 
     this.emote = emote;
@@ -67,9 +68,13 @@ export default class ChatEmoteTooltip extends ChatMenuFloating {
   /**
    * @param {string} emote
    */
-  set emote(emote) {
-    this.ui.name.text(emote);
-    this.ui.emote.html(`<div class="emote ${emote}">${emote}</div>`);
+  set emote(prefix) {
+    const emoteData = this.chat.emoteService.getEmote(prefix);
+    const name = emoteData ? emoteData.name : prefix;
+    this.ui.name.text(prefix);
+    this.ui.emote.html(
+      `<div class="emote ${name}" data-prefix="${prefix}">${prefix}</div>`,
+    );
   }
 
   /**

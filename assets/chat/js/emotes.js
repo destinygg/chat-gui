@@ -1,10 +1,12 @@
+import makeSafeForRegex from './regex';
+
 export default class EmoteService {
   emotesMapped = new Map();
 
   emotes = [];
 
   regexForEmotes(emotes) {
-    const prefixes = emotes.map((e) => e.prefix);
+    const prefixes = emotes.map((e) => makeSafeForRegex(e.prefix));
     return new RegExp(`(^|\\s)(${prefixes.join('|')})(?=$|\\s)`, 'gm');
   }
 

@@ -3,7 +3,13 @@ export default class EmoteFormatter {
     const regex = chat.emoteService.emoteRegex;
 
     if (regex != null) {
-      return str.replace(regex, '$1<div title="$2" class="emote $2">$2 </div>');
+      return str.replace(regex, (match, space, prefix) => {
+        const emote = chat.emoteService.getEmote(prefix);
+        if (!emote) {
+          return match;
+        }
+        return `${space}<div title="${prefix}" class="emote ${emote.name}" data-prefix="${prefix}">${prefix} </div>`;
+      });
     }
     return str;
   }
