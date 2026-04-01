@@ -31,6 +31,8 @@ $toolbar-icons-map: (
   }
 
   &#chat-emoticon-btn .btn-icon {
+    width: 17px;
+    height: 23px;
     @include a.icon-background('../img/aim-add_buddy.png');
     filter: none;
     image-rendering: pixelated;
@@ -38,10 +40,11 @@ $toolbar-icons-map: (
   &#chat-emoticon-btn:hover .btn-icon {
     @include a.icon-background('../img/aim-add_buddy_hover.png');
     filter: none;
-    image-rendering: pixelated;
   }
 
   &#chat-whisper-btn .btn-icon {
+    width: 19px;
+    height: 20px;
     @include a.icon-background('../img/aim-new_im.png');
     filter: none;
     image-rendering: pixelated;
@@ -49,10 +52,11 @@ $toolbar-icons-map: (
   &#chat-whisper-btn:hover .btn-icon {
     @include a.icon-background('../img/aim-new_im_hover.png');
     filter: none;
-    image-rendering: pixelated;
   }
 
   &#chat-users-btn .btn-icon {
+    width: 22px;
+    height: 22px;
     @include a.icon-background('../img/aim-group_im.png');
     filter: none;
     image-rendering: pixelated;
@@ -60,10 +64,11 @@ $toolbar-icons-map: (
   &#chat-users-btn:hover .btn-icon {
     @include a.icon-background('../img/aim-group_im_hover.png');
     filter: none;
-    image-rendering: pixelated;
   }
 
   &#chat-settings-btn .btn-icon {
+    width: 22px;
+    height: 16px;
     @include a.icon-background('../img/aim-get_info.png');
     filter: none;
     image-rendering: pixelated;
@@ -71,7 +76,6 @@ $toolbar-icons-map: (
   &#chat-settings-btn:hover .btn-icon {
     @include a.icon-background('../img/aim-get_info_hover.png');
     filter: none;
-    image-rendering: pixelated;
   }
 }
 
