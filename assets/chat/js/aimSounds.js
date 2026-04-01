@@ -9,7 +9,7 @@ const receivedSoundUrl =
 
 const defaults = {
   soundSent: true,
-  soundReceived: false,
+  soundReceived: true,
 };
 
 function readSettings() {

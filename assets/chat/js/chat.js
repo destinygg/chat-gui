@@ -1269,7 +1269,7 @@ class Chat {
 
     if (!this.resolveMessage(data.nick, data.data, data.timestamp)) {
       message.into(this);
-      if (!this.backlogloading) {
+      if (!this.backlogloading && message.highlighted) {
         playReceived();
       }
     }
