@@ -144,10 +144,11 @@ $toolbar-icons-map: (
 
 #chat-whisper-unread-indicator {
   left: 100%;
-  color: a.$color-light;
-  font-size: 0.75em;
+  color: a.$win95-text;
+  font-family: 'MSSansSerif', sans-serif;
+  font-size: 11px;
   position: absolute;
   vertical-align: text-bottom;
-  margin-left: 0.5em;
+  margin-left: 4px;
   top: 6px;
 }

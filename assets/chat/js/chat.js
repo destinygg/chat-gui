@@ -1213,14 +1213,14 @@ class Chat {
     }
 
     const usr = this.users.get(msg.nick.toLowerCase()) ?? new ChatUser(msg);
-    this.pinnedMessage = MessageBuilder.pinned(
+    const pinMsg = MessageBuilder.pinned(
       msg.data,
       usr,
       msg.timestamp,
       msg.uuid,
-    )
-      .into(this)
-      .pin(this, !checkIfPinWasDismissed(msg.uuid));
+    );
+    pinMsg.ui = pinMsg.html(this);
+    this.pinnedMessage = pinMsg.pin(this, !checkIfPinWasDismissed(msg.uuid));
   }
 
   onQUIT(data) {
