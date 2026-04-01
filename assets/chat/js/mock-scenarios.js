@@ -121,16 +121,16 @@ const MESSAGES = [
 ];
 
 const EMOTES = [
-  'PEPE',
-  'YEE',
-  'LULW',
-  'Klappa',
-  'OverRustle',
-  'POGGERS',
-  'monkaS',
-  'DANKMEMES',
-  'Wowee',
-  'DaFeels',
+  'smiley-smile',
+  'smiley-grin',
+  'smiley-cool',
+  'smiley-wink',
+  'smiley-tongue',
+  'buddy-moonwalk',
+  'buddy-spongebob2',
+  'buddy-matrix2',
+  'buddy-lol',
+  'buddy-brb',
 ];
 
 const BROADCAST_MESSAGES = [

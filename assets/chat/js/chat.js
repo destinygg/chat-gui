@@ -1279,7 +1279,7 @@ class Chat {
     }
 
     const isCombo =
-      this.emoteService.canUserUseEmote(usr, textonly) &&
+      this.emoteService.hasEmote(textonly) &&
       removeSlashCommand(win.lastmessage?.message) === textonly;
 
     if (isCombo && win.lastmessage?.type === MessageTypes.EMOTE) {
