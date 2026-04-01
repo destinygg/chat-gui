@@ -10,17 +10,7 @@ export default class ChatEmoteTooltip extends ChatMenuFloating {
     this.ui.creator = this.ui.find('.emote-info .creator');
     this.ui.favorite = this.ui.find('.emote-info .favorite');
 
-    this.chat.menus.get('emotes').ui.on('contextmenu', '.emote', (e) => {
-      this.contextmenu(e);
-      return false;
-    });
-
     this.chat.menus.get('emotes').ui.on('click', () => this.hide());
-
-    this.chat.output.on('contextmenu', '.msg-chat .text .emote', (e) => {
-      this.contextmenu(e);
-      return false;
-    });
 
     this.ui.emote.on('click', '.emote', () => {
       const value = this.chat.input.val().toString().trim();
