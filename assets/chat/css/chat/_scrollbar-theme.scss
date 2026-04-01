@@ -2,6 +2,7 @@ $scrollbar-size: 16px;
 $scrollbar-arrow-size: 16px;
 $scrollbar-bg: #bbc3c4;
 $scrollbar-track-bg: #ffffff;
+$scrollbar-track-pattern: url('data:image/gif;base64,R0lGODlhAgACAJEAAAAAAP///8zMzP///yH5BAEAAAMALAAAAAACAAIAAAID1CYFADs=');
 $scrollbar-border: #0c0c0c;
 $scrollbar-highlight: #ffffff;
 $scrollbar-shadow: #808088;
@@ -29,7 +30,8 @@ $arrow-down: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' w
 .dgg-scroller-theme.os-scrollbar {
   padding: $scrollbar-arrow-size 0;
   box-sizing: border-box;
-  background: $scrollbar-track-bg;
+  background-color: $scrollbar-track-bg;
+  background-image: $scrollbar-track-pattern;
 }
 
 .dgg-scroller-theme.os-scrollbar-unusable {
@@ -37,7 +39,8 @@ $arrow-down: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' w
 }
 
 .dgg-scroller-theme.os-scrollbar > .os-scrollbar-track {
-  background: $scrollbar-track-bg;
+  background-color: $scrollbar-track-bg;
+  background-image: $scrollbar-track-pattern;
 }
 
 // Track fills the padded area
