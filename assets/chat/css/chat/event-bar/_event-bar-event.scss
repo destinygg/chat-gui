@@ -10,6 +10,7 @@
   padding: 3px;
   user-select: none;
   min-width: 60px;
+  flex-shrink: 0;
   display: flex;
   flex-direction: column;
   @include a.win95-button-raised;

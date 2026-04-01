@@ -7,8 +7,8 @@
     display: none;
   }
 
-  display: inline-flex;
-  overflow-x: scroll;
+  display: flex;
+  overflow-x: auto;
   background: a.$win95-bg;
   z-index: 6;
   padding: 2px;
