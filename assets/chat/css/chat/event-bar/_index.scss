@@ -9,8 +9,10 @@
 
   display: inline-flex;
   overflow-x: scroll;
-  background: #111113;
+  background: a.$win95-bg;
   z-index: 6;
+  padding: 2px;
+  @include a.win95-sunken;
 
   scrollbar-width: none;
   &::-webkit-scrollbar {

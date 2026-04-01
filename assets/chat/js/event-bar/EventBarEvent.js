@@ -36,13 +36,29 @@ export default class EventBarEvent extends EventEmitter {
     const userTemplate = eventTemplate.querySelector('.user');
     userTemplate.textContent = user.displayName;
 
-    const iconTemplate = eventTemplate.querySelector('.event-icon');
-    iconTemplate.classList.add(this.type.toLowerCase());
+    const labelTemplate = eventTemplate.querySelector('.event-label');
 
     switch (this.type) {
       case MessageTypes.DONATION: {
         const donationTier = selectDonationTier(this.data.amount);
         eventTemplate.classList.add(donationTier[0]);
+        const dollars = (this.data.amount / 100).toLocaleString('en-US', {
+          style: 'currency',
+          currency: 'USD',
+        });
+        labelTemplate.textContent = dollars;
+        break;
+      }
+      case MessageTypes.SUBSCRIPTION: {
+        labelTemplate.textContent = `T${this.data.tier}`;
+        break;
+      }
+      case MessageTypes.GIFTSUB: {
+        labelTemplate.textContent = `T${this.data.tier}`;
+        break;
+      }
+      case MessageTypes.MASSGIFT: {
+        labelTemplate.textContent = `T${this.data.tier} x${this.data.quantity}`;
         break;
       }
       default:
@@ -87,13 +103,15 @@ export default class EventBarEvent extends EventEmitter {
   }
 
   /**
-   * Sets the progress gradient of the event.
+   * Sets the progress bar width of the event.
    * @param {number} percentageLeft
    */
   set expiryPercentage(percentageLeft) {
     this.element.dataset.percentageLeft = percentageLeft;
-    this.element.querySelector('.event-contents').style.background =
-      `linear-gradient(90deg, #282828, #282828 ${percentageLeft}%, #151515 ${percentageLeft}%, #151515)`;
+    const timerInner = this.element.querySelector('.event-timer-inner');
+    if (timerInner) {
+      timerInner.style.width = `${percentageLeft}%`;
+    }
   }
 
   buildSelected() {
@@ -126,17 +144,9 @@ export default class EventBarEvent extends EventEmitter {
   /**
    * @param {boolean} animate Animate the removal of the event
    */
-  remove(animate = true) {
+  remove() {
     this.stopUpdatingExpirationProgressBar();
-
-    if (animate) {
-      this.element.addEventListener('animationend', () => {
-        this.element.remove();
-      });
-      this.element.classList.add('removed');
-    } else {
-      this.element.remove();
-    }
+    this.element.remove();
   }
 
   stopUpdatingExpirationProgressBar() {

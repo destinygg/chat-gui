@@ -1,59 +1,51 @@
 @use '../../abstracts/' as a;
-@use '../../messages/event/_donation' as donation;
 
 .event-bar-event {
   position: relative;
   cursor: pointer;
-  transition: transform 100ms;
-
-  font-size: 1.1em;
-  border-radius: 10px;
-  border-style: solid;
-  border-color: unset;
-  border-width: 2px;
-  margin: a.$gutter-sm;
+  background-color: a.$win95-bg;
+  border: none;
+  border-radius: 0;
+  margin: 0;
+  padding: 3px;
   user-select: none;
+  min-width: 60px;
+  display: flex;
+  flex-direction: column;
+  @include a.win95-button-raised;
 
   .event-contents {
     display: flex;
-    padding: 0 a.$gutter-xs 0 0.4em;
-    background-color: a.$color-chat-emphasize;
-    justify-content: space-between;
     align-items: center;
-    border-radius: 10px;
+    justify-content: center;
+    padding: 4px 6px;
+    flex: 1;
   }
 
   .event-info {
-    margin-right: a.$gutter-xs;
-    max-width: 12ch;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
   }
 
-  .event-icon {
-    width: 2em;
-    height: 2em;
-    border: 0.25em solid transparent;
-    opacity: 0.75;
-    filter: invert(100%);
-
-    &.subscription {
-      @include a.icon-background('../img/sub-regular.svg');
-    }
-
-    &.giftsub {
-      @include a.icon-background('../img/sub-gift.png');
-    }
-
-    &.massgift {
-      @include a.icon-background('../img/sub-mass-gift.png');
-    }
+  .event-label {
+    font-family: 'MSSansSerif', sans-serif;
+    font-size: 11px;
+    color: a.$win95-text;
+    font-weight: bold;
   }
 
   .user {
-    font-weight: 500;
-    color: a.$color-label-user;
+    font-family: 'MSSansSerif', sans-serif;
+    font-size: 11px;
+    font-weight: normal;
+    color: a.$win95-text;
     word-wrap: normal;
+    max-width: 10ch;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 
     &::before {
       content: unset;
@@ -64,68 +56,23 @@
     }
   }
 
-  &.amount-0 {
-    border-color: #1c5cdb;
-  }
+  .event-timer {
+    background-color: a.$win95-input-bg;
+    overflow: hidden;
+    padding: 2px;
+    margin: 2px 3px 1px;
+    border-radius: 0;
+    @include a.win95-sunken;
 
-  @each $amount, $color in donation.$amount-color-map {
-    &.amount-#{$amount} {
-      border-color: $color;
-
-      .event-icon {
-        @include a.icon-background('../img/donation-amount-#{$amount}.png');
-      }
+    .event-timer-inner {
+      min-height: 2px;
+      background-color: a.$win95-highlight;
+      border-radius: 0;
+      transition: width 1s linear;
     }
   }
 
-  &.rainbow-border {
-    background-clip: padding-box;
-    border: solid 2px transparent;
-
-    &:before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      z-index: -1;
-      margin: -2px;
-      border-radius: inherit;
-      background: var(--rainbow-gradient);
-    }
-  }
-
-  &:hover {
-    transform: scale(1.05);
-  }
-
-  // Ensure `removed` can override `enter` because `enter` is not removed from
-  // the event after the animation completes.
-  &.enter {
-    animation: event-bar-appear 500ms linear;
-  }
-
-  &.removed {
-    animation: event-bar-disappear 500ms linear;
-  }
-}
-
-@keyframes event-bar-appear {
-  0% {
-    transform: scale(0.1);
-    opacity: 0;
-  }
-
-  100% {
-    opacity: 1;
-  }
-}
-
-@keyframes event-bar-disappear {
-  0% {
-    opacity: 1;
-  }
-
-  100% {
-    transform: scale(0.1);
-    opacity: 0;
+  &:active {
+    @include a.win95-button-pressed;
   }
 }
