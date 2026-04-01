@@ -1,32 +1,24 @@
 @use '../abstracts/' as a;
 
 .chat-scroll-notify {
-  padding: 2px 4px;
+  padding: 2px 8px;
   color: a.$win95-text;
   background: a.$win95-bg;
   font-family: 'MSSansSerif', sans-serif;
   font-size: 11px;
   position: absolute;
-  bottom: -2.5em;
-  left: 4px;
-  right: 4px;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
   text-align: center;
   cursor: pointer;
   z-index: 130;
   border-radius: 0;
-  opacity: 0;
-  transition: all 250ms;
-  transition-timing-function: cubic-bezier(0.6, 0.08, 0.99, 0.54);
+  display: none;
   @include a.win95-button-raised;
 
-  &:hover {
-    color: a.$win95-text;
-  }
-
   .chat-unpinned & {
-    transition-timing-function: cubic-bezier(0, 0.99, 0.18, 0.99);
-    opacity: 1;
-    bottom: 0;
+    display: block;
   }
 
   #chat.chat-autocomplete-in & {
