@@ -27,27 +27,41 @@ export default class ChatDonationMessage extends ChatEventMessage {
   html(chat = null) {
     const eventTemplate = super.html(chat);
 
-    /** @type HTMLAnchorElement */
-    const user = document
-      .querySelector('#user-template')
-      ?.content.cloneNode(true).firstElementChild;
+    const dollars = (this.amount / 100).toLocaleString('en-US', {
+      style: 'currency',
+      currency: 'USD',
+    });
 
-    user.title = this.title;
-    user.innerText = this.user.displayName;
+    const info = eventTemplate.querySelector('.event-info');
+    info.innerHTML = '';
 
-    eventTemplate.querySelector('.event-info').append(
-      user,
-      ` donated ${(this.amount / 100).toLocaleString('en-US', {
-        style: 'currency',
-        currency: 'USD',
-      })}`,
+    const smarterChild = document.createElement('span');
+    smarterChild.classList.add('user', 'smarterchild');
+    smarterChild.textContent = 'SmarterChild';
+
+    const ctrl = document.createElement('span');
+    ctrl.textContent = ': ';
+
+    info.append(
+      smarterChild,
+      ctrl,
+      `${this.user.displayName} donated ${dollars}`,
     );
 
-    const donationTier = selectDonationTier(this.amount);
-    eventTemplate.classList.add(donationTier[0]);
-    eventTemplate
-      .querySelector('.event-icon')
-      .classList.add('donation-icon', donationTier[0]);
+    // Hide icon and event-bottom
+    const icon = eventTemplate.querySelector('.event-icon');
+    if (icon) {
+      icon.remove();
+    }
+    const bottom = eventTemplate.querySelector('.event-bottom');
+    if (bottom && this.message) {
+      const text = document.createElement('span');
+      text.textContent = ` — ${this.message}`;
+      info.append(text);
+      bottom.remove();
+    } else if (bottom) {
+      bottom.remove();
+    }
 
     const classes = Array.from(eventTemplate.classList);
     const attributes = eventTemplate

@@ -1,23 +1,26 @@
 @use '../abstracts/' as a;
 
 .chat-scroll-notify {
-  padding: 0.25em 0;
-  color: a.$color-chat-text3;
-  background: a.$color-surface-dark3;
+  padding: 2px 4px;
+  color: a.$win95-text;
+  background: a.$win95-bg;
+  font-family: 'MSSansSerif', sans-serif;
+  font-size: 11px;
   position: absolute;
   bottom: -2.5em;
-  left: a.$gutter-md;
-  right: a.$gutter-md;
+  left: 4px;
+  right: 4px;
   text-align: center;
   cursor: pointer;
   z-index: 130;
-  border-radius: a.$bradius;
+  border-radius: 0;
   opacity: 0;
   transition: all 250ms;
   transition-timing-function: cubic-bezier(0.6, 0.08, 0.99, 0.54);
+  @include a.win95-button-raised;
 
   &:hover {
-    color: a.$color-chat-text1;
+    color: a.$win95-text;
   }
 
   .chat-unpinned & {

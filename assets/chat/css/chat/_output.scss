@@ -5,6 +5,9 @@
   overflow: hidden;
   width: 100%;
   position: relative;
+  margin: 4px;
+  background-color: a.$win95-input-bg;
+  @include a.win95-sunken;
 }
 
 .chat-output {
@@ -13,10 +16,12 @@
 }
 
 .chat-lines {
-  font-family: a.$chat-lines-font;
+  font-family: 'MSSansSerif', sans-serif;
+  font-size: 11px;
   line-height: 1.65em;
   outline: 0 !important;
   overflow-anchor: none;
+  color: a.$win95-text;
 }
 
 .onstreamchat {
@@ -29,5 +34,7 @@
 
   #chat-output-frame {
     margin: 0;
+    background-color: transparent;
+    box-shadow: none;
   }
 }

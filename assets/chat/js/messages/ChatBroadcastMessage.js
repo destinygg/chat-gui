@@ -10,41 +10,35 @@ export default class ChatBroadcastMessage extends ChatEventMessage {
     this.generateMessageHash();
   }
 
-  buildUserTemplate() {
-    if (this.user.isSystem()) {
-      return [];
-    }
-
-    /** @type HTMLAnchorElement */
-    const user = document
-      .querySelector('#user-template')
-      ?.content.cloneNode(true).firstElementChild;
-    user.title = this.title;
-    user.innerText = this.user.displayName;
-
-    const ctrl = document.createElement('span');
-    ctrl.classList.toggle('ctrl');
-
-    if (this.slashme) {
-      return [user, ctrl, ' '];
-    }
-
-    ctrl.innerText = ': ';
-
-    return [user, ctrl];
-  }
-
   html(chat = null) {
     const eventTemplate = super.html(chat);
 
-    const text = eventTemplate.querySelector('.event-bottom')?.innerHTML;
-    eventTemplate.querySelector('.event-bottom').remove();
-    eventTemplate.querySelector('.event-info').innerHTML = text;
+    const info = eventTemplate.querySelector('.event-info');
+    const bottom = eventTemplate.querySelector('.event-bottom');
+    const bottomText = bottom ? bottom.innerHTML : '';
+    if (bottom) {
+      bottom.remove();
+    }
 
-    const user = this.buildUserTemplate(chat);
+    info.innerHTML = '';
 
-    eventTemplate.querySelector('.event-icon').classList.add('broadcast-icon');
-    eventTemplate.querySelector('.event-info').prepend(...user);
+    const smarterChild = document.createElement('span');
+    smarterChild.classList.add('user', 'smarterchild');
+    smarterChild.textContent = 'SmarterChild';
+
+    const ctrl = document.createElement('span');
+    ctrl.textContent = ': ';
+
+    const text = document.createElement('span');
+    text.innerHTML = bottomText;
+
+    info.append(smarterChild, ctrl, text);
+
+    // Remove icon
+    const icon = eventTemplate.querySelector('.event-icon');
+    if (icon) {
+      icon.remove();
+    }
 
     const classes = Array.from(eventTemplate.classList);
     const attributes = eventTemplate

@@ -8,21 +8,23 @@ $link-color-map: (
 
 .msg-chat {
   word-wrap: break-word;
-  padding: a.$gutter-xs a.$gutter-md * 2 a.$gutter-xs a.$gutter-md;
-  color: a.$color-chat-text2;
+  padding: 1px 4px;
+  color: a.$win95-text;
+  font-family: 'MSSansSerif', sans-serif;
+  font-size: 11px;
 
   .time {
-    font-size: 0.8em;
-    color: a.$color-chat-disabled;
-    padding-right: a.$gutter-sm;
+    font-size: 0.9em;
+    color: a.$win95-text-disabled;
+    padding-right: 4px;
     display: none; /* hidden by default */
   }
 
   .user {
-    font-weight: 500;
+    font-weight: bold;
     cursor: pointer;
-    margin-left: a.$gutter-sm;
-    color: a.$color-label-user;
+    margin-left: 0;
+    color: a.$win95-highlight;
   }
 
   .chat-user {
@@ -34,20 +36,24 @@ $link-color-map: (
     }
   }
 
+  &.msg-own .user {
+    color: #cc0000;
+  }
+
   .greentext {
     color: a.$color-green-text;
   }
 
   .sus {
     text-transform: uppercase;
-    font-family: 'Among Us', a.$chat-lines-font;
+    font-family: 'Among Us', 'MSSansSerif', sans-serif;
   }
 
   .externallink {
     border-style: solid;
     border-color: transparent;
     border-width: 1px 0 1px 0;
-    color: a.$color-link;
+    color: a.$win95-highlight;
     position: relative;
 
     &:visited {
@@ -75,8 +81,8 @@ $link-color-map: (
   .embed-button {
     position: relative;
     top: 2.5px;
-    margin-left: a.$gutter-sm;
-    margin-right: a.$gutter-xs;
+    margin-left: 2px;
+    margin-right: 1px;
     opacity: 0.5;
 
     &:hover {

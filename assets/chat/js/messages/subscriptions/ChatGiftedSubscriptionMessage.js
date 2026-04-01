@@ -37,19 +37,32 @@ export default class ChatGiftedSubscriptionMessage extends ChatSubscriptionMessa
 
     attributes['data-giftee'] = this.giftee.username;
 
-    message.querySelector('.subscription-icon').classList.add('gift');
+    const tierLabel = this.tierLabel ?? `Tier ${this.tier}`;
+    const info = message.querySelector('.event-info');
+    info.innerHTML = '';
 
-    /** @type HTMLAnchorElement */
-    const giftee = document
-      .querySelector('#user-template')
-      ?.content.cloneNode(true).firstElementChild;
+    const smarterChild = document.createElement('span');
+    smarterChild.classList.add('user', 'smarterchild');
+    smarterChild.textContent = 'SmarterChild';
 
-    giftee.innerText = this.giftee.displayName;
+    const ctrl = document.createElement('span');
+    ctrl.textContent = ': ';
 
-    const subscriptionInfo = message.querySelector('.event-info');
-    const user = message.querySelector('.user');
-    const tier = message.querySelector('.tier');
-    subscriptionInfo.innerHTML = `${user.outerHTML} gifted ${giftee.outerHTML} a ${tier.outerHTML} subscription`;
+    info.append(
+      smarterChild,
+      ctrl,
+      `${this.user.displayName} gifted ${this.giftee.displayName} a ${tierLabel} subscription.`,
+    );
+
+    // Remove icon and bottom
+    const icon = message.querySelector('.event-icon');
+    if (icon) {
+      icon.remove();
+    }
+    const bottom = message.querySelector('.event-bottom');
+    if (bottom) {
+      bottom.remove();
+    }
 
     return this.wrap(message.innerHTML, classes, attributes);
   }

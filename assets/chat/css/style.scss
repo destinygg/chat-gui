@@ -38,9 +38,9 @@
 html {
   box-sizing: border-box;
   position: relative;
-  color: a.$text-color1;
-  background: a.$color-chat-bg;
-  font-family: a.$chat-chrome-font;
+  color: a.$win95-text;
+  background: a.$win95-bg;
+  font-family: 'MSSansSerif', sans-serif;
   font-size: 13px;
   line-height: 1.42857143;
   text-rendering: optimizeLegibility;
@@ -52,9 +52,9 @@ html {
 
 body {
   position: relative;
-  color: a.$text-color1;
-  background: a.$color-chat-bg;
-  font-family: a.$chat-chrome-font;
+  color: a.$win95-text;
+  background: a.$win95-bg;
+  font-family: 'MSSansSerif', sans-serif;
   font-size: 13px;
   line-height: 1.42857143;
   text-rendering: optimizeLegibility;
@@ -117,12 +117,12 @@ hr {
 
 .tippy-box[data-theme~='dgg'] {
   text-align: center;
-  background-color: a.$color-surface-dark4;
-  color: a.$color-chat-text1;
+  background-color: a.$win95-bg;
+  color: a.$win95-text;
 }
 
 .tippy-box[data-theme~='dgg'] > .tippy-svg-arrow {
-  fill: a.$color-surface-dark4;
+  fill: a.$win95-bg;
 }
 
 /* Small screen, non-retina */

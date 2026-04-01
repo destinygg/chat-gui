@@ -5,77 +5,63 @@
 .msg-giftsub,
 .msg-massgift,
 .msg-broadcast {
-  text-shadow: 1px 1px 3px rgba(0, 0, 0, 1);
-  font-size: 1.1em;
-  font-weight: 400;
-  padding: unset;
-  border-radius: 10px;
-  border-style: solid;
-  border-color: unset;
-  border-width: 3px;
-  display: flex;
-  flex-direction: column;
-  margin: a.$gutter-sm a.$gutter-md * 2 a.$gutter-sm a.$gutter-sm;
+  text-shadow: none;
+  font-family: 'MSSansSerif', sans-serif;
+  font-size: 11px;
+  font-weight: normal;
+  padding: 1px 4px;
+  border-radius: 0;
+  border: none;
+  display: block;
+  margin: 0;
+  color: a.$win95-text;
 
   .event-wrapper {
-    border-radius: 10px;
+    display: inline;
   }
 
   .event-top {
-    display: flex;
-    padding: a.$gutter-xs a.$gutter-md * 2 a.$gutter-xs a.$gutter-md;
-    background-color: a.$color-chat-emphasize;
-    justify-content: space-between;
-    align-items: center;
-    border-top-right-radius: 10px;
-    border-top-left-radius: 10px;
+    display: inline;
+    padding: 0;
+    background-color: transparent;
   }
 
   .event-icon {
-    color: a.$color-chat-disabled;
-    position: relative;
-    text-decoration: none;
-    display: inline-block;
-    border: 0.25em solid transparent;
-    opacity: 0.75;
-    width: 100%;
-    height: 100%;
-    transition: background 200ms ease;
+    display: none;
   }
 
   .event-bottom {
-    padding: a.$gutter-xs a.$gutter-md * 2 a.$gutter-xs a.$gutter-md;
-    background-color: a.$color-chat-bg;
-    border-bottom-right-radius: 10px;
-    border-bottom-left-radius: 10px;
+    display: inline;
+    padding: 0;
+    background-color: transparent;
   }
 
   .event-button {
-    width: 2.25em;
-    height: 2.25em;
-    flex-shrink: 0;
+    display: none;
+  }
 
-    &:hover:not(:disabled) {
-      .event-icon {
-        @include a.icon-background('../img/icon-ellipsis-vertical.svg');
-      }
-    }
+  .user.smarterchild {
+    font-weight: bold;
+    color: #008000;
+    cursor: default;
+    margin-left: 0;
 
-    &:disabled {
-      cursor: default;
+    &::before {
+      content: '';
+      display: inline-block;
+      width: 14px;
+      height: 16px;
+      margin-right: 2px;
+      vertical-align: middle;
+      margin-bottom: 2px;
+      background: url('../img/aim-icon.png') no-repeat center / contain;
+      image-rendering: pixelated;
     }
   }
 
-  &:not(:has(.event-bottom)) {
-    .event-top {
-      border-bottom-right-radius: 10px;
-      border-bottom-left-radius: 10px;
-    }
-  }
-
-  .user {
-    margin-left: unset;
-    text-shadow: none;
+  .user:not(.smarterchild) {
+    margin-left: 0;
+    color: a.$win95-highlight;
   }
 
   &.censored {
@@ -84,13 +70,13 @@
     }
 
     .event-bottom:after {
-      color: a.$color-accent;
+      color: a.$win95-text-disabled;
       cursor: pointer;
       content: '<censored>';
     }
 
     .event-bottom:hover:after {
-      color: a.$color-accent-light;
+      color: a.$win95-text;
     }
   }
 }

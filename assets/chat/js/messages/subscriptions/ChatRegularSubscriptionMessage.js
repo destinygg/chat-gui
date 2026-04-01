@@ -33,25 +33,32 @@ export default class ChatRegularSubscriptionMessage extends ChatSubscriptionMess
         };
       }, {});
 
-    message.querySelector('.subscription-icon').classList.add('regular');
+    const tierLabel = this.tierLabel ?? `Tier ${this.tier}`;
+    const info = message.querySelector('.event-info');
+    info.innerHTML = '';
 
-    const subscriptionInfo = message.querySelector('.event-info');
-    const user = message.querySelector('.user');
-    const tier = message.querySelector('.tier');
-    subscriptionInfo.innerHTML = `${user.outerHTML} is now a ${tier.outerHTML} subscriber`;
+    const smarterChild = document.createElement('span');
+    smarterChild.classList.add('user', 'smarterchild');
+    smarterChild.textContent = 'SmarterChild';
 
+    const ctrl = document.createElement('span');
+    ctrl.textContent = ': ';
+
+    let text = `${this.user.displayName} is now a ${tierLabel} subscriber.`;
     if (this.streak) {
-      subscriptionInfo.classList.add('streak');
-      subscriptionInfo.innerHTML = `<span>${subscriptionInfo.innerHTML}</span>`;
+      text += ` They're on a ${this.streak} month streak!`;
+    }
 
-      /** @type HTMLSpanElement */
-      const streak = document
-        .querySelector('#streak-template')
-        ?.content.cloneNode(true).firstElementChild;
+    info.append(smarterChild, ctrl, text);
 
-      streak.innerText = `They're currently on a ${this.streak} month streak`;
-
-      subscriptionInfo.append(streak);
+    // Remove icon and bottom
+    const icon = message.querySelector('.event-icon');
+    if (icon) {
+      icon.remove();
+    }
+    const bottom = message.querySelector('.event-bottom');
+    if (bottom) {
+      bottom.remove();
     }
 
     return this.wrap(message.innerHTML, classes, attributes);

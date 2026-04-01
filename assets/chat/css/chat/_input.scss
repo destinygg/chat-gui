@@ -1,7 +1,7 @@
 @use '../abstracts/' as a;
 
 #chat-input-frame {
-  padding: a.$gutter-md a.$gutter-md 0 a.$gutter-md;
+  padding: 4px;
 }
 
 #chat-input-wrap {
@@ -11,26 +11,29 @@
 #chat-input-control {
   max-height: 140px;
   position: relative;
-  color: a.$color-chat-text2;
-  background: a.$color-surface-dark2;
-  border: 1px solid a.$color-surface-dark3;
+  color: a.$win95-text;
+  background: a.$win95-input-bg;
+  border: none;
   outline: none;
   resize: none;
   margin: 0;
   width: 100%;
-  padding: a.$gutter-md;
-  border-radius: a.$bradius;
+  padding: 4px;
+  border-radius: 0;
   box-shadow: none;
   box-sizing: border-box;
   display: block;
   overflow: hidden;
+  font-family: 'MSSansSerif', sans-serif;
+  font-size: 11px;
+  @include a.win95-sunken;
 
   &::placeholder {
-    color: a.$color-chat-place;
+    color: a.$win95-text-disabled;
   }
 
   #chat.chat-autocomplete-in & {
-    border-radius: 0 0 a.$bradius a.$bradius;
+    border-radius: 0;
   }
 }
 
@@ -47,5 +50,6 @@
     opacity: 0.75;
 
     @include a.icon-background('../img/icon-subonly.svg');
+    filter: brightness(0);
   }
 }
