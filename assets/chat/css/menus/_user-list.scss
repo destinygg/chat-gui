@@ -1,23 +1,45 @@
 @use '../abstracts/' as a;
 
 #chat-user-list {
-  .section {
-    margin: 1.5em 0em 0.5em;
-
-    .title {
-      padding: 0em 0em 0.2em 1em;
-      font-weight: 600;
-      border-bottom: 1px solid;
-    }
+  .scrollable {
+    max-height: calc(100% - 3em);
+    background: a.$win95-input-bg;
+    margin: 4px;
+    @include a.win95-sunken;
   }
 
   .content {
-    margin-top: -(a.$gutter-md);
-    padding-bottom: a.$gutter-lg;
+    padding: 4px 0 0 2px;
   }
 
-  .scrollable {
-    max-height: calc(100% - 3em);
+  .section {
+    margin: 0;
+
+    .title {
+      position: relative;
+      padding: 3px 4px 3px 18px;
+      font-weight: bold;
+      color: a.$win95-text;
+      border: none;
+      cursor: default;
+      margin: 0;
+
+      &::before {
+        content: '';
+        position: absolute;
+        top: 7px;
+        left: 4px;
+        width: 0;
+        height: 0;
+        border-left: 4px solid transparent;
+        border-right: 4px solid transparent;
+        border-top: 5px solid #2f2f2f;
+      }
+    }
+
+    .users {
+      margin-left: 20px;
+    }
   }
 
   &.search-in {
@@ -30,22 +52,45 @@
     }
   }
 
-  input {
-    padding: a.$gutter-lg a.$gutter-lg;
-    border: none;
-    background: none;
-    border-radius: 0;
+  #chat-user-list-search {
+    padding: 4px 6px;
+
+    label {
+      display: block;
+      font-family: 'MSSansSerif', sans-serif;
+      font-size: 11px;
+      color: a.$win95-text;
+      margin-bottom: 2px;
+    }
+
+    input {
+      padding: 3px;
+      border: none;
+      background: a.$win95-input-bg;
+      border-radius: 0;
+      color: a.$win95-text;
+      font-family: 'MSSansSerif', sans-serif;
+      font-size: 11px;
+      @include a.win95-sunken;
+    }
   }
 }
 
 .user-entry {
   margin: 0;
-  cursor: pointer;
-  padding: 0 a.$gutter-lg;
+  cursor: default;
+  padding: 2px 4px 2px 15px;
   text-decoration: none;
   visibility: visible;
   align-items: center;
   display: flex;
+  color: a.$win95-text;
+
+  &.selected {
+    background-color: yellow;
+    outline: 1px dotted #010101;
+    outline-offset: -1px;
+  }
 
   .user-actions {
     display: flex;
@@ -55,20 +100,9 @@
     .whisper-nick {
       @include a.icon-background('../img/icon-whisper.svg');
       visibility: hidden;
-      opacity: 0.25;
       width: 1em;
       height: 1em;
-      &:hover {
-        opacity: 1;
-      }
-    }
-  }
-
-  &:hover {
-    background: #282828;
-
-    .whisper-nick {
-      visibility: visible;
+      filter: brightness(0);
     }
   }
 }

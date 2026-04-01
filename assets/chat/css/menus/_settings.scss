@@ -16,8 +16,8 @@
     margin-top: a.$gutter-lg * 2;
     margin-bottom: a.$gutter-lg;
     padding-left: a.$gutter-lg;
-    color: a.$text-color-disabled;
-    text-transform: uppercase;
+    color: a.$win95-text;
+    text-transform: capitalize;
     font-weight: 600;
   }
 
@@ -26,6 +26,7 @@
     font-weight: normal;
     max-width: 100%;
     margin-bottom: a.$gutter-md;
+    color: a.$win95-text;
   }
 
   .checkbox label {
@@ -34,20 +35,85 @@
     max-width: 100%;
     cursor: pointer;
     display: flex;
-    justify-items: center;
     align-items: center;
+    color: a.$win95-text;
+    position: relative;
+    padding-left: 18px;
   }
 
   .checkbox input {
-    margin: 0 a.$gutter-sm 0 0;
-    line-height: normal;
-    box-sizing: border-box;
-    padding: 0;
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    appearance: none;
+    width: 13px;
+    height: 13px;
+    margin: 0;
+    background-color: a.$win95-input-bg;
+    @include a.win95-sunken;
+    cursor: pointer;
+
+    &:checked {
+      background-image: url('data:image/gif;base64,R0lGODlhBwAHAJEAAAAAAP///////wAAACH5BAEAAAIALAAAAAAHAAcAAAIMlA9nwMj9xGuLIlUAADs=');
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: 7px;
+      image-rendering: pixelated;
+    }
+
+    &:focus {
+      outline: none;
+    }
+  }
+
+  .form-group:has(select) {
+    position: relative;
   }
 
   select {
-    border-radius: a.$bradius;
-    padding: a.$gutter-sm;
+    border-radius: 0;
+    padding: 2px 20px 2px 4px;
     width: 100%;
+    height: 21px;
+    background-color: a.$win95-input-bg;
+    color: a.$win95-text;
+    border: none;
+    font-family: 'MSSansSerif', sans-serif;
+    font-size: 11px;
+    appearance: none;
+    cursor: default;
+    @include a.win95-sunken;
+    background-image: none;
+
+    &:focus {
+      outline: none;
+    }
+
+    + .win95-select-btn,
+    ~ .win95-select-btn {
+      display: block;
+    }
+  }
+
+  .win95-select-btn {
+    display: none;
+    position: absolute;
+    right: 2px;
+    bottom: 2px;
+    width: 16px;
+    height: 17px;
+    background-color: a.$win95-bg-alt;
+    border: none;
+    pointer-events: none;
+    box-shadow:
+      inset -1px -1px 0 a.$win95-black,
+      inset 1px 1px 0 a.$win95-white,
+      inset -2px -2px 0 a.$win95-darkgrey,
+      inset 2px 2px 0 a.$win95-bg-alt;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='4'%3E%3Cpolygon points='0,0 8,0 4,4' fill='%23000'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center;
+    image-rendering: pixelated;
   }
 }

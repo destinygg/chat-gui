@@ -12,18 +12,29 @@ button.btn {
   cursor: pointer;
   user-select: none;
   background-image: none;
-  border: 1px solid transparent;
-  border-radius: a.$bradius;
+  border: none;
+  border-radius: 0;
+  background-color: a.$win95-bg;
+  color: a.$win95-text;
+  @include a.win95-button-raised;
+
+  &:active {
+    @include a.win95-button-pressed;
+    padding: calc(a.$gutter-md + 1px) calc(a.$gutter-lg - 1px)
+      calc(a.$gutter-md - 1px) calc(a.$gutter-lg + 1px);
+  }
 }
 
 .btn-primary {
-  color: a.$text-color;
-  background-color: a.$color-accent;
-  border-color: a.$color-accent;
+  color: a.$win95-text;
+  background-color: a.$win95-bg;
+  border: none;
+  @include a.win95-button-raised;
 }
 
 .btn-default {
-  color: a.$text-color3;
-  background-color: a.$color-surface-light1;
-  border-color: a.$color-surface-light3;
+  color: a.$win95-text;
+  background-color: a.$win95-bg;
+  border: none;
+  @include a.win95-button-raised;
 }

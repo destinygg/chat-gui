@@ -1,5 +1,45 @@
+@use 'vars' as v;
+
 @mixin icon-background($url) {
   background: transparent url($url) no-repeat center center / contain;
+}
+
+// Win95 box-shadow mixins
+@mixin win95-raised {
+  box-shadow:
+    inset -1px -1px 0 v.$win95-black,
+    inset 1px 1px 0 v.$win95-bg-alt,
+    inset -2px -2px 0 v.$win95-darkgrey,
+    inset 2px 2px 0 v.$win95-white;
+}
+
+@mixin win95-sunken {
+  box-shadow:
+    inset -1px -1px 0 v.$win95-white,
+    inset 1px 1px 0 v.$win95-darkgrey,
+    inset -2px -2px 0 v.$win95-bg-alt,
+    inset 2px 2px 0 v.$win95-black;
+}
+
+@mixin win95-divider {
+  border-top: 1px solid v.$win95-darkgrey;
+  border-bottom: 1px solid v.$win95-white;
+}
+
+@mixin win95-button-raised {
+  box-shadow:
+    inset -1px -1px 0 v.$win95-black,
+    inset 1px 1px 0 v.$win95-white,
+    inset -2px -2px 0 v.$win95-darkgrey,
+    inset 2px 2px 0 v.$win95-bg-alt;
+}
+
+@mixin win95-button-pressed {
+  box-shadow:
+    inset -1px -1px 0 v.$win95-white,
+    inset 1px 1px 0 v.$win95-black,
+    inset -2px -2px 0 v.$win95-bg-alt,
+    inset 2px 2px 0 v.$win95-darkgrey;
 }
 
 @mixin msg-icon($posX, $posY, $width: 16px, $height: 16px) {

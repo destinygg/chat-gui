@@ -46,11 +46,13 @@ export default class ChatUserMenu extends ChatMenu {
     this.searchinput = this.ui.find(
       '#chat-user-list-search .form-control:first',
     );
-    this.container.on('click', '.user-entry', (e) =>
+    this.container.on('click', '.user-entry', (e) => {
+      this.container.find('.user-entry.selected').removeClass('selected');
+      $(e.currentTarget).addClass('selected');
       this.chat.userfocus.toggleFocus(
         e.currentTarget.getAttribute('data-username'),
-      ),
-    );
+      );
+    });
     this.container.on('click', '.whisper-nick', (e) => {
       ChatMenu.closeMenus(this.chat);
       const value = this.chat.input.val().toString().trim();
@@ -91,18 +93,19 @@ export default class ChatUserMenu extends ChatMenu {
     }
   }
 
+  hide() {
+    this.container.find('.user-entry.selected').removeClass('selected');
+    super.hide();
+  }
+
   redraw() {
     if (this.visible) {
       const searching = this.searchterm.length > 0;
       if (searching && this.totalcount !== this.searchcount) {
-        this.header.text(
-          `Users (${this.searchcount} out of ${this.totalcount})`,
-        );
+        this.header.text(`People (${this.searchcount}/${this.totalcount})`);
         [...this.sections.values()].forEach((section) => {
           $(section.title).html(
-            `${section.searchcount} out of ${section.users.children.length} ${
-              section.data.name
-            }${section.users.children.length === 1 ? '' : 's'}`,
+            `${section.data.name} (${section.searchcount}/${section.users.children.length})`,
           );
           if (section.searchcount === 0) {
             $(section.container).hide();
@@ -111,12 +114,10 @@ export default class ChatUserMenu extends ChatMenu {
           }
         });
       } else {
-        this.header.text(`Users (${this.totalcount})`);
+        this.header.text(`People (${this.totalcount})`);
         [...this.sections.values()].forEach((section) => {
           $(section.title).html(
-            `${section.users.children.length} ${section.data.name}${
-              section.users.children.length === 1 ? '' : 's'
-            }`,
+            `${section.data.name} (${section.users.children.length}/${section.users.children.length})`,
           );
           if (section.users.children.length === 0) {
             $(section.container).hide();

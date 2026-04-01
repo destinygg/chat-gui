@@ -18,22 +18,27 @@ $toolbar-icons-map: (
   max-width: 350px;
 
   .floating-window {
-    box-shadow: 0px 0px 6px black;
-    border-radius: 6px;
+    @include a.win95-raised;
+    border: 1px solid rgba(0, 0, 0, 0.5);
+    border-radius: 0;
   }
 
   .user-info h5 {
     padding-left: a.$gutter-md;
     margin-top: unset;
     margin-bottom: unset;
-    border-bottom: 1px solid a.$color-surface-dark4;
+    color: a.$win95-text;
+    border-bottom: none;
+    @include a.win95-divider;
   }
 
   .stalk {
     height: 100px;
 
     .scrollable {
-      background: a.$color-chat-bg;
+      background: a.$win95-input-bg;
+      color: a.$win95-text;
+      @include a.win95-sunken;
     }
   }
 
@@ -51,6 +56,7 @@ $toolbar-icons-map: (
     @each $id, $icon in $toolbar-icons-map {
       &##{$id}-user-btn .btn-icon {
         @include a.icon-background('../img/icon-#{$icon}.svg');
+        filter: brightness(0);
       }
     }
   }
@@ -78,7 +84,7 @@ $toolbar-icons-map: (
   .mute-duration-button {
     opacity: 0.25;
     transition: opacity 150ms;
-    color: white;
+    color: a.$win95-text;
     width: 100%;
 
     &:hover {

@@ -1,22 +1,35 @@
+$scrollbar-size: 16px;
+$scrollbar-arrow-size: 16px;
+$scrollbar-bg: #bbc3c4;
+$scrollbar-track-bg: #ffffff;
+$scrollbar-border: #0c0c0c;
+$scrollbar-highlight: #ffffff;
+$scrollbar-shadow: #808088;
+
+// Up arrow as inline SVG (black triangle pointing up)
+$arrow-up: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='4'%3E%3Cpolygon points='4,0 8,4 0,4' fill='%23000'/%3E%3C/svg%3E");
+// Down arrow
+$arrow-down: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='4'%3E%3Cpolygon points='0,0 8,0 4,4' fill='%23000'/%3E%3C/svg%3E");
+
 .dgg-scroller-theme.os-scrollbar-horizontal {
-  right: 10px;
-  height: 10px;
+  right: $scrollbar-size;
+  height: $scrollbar-size;
 }
 
 .dgg-scroller-theme.os-scrollbar-vertical {
-  bottom: 10px;
-  width: 10px;
+  bottom: 0;
+  width: $scrollbar-size;
 }
 
 .dgg-scroller-theme.os-scrollbar-rtl.os-scrollbar-horizontal {
-  left: 10px;
+  left: $scrollbar-size;
   right: 0;
 }
 
 .dgg-scroller-theme.os-scrollbar {
-  padding: 2px;
+  padding: 0;
   box-sizing: border-box;
-  background: transparent;
+  background: $scrollbar-track-bg;
 }
 
 .dgg-scroller-theme.os-scrollbar-unusable {
@@ -24,7 +37,13 @@
 }
 
 .dgg-scroller-theme.os-scrollbar > .os-scrollbar-track {
-  background: transparent;
+  background: $scrollbar-track-bg;
+}
+
+// Reserve space for arrow buttons
+.dgg-scroller-theme.os-scrollbar-vertical > .os-scrollbar-track {
+  margin-top: $scrollbar-arrow-size;
+  margin-bottom: $scrollbar-arrow-size;
 }
 
 .dgg-scroller-theme.os-scrollbar-horizontal
@@ -36,56 +55,73 @@
 .dgg-scroller-theme.os-scrollbar-vertical
   > .os-scrollbar-track
   > .os-scrollbar-handle {
-  min-height: 30px;
+  min-height: 20px;
 }
 
 .dgg-scroller-theme.os-scrollbar-transition
   > .os-scrollbar-track
   > .os-scrollbar-handle {
-  transition: background-color 0.3s;
+  transition: none;
 }
 
 .dgg-scroller-theme.os-scrollbar > .os-scrollbar-track > .os-scrollbar-handle {
-  background: rgba(255, 255, 255, 0.4);
+  background: $scrollbar-bg;
+  box-shadow:
+    inset -1px -1px 0 $scrollbar-shadow,
+    inset 1px 1px 0 0 $scrollbar-highlight;
+  border: 1px solid $scrollbar-border;
 }
 
 .dgg-scroller-theme.os-scrollbar:hover
   > .os-scrollbar-track
   > .os-scrollbar-handle {
-  background: rgba(255, 255, 255, 0.55);
+  background: $scrollbar-bg;
 }
 
 .dgg-scroller-theme.os-scrollbar
   > .os-scrollbar-track
   > .os-scrollbar-handle.active {
-  background: rgba(255, 255, 255, 0.7);
+  background: $scrollbar-bg;
 }
 
+// Remove the old hit-area pseudo-elements
 .dgg-scroller-theme.os-scrollbar-horizontal .os-scrollbar-handle:before,
 .dgg-scroller-theme.os-scrollbar-vertical .os-scrollbar-handle:before {
-  content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  display: block;
+  display: none;
 }
 
-.dgg-scroller-theme.os-scrollbar-horizontal .os-scrollbar-handle:before {
-  top: -6px;
-  bottom: -2px;
-}
+// Arrow buttons via pseudo-elements on the scrollbar itself
+.dgg-scroller-theme.os-scrollbar-vertical {
+  position: relative;
 
-.dgg-scroller-theme.os-scrollbar-vertical .os-scrollbar-handle:before {
-  left: -6px;
-  right: -2px;
-}
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    width: $scrollbar-size;
+    height: $scrollbar-arrow-size;
+    background-color: $scrollbar-bg;
+    background-repeat: no-repeat;
+    background-position: center;
+    image-rendering: pixelated;
+    box-shadow:
+      inset -1px -1px 0 $scrollbar-shadow,
+      inset 1px 1px 0 0 $scrollbar-highlight;
+    border: 1px solid $scrollbar-border;
+    box-sizing: border-box;
+    z-index: 1;
+  }
 
-.dgg-scroller-theme.os-scrollbar-rtl.os-scrollbar-vertical
-  .os-scrollbar-handle:before {
-  right: -6px;
-  left: -2px;
+  &::before {
+    top: 0;
+    background-image: $arrow-up;
+  }
+
+  &::after {
+    bottom: 0;
+    background-image: $arrow-down;
+  }
 }
 
 .onstreamchat {

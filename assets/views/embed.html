@@ -5,10 +5,15 @@
 
   <div id="chat-poll-frame">
     <div class="poll-frame">
+      <div class="toolbar">
+        <h5>
+          <span>Poll</span>
+          <i class="poll-close chat-menu-close" title="Close poll"></i>
+        </h5>
+      </div>
       <div class="poll-header">
         <div class="poll-top">
           <span class="poll-question"></span>
-          <span class="poll-close" title="Close poll"></span>
         </div>
         <div class="poll-title">
           <span class="poll-info"></span>
@@ -47,45 +52,18 @@
     </div>
     <div id="chat-tools-wrap">
       <div class="chat-tools-group">
-        <a
-          id="chat-emoticon-btn"
-          class="chat-tool-btn"
-          aria-label="Emotes"
-          data-tippy-content="Emotes"
-        >
+        <a id="chat-emoticon-btn" class="chat-tool-btn">
           <i class="btn-icon"></i>
         </a>
-        <a
-          id="chat-whisper-btn"
-          class="chat-tool-btn"
-          aria-label="Whispers"
-          data-tippy-content="Whispers"
-        >
+        <a id="chat-whisper-btn" class="chat-tool-btn">
           <i class="btn-icon"></i>
         </a>
       </div>
       <div class="chat-tools-group">
-        <a
-          id="chat-watching-focus-btn"
-          class="chat-tool-btn"
-          data-tippy-content="Highlights messages from users watching the same stream"
-        >
+        <a id="chat-settings-btn" class="chat-tool-btn">
           <i class="btn-icon"></i>
         </a>
-        <a
-          id="chat-settings-btn"
-          class="chat-tool-btn"
-          aria-label="Settings"
-          data-tippy-content="Settings"
-        >
-          <i class="btn-icon"></i>
-        </a>
-        <a
-          id="chat-users-btn"
-          class="chat-tool-btn"
-          aria-label="Users"
-          data-tippy-content="Users"
-        >
+        <a id="chat-users-btn" class="chat-tool-btn">
           <i class="btn-icon"></i>
         </a>
       </div>
@@ -116,6 +94,7 @@
                 <option value="medium">Size Medium</option>
                 <option value="large">Size Large</option>
               </select>
+              <span class="win95-select-btn"></span>
             </div>
 
             <h4>Messages</h4>
@@ -164,6 +143,7 @@
                 <option value="1">&lt;censored&gt;</option>
                 <option value="2">do nothing</option>
               </select>
+              <span class="win95-select-btn"></span>
             </div>
             <div class="form-group checkbox">
               <label title="Disable animations when possible">
@@ -178,13 +158,6 @@
                 <input name="notificationtimeout" type="checkbox" /> Close after
                 short period
               </label>
-            </div>
-            <div class="form-group">
-              <p>
-                <small id="chat-settings-notification-permissions"
-                  >(Permission unknown)</small
-                >
-              </p>
             </div>
 
             <h4>Whispers</h4>
@@ -257,17 +230,18 @@
   <div id="chat-user-list" class="chat-menu right">
     <div class="chat-menu-inner">
       <div class="toolbar">
-        <h5><span>Users</span> <i class="chat-menu-close"></i></h5>
+        <h5><span>People</span> <i class="chat-menu-close"></i></h5>
       </div>
       <div class="scrollable">
         <div class="content"></div>
       </div>
       <div id="chat-user-list-search">
+        <label for="user-search-input">Username Search:</label>
         <input
           type="text"
+          id="user-search-input"
           class="form-control"
           value=""
-          placeholder="Username search ..."
         />
       </div>
     </div>
@@ -387,17 +361,18 @@
   <div id="chat-emote-list" class="chat-menu left">
     <div class="chat-menu-inner">
       <div class="toolbar">
-        <h5><span>Emotes</span> <i class="chat-menu-close"></i></h5>
+        <h5><span>Smileys</span> <i class="chat-menu-close"></i></h5>
       </div>
       <div class="scrollable all">
         <div class="content"></div>
       </div>
       <div id="chat-emote-list-search">
+        <label for="emote-search-input">Emote Search:</label>
         <input
           type="text"
+          id="emote-search-input"
           class="form-control"
           value=""
-          placeholder="Emote search ..."
         />
       </div>
     </div>
@@ -406,7 +381,7 @@
   <div id="chat-whisper-users" class="chat-menu left">
     <div class="chat-menu-inner">
       <div class="toolbar">
-        <h5><span>Whispers</span> <i class="chat-menu-close"></i></h5>
+        <h5><span>Buddy List</span> <i class="chat-menu-close"></i></h5>
       </div>
       <div class="scrollable">
         <div class="content">

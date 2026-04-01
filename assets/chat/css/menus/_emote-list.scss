@@ -6,11 +6,27 @@
     outline: 0;
   }
 
-  input {
-    padding: a.$gutter-lg a.$gutter-lg;
-    border: none;
-    background: none;
-    border-radius: 0;
+  #chat-emote-list-search {
+    padding: 4px 6px;
+
+    label {
+      display: block;
+      font-family: 'MSSansSerif', sans-serif;
+      font-size: 11px;
+      color: a.$win95-text;
+      margin-bottom: 2px;
+    }
+
+    input {
+      padding: 3px;
+      border: none;
+      background: a.$win95-input-bg;
+      border-radius: 0;
+      color: a.$win95-text;
+      font-family: 'MSSansSerif', sans-serif;
+      font-size: 11px;
+      @include a.win95-sunken;
+    }
   }
 }
 

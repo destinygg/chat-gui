@@ -17,6 +17,18 @@
   src: url('../../../fonts/AmongUs-Regular.ttf') format('truetype');
 }
 
+@font-face {
+  font-family: 'MSSansSerif';
+  src: url('../../../fonts/MSSansSerif-Regular.ttf') format('truetype');
+  font-weight: normal;
+}
+
+@font-face {
+  font-family: 'MSSansSerif';
+  src: url('../../../fonts/MSSansSerif-Bold.ttf') format('truetype');
+  font-weight: bold;
+}
+
 *,
 *::before,
 *::after {

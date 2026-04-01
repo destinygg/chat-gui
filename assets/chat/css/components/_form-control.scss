@@ -1,23 +1,25 @@
-@use 'sass:color';
 @use '../abstracts/' as a;
 
 .form-control {
-  color: a.$color-chat-text2;
-  background: a.$color-surface-dark1;
-  border: 1px solid color.adjust(a.$color-surface-dark1, $lightness: 9%);
+  color: a.$win95-text;
+  background: a.$win95-input-bg;
+  border: none;
+  border-radius: 0;
+  @include a.win95-sunken;
 
   &:focus {
-    color: a.$color-chat-text1;
-    background: a.$color-surface-dark1;
-    border: 1px solid color.adjust(a.$color-surface-dark1, $lightness: 15%);
-    box-shadow: none;
+    color: a.$win95-text;
+    background: a.$win95-input-bg;
+    border: none;
     outline: none;
+    @include a.win95-sunken;
   }
 
   &[disabled],
   &[readonly],
   &::placeholder {
-    color: a.$color-chat-place;
+    color: a.$win95-text-disabled;
+    background-color: a.$win95-bg;
   }
 
   &[type='text'] {
@@ -27,4 +29,5 @@
 
 textarea.form-control {
   width: 100%;
+  padding: 3px 6px;
 }

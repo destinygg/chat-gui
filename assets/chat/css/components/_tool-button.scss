@@ -4,9 +4,18 @@
   width: 2.25em;
   height: 2.25em;
   cursor: pointer;
-  color: a.$color-chat-disabled;
+  color: a.$win95-text-disabled;
   position: relative;
   text-decoration: none;
   display: inline-block;
   border: 0.35em solid transparent; /* used for "padding" */
+
+  .btn-icon {
+    filter: brightness(0);
+  }
+
+  &:hover .btn-icon,
+  &.active .btn-icon {
+    filter: brightness(0) contrast(2);
+  }
 }

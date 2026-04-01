@@ -7,17 +7,14 @@
   max-width: 250px;
   z-index: 221;
 
-  .chat-menu-inner {
-    background-color: a.$color-surface-dark3;
-  }
-
   .event-action {
     transition: background-color 150ms ease;
-    color: a.$color-light;
+    color: a.$win95-text;
     padding: 0.5rem 1rem;
 
     &:hover {
-      background-color: a.$color-surface-dark4;
+      background-color: a.$win95-highlight;
+      color: a.$win95-highlight-text;
     }
   }
 }

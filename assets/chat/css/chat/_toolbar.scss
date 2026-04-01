@@ -40,6 +40,50 @@ $toolbar-icons-map: (
       @include a.icon-background('../img/icon-#{$icon}.svg');
     }
   }
+
+  &#chat-emoticon-btn .btn-icon {
+    @include a.icon-background('../img/aim-add_buddy.png');
+    filter: none;
+    image-rendering: pixelated;
+  }
+  &#chat-emoticon-btn:hover .btn-icon {
+    @include a.icon-background('../img/aim-add_buddy_hover.png');
+    filter: none;
+    image-rendering: pixelated;
+  }
+
+  &#chat-whisper-btn .btn-icon {
+    @include a.icon-background('../img/aim-new_im.png');
+    filter: none;
+    image-rendering: pixelated;
+  }
+  &#chat-whisper-btn:hover .btn-icon {
+    @include a.icon-background('../img/aim-new_im_hover.png');
+    filter: none;
+    image-rendering: pixelated;
+  }
+
+  &#chat-users-btn .btn-icon {
+    @include a.icon-background('../img/aim-group_im.png');
+    filter: none;
+    image-rendering: pixelated;
+  }
+  &#chat-users-btn:hover .btn-icon {
+    @include a.icon-background('../img/aim-group_im_hover.png');
+    filter: none;
+    image-rendering: pixelated;
+  }
+
+  &#chat-settings-btn .btn-icon {
+    @include a.icon-background('../img/aim-get_info.png');
+    filter: none;
+    image-rendering: pixelated;
+  }
+  &#chat-settings-btn:hover .btn-icon {
+    @include a.icon-background('../img/aim-get_info_hover.png');
+    filter: none;
+    image-rendering: pixelated;
+  }
 }
 
 #chat-whisper-unread-indicator {

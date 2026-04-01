@@ -6,7 +6,6 @@ export default class ChatWhisperUsers extends ChatMenu {
   constructor(ui, btn, chat) {
     super(ui, btn, chat);
     this.unread = 0;
-    this.empty = $(`<span class="empty">No new whispers :(</span>`);
     this.notif = $(`<span id="chat-whisper-unread-indicator"></span>`);
     this.btn.append(this.notif);
     this.usersEl = ui.find('ul:first');
@@ -48,9 +47,17 @@ export default class ChatWhisperUsers extends ChatMenu {
     this.updateNotification(); // its always visible
     if (this.visible) {
       this.usersEl.empty();
-      if (this.chat.whispers.size === 0) {
-        this.usersEl.append(this.empty);
-      } else {
+      const count = this.chat.whispers.size;
+      const sectionTitle = count > 0 ? 'Buddies' : 'Offline';
+
+      const section = $(`<li class="whisper-section">
+        <p class="whisper-section-title">${sectionTitle} (${count}/${count})</p>
+        <div class="whisper-section-users"></div>
+      </li>`);
+
+      const usersContainer = section.find('.whisper-section-users');
+
+      if (count > 0) {
         [...this.chat.whispers.entries()]
           .sort((a, b) => {
             if (a[1].unread === 0) {
@@ -61,20 +68,25 @@ export default class ChatWhisperUsers extends ChatMenu {
             }
             return 0;
           })
-          .forEach((e) => this.addConversation(e[0], e[1].unread));
+          .forEach((e) => {
+            const nick = e[0];
+            const { unread } = e[1];
+            const user =
+              this.chat.users.get(nick.toLowerCase()) || new ChatUser(nick);
+            usersContainer.append(
+              `<div class="conversation" data-unread="${unread}">
+                <a data-username="${user.username}" class="user">${user.displayName}</a>
+              </div>`,
+            );
+          });
       }
+
+      this.usersEl.append(section);
     }
     super.redraw();
   }
 
-  addConversation(nick, unread) {
-    const user = this.chat.users.get(nick.toLowerCase()) || new ChatUser(nick);
-    this.usersEl.append(`
-            <li class="conversation unread-${unread}">
-                <a style="flex: 1;" data-username="${user.username}" class="user">${user.displayName}</a>
-                <span class="badge">${unread}</span>
-                <a data-username="${user.username}" title="Hide" class="remove"></a>
-            </li>
-        `);
+  addConversation() {
+    // handled in redraw
   }
 }

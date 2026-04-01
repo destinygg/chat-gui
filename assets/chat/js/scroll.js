@@ -3,10 +3,6 @@ import { debounce } from 'throttle-debounce';
 import 'overlayscrollbars/overlayscrollbars.css';
 import { OverlayScrollbars } from 'overlayscrollbars';
 
-const isTouchDevice =
-  'ontouchstart' in window || // works on most browsers
-  navigator.maxTouchPoints; // works on IE10/11 and Surface
-
 class ChatScrollPlugin {
   constructor(viewport, target = undefined) {
     this.viewport = $(viewport).get(0);
@@ -29,8 +25,7 @@ class ChatScrollPlugin {
         },
         scrollbars: {
           theme: 'dgg-scroller-theme',
-          autoHide: isTouchDevice ? 'never' : 'move',
-          autoHideDelay: 1000,
+          autoHide: 'never',
         },
       },
     );
