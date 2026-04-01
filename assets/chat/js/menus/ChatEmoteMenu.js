@@ -10,10 +10,8 @@ export default class ChatEmoteMenu extends ChatMenu {
       '#chat-emote-list-search .form-control:first',
     );
     this.ui.on('click', '.emote', (e) => {
-      if (!e.currentTarget.classList.contains('disabled')) {
-        ChatMenu.closeMenus(chat);
-        this.selectEmote(e.currentTarget.innerText);
-      }
+      ChatMenu.closeMenus(chat);
+      this.selectEmote(e.currentTarget.innerText);
     });
     this.searchinput.on(
       'keyup',
@@ -43,72 +41,44 @@ export default class ChatEmoteMenu extends ChatMenu {
 
     this.emoteMenuContent.empty();
 
-    this.chat.emoteService.tiers.forEach((tier) => {
-      const emotes = this.chat.emoteService.emotePrefixesForTier(tier);
-      if (!emotes.length) {
-        return;
-      }
-
-      const title = tier === 0 ? 'All Users' : `Tier ${tier} Subscribers`;
-      const locked =
-        tier > this.chat.user.subTier && !this.chat.user.isPrivileged();
-      this.emoteMenuContent.append(
-        this.buildEmoteMenuSection(
-          title,
-          emotes,
-          favoriteEmotes.filter((fav) => emotes.includes(fav)),
-          locked,
-        ),
-      );
-    });
-
-    const twitchEmotes = this.chat.emoteService.twitchEmotePrefixes;
-    if (twitchEmotes.length) {
-      this.emoteMenuContent.append(
-        this.buildEmoteMenuSection('Twitch Subscribers', twitchEmotes),
-      );
+    const emotes = this.chat.emoteService.prefixes;
+    if (!emotes.length) {
+      return;
     }
+
+    this.emoteMenuContent.append(
+      this.buildEmoteMenuSection(emotes, favoriteEmotes),
+    );
   }
 
-  buildEmoteMenuSection(title, emotes, favoriteEmotes, disabled = false) {
+  buildEmoteMenuSection(emotes, favoriteEmotes) {
     let emotesStr = '';
     if (favoriteEmotes.length > 0) {
       emotesStr += favoriteEmotes
-        .map((e) => this.buildEmoteItem(e, true, disabled))
+        .map((e) => this.buildEmoteItem(e, true))
         .join('');
     }
     emotesStr += emotes
       .map((e) =>
-        !favoriteEmotes.includes(e)
-          ? this.buildEmoteItem(e, false, disabled)
-          : null,
+        !favoriteEmotes.includes(e) ? this.buildEmoteItem(e, false) : null,
       )
       .join('');
     if (emotesStr !== '') {
       return `<div>
-              <div id="emote-subscribe-note">${
-                disabled ? '<i class="lock"></i>' : ''
-              }${title}</div>
-              <div class="emote-group${
-                disabled ? ' disabled' : ''
-              }">${emotesStr}</div>
+              <div class="emote-group">${emotesStr}</div>
           </div>`;
     }
     return '';
   }
 
-  buildEmoteItem(emote, favorite, disabled) {
+  buildEmoteItem(emote, favorite) {
     if (this.searchterm && this.searchterm.length > 0) {
       if (emote.toLowerCase().indexOf(this.searchterm.toLowerCase()) >= 0) {
-        return `<div class="emote-item${favorite ? ' favorite-emote' : ''}"><span title="${emote}" class="emote ${emote}${
-          disabled ? ' disabled' : ''
-        }">${emote}</span></div>`;
+        return `<div class="emote-item${favorite ? ' favorite-emote' : ''}"><span title="${emote}" class="emote ${emote}">${emote}</span></div>`;
       }
       return '';
     }
-    return `<div class="emote-item${favorite ? ' favorite-emote' : ''}"><span title="${emote}" class="emote ${emote}${
-      disabled ? ' disabled' : ''
-    }">${emote}</span></div>`;
+    return `<div class="emote-item${favorite ? ' favorite-emote' : ''}"><span title="${emote}" class="emote ${emote}">${emote}</span></div>`;
   }
 
   selectEmote(emote) {

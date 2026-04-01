@@ -697,8 +697,7 @@ class Chat {
   }
 
   refreshEmoteAutocomplete() {
-    this.emoteService
-      .emotesForUser(this.user)
+    this.emoteService.emotes
       .map((e) => e.prefix)
       .forEach((e) => this.autocomplete.add(e, true));
   }
