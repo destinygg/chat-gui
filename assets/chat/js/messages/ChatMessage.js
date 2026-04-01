@@ -11,7 +11,6 @@ import {
   EmbedUrlFormatter,
   BadWordsCensorshipFormatter,
   AmazonAssociatesTagInjector,
-  SuspostFormatter,
   BBCodeFormatter,
 } from '../formatters';
 import { DATE_FORMATS } from '../const';
@@ -24,7 +23,6 @@ formatters.set('url', new UrlFormatter());
 formatters.set('emote', new EmoteFormatter());
 formatters.set('mentioned', new MentionedUserFormatter());
 formatters.set('green', new GreenTextFormatter());
-formatters.set('sus', new SuspostFormatter());
 formatters.set('embed', new EmbedUrlFormatter());
 formatters.set('badwordscensor', new BadWordsCensorshipFormatter());
 
