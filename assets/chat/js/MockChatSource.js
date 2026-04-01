@@ -167,9 +167,39 @@ class MockChatSource extends EventEmitter {
       case 'death':
         this.emitEvent('DEATH');
         break;
+      case 'dm':
+      case 'whisper': {
+        const dmUser =
+          USERS[
+            Object.keys(USERS).filter((k) => k !== 'local')[
+              randomInt(0, Object.keys(USERS).length - 2)
+            ]
+          ];
+        const nick = dmUser?.nick || 'SubSally';
+        const privmsg = {
+          nick,
+          data: "Hey, what's up? This is a test whisper!",
+          timestamp: Date.now(),
+          messageid: `mock-dm-${Date.now()}`,
+        };
+        this.emit('DISPATCH', { data: privmsg, event: 'PRIVMSG' });
+        this.emit('PRIVMSG', privmsg);
+        break;
+      }
+      case 'mention': {
+        const msg = buildMSG(
+          'SubSally',
+          `Hey ${USERS.local.nick}, check this out!`,
+          ['subscriber', 'flair13'],
+          ['user'],
+        );
+        this.emit('DISPATCH', { data: msg, event: 'MSG' });
+        this.emit('MSG', msg);
+        break;
+      }
       default:
         this.emitInfo(
-          'Mock commands: stop, start, ban, sub, poll, flood, donation, gift, massgift, mute, broadcast, death',
+          'Mock commands: stop, start, ban, sub, poll, flood, donation, gift, massgift, mute, broadcast, death, dm, mention',
         );
     }
   }
