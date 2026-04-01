@@ -2,25 +2,94 @@
 
 #chat-login-screen {
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: rgba(a.$color-surface-dark1, 0.75);
+  background: rgba(0, 0, 0, 0.3);
   position: absolute;
-  text-align: center;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
   z-index: 300;
+}
 
-  h2 {
-    font-size: 2.5em;
-    font-weight: normal;
-    margin: 0;
+.login-window {
+  background-color: a.$win95-bg;
+  padding: 3px;
+  font-family: 'MSSansSerif', sans-serif;
+  font-size: 11px;
+  width: 250px;
+  @include a.win95-raised;
+  border: 1px solid rgba(0, 0, 0, 0.5);
+
+  .toolbar {
+    background: linear-gradient(
+      to right,
+      a.$win95-highlight,
+      a.$win95-highlight-light
+    );
+    border-bottom: 1px solid a.$win95-bg;
+
+    h5 {
+      justify-content: space-between;
+      padding: 3px 3px 2px;
+      font-family: 'MSSansSerif', sans-serif;
+      font-size: 11px;
+      font-weight: bold;
+      color: a.$win95-highlight-text;
+      align-items: center;
+      user-select: none;
+      display: flex;
+      margin: 0;
+      letter-spacing: 1px;
+
+      span {
+        line-height: 1.25em;
+        display: inline-block;
+
+        &::before {
+          content: '';
+          display: inline-block;
+          width: 14px;
+          height: 16px;
+          margin-right: 3px;
+          vertical-align: middle;
+          background: url('../img/aim-icon.png') no-repeat center / contain;
+          image-rendering: pixelated;
+        }
+      }
+    }
   }
+}
 
-  p {
-    margin: 1em 0 1.5em 0;
+.login-body {
+  padding: 8px;
+  text-align: center;
+}
+
+.login-logo {
+  width: 200px;
+  height: 158px;
+  margin: 8px auto;
+  background: url('../img/aim-logo.png') no-repeat center / contain;
+}
+
+.login-message {
+  color: a.$win95-text;
+  font-weight: bold;
+  margin: 12px 0;
+}
+
+.login-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 8px;
+
+  .btn {
+    min-width: 80px;
+    padding: 4px 12px;
+    font-family: 'MSSansSerif', sans-serif;
+    font-size: 11px;
   }
 }
