@@ -30,26 +30,6 @@
   }
 }
 
-.emote-section {
-  position: relative;
-  border: 1px solid a.$win95-white;
-  outline: 1px solid a.$win95-darkgrey;
-  padding: 8px 5px 5px;
-  margin: 16px 8px 8px;
-
-  .emote-section-title {
-    position: absolute;
-    top: -8px;
-    left: 6px;
-    padding: 0 4px;
-    background-color: a.$win95-bg;
-    font-family: 'MSSansSerif', sans-serif;
-    font-size: 11px;
-    color: a.$win95-text;
-    font-weight: bold;
-  }
-}
-
 .emote-group {
   display: flex;
   flex-wrap: wrap;

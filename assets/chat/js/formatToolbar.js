@@ -91,6 +91,90 @@ export default function initFormatToolbar() {
     showColorPicker('bgcolor', textarea);
   });
 
-  // Decorative buttons (do nothing)
-  // fmt-link, fmt-image, fmt-smiley are intentionally no-ops
+  // Smiley popup
+  const SMILEYS = [
+    'smiley-smile',
+    'smiley-frown',
+    'smiley-wink',
+    'smiley-tongue',
+    'smiley-surprised',
+    'smiley-kiss',
+    'smiley-yelling',
+    'smiley-cool',
+    'smiley-money',
+    'smiley-foot',
+    'smiley-embarrassed',
+    'smiley-innocent',
+    'smiley-undecided',
+    'smiley-cry',
+    'smiley-silent',
+    'smiley-grin',
+  ];
+
+  let smileyPopup = null;
+
+  function closeSmileyPopup() {
+    if (smileyPopup) {
+      smileyPopup.remove();
+      smileyPopup = null;
+    }
+  }
+
+  const smileyBtn = document.getElementById('fmt-smiley');
+  const formatBar = document.getElementById('chat-format-bar');
+  if (formatBar) {
+    formatBar.style.position = 'relative';
+  }
+
+  smileyBtn?.addEventListener('click', (ev) => {
+    ev.stopPropagation();
+    if (smileyPopup) {
+      closeSmileyPopup();
+      return;
+    }
+
+    const btnRect = smileyBtn.getBoundingClientRect();
+    const barRect = formatBar.getBoundingClientRect();
+    const btnCenter = btnRect.left + btnRect.width / 2 - barRect.left;
+
+    smileyPopup = document.createElement('div');
+    smileyPopup.style.cssText =
+      `position:absolute;bottom:100%;left:${btnCenter}px;transform:translateX(-50%);margin-bottom:2px;z-index:200;` +
+      'background:#c0c0c0;padding:6px;' +
+      'box-shadow:inset -1px -1px 0 #0c0c0c,inset 1px 1px 0 #bbc3c4,inset -2px -2px 0 #808088,inset 2px 2px 0 #ffffff;' +
+      'border:1px solid rgba(0,0,0,0.5);';
+
+    const grid = document.createElement('div');
+    grid.style.cssText =
+      'display:grid;grid-template-columns:repeat(4,1fr);gap:2px;';
+
+    SMILEYS.forEach((name) => {
+      const btn = document.createElement('button');
+      btn.style.cssText =
+        'width:28px;height:28px;border:none;background:transparent;cursor:pointer;padding:2px;display:flex;align-items:center;justify-content:center;';
+      btn.innerHTML = `<span class="emote ${name}" style="display:inline-block;width:16px;height:16px;text-indent:-999em;">${name}</span>`;
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        insertTag(textarea, `${name} `, '');
+        closeSmileyPopup();
+        textarea.focus();
+      });
+      grid.appendChild(btn);
+    });
+
+    smileyPopup.appendChild(grid);
+    formatBar.appendChild(smileyPopup);
+
+    const closeOnOutside = (e) => {
+      if (
+        smileyPopup &&
+        !smileyPopup.contains(e.target) &&
+        !e.target.closest('#fmt-smiley')
+      ) {
+        closeSmileyPopup();
+        document.removeEventListener('click', closeOnOutside);
+      }
+    };
+    setTimeout(() => document.addEventListener('click', closeOnOutside), 0);
+  });
 }
