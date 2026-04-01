@@ -1,17 +1,11 @@
 @use '../../abstracts/' as a;
 
 .msg-death {
-  .text {
-    font-style: italic;
-  }
+  color: a.$win95-text-disabled;
+  font-style: italic;
 
-  .user:before {
-    content: '';
-    display: inline-block;
-    vertical-align: text-top;
-    margin-right: a.$gutter-sm;
-
-    @include a.msg-icon(-32px, -0px);
+  .chat-user {
+    display: none;
   }
 }
 
