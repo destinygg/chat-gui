@@ -4,6 +4,8 @@
 
 // Win95 minimize button (line icon)
 $minimize-icon: url('data:image/gif;base64,R0lGODlhDQALAJEAAAAAAP///////wAAACH5BAEAAAIALAAAAAANAAsAAAIOlI+py+0PozSg2mXvFAUAOw==');
+// Win95 maximize button (box icon)
+$maximize-icon: url('data:image/gif;base64,R0lGODlhDQALAJEAAAAAAP///////wAAACH5BAEAAAIALAAAAAANAAsAAAIXlI8Jy4wNXzJAznqwsjtPoYFfCDXfWQAAOw==');
 
 .pinned-window {
   background-color: a.$win95-bg;
@@ -88,6 +90,10 @@ $minimize-icon: url('data:image/gif;base64,R0lGODlhDQALAJEAAAAAAP///////wAAACH5B
 
   .pinned-minimize-btn {
     background-image: $minimize-icon;
+
+    &.is-minimized {
+      background-image: $maximize-icon;
+    }
   }
 
   .pinned-close-btn {

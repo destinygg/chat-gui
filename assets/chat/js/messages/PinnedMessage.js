@@ -57,6 +57,10 @@ export default class PinnedMessage extends ChatUserMessage {
     if (window) {
       window.classList.toggle('minimized', !state);
     }
+    const minBtn = document.querySelector('.pinned-minimize-btn');
+    if (minBtn) {
+      minBtn.classList.toggle('is-minimized', !state);
+    }
     const showBtn = document.getElementById('chat-pinned-show-btn');
     if (showBtn) {
       showBtn.classList.toggle('active', !state);
