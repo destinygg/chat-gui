@@ -10,10 +10,25 @@
     font-weight: bold;
     color: a.$win95-highlight;
 
+    &::before {
+      content: '';
+      display: inline-block;
+      width: 14px;
+      height: 16px;
+      margin-right: 2px;
+      vertical-align: middle;
+      background: url('../img/aim-icon.png') no-repeat center / contain;
+      image-rendering: pixelated;
+    }
+
     &:hover {
       text-decoration: underline;
       color: a.$win95-highlight;
       background: transparent;
     }
+  }
+
+  .ctrl {
+    font-weight: bold;
   }
 }
