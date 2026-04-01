@@ -48,9 +48,26 @@ export default class ChatEmoteMenu extends ChatMenu {
       return;
     }
 
-    this.emoteMenuContent.append(
-      this.buildEmoteMenuSection(emotes, favoriteEmotes),
-    );
+    const smileys = emotes.filter((e) => e.name.startsWith('smiley-'));
+    const buddyIcons = emotes.filter((e) => e.name.startsWith('buddy-'));
+
+    const smileyNames = new Set(smileys.map((e) => e.prefix));
+    const smileysFav = favoriteEmotes.filter((p) => smileyNames.has(p));
+    const buddyFav = favoriteEmotes.filter((p) => !smileyNames.has(p));
+
+    const smileysHtml = this.buildEmoteMenuSection(smileys, smileysFav);
+    const buddyHtml = this.buildEmoteMenuSection(buddyIcons, buddyFav);
+
+    if (smileysHtml) {
+      this.emoteMenuContent.append(
+        `<div class="emote-section"><span class="emote-section-title">Smileys</span>${smileysHtml}</div>`,
+      );
+    }
+    if (buddyHtml) {
+      this.emoteMenuContent.append(
+        `<div class="emote-section"><span class="emote-section-title">Buddy Icons</span>${buddyHtml}</div>`,
+      );
+    }
   }
 
   buildEmoteMenuSection(emotes, favoriteEmotes) {

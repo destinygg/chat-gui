@@ -42,3 +42,85 @@ $smileys: (
     background-size: contain;
   }
 }
+
+$buddy-icons: (
+  'buddy-add': 'badassbuddy_com-add.gif',
+  'buddy-afro': 'badassbuddy_com-afro.gif',
+  'buddy-apcircle': 'badassbuddy_com-apcircle.gif',
+  'buddy-beanbag': 'badassbuddy_com-beanbag.gif',
+  'buddy-blink182': 'badassbuddy_com-blink182.gif',
+  'buddy-bored': 'badassbuddy_com-bored.gif',
+  'buddy-brb': 'badassbuddy_com-brb.gif',
+  'buddy-chappelle': 'badassbuddy_com-chappelle.gif',
+  'buddy-chores': 'badassbuddy_com-chores.gif',
+  'buddy-cs': 'badassbuddy_com-cs.gif',
+  'buddy-ddr': 'badassbuddy_com-ddr.gif',
+  'buddy-deepthough': 'badassbuddy_com-deepthough.gif',
+  'buddy-do-the-dew': 'badassbuddy_com-do_the_dew.gif',
+  'buddy-dodgeball': 'badassbuddy_com-dodgeball.gif',
+  'buddy-drevil': 'badassbuddy_com-drevil.gif',
+  'buddy-dropit': 'badassbuddy_com-dropit.gif',
+  'buddy-duck': 'badassbuddy_com-duck.gif',
+  'buddy-emokids': 'badassbuddy_com-emokids.gif',
+  'buddy-et': 'badassbuddy_com-et.gif',
+  'buddy-fart2': 'badassbuddy_com-fart2.gif',
+  'buddy-firstkiss': 'badassbuddy_com-firstkiss.gif',
+  'buddy-greenday': 'badassbuddy_com-greenday.gif',
+  'buddy-guitarhero': 'badassbuddy_com-guitarhero.gif',
+  'buddy-hackysack': 'badassbuddy_com-hackysack.gif',
+  'buddy-halfbaked': 'badassbuddy_com-halfbaked.gif',
+  'buddy-halo2': 'badassbuddy_com-halo2.gif',
+  'buddy-homestar': 'badassbuddy_com-homestar.gif',
+  'buddy-hoola-hoop': 'badassbuddy_com-hoola-hoop.gif',
+  'buddy-icp': 'badassbuddy_com-icp.gif',
+  'buddy-iraqwar': 'badassbuddy_com-iraqwar.gif',
+  'buddy-jumpleaves': 'badassbuddy_com-jumpleaves.gif',
+  'buddy-kickbutt2': 'badassbuddy_com-kickbutt2.gif',
+  'buddy-korn': 'badassbuddy_com-korn.gif',
+  'buddy-l33t': 'badassbuddy_com-l33t.gif',
+  'buddy-liljon2': 'badassbuddy_com-liljon2.gif',
+  'buddy-limpbizkit': 'badassbuddy_com-limpbizkit.gif',
+  'buddy-linkinpark': 'badassbuddy_com-linkinpark.gif',
+  'buddy-lol': 'badassbuddy_com-lol.gif',
+  'buddy-maceme': 'badassbuddy_com-maceme.gif',
+  'buddy-mandy': 'badassbuddy_com-mandy.gif',
+  'buddy-matrix2': 'badassbuddy_com-matrix2.gif',
+  'buddy-metalhead': 'badassbuddy_com-metalhead.gif',
+  'buddy-metallica': 'badassbuddy_com-metallica.gif',
+  'buddy-monkeyspank': 'badassbuddy_com-monkeyspank.gif',
+  'buddy-moonwalk': 'badassbuddy_com-moonwalk.gif',
+  'buddy-mychemical': 'badassbuddy_com-mychemical.gif',
+  'buddy-nutcheck': 'badassbuddy_com-nutcheck.gif',
+  'buddy-offspring': 'badassbuddy_com-offspring.gif',
+  'buddy-outkast': 'badassbuddy_com-outkast.gif',
+  'buddy-p-nk': 'badassbuddy_com-pnk.gif',
+  'buddy-paintball': 'badassbuddy_com-paintball.gif',
+  'buddy-parentsuk2': 'badassbuddy_com-parentsuk2.gif',
+  'buddy-popmacolla': 'badassbuddy_com-popmacolla.gif',
+  'buddy-pothead': 'badassbuddy_com-pothead.gif',
+  'buddy-pyro': 'badassbuddy_com-pyro.gif',
+  'buddy-relatives': 'badassbuddy_com-relatives.gif',
+  'buddy-robot': 'badassbuddy_com-robot.gif',
+  'buddy-rustyslide': 'badassbuddy_com-rustyslide.gif',
+  'buddy-schoolsout': 'badassbuddy_com-schoolsout.gif',
+  'buddy-shootingst': 'badassbuddy_com-shootingst.gif',
+  'buddy-skate5': 'badassbuddy_com-skate5.gif',
+  'buddy-slipnslide': 'badassbuddy_com-slipnslide.gif',
+  'buddy-soad': 'badassbuddy_com-soad.gif',
+  'buddy-spaz': 'badassbuddy_com-spaz.gif',
+  'buddy-spongebob2': 'badassbuddy_com-spongebob2.gif',
+  'buddy-sum41': 'badassbuddy_com-sum41.gif',
+  'buddy-taken': 'badassbuddy_com-taken.gif',
+  'buddy-wildmonkey': 'badassbuddy_com-wildmonkey.gif',
+  'buddy-zit': 'badassbuddy_com-zit.gif',
+);
+
+@each $name, $file in $buddy-icons {
+  .emote.#{$name} {
+    width: 50px;
+    height: 50px;
+    vertical-align: middle;
+    background: url('../img/buddy_icons/#{$file}') no-repeat center;
+    background-size: contain;
+  }
+}
