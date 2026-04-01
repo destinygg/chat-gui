@@ -50,19 +50,18 @@ $link-color-map: (
   }
 
   .externallink {
-    border-style: solid;
-    border-color: transparent;
-    border-width: 1px 0 1px 0;
-    color: a.$win95-highlight;
+    border: none;
+    color: #0000ee;
+    text-decoration: underline;
     position: relative;
 
     &:visited {
-      color: a.$color-link-visited;
+      color: #551a8b;
     }
 
     &:hover,
     &:focus {
-      color: a.$color-link-hover;
+      color: #0000ee;
     }
   }
 

@@ -1,8 +1,6 @@
 @use '../../abstracts/' as a;
 
-.msg-status .text:before {
-  @include a.msg-icon(-50px, -18px);
-}
+// No icon - styled as italic gray text
 
 .onstreamchat {
   .msg-status {

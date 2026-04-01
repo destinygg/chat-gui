@@ -10,18 +10,11 @@
 .msg-info,
 .msg-status {
   white-space: pre-wrap;
-  color: a.$color-chat-text1;
-
-  .text:before {
-    content: '';
-    display: inline-block;
-    vertical-align: text-top;
-    margin-right: a.$gutter-sm;
-  }
-
-  &.msg-continue .text:before {
-    content: '';
-  }
+  color: a.$win95-text-disabled;
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 16px;
+  font-style: italic;
+  padding: 1px 4px;
 }
 
 .onstreamchat {
