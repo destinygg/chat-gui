@@ -94,18 +94,5 @@
 }
 
 #chat-input-subonly {
-  cursor: default;
-  display: none;
-  position: absolute;
-  top: a.$gutter-md;
-  right: a.$gutter-sm;
-  width: 1.5em;
-  height: 1.5em;
-
-  .btn-icon {
-    opacity: 0.75;
-
-    @include a.icon-background('../img/icon-subonly.svg');
-    filter: brightness(0);
-  }
+  display: none !important;
 }
