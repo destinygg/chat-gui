@@ -40,17 +40,27 @@ export default class PinnedMessage extends ChatUserMessage {
     super(message, user, timestamp);
     this.uuid = uuid;
     this.type = MessageTypes.PINNED;
+    this.minimized = false;
   }
 
   /**
-   * Shows/hides the current message.
+   * Shows/hides the current message (minimize/restore).
    * @param {boolean} state
    */
   set displayed(state) {
-    this.ui.classList.toggle('hidden', !state);
-    document
-      .getElementById('chat-pinned-show-btn')
-      ?.classList.toggle('active', !state);
+    this.minimized = !state;
+    const body = document.getElementById('pinned-message-body');
+    if (body) {
+      body.style.display = state ? 'block' : 'none';
+    }
+    const window = document.querySelector('.pinned-window');
+    if (window) {
+      window.classList.toggle('minimized', !state);
+    }
+    const showBtn = document.getElementById('chat-pinned-show-btn');
+    if (showBtn) {
+      showBtn.classList.toggle('active', !state);
+    }
   }
 
   /**
@@ -84,60 +94,90 @@ export default class PinnedMessage extends ChatUserMessage {
    */
   pin(chat = null, visibility = true) {
     this.ui.id = 'msg-pinned';
-    this.ui.classList.toggle('msg-pinned', true);
-    this.displayed = visibility;
-    chat.mainwindow.update();
+    this.ui.classList.add('msg-pinned');
 
+    // Build the Win95 window
+    const window = document.createElement('div');
+    window.classList.add('pinned-window');
+
+    // Toolbar (title bar)
+    const toolbar = document.createElement('div');
+    toolbar.classList.add('toolbar');
+
+    const title = document.createElement('h5');
+    const titleSpan = document.createElement('span');
+    titleSpan.textContent = 'Your Attention Please';
+
+    const buttonGroup = document.createElement('div');
+    buttonGroup.classList.add('pinned-toolbar-buttons');
+
+    // Minimize button (all users)
+    const minimizeBtn = document.createElement('button');
+    minimizeBtn.classList.add('pinned-nav-btn', 'pinned-minimize-btn');
+    minimizeBtn.addEventListener('click', () => {
+      this.displayed = this.minimized;
+    });
+    buttonGroup.appendChild(minimizeBtn);
+
+    // Close button (mods only)
     if (chat.user.hasModPowers()) {
-      const unpinMessage = document.createElement('a');
-      const unpinMessageIcon = document.createElement('i');
-      unpinMessageIcon.classList.add('btn-icon');
-      unpinMessage.append(unpinMessageIcon);
-
-      unpinMessage.id = 'unpin-btn';
-      unpinMessage.classList.add('chat-tool-btn');
-      unpinMessage.title = 'Unpin Message';
-
-      unpinMessage.addEventListener('click', () => {
+      const closeBtn = document.createElement('button');
+      closeBtn.classList.add('pinned-nav-btn', 'pinned-close-btn');
+      closeBtn.addEventListener('click', () => {
         chat.cmdUNPIN();
       });
-
-      this.ui.prepend(unpinMessage);
+      buttonGroup.appendChild(closeBtn);
     }
 
-    const showPin = document.createElement('div');
-    const showPinIcon = document.createElement('i');
-    showPinIcon.classList.add('btn-icon');
-    showPin.append(showPinIcon);
+    title.appendChild(titleSpan);
+    title.appendChild(buttonGroup);
+    toolbar.appendChild(title);
 
+    // Message body (AIM chat style)
+    const body = document.createElement('div');
+    body.id = 'pinned-message-body';
+
+    const messageArea = document.createElement('div');
+    messageArea.classList.add('pinned-message-area');
+
+    const senderName = document.createElement('span');
+    senderName.classList.add('pinned-sender');
+    senderName.textContent = `${this.user.displayName}: `;
+
+    const messageText = document.createElement('span');
+    messageText.classList.add('pinned-text');
+    messageText.textContent = this.message;
+
+    messageArea.appendChild(senderName);
+    messageArea.appendChild(messageText);
+    body.appendChild(messageArea);
+
+    window.appendChild(toolbar);
+    window.appendChild(body);
+
+    // Show button (when minimized/dismissed)
+    const showPin = document.createElement('div');
     showPin.id = 'chat-pinned-show-btn';
     showPin.classList.toggle('active', !visibility);
     showPin.title = 'Show Pinned Message';
-
+    const showPinIcon = document.createElement('i');
+    showPinIcon.classList.add('btn-icon');
+    showPin.appendChild(showPinIcon);
     showPin.addEventListener('click', () => {
       this.displayed = true;
     });
 
-    const closePin = document.createElement('a');
-    const closePinIcon = document.createElement('i');
-    closePinIcon.classList.add('btn-icon');
-    closePin.append(closePinIcon);
-
-    closePin.id = 'close-pin-btn';
-    closePin.classList.add('chat-tool-btn');
-    closePin.title = 'Close Pinned Message';
-
-    closePin.addEventListener('click', () => {
-      dismissPin(this.uuid);
-      this.displayed = false;
-    });
-
-    this.ui.prepend(closePin);
+    if (!visibility) {
+      body.style.display = 'none';
+    }
 
     const pinnedFrame = document.getElementById('chat-pinned-message');
     pinnedFrame.classList.toggle('active', true);
-    pinnedFrame.prepend(this.ui);
-    pinnedFrame.prepend(showPin);
+    pinnedFrame.replaceChildren();
+    pinnedFrame.appendChild(window);
+    pinnedFrame.appendChild(showPin);
+
+    chat.mainwindow.update();
 
     return this;
   }

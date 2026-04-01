@@ -2,72 +2,127 @@
 
 @use 'frame';
 
-.msg-pinned {
-  background-color: a.$color-chat-emphasize;
-  padding-top: a.$gutter-md;
-  padding-bottom: a.$gutter-md;
-  border-style: solid;
-  border-radius: 10px;
-  border-color: #505050;
-  transition: all 0.15s ease-in-out;
+// Win95 minimize button (line icon)
+$minimize-icon: url('data:image/gif;base64,R0lGODlhDQALAJEAAAAAAP///////wAAACH5BAEAAAIALAAAAAANAAsAAAIOlI+py+0PozSg2mXvFAUAOw==');
 
-  &:hover {
-    border-color: a.$color-chat-text3;
+.pinned-window {
+  background-color: a.$win95-bg;
+  padding: 3px;
+  font-family: 'MSSansSerif', sans-serif;
+  font-size: 11px;
+  display: inline-block;
+  @include a.win95-raised;
+  border: 1px solid rgba(0, 0, 0, 0.5);
+
+  &:not(.minimized) {
+    width: 100%;
   }
 
-  &.hidden {
-    display: none;
-  }
+  .toolbar {
+    background: linear-gradient(
+      to right,
+      a.$win95-highlight,
+      a.$win95-highlight-light
+    );
+    border-bottom: 1px solid a.$win95-bg;
 
-  .user {
-    text-shadow: none;
-  }
+    h5 {
+      justify-content: space-between;
+      padding: 3px 3px 2px;
+      font-family: 'MSSansSerif', sans-serif;
+      font-size: 11px;
+      font-weight: bold;
+      color: a.$win95-highlight-text;
+      align-items: center;
+      user-select: none;
+      display: flex;
+      margin: 0;
+      letter-spacing: 1px;
 
-  .chat-tool-btn {
-    width: 1.5em;
-    height: 1.5em;
-    cursor: pointer;
-    color: a.$color-chat-disabled;
-    position: relative;
-    text-decoration: none;
-    float: right;
-    border: unset;
+      span {
+        line-height: 1.25em;
+        display: inline-block;
 
-    &:hover,
-    &.active {
-      .btn-icon {
-        opacity: 1;
+        &::before {
+          content: '';
+          display: inline-block;
+          width: 14px;
+          height: 16px;
+          margin-right: 3px;
+          vertical-align: middle;
+          background: url('../img/aim-icon.png') no-repeat center / contain;
+          image-rendering: pixelated;
+        }
       }
     }
   }
 
-  #close-pin-btn .btn-icon {
-    @include a.icon-background('../img/icon-close.svg');
+  .pinned-toolbar-buttons {
+    display: flex;
+    gap: 1px;
+    margin-left: 8px;
   }
 
-  #unpin-btn .btn-icon {
-    @include a.icon-background('../img/icon-unpin.svg');
+  .pinned-nav-btn {
+    width: 16px;
+    height: 14px;
+    min-width: 16px;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+    background-color: a.$win95-bg-alt;
+    border: none;
+    outline: 0;
+    padding: 0;
+    image-rendering: pixelated;
+    background-repeat: no-repeat;
+    background-position: 1px 1px;
+    @include a.win95-button-raised;
+
+    &:active {
+      @include a.win95-button-pressed;
+      background-position: 2px 2px;
+    }
   }
 
-  .focus & {
-    opacity: 1;
+  .pinned-minimize-btn {
+    background-image: $minimize-icon;
+  }
+
+  .pinned-close-btn {
+    background-image: url('data:image/gif;base64,R0lGODlhDQALAJEAAAAAAP///////wAAACH5BAEAAAIALAAAAAANAAsAAAIUlI+pKwDoVGxvucmwvblqo33MqBQAOw==');
+  }
+}
+
+#pinned-message-body {
+  .pinned-message-area {
+    background-color: a.$win95-input-bg;
+    color: a.$win95-text;
+    padding: 6px 8px;
+    margin: 4px;
+    @include a.win95-sunken;
+
+    .pinned-sender {
+      font-weight: bold;
+      color: a.$win95-highlight;
+    }
+
+    .pinned-text {
+      color: a.$win95-text;
+    }
+  }
+}
+
+// Legacy class compatibility
+.msg-pinned {
+  &.hidden {
+    display: none;
   }
 }
 
 .onstreamchat {
-  .msg-pinned {
-    position: unset;
-    text-shadow: unset;
-    background-color: unset;
-    font-size: unset;
-    font-weight: unset;
-    padding-top: unset;
-    padding-bottom: unset;
-    box-shadow: unset;
-    border-radius: unset;
-
-    .chat-tool-btn {
-      display: none !important;
-    }
+  .pinned-window {
+    display: none;
   }
 }
