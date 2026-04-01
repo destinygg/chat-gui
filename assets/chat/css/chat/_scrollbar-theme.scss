@@ -27,7 +27,7 @@ $arrow-down: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' w
 }
 
 .dgg-scroller-theme.os-scrollbar {
-  padding: 0;
+  padding: $scrollbar-arrow-size 0;
   box-sizing: border-box;
   background: $scrollbar-track-bg;
 }
@@ -40,10 +40,9 @@ $arrow-down: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' w
   background: $scrollbar-track-bg;
 }
 
-// Reserve space for arrow buttons
+// Track fills the padded area
 .dgg-scroller-theme.os-scrollbar-vertical > .os-scrollbar-track {
-  margin-top: $scrollbar-arrow-size;
-  margin-bottom: $scrollbar-arrow-size;
+  margin: 0;
 }
 
 .dgg-scroller-theme.os-scrollbar-horizontal
