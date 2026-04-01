@@ -46,6 +46,12 @@ import { isMuteActive, MutedTimer } from './mutedtimer';
 import EmoteService from './emotes';
 import EMOTES from './emoteData';
 import UserFeatures from './features';
+import {
+  playSent,
+  playReceived,
+  readSettings as readSoundSettings,
+  writeSettings as writeSoundSettings,
+} from './aimSounds';
 import UserRoles from './roles';
 import { UserMessageService, YouTubeOEmbedService } from './services';
 import makeSafeForRegex, {
@@ -409,6 +415,18 @@ class Chat {
 
     // Set initial height.
     this.adjustInputHeight();
+
+    // AIM sound settings (stored separately from chat settings)
+    const soundSettings = readSoundSettings();
+    this.ui.find('.aim-sound-setting').each(function initSoundCheckbox() {
+      const name = this.getAttribute('name');
+      this.checked = !!soundSettings[name];
+    });
+    this.ui.on('change', '.aim-sound-setting', (e) => {
+      const settings = readSoundSettings();
+      settings[e.target.name] = e.target.checked;
+      writeSoundSettings(settings);
+    });
 
     this.input.on('keypress', (e) => {
       if (isKeyCode(e, KEYCODES.ENTER) && !e.shiftKey && !e.ctrlKey) {
@@ -1242,6 +1260,9 @@ class Chat {
 
     if (!this.resolveMessage(data.nick, data.data, data.timestamp)) {
       message.into(this);
+      if (!this.backlogloading) {
+        playReceived();
+      }
     }
   }
 
@@ -1633,6 +1654,7 @@ class Chat {
         MessageBuilder.message(raw, this.user).into(this, win);
         this.source.send('PRIVMSG', { nick: win.name, data: raw });
         this.input.val('');
+        playSent();
       }
       // VOTE
       else if (
@@ -1660,6 +1682,7 @@ class Chat {
         this.source.send('MSG', { data: raw });
         this.inputhistory.add(raw);
         this.input.val('');
+        playSent();
       }
     }
   }

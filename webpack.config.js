@@ -102,6 +102,11 @@ module.exports = {
         generator: { filename: 'font/[name][ext]' },
       },
       {
+        test: /\.(mp3|wav|ogg)$/,
+        type: 'asset/resource',
+        generator: { filename: 'sounds/[name][ext]' },
+      },
+      {
         test: /\.(html)$/,
         loader: 'html-loader',
         options: { minimize: true },
