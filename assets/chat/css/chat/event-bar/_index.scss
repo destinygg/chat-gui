@@ -24,18 +24,97 @@
   position: absolute;
   z-index: 210;
   inset: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-
-  .event-bar-selected-message {
-    margin: a.$gutter-sm;
-
-    .focus:not(.watching-focus) & {
-      opacity: 1;
-    }
-  }
+  background-color: rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 8px;
 
   &.hidden {
     display: none;
+  }
+}
+
+.event-selected-window {
+  background-color: a.$win95-bg;
+  padding: 3px;
+  font-family: 'MSSansSerif', sans-serif;
+  font-size: 11px;
+  max-width: 95%;
+  @include a.win95-raised;
+  border: 1px solid rgba(0, 0, 0, 0.5);
+
+  .toolbar {
+    background: linear-gradient(
+      to right,
+      a.$win95-highlight,
+      a.$win95-highlight-light
+    );
+    border-bottom: 1px solid a.$win95-bg;
+
+    h5 {
+      justify-content: space-between;
+      padding: 3px 3px 2px;
+      font-family: 'MSSansSerif', sans-serif;
+      font-size: 11px;
+      font-weight: bold;
+      color: a.$win95-highlight-text;
+      align-items: center;
+      user-select: none;
+      display: flex;
+      margin: 0;
+      letter-spacing: 1px;
+
+      span {
+        line-height: 1.25em;
+        display: inline-block;
+
+        &::before {
+          content: '';
+          display: inline-block;
+          width: 14px;
+          height: 16px;
+          margin-right: 3px;
+          vertical-align: middle;
+          background: url('../img/aim-icon.png') no-repeat center / contain;
+          image-rendering: pixelated;
+        }
+      }
+    }
+  }
+
+  .event-selected-close-btn {
+    width: 16px;
+    height: 14px;
+    min-width: 16px;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+    background-color: a.$win95-bg-alt;
+    border: none;
+    outline: 0;
+    padding: 0;
+    image-rendering: pixelated;
+    background-image: url('data:image/gif;base64,R0lGODlhDQALAJEAAAAAAP///////wAAACH5BAEAAAIALAAAAAANAAsAAAIUlI+pKwDoVGxvucmwvblqo33MqBQAOw==');
+    background-repeat: no-repeat;
+    background-position: 1px 1px;
+    @include a.win95-button-raised;
+
+    &:active {
+      @include a.win95-button-pressed;
+      background-position: 2px 2px;
+    }
+  }
+
+  .event-selected-body {
+    background-color: a.$win95-input-bg;
+    margin: 4px;
+    padding: 6px 8px;
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 16px;
+    color: a.$win95-text;
+    @include a.win95-sunken;
   }
 }
 

@@ -85,11 +85,37 @@ export default class ChatEventBar extends EventEmitter {
    * @param {HTMLDivElement} event
    */
   select(event) {
-    /** @type HTMLDivElement */
+    // Build Win95 window wrapper
+    const window = document.createElement('div');
+    window.classList.add('event-selected-window');
+
+    const toolbar = document.createElement('div');
+    toolbar.classList.add('toolbar');
+
+    const title = document.createElement('h5');
+    const titleSpan = document.createElement('span');
+    titleSpan.textContent = 'Event';
+    const closeBtn = document.createElement('button');
+    closeBtn.classList.add('event-selected-close-btn');
+    closeBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.unselect();
+    });
+
+    title.appendChild(titleSpan);
+    title.appendChild(closeBtn);
+    toolbar.appendChild(title);
+
+    const body = document.createElement('div');
+    body.classList.add('event-selected-body');
     event.classList.add('event-bar-selected-message');
+    body.appendChild(event);
+
+    window.appendChild(toolbar);
+    window.appendChild(body);
 
     this.eventSelectUI.replaceChildren();
-    this.eventSelectUI.append(event);
+    this.eventSelectUI.append(window);
     this.eventSelectUI.classList.remove('hidden');
 
     this.emit('eventSelected');
