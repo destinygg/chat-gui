@@ -379,6 +379,17 @@ function randomMSG() {
   return buildMSG(user.nick, pick(MESSAGES), user.features, user.roles || []);
 }
 
+function randomEmoteCombo() {
+  const emote = pick(EMOTES);
+  const count = randomInt(3, 6);
+  const msgs = [];
+  for (let i = 0; i < count; i += 1) {
+    const user = pick(ALL_USERS);
+    msgs.push(buildMSG(user.nick, emote, user.features, user.roles || []));
+  }
+  return msgs;
+}
+
 function randomSubscription() {
   const user = pick(ALL_USERS);
   return buildSubscription(user, randomInt(1, 5));
@@ -460,6 +471,7 @@ export {
   buildHistoryMessages,
   buildPaidEvents,
   randomMSG,
+  randomEmoteCombo,
   randomSubscription,
   randomDonation,
   randomGiftSub,

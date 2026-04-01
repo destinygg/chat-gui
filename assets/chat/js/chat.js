@@ -860,6 +860,16 @@ class Chat {
       return;
     }
 
+    // Break the current combo if this message is not an emote
+    // We don't need to check what type the current message is, we just know that its a new message, so the combo is invalid.
+    if (
+      win.lastmessage &&
+      win.lastmessage.type === MessageTypes.EMOTE &&
+      win.lastmessage.emotecount > 1
+    ) {
+      win.lastmessage.completeCombo();
+    }
+
     // Populate the tag and mentioned users for this $message.
     if (
       [
@@ -1259,11 +1269,41 @@ class Chat {
   }
 
   onMSG(data) {
+    const textonly = removeSlashCommand(data.data);
     const usr = this.users.get(data.nick.toLowerCase());
     const win = this.mainwindow;
 
     const message = MessageBuilder.message(data.data, usr, data.timestamp);
     if (win.containsMessage(message)) {
+      return;
+    }
+
+    const isCombo =
+      this.emoteService.canUserUseEmote(usr, textonly) &&
+      removeSlashCommand(win.lastmessage?.message) === textonly;
+
+    if (isCombo && win.lastmessage?.type === MessageTypes.EMOTE) {
+      win.lastmessage.add(message);
+
+      if (this.user.equalWatching(usr.watching)) {
+        win.lastmessage.ui.classList.toggle('watching-same', true);
+      }
+
+      this.mainwindow.update();
+      return;
+    }
+
+    if (isCombo && win.lastmessage?.type === MessageTypes.USER) {
+      const lastMessage = win.lastmessage;
+      win.removeLastMessage();
+      const msg = MessageBuilder.emote(textonly, lastMessage.timestamp, [
+        lastMessage,
+        message,
+      ]).into(this);
+
+      if (this.user.equalWatching(usr.watching)) {
+        msg.ui.classList.add('watching-same');
+      }
       return;
     }
 
@@ -1678,6 +1718,16 @@ class Chat {
           MessageBuilder.error(`You have already voted!`).into(this);
           this.input.val('');
         }
+      }
+      // EMOTE SPAM
+      else if (
+        this.source.isConnected() &&
+        this.emoteService.getEmote(textOnly)
+      ) {
+        // Its easier to deal with combos with the this.unresolved flow
+        this.source.send('MSG', { data: raw });
+        this.inputhistory.add(raw);
+        this.input.val('');
       }
       // MESSAGE
       else {

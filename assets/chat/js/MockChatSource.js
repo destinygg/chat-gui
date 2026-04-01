@@ -7,6 +7,7 @@ import {
   buildHistoryMessages,
   buildPaidEvents,
   randomMSG,
+  randomEmoteCombo,
   randomSubscription,
   randomDonation,
   randomGiftSub,
@@ -21,6 +22,7 @@ import {
 
 const WEIGHTED_EVENTS = [
   { type: 'MSG', weight: 50 },
+  { type: 'COMBO', weight: 10 },
   { type: 'SUBSCRIPTION', weight: 8 },
   { type: 'DONATION', weight: 8 },
   { type: 'GIFTSUB', weight: 5 },
@@ -140,6 +142,9 @@ class MockChatSource extends EventEmitter {
       case 'sub':
         this.emitEvent('SUBSCRIPTION');
         break;
+      case 'combo':
+        this.emitEvent('COMBO');
+        break;
       case 'poll':
         this.emitEvent('POLLSTART');
         break;
@@ -199,7 +204,7 @@ class MockChatSource extends EventEmitter {
       }
       default:
         this.emitInfo(
-          'Mock commands: stop, start, ban, sub, poll, flood, donation, gift, massgift, mute, broadcast, death, dm, mention',
+          'Mock commands: stop, start, ban, sub, combo, poll, flood, donation, gift, massgift, mute, broadcast, death, dm, mention',
         );
     }
   }
@@ -298,6 +303,16 @@ class MockChatSource extends EventEmitter {
         const msg = randomMSG();
         this.emit('DISPATCH', { data: msg, event: 'MSG' });
         this.emit('MSG', msg);
+        break;
+      }
+      case 'COMBO': {
+        const msgs = randomEmoteCombo();
+        msgs.forEach((msg, i) => {
+          setTimeout(() => {
+            this.emit('DISPATCH', { data: msg, event: 'MSG' });
+            this.emit('MSG', msg);
+          }, i * 80);
+        });
         break;
       }
       case 'SUBSCRIPTION': {

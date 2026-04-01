@@ -1,0 +1,13 @@
+@use '../../abstracts/' as a;
+
+.msg-emote {
+  color: a.$win95-text-disabled;
+  font-style: italic;
+  padding: 1px 4px;
+}
+
+.chat-combo {
+  color: a.$win95-text-disabled;
+  display: inline;
+  font-style: italic;
+}
