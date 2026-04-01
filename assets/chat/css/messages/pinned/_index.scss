@@ -99,6 +99,8 @@ $minimize-icon: url('data:image/gif;base64,R0lGODlhDQALAJEAAAAAAP///////wAAACH5B
   .pinned-message-area {
     background-color: a.$win95-input-bg;
     color: a.$win95-text;
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 16px;
     padding: 6px 8px;
     margin: 4px;
     @include a.win95-sunken;
