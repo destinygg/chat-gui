@@ -47,7 +47,7 @@ switch ((chat.reqParam('t') || 'embed').toUpperCase()) {
         chat.settings.set('fontscale', chat.reqParam('f') || 1);
         chat.applySettings(false);
       })
-      .then(() => chat.loadEmotesAndFlairs())
+      .then(() => chat.loadEmotes())
       .then(() => connectOrMock());
     break;
 
@@ -69,7 +69,7 @@ switch ((chat.reqParam('t') || 'embed').toUpperCase()) {
   default:
     chat
       .withGui(embedHtml)
-      .then(() => chat.loadEmotesAndFlairs())
+      .then(() => chat.loadEmotes())
       .then(() => connectOrMock());
     break;
 }

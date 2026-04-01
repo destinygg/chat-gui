@@ -1,4 +1,3 @@
-import { usernameColorFlair } from './ChatUserMessage';
 import ChatEventMessage from './ChatEventMessage';
 import MessageTypes from './MessageTypes';
 
@@ -33,12 +32,7 @@ export default class ChatDonationMessage extends ChatEventMessage {
       .querySelector('#user-template')
       ?.content.cloneNode(true).firstElementChild;
 
-    const colorFlair = usernameColorFlair(chat.flairs, this.user);
-
     user.title = this.title;
-    if (colorFlair) {
-      user.classList.add(colorFlair.name);
-    }
     user.innerText = this.user.displayName;
 
     eventTemplate.querySelector('.event-info').append(

@@ -29,20 +29,6 @@ $toolbar-icons-map: (
     border-bottom: 1px solid a.$color-surface-dark4;
   }
 
-  .flairs {
-    margin-top: a.$gutter-lg;
-    margin-bottom: a.$gutter-lg;
-    padding-left: a.$gutter-md;
-  }
-
-  .features {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    align-items: center;
-    justify-items: center;
-    margin-left: -0.2em;
-  }
-
   .stalk {
     height: 100px;
 

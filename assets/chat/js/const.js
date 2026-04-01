@@ -115,7 +115,6 @@ const settingsdefault = new Map(
     schemaversion: 2,
     showtime: false,
     showentireurl: false,
-    hideflairicons: false,
     profilesettings: false,
     timestampformat: 'HH:mm',
     maxlines: 250,

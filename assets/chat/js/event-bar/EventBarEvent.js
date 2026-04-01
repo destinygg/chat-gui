@@ -1,6 +1,4 @@
-import { usernameColorFlair } from '../messages/ChatUserMessage';
 import { selectDonationTier } from '../messages/ChatDonationMessage';
-import { getTierStyles } from '../messages/subscriptions/ChatSubscriptionMessage';
 import { MessageBuilder, MessageTypes } from '../messages';
 import ChatUser from '../user';
 import EventEmitter from '../emitter';
@@ -36,32 +34,12 @@ export default class EventBarEvent extends EventEmitter {
 
     const user = new ChatUser(this.data.user);
     const userTemplate = eventTemplate.querySelector('.user');
-    const colorFlair = usernameColorFlair(chat.flairs, user);
-    if (colorFlair) {
-      userTemplate.classList.add(colorFlair.name);
-    }
     userTemplate.textContent = user.displayName;
 
     const iconTemplate = eventTemplate.querySelector('.event-icon');
     iconTemplate.classList.add(this.type.toLowerCase());
 
     switch (this.type) {
-      case MessageTypes.SUBSCRIPTION:
-      case MessageTypes.GIFTSUB:
-      case MessageTypes.MASSGIFT: {
-        const { rainbowColor, tierColor } = getTierStyles(
-          this.data.tier,
-          chat.flairs,
-        );
-
-        if (tierColor) {
-          eventTemplate.style.borderColor = tierColor;
-        }
-        if (rainbowColor) {
-          eventTemplate.classList.add('rainbow-border');
-        }
-        break;
-      }
       case MessageTypes.DONATION: {
         const donationTier = selectDonationTier(this.data.amount);
         eventTemplate.classList.add(donationTier[0]);

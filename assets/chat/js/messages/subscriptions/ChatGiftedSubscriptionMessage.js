@@ -1,4 +1,3 @@
-import { usernameColorFlair } from '../ChatUserMessage';
 import ChatSubscriptionMessage from './ChatSubscriptionMessage';
 import MessageTypes from '../MessageTypes';
 
@@ -45,10 +44,6 @@ export default class ChatGiftedSubscriptionMessage extends ChatSubscriptionMessa
       .querySelector('#user-template')
       ?.content.cloneNode(true).firstElementChild;
 
-    const gifteeColorFlair = usernameColorFlair(chat.flairs, this.giftee);
-    if (gifteeColorFlair) {
-      giftee.classList.add(gifteeColorFlair.name);
-    }
     giftee.innerText = this.giftee.displayName;
 
     const subscriptionInfo = message.querySelector('.event-info');

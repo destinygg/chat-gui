@@ -2,19 +2,6 @@ import encodeUrl from '../encodeUrl';
 import ChatMessage from './ChatMessage';
 import MessageTypes from './MessageTypes';
 
-/**
- * Return the highest priority flair with a color, if one exists. This is the
- * flair whose style should be applied to the user's username.
- */
-export function usernameColorFlair(allFlairs, user) {
-  return allFlairs
-    .filter((flair) =>
-      user.features.some((userFlair) => userFlair === flair.name),
-    )
-    .sort((a, b) => (a.priority - b.priority >= 0 ? 1 : -1))
-    .find((f) => f.rainbowColor || f.color);
-}
-
 export default class ChatUserMessage extends ChatMessage {
   constructor(message, user, timestamp = null) {
     super(message, timestamp, MessageTypes.USER);
@@ -83,12 +70,9 @@ export default class ChatUserMessage extends ChatMessage {
       ctrl = '';
     }
 
-    const colorFlair = usernameColorFlair(chat.flairs, this.user);
-    const user = `${this.buildFeatures(this.user, chat)} <a title="${encodeUrl(
+    const user = `<a title="${encodeUrl(
       this.title,
-    )}" class="${['user', colorFlair?.name].filter(Boolean).join(' ')}">${
-      this.user.displayName
-    }</a>`;
+    )}" class="user">${this.user.displayName}</a>`;
     return this.wrap(
       `${this.buildTime()} ${user}<span class="ctrl">${ctrl}</span> ${this.buildMessageTxt(
         chat,
@@ -96,18 +80,6 @@ export default class ChatUserMessage extends ChatMessage {
       classes,
       attr,
     );
-  }
-
-  buildFeatures(user, chat) {
-    const features = (user.features || [])
-      .filter((e) => chat.flairsMap.has(e))
-      .map((e) => chat.flairsMap.get(e))
-      .reduce(
-        (str, e) =>
-          `${str}<i data-flair="${e.name}" class="flair ${e.name}" title="${e.label}"></i> `,
-        '',
-      );
-    return features !== '' ? `<span class="features">${features}</span>` : '';
   }
 
   setTag(newTag) {

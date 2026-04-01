@@ -51,12 +51,6 @@ export default class ChatUserMenu extends ChatMenu {
         e.currentTarget.getAttribute('data-username'),
       ),
     );
-    this.container.on('click', '.flair', (e) =>
-      this.chat.userfocus.toggleFocus(
-        e.target.getAttribute('data-flair'),
-        true,
-      ),
-    );
     this.container.on('click', '.whisper-nick', (e) => {
       ChatMenu.closeMenus(this.chat);
       const value = this.chat.input.val().toString().trim();
@@ -108,9 +102,7 @@ export default class ChatUserMenu extends ChatMenu {
           $(section.title).html(
             `${section.searchcount} out of ${section.users.children.length} ${
               section.data.name
-            }${
-              section.users.children.length === 1 ? '' : 's'
-            }${this.buildFeatures(section.data.flairs)}`,
+            }${section.users.children.length === 1 ? '' : 's'}`,
           );
           if (section.searchcount === 0) {
             $(section.container).hide();
@@ -124,7 +116,7 @@ export default class ChatUserMenu extends ChatMenu {
           $(section.title).html(
             `${section.users.children.length} ${section.data.name}${
               section.users.children.length === 1 ? '' : 's'
-            }${this.buildFeatures(section.data.flairs)}`,
+            }`,
           );
           if (section.users.children.length === 0) {
             $(section.container).hide();
@@ -136,19 +128,6 @@ export default class ChatUserMenu extends ChatMenu {
       this.ui.toggleClass('search-in', searching);
     }
     super.redraw();
-  }
-
-  buildFeatures(flairs) {
-    const features = flairs
-      .filter((e) => this.chat.flairsMap.has(e))
-      .map((e) => this.chat.flairsMap.get(e))
-      .sort((a, b) => a.priority - b.priority)
-      .reduce(
-        (str, e) =>
-          `${str}<i data-flair="${e.name}" class="flair ${e.name}" title="${e.label}"></i> `,
-        '',
-      );
-    return features !== '' ? `<span class="features">${features}</span>` : '';
   }
 
   addAll(users) {

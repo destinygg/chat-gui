@@ -23,9 +23,6 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
 
     this.tagSubheader = this.ui.find('.user-info h5.tag-subheader')[0];
 
-    this.flairList = this.ui.find('.user-info .flairs');
-    this.flairSubheader = this.ui.find('.user-info h5.flairs-subheader')[0];
-
     this.messagesContainer = this.ui.find('.content .messages');
     this.messageHistoryStatus = this.ui.find(
       '.content .message-history-status',
@@ -308,24 +305,13 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
       this.tagSubheader.replaceChildren();
     }
 
-    const featuresList = this.buildFeatures(this.clickedNick, usernameFeatures);
-    if (featuresList) {
-      this.flairList.toggleClass('hidden', false);
-      this.flairSubheader.style.display = '';
-    } else {
-      this.flairList.toggleClass('hidden', true);
-      this.flairSubheader.style.display = 'none';
-    }
-
     this.header.text('');
     this.header.attr('class', 'username');
     this.messagesContainer.empty();
     this.updateNoMessagesNotice(true);
-    this.flairList.empty();
 
     this.header.text(displayName);
     this.header.addClass(usernameFeatures);
-    this.flairList.append(featuresList);
 
     this.setMessageHistoryStatus('Loading history...');
     this.loadMessageHistory(displayName)
@@ -377,34 +363,8 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     return timeHTML;
   }
 
-  buildFeatures(nick, messageFeatures) {
-    const user = this.chat.users.get(nick);
-    const messageFeaturesArray = messageFeatures
-      .split(' ')
-      .filter((e) => e !== 'user' && e !== 'subscriber');
-    const features =
-      user !== undefined
-        ? this.buildFeatureHTML(
-            user.features.filter((e) => e !== 'subscriber') || [],
-          )
-        : this.buildFeatureHTML(messageFeaturesArray);
-    return features !== '' ? `<span class="features">${features}</span>` : '';
-  }
-
   async loadMessageHistory(username) {
     return this.chat.userMessageService.getUserMessages(username);
-  }
-
-  buildFeatureHTML(featureArray) {
-    return featureArray
-      .filter((e) => this.chat.flairsMap.has(e))
-      .map((e) => this.chat.flairsMap.get(e))
-      .reduce((str, e) => {
-        if (e.hidden !== true) {
-          return `${str}<i class="flair ${e.name}" title="${e.label}"></i> `;
-        }
-        return `${str}<div class="flair" title="${e.label}">${e.label}</div> `;
-      }, '');
   }
 
   buildMessageMarkup(message) {

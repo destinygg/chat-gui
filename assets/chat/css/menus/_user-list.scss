@@ -8,19 +8,6 @@
       padding: 0em 0em 0.2em 1em;
       font-weight: 600;
       border-bottom: 1px solid;
-
-      .features {
-        float: right;
-        display: inline-flex;
-        vertical-align: text-top;
-        align-items: center;
-        margin-right: a.$gutter-md;
-
-        .flair {
-          cursor: pointer;
-          margin-right: a.$gutter-xs;
-        }
-      }
     }
   }
 

@@ -89,8 +89,6 @@ class Chat {
     this.backlogloading = false;
     this.unresolved = [];
 
-    this.flairs = [];
-    this.flairsMap = new Map();
     this.emoteService = new EmoteService();
     this.userMessageService = new UserMessageService();
     this.youtubeOEmbedService = new YouTubeOEmbedService();
@@ -650,11 +648,6 @@ class Chat {
       .catch();
   }
 
-  async loadEmotesAndFlairs() {
-    await this.loadEmotes();
-    await this.loadFlairs();
-  }
-
   async loadEmotes() {
     this.loadCss(
       `${this.config.cdn.base}/emotes/emotes.css?_=${this.config.cacheKey}`,
@@ -666,20 +659,6 @@ class Chat {
       .then((json) => {
         this.setEmotes(json);
         this.refreshEmoteAutocomplete();
-      })
-      .catch(() => {});
-  }
-
-  async loadFlairs() {
-    this.loadCss(
-      `${this.config.cdn.base}/flairs/flairs.css?_=${this.config.cacheKey}`,
-    );
-    return fetch(
-      `${this.config.cdn.base}/flairs/flairs.json?_=${this.config.cacheKey}`,
-    )
-      .then((res) => res.json())
-      .then((json) => {
-        this.setFlairs(json);
       })
       .catch(() => {});
   }
@@ -722,13 +701,6 @@ class Chat {
       .emotesForUser(this.user)
       .map((e) => e.prefix)
       .forEach((e) => this.autocomplete.add(e, true));
-  }
-
-  setFlairs(flairs) {
-    this.flairs = flairs;
-    this.flairsMap = new Map();
-    flairs.forEach((v) => this.flairsMap.set(v.name, v));
-    return this;
   }
 
   saveSettings() {

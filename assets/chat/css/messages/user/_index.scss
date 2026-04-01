@@ -3,20 +3,6 @@
 @use 'death';
 @use 'whisper';
 
-.msg-user {
-  .features {
-    display: inline-flex;
-    vertical-align: text-top;
-    align-items: center;
-    margin-left: -(a.$gutter-xs);
-  }
-
-  .flair {
-    cursor: pointer;
-    margin-left: a.$gutter-xs;
-  }
-}
-
 .watching-focus:not(.focus) {
   .msg-user {
     opacity: 0.3;
@@ -28,16 +14,8 @@
   }
 }
 
-.pref-hideflairicons .features {
-  display: none;
-}
-
 .onstreamchat {
   .msg-user {
     @include a.slide-in;
-  }
-
-  .features {
-    display: none !important;
   }
 }

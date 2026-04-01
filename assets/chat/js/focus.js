@@ -18,25 +18,23 @@ class ChatUserFocus {
     const t = $(target);
     if (t.hasClass('chat-user')) {
       if (!this.chat.settings.get('focusmentioned')) {
-        this.toggleFocus(t.closest('.msg-user').data('username'), false, true);
+        this.toggleFocus(t.closest('.msg-user').data('username'), true);
       }
       this.toggleFocus(t.text());
     } else if (t.hasClass('user') && !t.hasClass('tier')) {
       this.toggleFocus(t.text());
-    } else if (t.hasClass('flair')) {
-      this.toggleFocus(t.data('flair'), true);
     } else if (this.isFocused()) {
       this.clearFocus();
     }
   }
 
-  toggleFocus(value = '', isFlair = false, onlyAdd = false) {
+  toggleFocus(value = '', onlyAdd = false) {
     const normalized = value.toLowerCase();
     const index = this.focused.indexOf(normalized);
     const focused = index !== -1;
 
     if (!focused) {
-      this.addCssRule(normalized, isFlair);
+      this.addCssRule(normalized);
     } else if (!onlyAdd) {
       this.removeCssRule(index);
     }
@@ -48,11 +46,9 @@ class ChatUserFocus {
     return this.focused.length > 0;
   }
 
-  addCssRule(value, isFlair) {
+  addCssRule(value) {
     let rule;
-    if (isFlair) {
-      rule = `.msg-user.${value}{opacity:1 !important;}`;
-    } else if (this.chat.settings.get('focusmentioned')) {
+    if (this.chat.settings.get('focusmentioned')) {
       rule = `
         .msg-death[data-username="${value}"], .msg-death[data-mentioned~="${value}"],
         .msg-broadcast[data-username="${value}"], .msg-broadcast[data-mentioned~="${value}"],
