@@ -38,6 +38,41 @@
   #chat.chat-autocomplete-in & {
     border-radius: 0;
   }
+
+  &::-webkit-scrollbar {
+    width: 16px;
+    background-color: a.$win95-input-bg;
+    background-image: url('data:image/gif;base64,R0lGODlhAgACAJEAAAAAAP///8zMzP///yH5BAEAAAMALAAAAAACAAIAAAID1CYFADs=');
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: a.$win95-bg-alt;
+    box-shadow:
+      inset -1px -1px 0 a.$win95-darkgrey,
+      inset 1px 1px 0 0 a.$win95-white;
+    border: 1px solid a.$win95-black;
+  }
+
+  &::-webkit-scrollbar-button:start:decrement,
+  &::-webkit-scrollbar-button:end:increment {
+    display: block;
+    height: 16px;
+    background-color: a.$win95-bg-alt;
+    background-repeat: no-repeat;
+    background-position: center;
+    box-shadow:
+      inset -1px -1px 0 a.$win95-darkgrey,
+      inset 1px 1px 0 0 a.$win95-white;
+    border: 1px solid a.$win95-black;
+  }
+
+  &::-webkit-scrollbar-button:start:decrement {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='4'%3E%3Cpolygon points='4,0 8,4 0,4' fill='%23000'/%3E%3C/svg%3E");
+  }
+
+  &::-webkit-scrollbar-button:end:increment {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='4'%3E%3Cpolygon points='0,0 8,0 4,4' fill='%23000'/%3E%3C/svg%3E");
+  }
 }
 
 #chat-format-bar {
