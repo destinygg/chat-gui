@@ -7,7 +7,7 @@
     "glue": "node scripts/glue.js",
     "start": "webpack serve --mode=development",
     "test": "jest",
-    "prepare": "shx cp .githooks/* .git/hooks/",
+    "prepare": "shx test -d .git/hooks && shx cp .githooks/* .git/hooks/ || true",
     "lint": "eslint --fix --max-warnings=0 . && prettier -cwu ."
   },
   "repository": {
