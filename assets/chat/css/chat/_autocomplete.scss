@@ -1,22 +1,22 @@
-@use 'sass:color';
 @use '../abstracts/' as a;
 
 #chat-auto-complete {
   pointer-events: none;
-  transition: opacity 750ms;
-  transition-timing-function: cubic-bezier(0, 0.74, 0.1, 0.99);
   opacity: 0;
   z-index: 131;
-  border-radius: a.$bradius a.$bradius 0 0;
+  border-radius: 0;
   position: absolute;
-  font-size: 1.1em;
-  line-height: 2em;
-  height: 2em;
-  top: -2em;
+  font-family: 'MSSansSerif', sans-serif;
+  font-size: 11px;
+  line-height: 20px;
+  height: 22px;
+  top: -22px;
   left: 0;
   right: 0;
   overflow: hidden;
   white-space: nowrap;
+  background-color: a.$win95-bg;
+  @include a.win95-raised;
 
   &.active {
     opacity: 1;
@@ -32,27 +32,21 @@
   }
 
   li {
-    padding: 0 a.$gutter-sm;
+    padding: 0 6px;
     cursor: pointer;
     text-decoration: none;
     display: inline-block;
-    color: a.$color-chat-text3;
-    background: rgba(a.$color-surface-dark1, 0.75);
-
-    &:first-child {
-      border-radius: a.$bradius 0 0 0;
-    }
-
-    &:last-child {
-      border-radius: 0 a.$bradius 0 0;
-    }
+    color: a.$win95-text;
+    background: transparent;
 
     &:hover {
-      color: color.adjust(a.$color-chat-text3, $lightness: 20%);
+      background-color: a.$win95-highlight;
+      color: a.$win95-highlight-text;
     }
 
     &.active {
-      color: a.$text-color;
+      background-color: a.$win95-highlight;
+      color: a.$win95-highlight-text;
     }
   }
 }
