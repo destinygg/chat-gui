@@ -3,7 +3,6 @@ import ChatUIMessage from './ChatUIMessage';
 import ChatMessage from './ChatMessage';
 import ChatUser from '../user';
 import ChatUserMessage from './ChatUserMessage';
-import ChatEmoteMessage from './ChatEmoteMessage';
 import PinnedMessage from './PinnedMessage';
 import ChatDonationMessage from './ChatDonationMessage';
 import ChatRegularSubscriptionMessage from './subscriptions/ChatRegularSubscriptionMessage';
@@ -39,10 +38,6 @@ export default class MessageBuilder {
 
   static message(message, user, timestamp = null) {
     return new ChatUserMessage(message, user, timestamp);
-  }
-
-  static emote(emote, timestamp, messages) {
-    return new ChatEmoteMessage(emote, timestamp, messages);
   }
 
   static whisper(message, user, target, timestamp = null, id = null) {

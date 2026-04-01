@@ -26,7 +26,6 @@ Type `/mock` in the chat input with no arguments to see available commands. The 
 | `/mock start` | Start the mock event loop |
 | `/mock ban` | Emit a ban event |
 | `/mock sub` | Emit a subscription event |
-| `/mock combo` | Emit a combo event |
 | `/mock poll` | Emit a poll event |
 | `/mock flood` | Send 20 messages rapidly |
 | `/mock donation` | Emit a donation event |

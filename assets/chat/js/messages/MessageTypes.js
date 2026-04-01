@@ -7,7 +7,6 @@ export default {
   UI: 'UI',
   CHAT: 'CHAT',
   USER: 'USER',
-  EMOTE: 'EMOTE',
   PINNED: 'PINNED',
   SUBSCRIPTION: 'SUBSCRIPTION',
   GIFTSUB: 'GIFTSUB',

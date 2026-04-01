@@ -87,12 +87,7 @@ class ChatWindow extends EventEmitter {
   }
 
   containsMessage(message) {
-    return this.messages.find((msg) => {
-      if (msg.type === MessageTypes.EMOTE) {
-        return msg.containsMessage(message);
-      }
-      return msg.md5 === message.md5;
-    });
+    return this.messages.find((msg) => msg.md5 === message.md5);
   }
 
   getlines(sel) {
@@ -179,11 +174,6 @@ class ChatWindow extends EventEmitter {
         }
       }
     }
-  }
-
-  removeLastMessage() {
-    this.lastmessage.remove();
-    this.messages = this.messages.filter((m) => m !== this.lastmessage);
   }
 
   /**
