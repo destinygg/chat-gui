@@ -651,6 +651,11 @@ class Chat {
     return Promise.resolve(this);
   }
 
+  loadEmotesAndFlairs() {
+    this.loadEmotes();
+    return Promise.resolve(this);
+  }
+
   connect() {
     this.source.connect(this.config.url);
   }
