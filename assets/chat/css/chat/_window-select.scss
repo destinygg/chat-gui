@@ -1,31 +1,29 @@
 @use '../abstracts/' as a;
 
 #chat-windows-select {
-  padding-top: 0.5em;
-  background: a.$color-surface-dark4;
+  background: a.$win95-bg;
   white-space: nowrap;
   display: flex;
+  align-items: flex-end;
   z-index: 100;
+  padding: 4px 4px 0;
 }
 
 .win-main {
-  width: 3em;
   flex-shrink: 0;
-
-  span {
-    display: none;
-  }
 
   .tab-close {
     display: none !important;
   }
 
   .dgg-icon {
-    display: block;
-    width: 100%;
-    height: 100%;
-
-    @include a.icon-background('../img/dgg-icon.svg');
+    display: inline-block;
+    width: 11px;
+    height: 11px;
+    margin-right: 3px;
+    vertical-align: -1px;
+    background: url('../img/aim-icon.png') no-repeat center / contain;
+    image-rendering: pixelated;
   }
 }
 
@@ -33,45 +31,64 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;
-  border-radius: a.$bradius a.$bradius 0 0;
-  color: a.$color-chat-text3;
+  border-radius: 0;
+  color: a.$win95-text;
   user-select: none;
   cursor: pointer;
-  font-size: 1em;
-  padding: a.$gutter-sm a.$gutter-lg;
+  font-family: 'MSSansSerif', sans-serif;
+  font-size: 11px;
+  font-weight: bold;
+  padding: 3px 8px;
+  background-color: a.$win95-bg;
+  border: 1px solid a.$win95-black;
+  border-bottom: none;
+  margin-right: -1px;
+  position: relative;
+
+  box-shadow:
+    inset 1px 1px 0 a.$win95-white,
+    inset -1px 0 0 a.$win95-darkgrey;
 
   &.active {
-    color: a.$color-chat-text1;
-    background: a.$color-surface-dark1;
-    margin-left: 0;
-    margin-right: 0;
+    color: a.$win95-text;
+    background: a.$win95-bg;
     overflow: visible;
     text-overflow: unset;
     min-width: auto;
     display: flex;
     align-items: center;
+    padding-bottom: 4px;
+    margin-bottom: -1px;
+    z-index: 1;
 
     .tab-close {
       display: inline-block;
     }
   }
 
+  &:not(.active) {
+    padding-top: 4px;
+    margin-top: 2px;
+    background-color: a.$win95-bg-alt;
+    color: a.$win95-text;
+  }
+
   &:hover,
   &.unread {
-    color: a.$color-chat-text1;
+    color: a.$win95-text;
   }
 }
 
 .tab-close {
-  width: 1em;
-  height: 1em;
-  opacity: 0.25;
-  margin-left: a.$gutter-md;
+  width: 8px;
+  height: 8px;
+  margin-left: 6px;
   display: none;
+  filter: brightness(0);
 
   @include a.icon-background('../img/icon-close.svg');
 
   &:hover {
-    opacity: 1;
+    filter: brightness(0) contrast(2);
   }
 }

@@ -971,15 +971,15 @@ class Chat {
       this.windows.forEach((w) => {
         if (w.name === 'main') {
           this.windowselect.append(
-            `<span title="Destiny GG" data-name="main" class="tab win-main tag-${
-              w.tag
-            } ${w.visible ? 'active' : ''}"><i class="dgg-icon"></i></span>`,
+            `<span title="Chat" data-name="main" class="tab win-main ${
+              w.visible ? 'active' : ''
+            }"><i class="dgg-icon"></i>Chat</span>`,
           );
         } else {
           const conv = this.whispers.get(w.name);
           this.windowselect.append(`<span title="${w.label}" data-name="${
             w.name
-          }" class="tab win-${w.name} tag-${w.tag} ${
+          }" class="tab win-${w.name} ${
             w.visible ? 'active' : ''
           } ${conv.unread > 0 ? 'unread' : ''}">
                     <span>${w.label}${
