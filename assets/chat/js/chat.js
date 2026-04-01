@@ -997,7 +997,7 @@ class Chat {
           this.windowselect.append(
             `<span title="Chat" data-name="main" class="tab win-main ${
               w.visible ? 'active' : ''
-            }"><i class="dgg-icon"></i>Chat</span>`,
+            }">Chat</span>`,
           );
         } else {
           const conv = this.whispers.get(w.name);
