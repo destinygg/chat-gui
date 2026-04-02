@@ -2,7 +2,9 @@
 
 .msg-highlight {
   color: a.$win95-text;
-  background-color: transparent;
+  background-color: yellow;
+  outline: 1px dotted #010101;
+  outline-offset: -1px;
 
   .user::before {
     content: '';
