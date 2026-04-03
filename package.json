@@ -1,13 +1,13 @@
 {
   "name": "dgg-chat-gui",
-  "version": "2.63.0",
+  "version": "2.64.0",
   "description": "Destiny.gg chat client front-end",
   "main": "destiny",
   "scripts": {
     "glue": "node scripts/glue.js",
     "start": "webpack serve --mode=development",
     "test": "jest",
-    "prepare": "shx cp .githooks/* .git/hooks/",
+    "prepare": "shx test -d .git && shx cp .githooks/* .git/hooks/ || true",
     "lint": "eslint --fix --max-warnings=0 . && prettier -cwu ."
   },
   "repository": {
