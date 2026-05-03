@@ -160,6 +160,7 @@ class Chat {
     this.source.on('REMOVEPHRASE', (data) => this.onREMOVEPHRASE(data));
     this.source.on('DEATH', (data) => this.onDEATH(data));
     this.source.on('PAIDEVENTS', (data) => this.onPAIDEVENTS(data));
+    this.source.on('LIKEMSG', (data) => this.onLIKEMSG(data));
 
     this.control.on('SEND', (data) => this.cmdSEND(data));
     this.control.on('HINT', (data) => this.cmdHINT(data));
@@ -239,6 +240,7 @@ class Chat {
     this.control.on('DIE', () => this.cmdDIE());
     this.control.on('SUICIDE', () => this.cmdDIE());
     this.control.on('BITLY', () => this.cmdDIE());
+    this.control.on('LIKEMSG', (data) => this.cmdLIKEMSG(data));
   }
 
   get isDesktop() {
@@ -913,6 +915,22 @@ class Chat {
 
     // The point where we actually add the message dom
     win.addMessage(this, message);
+
+    // Add like hover target for user messages
+    if (message.type === MessageTypes.USER && message.ui) {
+      message.setupLikeTarget((data) => {
+        if (!this.authenticated) {
+          this.loginscrn.show();
+          return;
+        }
+        this.source.send('LIKEMSG', {
+          ...data,
+          nick: this.user.displayName,
+          id: this.user.id,
+          timestamp: Date.now(),
+        });
+      });
+    }
 
     // Hide the message if the user is ignored
     if (
@@ -1779,6 +1797,38 @@ class Chat {
     if (this.pinnedMessage) {
       this.pinnedMessage.hidden = false;
     }
+  }
+
+  onLIKEMSG(data) {
+    const { messageNick, messageTimestamp, nick: likerNick } = data;
+
+    // Find the message that is being liked based on the nick and timestamp
+    const message = this.mainwindow.messages.find(
+      (msg) =>
+        msg.user &&
+        msg.user.displayName === messageNick &&
+        msg.timestamp.valueOf() === messageTimestamp,
+    );
+
+    if (!message || !message.addLike) {
+      return;
+    }
+
+    // Check if current user is the one who liked this message
+    const isCurrentUser = likerNick && likerNick === this.user.displayName;
+
+    message.addLike(isCurrentUser, (likeData) => {
+      if (!this.authenticated) {
+        this.loginscrn.show();
+        return;
+      }
+      this.source.send('LIKEMSG', {
+        ...likeData,
+        nick: this.user.displayName,
+        id: this.user.id,
+        timestamp: Date.now(),
+      });
+    });
   }
 
   cmdSHOWPOLL() {
@@ -2685,6 +2735,10 @@ class Chat {
 
   cmdDIE() {
     this.source.send('DIE', { data: '' });
+  }
+
+  cmdLIKEMSG(data) {
+    this.source.send('LIKEMSG', { data });
   }
 
   openConversation(nick) {

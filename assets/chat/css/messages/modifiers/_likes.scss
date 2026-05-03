@@ -1,0 +1,135 @@
+@use '../../abstracts/' as a;
+
+.msg-chat {
+  position: relative;
+}
+
+.like-hover-target {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+  z-index: 1;
+
+  &::after {
+    content: '';
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 18px;
+    height: 18px;
+    background-image: url('../img/icon-hearts-gradient.svg');
+    background-size: auto 100%;
+    background-repeat: no-repeat;
+    background-position-x: 0;
+    background-position-y: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+
+  &:hover::after {
+    opacity: 0.6;
+  }
+}
+
+.msg-likes {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+}
+
+.like-heart {
+  width: 18px;
+  height: 18px;
+  background-image: url('../img/icon-hearts-gradient.svg');
+  background-size: auto 100%;
+  background-repeat: no-repeat;
+  background-position-x: 0;
+  background-position-y: center;
+  position: relative;
+  z-index: 1;
+  transition: transform 0.3s ease;
+
+  // Each heart in sprite is 18px apart
+  &[data-level='1'] {
+    background-position-x: -18px;
+  }
+
+  &[data-level='2'] {
+    background-position-x: -36px;
+  }
+
+  &[data-level='3'] {
+    background-position-x: -54px;
+  }
+
+  &[data-level='4'] {
+    background-position-x: -72px;
+  }
+
+  &[data-level='5'] {
+    background-position-x: -90px;
+  }
+
+  &[data-level='6'] {
+    background-position-x: -108px;
+  }
+}
+
+.heart-glow {
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  background-color: rgba(228, 70, 66, 0.2);
+  border-radius: 6px;
+  opacity: 0;
+  z-index: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.msg-likes.liked .heart-glow {
+  opacity: 1;
+}
+
+.msg-likes.liked .like-heart {
+  transform: scale(1.2);
+}
+
+.heart-float-ghost {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  left: -3px;
+  top: -3px;
+  z-index: -1;
+  mask-image: url('../img/icon-heart-float-ghost.svg');
+  mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center;
+  background-color: #e44642;
+  animation: heart-float 0.8s ease-out forwards;
+  pointer-events: none;
+}
+
+@keyframes heart-float {
+  0% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-30px);
+    opacity: 0;
+  }
+}
