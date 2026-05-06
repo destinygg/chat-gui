@@ -685,21 +685,24 @@ class Chat {
   }
 
   async loadWhispers() {
-    fetch(`${this.config.api.base}/api/messages/unread`, {
+    fetch(`${this.config.api.base}/api/messages/inbox`, {
       credentials: 'include',
     })
       .then((res) => res.json())
-      .then((d) => {
-        d.forEach((e) =>
-          this.whispers.set(e.username.toLowerCase(), {
-            id: e.messageid,
-            nick: e.username,
+      .then((data) => {
+        data.forEach((e) =>
+          this.whispers.set(e.user.toLowerCase(), {
+            id: e.id,
+            nick: e.user,
+            time: e.timestamp,
             unread: Number(e.unread),
+            read: Number(e.read),
             open: false,
+            found: false,
           }),
         );
+        this.menus.get('whisper-users').redraw();
       })
-      .then(() => this.menus.get('whisper-users').redraw())
       .catch(() => {});
   }
 
