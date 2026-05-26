@@ -18,7 +18,6 @@ export default class ChatXPostMessage extends ChatEventMessage {
 
   html(chat = null) {
     const eventTemplate = super.html(chat);
-    eventTemplate.classList.add('msg-event-xpost');
 
     const link = document.createElement('a');
     link.href = this.url;
