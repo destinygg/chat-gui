@@ -155,6 +155,7 @@ class Chat {
     this.source.on('GIFTSUB', (data) => this.onGIFTSUB(data));
     this.source.on('MASSGIFT', (data) => this.onMASSGIFT(data));
     this.source.on('DONATION', (data) => this.onDONATION(data));
+    this.source.on('XPOST', (data) => this.onXPOST(data));
     this.source.on('UPDATEUSER', (data) => this.onUPDATEUSER(data));
     this.source.on('ADDPHRASE', (data) => this.onADDPHRASE(data));
     this.source.on('REMOVEPHRASE', (data) => this.onREMOVEPHRASE(data));
@@ -1570,6 +1571,18 @@ class Chat {
         MessageTypes.DONATION,
         data,
       );
+      this.eventBar.add(eventBarEvent);
+      if (this.eventBar.length === 1) {
+        this.mainwindow.update();
+      }
+    }
+  }
+
+  onXPOST(data) {
+    MessageBuilder.xpost(data).into(this);
+
+    if (!this.backlogloading) {
+      const eventBarEvent = new EventBarEvent(this, MessageTypes.XPOST, data);
       this.eventBar.add(eventBarEvent);
       if (this.eventBar.length === 1) {
         this.mainwindow.update();

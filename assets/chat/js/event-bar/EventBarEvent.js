@@ -34,14 +34,7 @@ export default class EventBarEvent extends EventEmitter {
     eventTemplate.dataset.uuid = this.data.uuid;
     eventTemplate.dataset.unixtimestamp = this.data.timestamp;
 
-    const user = new ChatUser(this.data.user);
     const userTemplate = eventTemplate.querySelector('.user');
-    const colorFlair = usernameColorFlair(chat.flairs, user);
-    if (colorFlair) {
-      userTemplate.classList.add(colorFlair.name);
-    }
-    userTemplate.textContent = user.displayName;
-
     const iconTemplate = eventTemplate.querySelector('.event-icon');
     iconTemplate.classList.add(this.type.toLowerCase());
 
@@ -49,6 +42,13 @@ export default class EventBarEvent extends EventEmitter {
       case MessageTypes.SUBSCRIPTION:
       case MessageTypes.GIFTSUB:
       case MessageTypes.MASSGIFT: {
+        const user = new ChatUser(this.data.user);
+        const colorFlair = usernameColorFlair(chat.flairs, user);
+        if (colorFlair) {
+          userTemplate.classList.add(colorFlair.name);
+        }
+        userTemplate.textContent = user.displayName;
+
         const { rainbowColor, tierColor } = getTierStyles(
           this.data.tier,
           chat.flairs,
@@ -63,12 +63,30 @@ export default class EventBarEvent extends EventEmitter {
         break;
       }
       case MessageTypes.DONATION: {
+        const user = new ChatUser(this.data.user);
+        const colorFlair = usernameColorFlair(chat.flairs, user);
+        if (colorFlair) {
+          userTemplate.classList.add(colorFlair.name);
+        }
+        userTemplate.textContent = user.displayName;
+
         const donationTier = selectDonationTier(this.data.amount);
         eventTemplate.classList.add(donationTier[0]);
         break;
       }
-      default:
+      case MessageTypes.XPOST: {
+        userTemplate.textContent = `@${this.data.handle}`;
         break;
+      }
+      default: {
+        const user = new ChatUser(this.data.user);
+        const colorFlair = usernameColorFlair(chat.flairs, user);
+        if (colorFlair) {
+          userTemplate.classList.add(colorFlair.name);
+        }
+        userTemplate.textContent = user.displayName;
+        break;
+      }
     }
 
     this.selectedElement = this.buildSelected().html(chat);
@@ -131,6 +149,9 @@ export default class EventBarEvent extends EventEmitter {
       }
       case MessageTypes.DONATION: {
         return MessageBuilder.donation(this.data);
+      }
+      case MessageTypes.XPOST: {
+        return MessageBuilder.xpost(this.data);
       }
       default:
         return undefined;

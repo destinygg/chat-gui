@@ -48,6 +48,14 @@
     &.massgift {
       @include a.icon-background('../img/sub-mass-gift.png');
     }
+
+    &.xpost {
+      @include a.icon-background('../img/icon-x-post.svg');
+    }
+  }
+
+  &.xpost {
+    border-color: #ffffff;
   }
 
   .user {

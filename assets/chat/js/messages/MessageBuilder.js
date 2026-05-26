@@ -6,6 +6,7 @@ import ChatUserMessage from './ChatUserMessage';
 import ChatEmoteMessage from './ChatEmoteMessage';
 import PinnedMessage from './PinnedMessage';
 import ChatDonationMessage from './ChatDonationMessage';
+import ChatXPostMessage from './ChatXPostMessage';
 import ChatRegularSubscriptionMessage from './subscriptions/ChatRegularSubscriptionMessage';
 import ChatGiftedSubscriptionMessage from './subscriptions/ChatGiftedSubscriptionMessage';
 import ChatMassSubscriptionMessage from './subscriptions/ChatMassSubscriptionMessage';
@@ -118,5 +119,16 @@ export default class MessageBuilder {
 
   static death(message, user, timestamp = null) {
     return new ChatDeathMessage(message, user, timestamp);
+  }
+
+  static xpost(data) {
+    return new ChatXPostMessage(
+      data.handle,
+      data.text,
+      data.url,
+      data.timestamp,
+      data.expirationTimestamp,
+      data.uuid,
+    );
   }
 }

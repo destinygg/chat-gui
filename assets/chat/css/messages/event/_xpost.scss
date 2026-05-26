@@ -1,0 +1,13 @@
+@use '../../abstracts/' as a;
+
+.msg-event-xpost {
+  border-color: #ffffff;
+
+  .event-icon {
+    filter: invert(100%);
+
+    &.xpost {
+      @include a.icon-background('../img/icon-x-post.svg');
+    }
+  }
+}

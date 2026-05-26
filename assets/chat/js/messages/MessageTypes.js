@@ -13,5 +13,6 @@ export default {
   GIFTSUB: 'GIFTSUB',
   MASSGIFT: 'MASSGIFT',
   DONATION: 'DONATION',
+  XPOST: 'XPOST',
   DEATH: 'DEATH',
 };
