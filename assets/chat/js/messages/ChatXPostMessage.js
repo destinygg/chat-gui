@@ -23,7 +23,7 @@ export default class ChatXPostMessage extends ChatEventMessage {
     link.href = this.url;
     link.target = '_blank';
     link.rel = 'noopener noreferrer';
-    link.className = 'user';
+    link.className = 'user non-chat-user';
     link.textContent = `@${this.handle}`;
 
     eventTemplate.querySelector('.event-info').append(link, ' posted on X');

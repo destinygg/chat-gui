@@ -21,7 +21,11 @@ class ChatUserFocus {
         this.toggleFocus(t.closest('.msg-user').data('username'), false, true);
       }
       this.toggleFocus(t.text());
-    } else if (t.hasClass('user') && !t.hasClass('tier')) {
+    } else if (
+      t.hasClass('user') &&
+      !t.hasClass('tier') &&
+      !t.hasClass('non-chat-user')
+    ) {
       this.toggleFocus(t.text());
     } else if (t.hasClass('flair')) {
       this.toggleFocus(t.data('flair'), true);
