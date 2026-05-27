@@ -48,10 +48,18 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     this.configureButtons();
 
     this.chat.output.on('contextmenu', '.msg-chat .user', (e) => {
-      // If the target has this class, it's a sub tier label styled to match the
-      // username color of the sub (which requires the `user` class).
+      // The `tier` class is a sub-tier label styled to match the username
+      // color of the sub (which requires the `user` class). Suppress both
+      // menus — neither one is meaningful on it.
       if (e.currentTarget.classList.contains('tier')) {
         return false;
+      }
+
+      // `non-chat-user` marks user-like references that aren't chat users
+      // (e.g. an X handle on an XPOST event). Skip our menu and let the
+      // browser's native context menu show.
+      if (e.currentTarget.classList.contains('non-chat-user')) {
+        return;
       }
 
       const message = $(e.currentTarget).closest('.msg-chat');
