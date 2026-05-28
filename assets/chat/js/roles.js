@@ -1,6 +1,4 @@
 export default {
-  USER: 'USER',
-  SUBSCRIBER: 'SUBSCRIBER',
   ADMIN: 'ADMIN',
   MODERATOR: 'MODERATOR',
   HOST: 'HOST',
