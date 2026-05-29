@@ -19,11 +19,14 @@ export default class ChatXPostMessage extends ChatEventMessage {
   html(chat = null) {
     const eventTemplate = super.html(chat);
 
-    const link = document.createElement('a');
+    /** @type HTMLAnchorElement */
+    const link = document
+      .querySelector('#user-template')
+      ?.content.cloneNode(true).firstElementChild;
+    link.classList.add('non-chat-user');
     link.href = `https://x.com/${this.handle}`;
     link.target = '_blank';
     link.rel = 'noopener noreferrer';
-    link.className = 'user non-chat-user';
     link.textContent = `@${this.handle}`;
 
     eventTemplate.querySelector('.event-info').append(link, ' posted on X');
@@ -39,12 +42,11 @@ export default class ChatXPostMessage extends ChatEventMessage {
       }
       bottom.append(text);
 
-      const openButton = document.createElement('a');
+      /** @type HTMLAnchorElement */
+      const openButton = document
+        .querySelector('#xpost-link-template')
+        ?.content.cloneNode(true).firstElementChild;
       openButton.href = this.url;
-      openButton.target = '_blank';
-      openButton.rel = 'noopener noreferrer';
-      openButton.className = 'event-bottom-action xpost-link';
-      openButton.textContent = 'View Post on X';
       bottom.append(openButton);
     }
 
