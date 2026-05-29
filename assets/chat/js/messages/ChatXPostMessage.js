@@ -20,7 +20,7 @@ export default class ChatXPostMessage extends ChatEventMessage {
     const eventTemplate = super.html(chat);
 
     const link = document.createElement('a');
-    link.href = this.url;
+    link.href = `https://x.com/${this.handle}`;
     link.target = '_blank';
     link.rel = 'noopener noreferrer';
     link.className = 'user non-chat-user';
