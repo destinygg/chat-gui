@@ -10,4 +10,30 @@
       @include a.icon-background('../img/icon-x-post.svg');
     }
   }
+
+  .event-bottom {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+
+  .event-bottom-action {
+    display: inline-flex;
+    align-items: center;
+    margin-bottom: 0.25rem;
+    padding: 0.25em a.$gutter-md;
+    border-radius: 6px;
+    background-color: #2a2a2a;
+    color: a.$color-chat-text1;
+    text-decoration: none;
+    font-weight: 600;
+    line-height: 1;
+
+    &:hover,
+    &:focus-visible {
+      background-color: #353535;
+      color: a.$color-chat-text1;
+    }
+  }
 }
