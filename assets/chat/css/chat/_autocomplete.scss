@@ -70,6 +70,10 @@
   display: none;
 }
 
+#chat:not(.pref-emotepreviews) .autocomplete-entry__emote {
+  display: none;
+}
+
 .pref-autocompletehelper #chat-auto-complete.active {
   display: block;
 }
