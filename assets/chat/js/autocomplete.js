@@ -352,7 +352,13 @@ class ChatAutoComplete {
   buildHelpers() {
     if (this.results.length > 0) {
       this.container[0].innerHTML = this.results
-        .map((res, k) => `<li data-index="${k}">${res.data}</li>`)
+        .map(
+          (res, k) =>
+            `<li data-index="${k}" class="autocomplete-entry">
+              ${res.isemote ? `<div class="autocomplete-entry__emote"><div class="emote ${res.data}">${res.data}</div></div>` : ''}
+              <span class="autocomplete-entry__name">${res.data}</span>
+            </li>`,
+        )
         .join('');
     }
   }
