@@ -1,5 +1,6 @@
 import ChatEventMessage from './ChatEventMessage';
 import MessageTypes from './MessageTypes';
+import { buildBoardElement } from './vestaboardCharacters';
 
 const VESTABOARD_VERBS = {
   [MessageTypes.VESTABOARD_LEAD]: 'took the lead on the Vestaboard',
@@ -7,9 +8,16 @@ const VESTABOARD_VERBS = {
   [MessageTypes.VESTABOARD_RESET]: 'won the Vestaboard',
 };
 
+// The board render is reserved for the milestone announcements; the recurring
+// hourly update stays a compact text card so the same board isn't repeated.
+const TYPES_WITH_BOARD = new Set([
+  MessageTypes.VESTABOARD_LEAD,
+  MessageTypes.VESTABOARD_RESET,
+]);
+
 /**
  * One message class for all three Vestaboard announcements; the header text
- * varies by `type`.
+ * varies by `type`, and LEAD/RESET additionally render the design board.
  */
 export default class ChatVestaboardMessage extends ChatEventMessage {
   constructor(
@@ -17,6 +25,7 @@ export default class ChatVestaboardMessage extends ChatEventMessage {
     submitter,
     total,
     designId,
+    characters,
     timestamp,
     expirationTimestamp,
     uuid,
@@ -26,6 +35,7 @@ export default class ChatVestaboardMessage extends ChatEventMessage {
     this.submitter = submitter;
     this.total = total;
     this.designId = designId;
+    this.characters = characters;
     this.expirationTimestamp = expirationTimestamp;
 
     this.generateMessageHash();
@@ -56,6 +66,34 @@ export default class ChatVestaboardMessage extends ChatEventMessage {
 
     eventTemplate.classList.add('vestaboard');
     eventTemplate.querySelector('.event-icon').classList.add('vestaboard');
+
+    // The base event template drops `.event-bottom` for empty messages, so
+    // build the body (optional board + call-to-action) explicitly.
+    const bottom = document.createElement('div');
+    bottom.className = 'event-bottom';
+
+    if (TYPES_WITH_BOARD.has(this.type)) {
+      const board = buildBoardElement(this.characters);
+      if (board) {
+        bottom.append(board);
+      }
+    }
+
+    const prompt = document.createElement('span');
+    prompt.className = 'event-bottom-text';
+    prompt.textContent = 'Fund a design or submit your own to claim the board.';
+    bottom.append(prompt);
+
+    /** @type HTMLAnchorElement */
+    const link = document
+      .querySelector('#vestaboard-link-template')
+      ?.content.cloneNode(true).firstElementChild;
+    if (link) {
+      link.href = `${chat?.config?.dggOrigin ?? ''}/vestaboard`;
+      bottom.append(link);
+    }
+
+    eventTemplate.querySelector('.event-wrapper').append(bottom);
 
     const classes = Array.from(eventTemplate.classList);
     const attributes = eventTemplate

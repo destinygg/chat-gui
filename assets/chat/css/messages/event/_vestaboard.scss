@@ -1,0 +1,115 @@
+@use '../../abstracts/' as a;
+
+// Split-flap palette, mirrored from the website's vestaboard board (_vars.scss).
+$vb-bezel: #0a0b0d;
+$vb-tile: #1a1b1f;
+$vb-colors: (
+  'red': #e5484d,
+  'orange': #f2851f,
+  'yellow': #f5c518,
+  'green': #1fbf75,
+  'blue': #0090ff,
+  'violet': #6e6ade,
+  'white': #edeef0,
+  'black': #0a0b0d,
+  'gray': #777b84,
+);
+
+.vestaboard {
+  border-color: #0090ff;
+
+  .event-icon {
+    filter: invert(100%);
+
+    &.vestaboard {
+      @include a.icon-background('../img/icon-vestaboard.svg');
+    }
+  }
+
+  .event-bottom {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.4rem;
+  }
+
+  .event-bottom-text {
+    color: a.$color-chat-text2;
+  }
+
+  .event-bottom-action {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25em a.$gutter-md;
+    border-radius: 6px;
+    background-color: #2a2a2a;
+    color: a.$color-chat-text1;
+    text-decoration: none;
+    font-weight: 600;
+    line-height: 1;
+
+    &:hover,
+    &:focus-visible {
+      background-color: #353535;
+      color: a.$color-chat-text1;
+    }
+  }
+}
+
+// The digital board render, ported from the website's pages/vestaboard/_board.scss.
+// Container queries scale the tiles/characters to the board's own width.
+.vb {
+  container-type: inline-size;
+  width: 100%;
+  max-width: 380px;
+  padding: 1.7cqw;
+  border: 1px solid #000;
+  border-radius: clamp(5px, 1.3cqw, 12px);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 3%);
+  background: $vb-bezel;
+  text-shadow: none;
+
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(22, 1fr);
+    gap: 0.5cqw;
+  }
+}
+
+.vb-tile {
+  display: flex;
+  position: relative;
+  justify-content: center;
+  align-items: center;
+  aspect-ratio: 25 / 29;
+  border-radius: 0.55cqw;
+  box-shadow: inset 0 0 0 1px rgb(0 0 0 / 55%);
+  background: $vb-tile;
+  overflow: hidden;
+
+  &__seam {
+    position: absolute;
+    inset: 50% 0 auto;
+    z-index: 2;
+    height: 1px;
+    transform: translateY(-50%);
+    background: rgb(0 0 0 / 50%);
+  }
+
+  &__ch {
+    position: relative;
+    z-index: 1;
+    color: #f3ead7;
+    font:
+      700 2.6cqw/1 ui-monospace,
+      'JetBrains Mono',
+      monospace;
+    letter-spacing: -0.03em;
+  }
+
+  @each $name, $hex in $vb-colors {
+    &--#{$name} {
+      background: $hex;
+    }
+  }
+}

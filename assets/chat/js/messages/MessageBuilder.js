@@ -139,6 +139,7 @@ export default class MessageBuilder {
       data.submitter,
       data.total,
       data.designId,
+      data.characters,
       data.timestamp,
       data.expirationTimestamp,
       data.uuid,

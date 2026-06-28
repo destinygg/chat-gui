@@ -52,10 +52,22 @@
     &.xpost {
       @include a.icon-background('../img/icon-x-post.svg');
     }
+
+    &.vestaboard_lead,
+    &.vestaboard_hourly,
+    &.vestaboard_reset {
+      @include a.icon-background('../img/icon-vestaboard.svg');
+    }
   }
 
   &.xpost {
     border-color: #ffffff;
+  }
+
+  &.vestaboard_lead,
+  &.vestaboard_hourly,
+  &.vestaboard_reset {
+    border-color: #0090ff;
   }
 
   .user {
