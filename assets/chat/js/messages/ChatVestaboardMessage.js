@@ -8,6 +8,17 @@ const VESTABOARD_VERBS = {
   [MessageTypes.VESTABOARD_RESET]: 'won the Vestaboard',
 };
 
+// Call-to-action line shown above the auction link, tailored to each event. The
+// hourly line avoids referencing "the board" since that card shows no board.
+const VESTABOARD_PROMPTS = {
+  [MessageTypes.VESTABOARD_LEAD]:
+    'Think you can top it? Fund a challenger or submit your own.',
+  [MessageTypes.VESTABOARD_HOURLY]:
+    "The auction's live. Fund a design to take the lead.",
+  [MessageTypes.VESTABOARD_RESET]:
+    "Today's auction is open. Submit or fund a design.",
+};
+
 // The board render is reserved for the milestone announcements; the recurring
 // hourly update stays a compact text card so the same board isn't repeated.
 const TYPES_WITH_BOARD = new Set([
@@ -81,7 +92,8 @@ export default class ChatVestaboardMessage extends ChatEventMessage {
 
     const prompt = document.createElement('span');
     prompt.className = 'event-bottom-text';
-    prompt.textContent = 'Fund a design or submit your own to claim the board.';
+    prompt.textContent =
+      VESTABOARD_PROMPTS[this.type] ?? 'Fund a design or submit your own.';
     bottom.append(prompt);
 
     /** @type HTMLAnchorElement */
