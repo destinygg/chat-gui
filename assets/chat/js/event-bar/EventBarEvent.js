@@ -81,7 +81,8 @@ export default class EventBarEvent extends EventEmitter {
       case MessageTypes.VESTABOARD_LEAD:
       case MessageTypes.VESTABOARD_HOURLY:
       case MessageTypes.VESTABOARD_RESET: {
-        userTemplate.textContent = this.data.submitter;
+        // A design-less hourly nudge has no submitter to name.
+        userTemplate.textContent = this.data.submitter || 'Vestaboard';
         break;
       }
       default: {

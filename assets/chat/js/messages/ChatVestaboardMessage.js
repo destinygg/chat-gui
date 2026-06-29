@@ -19,6 +19,12 @@ const VESTABOARD_PROMPTS = {
     "Today's auction is open. Submit or fund a design.",
 };
 
+// Shown when the hourly nudge fires with no submissions yet, so there is no
+// leader to name.
+const VESTABOARD_OPEN_HEADER = 'No designs on the Vestaboard yet';
+const VESTABOARD_OPEN_PROMPT =
+  'Be the first. Submit a design to claim the board.';
+
 // The board render is reserved for the milestone announcements; the recurring
 // hourly update stays a compact text card so the same board isn't repeated.
 const TYPES_WITH_BOARD = new Set([
@@ -59,21 +65,28 @@ export default class ChatVestaboardMessage extends ChatEventMessage {
   html(chat = null) {
     const eventTemplate = super.html(chat);
 
-    const submitter = document
-      .querySelector('#user-template')
-      ?.content.cloneNode(true).firstElementChild;
-    submitter.classList.add('non-chat-user');
-    submitter.textContent = this.submitter;
+    // An hourly nudge with no design (nobody has submitted yet) names no leader.
+    const isOpenHourly =
+      this.type === MessageTypes.VESTABOARD_HOURLY && !this.submitter;
+    const info = eventTemplate.querySelector('.event-info');
 
-    const verb = VESTABOARD_VERBS[this.type] ?? 'is on the Vestaboard';
-    const amount = (this.total / 100).toLocaleString('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    });
+    if (isOpenHourly) {
+      info.textContent = VESTABOARD_OPEN_HEADER;
+    } else {
+      const submitter = document
+        .querySelector('#user-template')
+        ?.content.cloneNode(true).firstElementChild;
+      submitter.classList.add('non-chat-user');
+      submitter.textContent = this.submitter;
 
-    eventTemplate
-      .querySelector('.event-info')
-      .append(submitter, ` ${verb} · ${amount}`);
+      const verb = VESTABOARD_VERBS[this.type] ?? 'is on the Vestaboard';
+      const amount = (this.total / 100).toLocaleString('en-US', {
+        style: 'currency',
+        currency: 'USD',
+      });
+
+      info.append(submitter, ` ${verb} · ${amount}`);
+    }
 
     eventTemplate.classList.add('vestaboard');
     eventTemplate.querySelector('.event-icon').classList.add('vestaboard');
@@ -92,8 +105,9 @@ export default class ChatVestaboardMessage extends ChatEventMessage {
 
     const prompt = document.createElement('span');
     prompt.className = 'event-bottom-text';
-    prompt.textContent =
-      VESTABOARD_PROMPTS[this.type] ?? 'Fund a design or submit your own.';
+    prompt.textContent = isOpenHourly
+      ? VESTABOARD_OPEN_PROMPT
+      : (VESTABOARD_PROMPTS[this.type] ?? 'Fund a design or submit your own.');
     bottom.append(prompt);
 
     /** @type HTMLAnchorElement */
