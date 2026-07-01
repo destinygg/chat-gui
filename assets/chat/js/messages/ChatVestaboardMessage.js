@@ -88,7 +88,7 @@ export default class ChatVestaboardMessage extends ChatEventMessage {
       info.append(submitter, ` ${verb} · ${amount}`);
     }
 
-    eventTemplate.classList.add('vestaboard');
+    eventTemplate.classList.add('msg-vestaboard');
     eventTemplate.querySelector('.event-icon').classList.add('vestaboard');
 
     // The base event template drops `.event-bottom` for empty messages, so
