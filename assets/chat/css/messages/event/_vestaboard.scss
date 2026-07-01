@@ -22,7 +22,7 @@ $vb-colors: (
     filter: invert(100%);
 
     &.vestaboard {
-      @include a.icon-background('../img/icon-vestaboard.svg');
+      @include a.icon-background('../img/icon-vestaboard.png');
     }
   }
 
