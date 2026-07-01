@@ -3,6 +3,7 @@ import { throttle } from 'throttle-debounce';
 import UserFeatures from './features';
 import UserRoles from './roles';
 import { MessageBuilder } from './messages';
+import encodeUrl from './encodeUrl';
 
 const POLL_CONJUNCTION = /\bor\b/i;
 const POLL_INTERROGATIVE = /^(how|why|when|what|where)\b/i;
@@ -53,6 +54,27 @@ function parseQuestionAndTime(rawQuestion) {
   const question = parseQuestion(rawQuestion.replace(POLL_TIME, '').trim());
   question.time = Math.max(POLL_MIN_TIME, Math.min(time, POLL_MAX_TIME));
   return question;
+}
+
+// Poll options are free-form server text that does not pass through the message
+// formatter pipeline, so they must be HTML-escaped before being interpolated
+// into the option markup (used in both an attribute and element content).
+function buildPollOptionHtml(option, index) {
+  const safeOption = encodeUrl(option);
+  return `
+        <div class="opt" title="Vote ${safeOption}">
+          <div class="opt-info">
+            <span class="opt-vote-number">
+              <strong>${index + 1}</strong>
+            </span>
+            <span class="opt-bar-option">${safeOption}</span>
+            <span class="opt-bar-value"></span>
+          </div>
+          <div class="opt-bar">
+            <div class="opt-bar-inner" style="width: 0;"></div>
+          </div>
+        </div>
+      `;
 }
 
 class ChatPoll {
@@ -159,22 +181,7 @@ class ChatPoll {
     this.ui.question.text(this.poll.question);
     this.ui.options.html(
       this.poll.options
-        .map(
-          (option, i) => `
-        <div class="opt" title="Vote ${option}">
-          <div class="opt-info">
-            <span class="opt-vote-number">
-              <strong>${i + 1}</strong>
-            </span>
-            <span class="opt-bar-option">${option}</span>
-            <span class="opt-bar-value"></span>
-          </div>
-          <div class="opt-bar">
-            <div class="opt-bar-inner" style="width: 0;"></div>
-          </div>
-        </div>
-      `,
-        )
+        .map((option, i) => buildPollOptionHtml(option, i))
         .join(''),
     );
 
@@ -296,4 +303,4 @@ class ChatPoll {
   }
 }
 
-export { ChatPoll, parseQuestionAndTime };
+export { ChatPoll, parseQuestionAndTime, buildPollOptionHtml };
