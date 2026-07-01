@@ -4,8 +4,8 @@ import { nsflregex, nsfwregex, spoilersregex } from '../regex';
 
 const MAX_URL_LENGTH = 90;
 
-function escapeAttr(str) {
-  return str
+function escapeHtml(str) {
+  return String(str)
     .replace(/&/g, '&amp;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;')
@@ -60,16 +60,21 @@ export default class UrlFormatter {
         }
 
         const attrs = Object.keys(attributes).reduce(
-          (acc, cur) => `${acc} ${cur}="${attributes[cur]}"`,
+          (acc, cur) => `${acc} ${cur}="${escapeHtml(attributes[cur])}"`,
           '',
         );
+
+        // linkify decodes HTML entities before handing us `attributes` and
+        // `content`, so both can carry raw `"`, `<`, `>` from the original
+        // message and must be re-escaped to prevent HTML/attribute injection.
+        const safeContent = escapeHtml(content);
 
         const embedTarget = chat.isBigscreenEmbed() ? '_top' : '_blank';
         const embedUrl = `${chat.config.dggOrigin}${chat.bigscreenPath}${embedHashLink}`;
 
         return embedHashLink
-          ? `<${tagName}${attrs}>${content}</${tagName}><a target="${embedTarget}" class="embed-button" href="${escapeAttr(embedUrl)}"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-tv-minimal"><path d="M7 21h10"/><rect width="20" height="14" x="2" y="3" rx="2"/></svg></a>`
-          : `<${tagName}${attrs}>${content}</${tagName}>`;
+          ? `<${tagName}${attrs}>${safeContent}</${tagName}><a target="${embedTarget}" class="embed-button" href="${escapeHtml(embedUrl)}"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-tv-minimal"><path d="M7 21h10"/><rect width="20" height="14" x="2" y="3" rx="2"/></svg></a>`
+          : `<${tagName}${attrs}>${safeContent}</${tagName}>`;
       },
     });
   }
