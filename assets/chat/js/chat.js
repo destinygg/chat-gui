@@ -156,6 +156,11 @@ class Chat {
     this.source.on('MASSGIFT', (data) => this.onMASSGIFT(data));
     this.source.on('DONATION', (data) => this.onDONATION(data));
     this.source.on('XPOST', (data) => this.onXPOST(data));
+    this.source.on('VESTABOARD_LEAD', (data) => this.onVESTABOARD_LEAD(data));
+    this.source.on('VESTABOARD_HOURLY', (data) =>
+      this.onVESTABOARD_HOURLY(data),
+    );
+    this.source.on('VESTABOARD_RESET', (data) => this.onVESTABOARD_RESET(data));
     this.source.on('UPDATEUSER', (data) => this.onUPDATEUSER(data));
     this.source.on('ADDPHRASE', (data) => this.onADDPHRASE(data));
     this.source.on('REMOVEPHRASE', (data) => this.onREMOVEPHRASE(data));
@@ -1583,6 +1588,30 @@ class Chat {
 
     if (!this.backlogloading) {
       const eventBarEvent = new EventBarEvent(this, MessageTypes.XPOST, data);
+      this.eventBar.add(eventBarEvent);
+      if (this.eventBar.length === 1) {
+        this.mainwindow.update();
+      }
+    }
+  }
+
+  onVESTABOARD_LEAD(data) {
+    this.handleVestaboard(MessageTypes.VESTABOARD_LEAD, data);
+  }
+
+  onVESTABOARD_HOURLY(data) {
+    this.handleVestaboard(MessageTypes.VESTABOARD_HOURLY, data);
+  }
+
+  onVESTABOARD_RESET(data) {
+    this.handleVestaboard(MessageTypes.VESTABOARD_RESET, data);
+  }
+
+  handleVestaboard(type, data) {
+    MessageBuilder.vestaboard(type, data).into(this);
+
+    if (!this.backlogloading) {
+      const eventBarEvent = new EventBarEvent(this, type, data);
       this.eventBar.add(eventBarEvent);
       if (this.eventBar.length === 1) {
         this.mainwindow.update();

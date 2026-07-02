@@ -78,6 +78,13 @@ export default class EventBarEvent extends EventEmitter {
         userTemplate.textContent = `@${this.data.handle}`;
         break;
       }
+      case MessageTypes.VESTABOARD_LEAD:
+      case MessageTypes.VESTABOARD_HOURLY:
+      case MessageTypes.VESTABOARD_RESET: {
+        // A design-less hourly nudge has no submitter to name.
+        userTemplate.textContent = this.data.submitter || 'Vestaboard';
+        break;
+      }
       default: {
         const user = new ChatUser(this.data.user);
         const colorFlair = usernameColorFlair(chat.flairs, user);
@@ -152,6 +159,11 @@ export default class EventBarEvent extends EventEmitter {
       }
       case MessageTypes.XPOST: {
         return MessageBuilder.xpost(this.data);
+      }
+      case MessageTypes.VESTABOARD_LEAD:
+      case MessageTypes.VESTABOARD_HOURLY:
+      case MessageTypes.VESTABOARD_RESET: {
+        return MessageBuilder.vestaboard(this.type, this.data);
       }
       default:
         return undefined;
