@@ -96,6 +96,7 @@ export default class UrlFormatter {
       try {
         const ytLink = new URL(url);
         ytLink.searchParams.delete('si');
+        ytLink.searchParams.delete('is');
         return ytLink.href;
       } catch {
         return url;

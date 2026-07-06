@@ -21,7 +21,7 @@ describe('Normalizing URLs', () => {
     );
   });
 
-  test('Remove the share tracking query param from a youtube.com link', () => {
+  test('Remove the `si` share tracking query param from a youtube.com link', () => {
     expect(
       urlFormatter.normalizeUrl(
         'https://www.youtube.com/live/2NjXXQYtUNY?si=5ALpT28ptRec6T7u&t=70',
@@ -29,7 +29,7 @@ describe('Normalizing URLs', () => {
     ).toBe('https://www.youtube.com/live/2NjXXQYtUNY?t=70');
   });
 
-  test('Remove the share tracking query param from a youtu.be link', () => {
+  test('Remove the `si` share tracking query param from a youtu.be link', () => {
     expect(
       urlFormatter.normalizeUrl(
         'https://youtu.be/SbPP1i6INPk?si=K0qpdHBGOIJ-gBMK&t=60',
@@ -37,7 +37,23 @@ describe('Normalizing URLs', () => {
     ).toBe('https://youtu.be/SbPP1i6INPk?t=60');
   });
 
-  test("Don't modify a youtube.com link that doesn't contain the share tracking query param", () => {
+  test('Remove the `is` share tracking query param from a youtube.com link', () => {
+    expect(
+      urlFormatter.normalizeUrl(
+        'https://www.youtube.com/live/2NjXXQYtUNY?is=5ALpT28ptRec6T7u&t=70',
+      ),
+    ).toBe('https://www.youtube.com/live/2NjXXQYtUNY?t=70');
+  });
+
+  test('Remove the `is` share tracking query param from a youtu.be link', () => {
+    expect(
+      urlFormatter.normalizeUrl(
+        'https://youtu.be/SbPP1i6INPk?is=K0qpdHBGOIJ-gBMK&t=60',
+      ),
+    ).toBe('https://youtu.be/SbPP1i6INPk?t=60');
+  });
+
+  test("Don't modify a youtube.com link that doesn't contain the share tracking query params", () => {
     expect(
       urlFormatter.normalizeUrl(
         'https://www.youtube.com/live/2NjXXQYtUNY?t=70',
@@ -45,7 +61,7 @@ describe('Normalizing URLs', () => {
     ).toBe('https://www.youtube.com/live/2NjXXQYtUNY?t=70');
   });
 
-  test("Don't modify a youtu.be link that doesn't contain the share tracking query param", () => {
+  test("Don't modify a youtu.be link that doesn't contain any of the share tracking query params", () => {
     expect(urlFormatter.normalizeUrl('https://youtu.be/SbPP1i6INPk?t=60')).toBe(
       'https://youtu.be/SbPP1i6INPk?t=60',
     );
