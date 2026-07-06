@@ -785,9 +785,13 @@ class Chat {
     const cust = [...(this.settings.get('customhighlight') || [])].filter(
       (a) => a !== '',
     );
-    const nicks = [...(this.settings.get('highlightnicks') || [])].filter(
-      (a) => a !== '',
+    this.settings.set('customhighlight', cust); // clean up
+
+    const nicks = [...(this.settings.get('highlightnicks') || [])].filter((a) =>
+      nickregex.test(a),
     );
+    this.settings.set('highlightnicks', nicks); // clean up
+
     this.regexhighlightself = this.user.displayName
       ? new RegExp(`\\b(?:${this.user.displayName})\\b`, 'i')
       : null;
@@ -2127,9 +2131,12 @@ class Chat {
       }
       return;
     }
+
     if (!nickregex.test(parts[0])) {
       MessageBuilder.error(`Invalid nick - /${command} nick`).into(this);
+      return;
     }
+
     const nick = parts[0].toLowerCase();
     const i = highlights.indexOf(nick);
     switch (command) {
@@ -2145,11 +2152,13 @@ class Chat {
         }
         break;
     }
+
     MessageBuilder.info(
       command.toUpperCase() === 'HIGHLIGHT'
         ? `Highlighting ${nick}.`
         : `No longer highlighting ${nick}.`,
     ).into(this);
+
     this.settings.set('highlightnicks', highlights);
     this.applySettings();
   }
