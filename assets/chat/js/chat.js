@@ -193,6 +193,7 @@ class Chat {
     this.control.on('CONNECT', (data) => this.cmdCONNECT(data));
     this.control.on('TAG', (data) => this.cmdTAG(data));
     this.control.on('UNTAG', (data) => this.cmdUNTAG(data));
+    this.control.on('UNTAGALL', (data) => this.cmdUNTAGALL(data));
     this.control.on('EMBED', (data) => this.cmdEMBED(data));
     this.control.on('E', (data) => this.cmdEMBED(data));
     this.control.on('POSTEMBED', (data) => this.cmdPOSTEMBED(data));
@@ -2325,6 +2326,40 @@ class Chat {
     this.settings.set('taggednotes', [...this.taggednotes]);
     this.applySettings();
     MessageBuilder.info(`Un-tagged ${n}.`).into(this);
+  }
+
+  cmdUNTAGALL(parts) {
+    const confirmation = parts[0] || null;
+    if (
+      !confirmation ||
+      (confirmation.toLowerCase() !== 'yes' &&
+        confirmation.toLowerCase() !== 'y')
+    ) {
+      MessageBuilder.error(
+        'This command requires confirmation - /untagall yes OR /untagall y',
+      ).into(this);
+    } else {
+      [...this.taggednicks.keys()].forEach((n) => {
+        this.mainwindow
+          .getlines(`.msg-user[data-username="${n}"]`)
+          .forEach((line) => {
+            const classesToRemove = this.removeClasses(
+              'msg-tagged',
+              line.classList.value,
+            );
+            classesToRemove.forEach((className) =>
+              line.classList.remove(className),
+            );
+            line.querySelector('.user').removeAttribute('title');
+          });
+      });
+      this.taggednicks.clear();
+      this.taggednotes.clear();
+      this.settings.set('taggednicks', [...this.taggednicks]);
+      this.settings.set('taggednotes', [...this.taggednotes]);
+      this.applySettings();
+      MessageBuilder.status(`Your tags have been cleared.`).into(this);
+    }
   }
 
   cmdEMBED(parts) {

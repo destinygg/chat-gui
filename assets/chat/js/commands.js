@@ -212,6 +212,10 @@ const CHAT_COMMANDS = [
     name: 'untag',
     description: 'Untag <nick>.',
   },
+  {
+    name: 'untagall',
+    description: 'Untag all your tagged users.',
+  },
 ];
 
 export default class ChatCommands {
