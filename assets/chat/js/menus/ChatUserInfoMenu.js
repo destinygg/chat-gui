@@ -47,32 +47,40 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
 
     this.configureButtons();
 
-    this.chat.output.on('contextmenu', '.msg-chat .user', (e) => {
-      // The `tier` class is a sub-tier label styled to match the username
-      // color of the sub (which requires the `user` class). Suppress both
-      // menus — neither one is meaningful on it.
-      if (e.currentTarget.classList.contains('tier')) {
+    this.chat.output.on(
+      'contextmenu',
+      '.msg-chat .user, .msg-chat .chat-user',
+      (e) => {
+        // The `tier` class is a sub-tier label styled to match the username
+        // color of the sub (which requires the `user` class). Suppress both
+        // menus — neither one is meaningful on it.
+        if (e.currentTarget.classList.contains('tier')) {
+          return false;
+        }
+
+        // `non-chat-user` marks user-like references that aren't chat users
+        // (e.g. an X handle on an XPOST event). Skip our menu and let the
+        // browser's native context menu show.
+        if (e.currentTarget.classList.contains('non-chat-user')) {
+          return;
+        }
+
+        const message = $(e.currentTarget).closest('.msg-chat');
+        this.showUser(e, message);
+
+        // gotta return false so that the actual context menu doesn't show up
         return false;
-      }
-
-      // `non-chat-user` marks user-like references that aren't chat users
-      // (e.g. an X handle on an XPOST event). Skip our menu and let the
-      // browser's native context menu show.
-      if (e.currentTarget.classList.contains('non-chat-user')) {
-        return;
-      }
-
-      const message = $(e.currentTarget).closest('.msg-chat');
-      this.showUser(e, message);
-
-      // gotta return false so that the actual context menu doesn't show up
-      return false;
-    });
+      },
+    );
 
     // preventing the window from closing instantly
-    this.chat.output.on('mouseup', '.msg-chat .user', (e) => {
-      e.stopPropagation();
-    });
+    this.chat.output.on(
+      'mouseup',
+      '.msg-chat .user, .msg-chat .chat-user',
+      (e) => {
+        e.stopPropagation();
+      },
+    );
 
     this.chat.source.on('MSG', this.handleNewMessage.bind(this));
   }
@@ -277,12 +285,17 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
         ? [message]
         : [];
 
-    const selectedUser = [...message[0].querySelectorAll('.user')].find(
+    // Match the message author's `.user` link or an in-text `.chat-user`
+    // mention span whose text is the clicked nick. A mention of someone who
+    // isn't the author has no matching `.user`, so guard against no match.
+    const selectedUser = [
+      ...message[0].querySelectorAll('.user, .chat-user'),
+    ].find(
       (user) => user.innerText.toLowerCase() === this.clickedNick.toLowerCase(),
     );
-    const displayName = selectedUser.innerText;
+    const displayName = selectedUser?.innerText ?? this.clickedNick;
     const tagNote = this.chat.taggednotes.get(this.clickedNick);
-    const usernameFeatures = selectedUser.classList.value;
+    const usernameFeatures = selectedUser?.classList.value ?? '';
 
     if (tagNote) {
       this.tagSubheader.style.display = '';
