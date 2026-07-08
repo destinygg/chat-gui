@@ -32,9 +32,10 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     );
     this.noMessageNotice = this.ui.find('.content .no-messages-notice');
 
-    // Sections toggled for the minimal "user not found" view.
+    // Body sections toggled between the loading / loaded / not-found states.
     this.userInfoSection = this.ui.find('.user-info');
     this.actionsSection = this.ui.find('.actions');
+    this.loadingNotice = this.ui.find('.user-info-loading');
     this.notFoundNotice = this.ui.find('.user-not-found');
 
     this.muteUserBtn = this.ui.find('#mute-user-btn');
@@ -100,20 +101,20 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     this.show();
   }
 
-  // Restores the full menu (details + action buttons), undoing a prior
-  // "not found" state. Called on every open before the fetch resolves.
-  resetMenuSections() {
-    this.userInfoSection.toggleClass('hidden', false);
-    this.actionsSection.toggleClass('hidden', false);
-    this.notFoundNotice.toggleClass('hidden', true);
+  // Toggles the menu body between its mutually-exclusive states:
+  //  - 'loading'  : a spinner while the user's data is being fetched
+  //  - 'loaded'   : the full menu (details + action buttons)
+  //  - 'notFound' : the minimal "user not found" notice
+  setMenuBodyState(state) {
+    this.userInfoSection.toggleClass('hidden', state !== 'loaded');
+    this.actionsSection.toggleClass('hidden', state !== 'loaded');
+    this.loadingNotice.toggleClass('hidden', state !== 'loading');
+    this.notFoundNotice.toggleClass('hidden', state !== 'notFound');
   }
 
-  // Collapses the menu to a minimal "user not found" view: just the header
-  // and the notice, with the details and action buttons hidden.
+  // Collapses the menu to a minimal "user not found" view.
   showUserNotFound() {
-    this.userInfoSection.toggleClass('hidden', true);
-    this.actionsSection.toggleClass('hidden', true);
-    this.notFoundNotice.toggleClass('hidden', false);
+    this.setMenuBodyState('notFound');
     this.redraw();
   }
 
@@ -299,9 +300,6 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
   }
 
   addContent(message) {
-    // Start from the full menu, undoing any prior "not found" collapse.
-    this.resetMenuSections();
-
     // Don't display messages if the giftee was clicked in a gift sub event
     // because the message belongs to the gifter.
     this.messageArray =
@@ -338,15 +336,19 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     this.header.text(displayName);
     this.header.addClass(usernameFeatures);
 
-    // Render immediately from the local cache (fast, no flicker); the details
-    // are refreshed from the website API below.
-    this.renderUserDetails(
-      this.chat.users.get(this.clickedNick),
-      usernameFeatures,
-    );
+    // If the user is already cached, render it immediately (no loading flash)
+    // and let the fetch below refresh it. Otherwise show a spinner until the
+    // fetch resolves.
+    const cachedUser = this.chat.users.get(this.clickedNick);
+    if (cachedUser) {
+      this.setMenuBodyState('loaded');
+      this.renderUserDetails(cachedUser, usernameFeatures);
+    } else {
+      this.setMenuBodyState('loading');
+    }
 
     // Fetch authoritative info from the website so the menu is populated even
-    // for users absent from the local cache. Keep the cached render on failure.
+    // for users absent from the local cache.
     const requestedNick = this.clickedNick;
     this.chat.userInfoService
       .getUserInfo(displayName)
@@ -360,13 +362,26 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
           this.showUserNotFound();
           return;
         }
+        this.setMenuBodyState('loaded');
         const fetchedUser = new ChatUser(data);
         this.renderUserDetails(fetchedUser, usernameFeatures);
         this.setActionsVisibility(fetchedUser);
         this.redraw();
       })
       .catch(() => {
-        // Ignore: the cache/DOM-based render already shown remains in place.
+        // Bail if a different user's menu was opened while this was in flight.
+        if (this.clickedNick !== requestedNick) {
+          return;
+        }
+        // Transient failure: drop the loading spinner and show whatever the
+        // cache/DOM gave us rather than spinning forever.
+        this.setMenuBodyState('loaded');
+        this.renderUserDetails(
+          this.chat.users.get(this.clickedNick),
+          usernameFeatures,
+        );
+        this.setActionsVisibility();
+        this.redraw();
       });
 
     this.setMessageHistoryStatus('Loading history...');
