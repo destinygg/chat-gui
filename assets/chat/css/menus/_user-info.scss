@@ -29,6 +29,11 @@ $toolbar-icons-map: (
     border-bottom: 1px solid a.$color-surface-dark4;
   }
 
+  .user-not-found {
+    padding: a.$gutter-lg a.$gutter-md;
+    text-align: center;
+  }
+
   .flairs {
     margin-top: a.$gutter-lg;
     margin-bottom: a.$gutter-lg;

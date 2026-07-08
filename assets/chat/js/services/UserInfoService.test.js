@@ -65,5 +65,11 @@ describe('UserInfoService', () => {
 
       await expect(service.getUserInfo('Destiny')).rejects.toThrow('API error');
     });
+
+    it('should pass through a null result when the user does not exist', async () => {
+      mockApiClient.mockUserInfo = null;
+
+      await expect(service.getUserInfo('nobody')).resolves.toBeNull();
+    });
   });
 });

@@ -21,7 +21,7 @@ export default class UserInfoService {
 
   /**
    * @param {string} username
-   * @returns {Promise<UserInfo>}
+   * @returns {Promise<UserInfo|null>} `null` when the user does not exist.
    * @throws {Error}
    */
   async getUserInfo(username) {

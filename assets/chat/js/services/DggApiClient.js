@@ -35,10 +35,12 @@ export default class DggApiClient {
   }
 
   /**
-   * Fetches the public user info shown in the user-info menu.
+   * Fetches the public user info shown in the user-info menu. Resolves to
+   * `null` when the user does not exist (HTTP 404), so callers can show a
+   * "not found" state; transient failures still reject.
    *
    * @param {string} username
-   * @returns {Promise<UserInfo>}
+   * @returns {Promise<UserInfo|null>}
    * @throws {Error}
    */
   async getUserInfo(username) {
@@ -56,6 +58,11 @@ export default class DggApiClient {
     }
 
     if (!body.success) {
+      // A 404 means the user doesn't exist; distinguish it from transient
+      // failures (which reject) so the menu can show a "not found" state.
+      if (response.status === 404) {
+        return null;
+      }
       throw new Error(body.message ?? 'Failed to fetch user info');
     }
 

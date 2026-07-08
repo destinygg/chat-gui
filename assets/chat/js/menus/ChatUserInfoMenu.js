@@ -32,6 +32,11 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     );
     this.noMessageNotice = this.ui.find('.content .no-messages-notice');
 
+    // Sections toggled for the minimal "user not found" view.
+    this.userInfoSection = this.ui.find('.user-info');
+    this.actionsSection = this.ui.find('.actions');
+    this.notFoundNotice = this.ui.find('.user-not-found');
+
     this.muteUserBtn = this.ui.find('#mute-user-btn');
     this.banUserBtn = this.ui.find('#ban-user-btn');
     this.logsUserBtn = this.ui.find('#logs-user-btn');
@@ -93,6 +98,23 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
 
     this.position(e);
     this.show();
+  }
+
+  // Restores the full menu (details + action buttons), undoing a prior
+  // "not found" state. Called on every open before the fetch resolves.
+  resetMenuSections() {
+    this.userInfoSection.toggleClass('hidden', false);
+    this.actionsSection.toggleClass('hidden', false);
+    this.notFoundNotice.toggleClass('hidden', true);
+  }
+
+  // Collapses the menu to a minimal "user not found" view: just the header
+  // and the notice, with the details and action buttons hidden.
+  showUserNotFound() {
+    this.userInfoSection.toggleClass('hidden', true);
+    this.actionsSection.toggleClass('hidden', true);
+    this.notFoundNotice.toggleClass('hidden', false);
+    this.redraw();
   }
 
   configureButtons() {
@@ -277,6 +299,9 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
   }
 
   addContent(message) {
+    // Start from the full menu, undoing any prior "not found" collapse.
+    this.resetMenuSections();
+
     // Don't display messages if the giftee was clicked in a gift sub event
     // because the message belongs to the gifter.
     this.messageArray =
@@ -328,6 +353,11 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
       .then((data) => {
         // Bail if a different user's menu was opened while this was in flight.
         if (this.clickedNick !== requestedNick) {
+          return;
+        }
+        // The user doesn't exist — collapse to the minimal "not found" view.
+        if (data === null) {
+          this.showUserNotFound();
           return;
         }
         const fetchedUser = new ChatUser(data);

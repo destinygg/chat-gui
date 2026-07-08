@@ -46,13 +46,23 @@ describe('DggApiClient', () => {
       );
     });
 
-    it('should throw with the envelope message when success is false', async () => {
+    it('should resolve to null when the user does not exist (404)', async () => {
       fetchMock.mockResponseOnce(
         JSON.stringify({ success: false, message: 'User not found' }),
+        { status: 404 },
+      );
+
+      await expect(apiClient.getUserInfo('nobody')).resolves.toBeNull();
+    });
+
+    it('should throw on a non-404 failure envelope', async () => {
+      fetchMock.mockResponseOnce(
+        JSON.stringify({ success: false, message: 'Server error' }),
+        { status: 500 },
       );
 
       await expect(apiClient.getUserInfo('nobody')).rejects.toThrow(
-        'User not found',
+        'Server error',
       );
     });
 
