@@ -46,7 +46,11 @@ import { isMuteActive, MutedTimer } from './mutedtimer';
 import EmoteService from './emotes';
 import UserFeatures from './features';
 import UserRoles from './roles';
-import { UserMessageService, YouTubeOEmbedService } from './services';
+import {
+  UserInfoService,
+  UserMessageService,
+  YouTubeOEmbedService,
+} from './services';
 import makeSafeForRegex, {
   regextime,
   nickmessageregex,
@@ -93,6 +97,7 @@ class Chat {
     this.flairsMap = new Map();
     this.emoteService = new EmoteService();
     this.userMessageService = new UserMessageService();
+    this.userInfoService = new UserInfoService(this.config.api.base);
     this.youtubeOEmbedService = new YouTubeOEmbedService();
 
     this.user = new ChatUser();

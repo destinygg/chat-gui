@@ -154,7 +154,7 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     });
   }
 
-  setActionsVisibility() {
+  setActionsVisibility(clickedUser = this.chat.users.get(this.clickedNick)) {
     if (this.chat.user.hasModPowers()) {
       this.muteUserBtn.toggleClass('hidden', false);
       this.banUserBtn.toggleClass('hidden', false);
@@ -167,7 +167,6 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     this.banUserBtn.removeClass('active');
     this.muteUserBtn.removeClass('active');
 
-    const clickedUser = this.chat.users.get(this.clickedNick);
     const isBot = clickedUser?.hasFeature(UserFeatures.BOT);
     if (isBot) {
       this.ignoreUserBtn.toggleClass('hidden', true);
@@ -285,29 +284,6 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     const tagNote = this.chat.taggednotes.get(this.clickedNick);
     const usernameFeatures = selectedUser.classList.value;
 
-    const watchingEmbed = this.buildWatchingEmbed(this.clickedNick);
-    if (watchingEmbed !== '') {
-      this.watchingSubheader.style.display = '';
-      this.watchingSubheader.replaceChildren(
-        'Watching: ',
-        $(watchingEmbed).get()[0],
-      );
-    } else {
-      this.watchingSubheader.style.display = 'none';
-      this.watchingSubheader.replaceChildren();
-    }
-
-    const formattedDate = this.buildCreatedDate(this.clickedNick);
-    if (formattedDate) {
-      this.createdDateSubheader.style.display = '';
-      this.createdDateSubheader.replaceChildren('Joined on ', formattedDate);
-    } else {
-      this.createdDateSubheader.style.display = 'none';
-      this.createdDateSubheader.replaceChildren(
-        'Unable to display account creation date',
-      );
-    }
-
     if (tagNote) {
       this.tagSubheader.style.display = '';
       this.tagSubheader.replaceChildren('Tag: ', tagNote);
@@ -316,24 +292,39 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
       this.tagSubheader.replaceChildren();
     }
 
-    const featuresList = this.buildFeatures(this.clickedNick, usernameFeatures);
-    if (featuresList) {
-      this.flairList.toggleClass('hidden', false);
-      this.flairSubheader.style.display = '';
-    } else {
-      this.flairList.toggleClass('hidden', true);
-      this.flairSubheader.style.display = 'none';
-    }
-
     this.header.text('');
     this.header.attr('class', 'username');
     this.messagesContainer.empty();
     this.updateNoMessagesNotice(true);
-    this.flairList.empty();
 
     this.header.text(displayName);
     this.header.addClass(usernameFeatures);
-    this.flairList.append(featuresList);
+
+    // Render immediately from the local cache (fast, no flicker); the details
+    // are refreshed from the website API below.
+    this.renderUserDetails(
+      this.chat.users.get(this.clickedNick),
+      usernameFeatures,
+    );
+
+    // Fetch authoritative info from the website so the menu is populated even
+    // for users absent from the local cache. Keep the cached render on failure.
+    const requestedNick = this.clickedNick;
+    this.chat.userInfoService
+      .getUserInfo(displayName)
+      .then((data) => {
+        // Bail if a different user's menu was opened while this was in flight.
+        if (this.clickedNick !== requestedNick) {
+          return;
+        }
+        const fetchedUser = new ChatUser(data);
+        this.renderUserDetails(fetchedUser, usernameFeatures);
+        this.setActionsVisibility(fetchedUser);
+        this.redraw();
+      })
+      .catch(() => {
+        // Ignore: the cache/DOM-based render already shown remains in place.
+      });
 
     this.setMessageHistoryStatus('Loading history...');
     this.loadMessageHistory(displayName)
@@ -360,8 +351,50 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
       });
   }
 
-  buildWatchingEmbed(nick) {
-    const user = this.chat.users.get(nick);
+  /**
+   * Renders the watching, account-creation date, and flair sections for the
+   * given user. Safe to call repeatedly — e.g. an initial render from the
+   * local cache followed by a refresh from the website API. `user` may be
+   * undefined (an uncached user), in which case flairs fall back to the
+   * clicked message's CSS classes.
+   */
+  renderUserDetails(user, usernameFeatures) {
+    const watchingEmbed = this.buildWatchingEmbed(user);
+    if (watchingEmbed !== '') {
+      this.watchingSubheader.style.display = '';
+      this.watchingSubheader.replaceChildren(
+        'Watching: ',
+        $(watchingEmbed).get()[0],
+      );
+    } else {
+      this.watchingSubheader.style.display = 'none';
+      this.watchingSubheader.replaceChildren();
+    }
+
+    const formattedDate = this.buildCreatedDate(user);
+    if (formattedDate) {
+      this.createdDateSubheader.style.display = '';
+      this.createdDateSubheader.replaceChildren('Joined on ', formattedDate);
+    } else {
+      this.createdDateSubheader.style.display = 'none';
+      this.createdDateSubheader.replaceChildren(
+        'Unable to display account creation date',
+      );
+    }
+
+    const featuresList = this.buildFeatures(user, usernameFeatures);
+    this.flairList.empty();
+    if (featuresList) {
+      this.flairList.toggleClass('hidden', false);
+      this.flairSubheader.style.display = '';
+      this.flairList.append(featuresList);
+    } else {
+      this.flairList.toggleClass('hidden', true);
+      this.flairSubheader.style.display = 'none';
+    }
+  }
+
+  buildWatchingEmbed(user) {
     if (!user?.watching) {
       return '';
     }
@@ -371,8 +404,7 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     return `<a href="${url}" target="${target}">${user.watching.id} on ${user.watching.platform}</a>`;
   }
 
-  buildCreatedDate(nick) {
-    const user = this.chat.users.get(nick.toLowerCase());
+  buildCreatedDate(user) {
     if (!user?.createdDate) {
       return '';
     }
@@ -385,8 +417,7 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     return timeHTML;
   }
 
-  buildFeatures(nick, messageFeatures) {
-    const user = this.chat.users.get(nick);
+  buildFeatures(user, messageFeatures) {
     const messageFeaturesArray = messageFeatures
       .split(' ')
       .filter((e) => e !== 'user' && e !== 'subscriber');
