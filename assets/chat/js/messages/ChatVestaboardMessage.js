@@ -76,7 +76,6 @@ export default class ChatVestaboardMessage extends ChatEventMessage {
       const submitter = document
         .querySelector('#user-template')
         ?.content.cloneNode(true).firstElementChild;
-      submitter.classList.add('non-chat-user');
       submitter.textContent = this.submitter;
 
       const verb = VESTABOARD_VERBS[this.type] ?? 'is on the Vestaboard';
