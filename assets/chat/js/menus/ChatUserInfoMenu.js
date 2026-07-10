@@ -32,6 +32,12 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     );
     this.noMessageNotice = this.ui.find('.content .no-messages-notice');
 
+    // Body sections toggled between the loading / loaded / not-found states.
+    this.userInfoSection = this.ui.find('.user-info');
+    this.actionsSection = this.ui.find('.actions');
+    this.loadingNotice = this.ui.find('.user-info-loading');
+    this.notFoundNotice = this.ui.find('.user-not-found');
+
     this.muteUserBtn = this.ui.find('#mute-user-btn');
     this.banUserBtn = this.ui.find('#ban-user-btn');
     this.logsUserBtn = this.ui.find('#logs-user-btn');
@@ -47,32 +53,40 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
 
     this.configureButtons();
 
-    this.chat.output.on('contextmenu', '.msg-chat .user', (e) => {
-      // The `tier` class is a sub-tier label styled to match the username
-      // color of the sub (which requires the `user` class). Suppress both
-      // menus — neither one is meaningful on it.
-      if (e.currentTarget.classList.contains('tier')) {
+    this.chat.output.on(
+      'contextmenu',
+      '.msg-chat .user, .msg-chat .chat-user',
+      (e) => {
+        // The `tier` class is a sub-tier label styled to match the username
+        // color of the sub (which requires the `user` class). Suppress both
+        // menus — neither one is meaningful on it.
+        if (e.currentTarget.classList.contains('tier')) {
+          return false;
+        }
+
+        // `non-chat-user` marks user-like references that aren't chat users
+        // (e.g. an X handle on an XPOST event). Skip our menu and let the
+        // browser's native context menu show.
+        if (e.currentTarget.classList.contains('non-chat-user')) {
+          return;
+        }
+
+        const message = $(e.currentTarget).closest('.msg-chat');
+        this.showUser(e, message);
+
+        // gotta return false so that the actual context menu doesn't show up
         return false;
-      }
-
-      // `non-chat-user` marks user-like references that aren't chat users
-      // (e.g. an X handle on an XPOST event). Skip our menu and let the
-      // browser's native context menu show.
-      if (e.currentTarget.classList.contains('non-chat-user')) {
-        return;
-      }
-
-      const message = $(e.currentTarget).closest('.msg-chat');
-      this.showUser(e, message);
-
-      // gotta return false so that the actual context menu doesn't show up
-      return false;
-    });
+      },
+    );
 
     // preventing the window from closing instantly
-    this.chat.output.on('mouseup', '.msg-chat .user', (e) => {
-      e.stopPropagation();
-    });
+    this.chat.output.on(
+      'mouseup',
+      '.msg-chat .user, .msg-chat .chat-user',
+      (e) => {
+        e.stopPropagation();
+      },
+    );
 
     this.chat.source.on('MSG', this.handleNewMessage.bind(this));
   }
@@ -85,6 +99,23 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
 
     this.position(e);
     this.show();
+  }
+
+  // Toggles the menu body between its mutually-exclusive states:
+  //  - 'loading'  : a spinner while the user's data is being fetched
+  //  - 'loaded'   : the full menu (details + action buttons)
+  //  - 'notFound' : the minimal "user not found" notice
+  setMenuBodyState(state) {
+    this.userInfoSection.toggleClass('hidden', state !== 'loaded');
+    this.actionsSection.toggleClass('hidden', state !== 'loaded');
+    this.loadingNotice.toggleClass('hidden', state !== 'loading');
+    this.notFoundNotice.toggleClass('hidden', state !== 'notFound');
+  }
+
+  // Collapses the menu to a minimal "user not found" view.
+  showUserNotFound() {
+    this.setMenuBodyState('notFound');
+    this.redraw();
   }
 
   configureButtons() {
@@ -154,7 +185,7 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     });
   }
 
-  setActionsVisibility() {
+  setActionsVisibility(clickedUser = this.chat.users.get(this.clickedNick)) {
     if (this.chat.user.hasModPowers()) {
       this.muteUserBtn.toggleClass('hidden', false);
       this.banUserBtn.toggleClass('hidden', false);
@@ -167,7 +198,6 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     this.banUserBtn.removeClass('active');
     this.muteUserBtn.removeClass('active');
 
-    const clickedUser = this.chat.users.get(this.clickedNick);
     const isBot = clickedUser?.hasFeature(UserFeatures.BOT);
     if (isBot) {
       this.ignoreUserBtn.toggleClass('hidden', true);
@@ -278,35 +308,17 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
         ? [message]
         : [];
 
-    const selectedUser = [...message[0].querySelectorAll('.user')].find(
+    // Match the message author's `.user` link or an in-text `.chat-user`
+    // mention span whose text is the clicked nick. A mention of someone who
+    // isn't the author has no matching `.user`, so guard against no match.
+    const selectedUser = [
+      ...message[0].querySelectorAll('.user, .chat-user'),
+    ].find(
       (user) => user.innerText.toLowerCase() === this.clickedNick.toLowerCase(),
     );
-    const displayName = selectedUser.innerText;
+    const displayName = selectedUser?.innerText ?? this.clickedNick;
     const tagNote = this.chat.taggednotes.get(this.clickedNick);
-    const usernameFeatures = selectedUser.classList.value;
-
-    const watchingEmbed = this.buildWatchingEmbed(this.clickedNick);
-    if (watchingEmbed !== '') {
-      this.watchingSubheader.style.display = '';
-      this.watchingSubheader.replaceChildren(
-        'Watching: ',
-        $(watchingEmbed).get()[0],
-      );
-    } else {
-      this.watchingSubheader.style.display = 'none';
-      this.watchingSubheader.replaceChildren();
-    }
-
-    const formattedDate = this.buildCreatedDate(this.clickedNick);
-    if (formattedDate) {
-      this.createdDateSubheader.style.display = '';
-      this.createdDateSubheader.replaceChildren('Joined on ', formattedDate);
-    } else {
-      this.createdDateSubheader.style.display = 'none';
-      this.createdDateSubheader.replaceChildren(
-        'Unable to display account creation date',
-      );
-    }
+    const usernameFeatures = selectedUser?.classList.value ?? '';
 
     if (tagNote) {
       this.tagSubheader.style.display = '';
@@ -316,24 +328,61 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
       this.tagSubheader.replaceChildren();
     }
 
-    const featuresList = this.buildFeatures(this.clickedNick, usernameFeatures);
-    if (featuresList) {
-      this.flairList.toggleClass('hidden', false);
-      this.flairSubheader.style.display = '';
-    } else {
-      this.flairList.toggleClass('hidden', true);
-      this.flairSubheader.style.display = 'none';
-    }
-
     this.header.text('');
     this.header.attr('class', 'username');
     this.messagesContainer.empty();
     this.updateNoMessagesNotice(true);
-    this.flairList.empty();
 
     this.header.text(displayName);
     this.header.addClass(usernameFeatures);
-    this.flairList.append(featuresList);
+
+    // If the user is already cached, render it immediately (no loading flash)
+    // and let the fetch below refresh it. Otherwise show a spinner until the
+    // fetch resolves.
+    const cachedUser = this.chat.users.get(this.clickedNick);
+    if (cachedUser) {
+      this.setMenuBodyState('loaded');
+      this.renderUserDetails(cachedUser, usernameFeatures);
+    } else {
+      this.setMenuBodyState('loading');
+    }
+
+    // Fetch authoritative info from the website so the menu is populated even
+    // for users absent from the local cache.
+    const requestedNick = this.clickedNick;
+    this.chat.userInfoService
+      .getUserInfo(displayName)
+      .then((data) => {
+        // Bail if a different user's menu was opened while this was in flight.
+        if (this.clickedNick !== requestedNick) {
+          return;
+        }
+        // The user doesn't exist — collapse to the minimal "not found" view.
+        if (data === null) {
+          this.showUserNotFound();
+          return;
+        }
+        this.setMenuBodyState('loaded');
+        const fetchedUser = new ChatUser(data);
+        this.renderUserDetails(fetchedUser, usernameFeatures);
+        this.setActionsVisibility(fetchedUser);
+        this.redraw();
+      })
+      .catch(() => {
+        // Bail if a different user's menu was opened while this was in flight.
+        if (this.clickedNick !== requestedNick) {
+          return;
+        }
+        // Transient failure: drop the loading spinner and show whatever the
+        // cache/DOM gave us rather than spinning forever.
+        this.setMenuBodyState('loaded');
+        this.renderUserDetails(
+          this.chat.users.get(this.clickedNick),
+          usernameFeatures,
+        );
+        this.setActionsVisibility();
+        this.redraw();
+      });
 
     this.setMessageHistoryStatus('Loading history...');
     this.loadMessageHistory(displayName)
@@ -360,8 +409,50 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
       });
   }
 
-  buildWatchingEmbed(nick) {
-    const user = this.chat.users.get(nick);
+  /**
+   * Renders the watching, account-creation date, and flair sections for the
+   * given user. Safe to call repeatedly — e.g. an initial render from the
+   * local cache followed by a refresh from the website API. `user` may be
+   * undefined (an uncached user), in which case flairs fall back to the
+   * clicked message's CSS classes.
+   */
+  renderUserDetails(user, usernameFeatures) {
+    const watchingEmbed = this.buildWatchingEmbed(user);
+    if (watchingEmbed !== '') {
+      this.watchingSubheader.style.display = '';
+      this.watchingSubheader.replaceChildren(
+        'Watching: ',
+        $(watchingEmbed).get()[0],
+      );
+    } else {
+      this.watchingSubheader.style.display = 'none';
+      this.watchingSubheader.replaceChildren();
+    }
+
+    const formattedDate = this.buildCreatedDate(user);
+    if (formattedDate) {
+      this.createdDateSubheader.style.display = '';
+      this.createdDateSubheader.replaceChildren('Joined on ', formattedDate);
+    } else {
+      this.createdDateSubheader.style.display = 'none';
+      this.createdDateSubheader.replaceChildren(
+        'Unable to display account creation date',
+      );
+    }
+
+    const featuresList = this.buildFeatures(user, usernameFeatures);
+    this.flairList.empty();
+    if (featuresList) {
+      this.flairList.toggleClass('hidden', false);
+      this.flairSubheader.style.display = '';
+      this.flairList.append(featuresList);
+    } else {
+      this.flairList.toggleClass('hidden', true);
+      this.flairSubheader.style.display = 'none';
+    }
+  }
+
+  buildWatchingEmbed(user) {
     if (!user?.watching) {
       return '';
     }
@@ -371,8 +462,7 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     return `<a href="${url}" target="${target}">${user.watching.id} on ${user.watching.platform}</a>`;
   }
 
-  buildCreatedDate(nick) {
-    const user = this.chat.users.get(nick.toLowerCase());
+  buildCreatedDate(user) {
     if (!user?.createdDate) {
       return '';
     }
@@ -385,8 +475,7 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     return timeHTML;
   }
 
-  buildFeatures(nick, messageFeatures) {
-    const user = this.chat.users.get(nick);
+  buildFeatures(user, messageFeatures) {
     const messageFeaturesArray = messageFeatures
       .split(' ')
       .filter((e) => e !== 'user' && e !== 'subscriber');

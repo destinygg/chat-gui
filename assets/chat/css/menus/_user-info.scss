@@ -29,6 +29,27 @@ $toolbar-icons-map: (
     border-bottom: 1px solid a.$color-surface-dark4;
   }
 
+  .user-not-found {
+    padding: a.$gutter-lg a.$gutter-md;
+    text-align: center;
+  }
+
+  .user-info-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: a.$gutter-lg a.$gutter-md;
+
+    .loading-icon {
+      width: 2em;
+      height: 2em;
+      display: inline-block;
+      animation: spin 2s linear infinite;
+
+      @include a.icon-background('../img/icon-settings.svg');
+    }
+  }
+
   .flairs {
     margin-top: a.$gutter-lg;
     margin-bottom: a.$gutter-lg;
