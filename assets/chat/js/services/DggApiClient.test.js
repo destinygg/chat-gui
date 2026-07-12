@@ -19,6 +19,9 @@ describe('DggApiClient', () => {
         roles: ['subscriber'],
         features: ['flair1', 'admin'],
         createdDate: '2013-01-01T00:00:00+00:00',
+        bio: 'gaming',
+        gender: 'nonbinary',
+        age: '18-24',
         watching: { platform: 'twitch', id: 'xqc' },
       };
 
