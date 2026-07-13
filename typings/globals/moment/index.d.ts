@@ -582,9 +582,7 @@ declare namespace moment {
   }
 
   type MomentFormatSpecification =
-    | string
-    | MomentBuiltinFormat
-    | (string | MomentBuiltinFormat)[];
+    string | MomentBuiltinFormat | (string | MomentBuiltinFormat)[];
 
   interface MomentStatic {
     version: string;

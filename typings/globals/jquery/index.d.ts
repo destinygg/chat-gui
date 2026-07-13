@@ -355,8 +355,7 @@ interface JQueryPromise<T> extends JQueryGenericPromise<T> {
    */
   progress(
     progressCallback1?:
-      | JQueryPromiseCallback<any>
-      | JQueryPromiseCallback<any>[],
+      JQueryPromiseCallback<any> | JQueryPromiseCallback<any>[],
     ...progressCallbackN: Array<
       JQueryPromiseCallback<any> | JQueryPromiseCallback<any>[]
     >
@@ -428,8 +427,7 @@ interface JQueryDeferred<T> extends JQueryGenericPromise<T> {
    */
   progress(
     progressCallback1?:
-      | JQueryPromiseCallback<any>
-      | JQueryPromiseCallback<any>[],
+      JQueryPromiseCallback<any> | JQueryPromiseCallback<any>[],
     ...progressCallbackN: Array<
       JQueryPromiseCallback<any> | JQueryPromiseCallback<any>[]
     >
