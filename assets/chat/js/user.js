@@ -7,6 +7,9 @@ import UserFeature from './features';
  * @property {string} createdDate
  * @property {string[]} features
  * @property {string[]} roles
+ * @property {?string} [bio]
+ * @property {?string} [gender]
+ * @property {?string} [age]
  */
 
 class ChatUser {
@@ -53,6 +56,24 @@ class ChatUser {
   watching = null;
 
   /**
+   * User's profile bio.
+   * @type {?string}
+   */
+  bio = null;
+
+  /**
+   * User's gender as a raw enum value (e.g. 'nonbinary'); mapped to a label for display.
+   * @type {?string}
+   */
+  gender = null;
+
+  /**
+   * User's age range as a raw enum value (e.g. '18-24'); mapped to a label for display.
+   * @type {?string}
+   */
+  age = null;
+
+  /**
    * @param {string|User} user
    */
   constructor(user = '') {
@@ -67,6 +88,9 @@ class ChatUser {
       this.features = user.features || [];
       this.roles = user.roles || [];
       this.watching = user.watching || null;
+      this.bio = user.bio ?? null;
+      this.gender = user.gender ?? null;
+      this.age = user.age ?? null;
     }
   }
 

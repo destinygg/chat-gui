@@ -6,6 +6,24 @@ import UserFeatures from '../features';
 import UserRoles from '../roles';
 import ChatMenuFloating from './ChatMenuFloating';
 
+// Display labels for the raw gender/age enum values sent by the user-info API.
+// Unknown values fall back to the raw value so a new server-side case still
+// renders something sensible.
+const GENDER_LABELS = {
+  male: 'Male',
+  female: 'Female',
+  nonbinary: 'Nonbinary',
+};
+
+const AGE_LABELS = {
+  'under-18': 'Under 18',
+  '18-24': '18-24',
+  '25-34': '25-34',
+  '35-44': '35-44',
+  '45-54': '45-54',
+  '55+': '55+',
+};
+
 export default class ChatUserInfoMenu extends ChatMenuFloating {
   constructor(ui, btn, chat) {
     super(ui, btn, chat, ui.find('.toolbar'));
@@ -20,6 +38,12 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     )[0];
 
     this.createdDateSubheader = this.ui.find('.user-info h5.date-subheader')[0];
+
+    this.ageSubheader = this.ui.find('.user-info h5.age-subheader')[0];
+
+    this.genderSubheader = this.ui.find('.user-info h5.gender-subheader')[0];
+
+    this.bioSubheader = this.ui.find('.user-info h5.bio-subheader')[0];
 
     this.tagSubheader = this.ui.find('.user-info h5.tag-subheader')[0];
 
@@ -410,11 +434,12 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
   }
 
   /**
-   * Renders the watching, account-creation date, and flair sections for the
-   * given user. Safe to call repeatedly — e.g. an initial render from the
-   * local cache followed by a refresh from the website API. `user` may be
-   * undefined (an uncached user), in which case flairs fall back to the
-   * clicked message's CSS classes.
+   * Renders the watching, account-creation date, age, gender, bio, and flair
+   * sections for the given user. Safe to call repeatedly — e.g. an initial
+   * render from the local cache followed by a refresh from the website API.
+   * `user` may be undefined (an uncached user), in which case flairs fall back
+   * to the clicked message's CSS classes and the profile rows (age/gender/bio,
+   * which only come from the API) stay hidden.
    */
   renderUserDetails(user, usernameFeatures) {
     const watchingEmbed = this.buildWatchingEmbed(user);
@@ -440,6 +465,19 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
       );
     }
 
+    // Profile fields (from the authoritative fetch; absent on cache-only users).
+    this.renderTextSubheader(
+      this.ageSubheader,
+      'Age: ',
+      user?.age ? (AGE_LABELS[user.age] ?? user.age) : '',
+    );
+    this.renderTextSubheader(
+      this.genderSubheader,
+      'Gender: ',
+      user?.gender ? (GENDER_LABELS[user.gender] ?? user.gender) : '',
+    );
+    this.renderTextSubheader(this.bioSubheader, 'Bio: ', user?.bio ?? '');
+
     const featuresList = this.buildFeatures(user, usernameFeatures);
     this.flairList.empty();
     if (featuresList) {
@@ -449,6 +487,21 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     } else {
       this.flairList.toggleClass('hidden', true);
       this.flairSubheader.style.display = 'none';
+    }
+  }
+
+  /**
+   * Shows a `<h5>` subheader as `{label}{value}` when `value` is non-empty,
+   * otherwise hides it. `value` is rendered as a text node, so user-controlled
+   * content (e.g. a bio) is safe from injection.
+   */
+  renderTextSubheader(element, label, value) {
+    if (value) {
+      element.style.display = '';
+      element.replaceChildren(label, value);
+    } else {
+      element.style.display = 'none';
+      element.replaceChildren();
     }
   }
 

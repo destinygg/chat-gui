@@ -29,6 +29,15 @@ $toolbar-icons-map: (
     border-bottom: 1px solid a.$color-surface-dark4;
   }
 
+  // The bio can be up to 160 characters, so let it wrap onto multiple lines
+  // instead of overflowing the single-line subheader row.
+  .bio-subheader {
+    padding-top: a.$gutter-sm;
+    padding-bottom: a.$gutter-sm;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
   .user-not-found {
     padding: a.$gutter-lg a.$gutter-md;
     text-align: center;
