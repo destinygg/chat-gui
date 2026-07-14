@@ -1,0 +1,51 @@
+@use '../../abstracts/' as a;
+@use 'donation';
+
+.msg-tts {
+  // Staff-sent TTS (no amount) shares the amount-0 accent.
+  &.amount-0 {
+    border-color: #1c5cdb;
+  }
+
+  @each $amount, $color in donation.$amount-color-map {
+    &.amount-#{$amount} {
+      border-color: $color;
+    }
+  }
+
+  .event-icon {
+    filter: invert(100%);
+
+    &.tts-icon {
+      @include a.icon-background('../img/icon-tts.svg');
+    }
+  }
+
+  .event-bottom {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+
+  .event-bottom-action {
+    display: inline-flex;
+    align-items: center;
+    margin-bottom: 0.25rem;
+    padding: 0.25em a.$gutter-md;
+    border: none;
+    border-radius: 6px;
+    background-color: #2a2a2a;
+    color: a.$color-chat-text1;
+    text-decoration: none;
+    font-weight: 600;
+    line-height: 1;
+    cursor: pointer;
+
+    &:hover,
+    &:focus-visible {
+      background-color: #353535;
+      color: a.$color-chat-text1;
+    }
+  }
+}
