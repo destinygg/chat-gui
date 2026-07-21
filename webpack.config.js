@@ -37,8 +37,10 @@ module.exports = {
         target: 'https://www.destiny.gg',
         secure: false,
         changeOrigin: true,
-        onProxyReq: (proxyReq) => {
-          bakeCookies(proxyReq);
+        on: {
+          proxyReq: (proxyReq) => {
+            bakeCookies(proxyReq);
+          },
         },
       },
       {
@@ -61,8 +63,10 @@ module.exports = {
           Origin: 'https://www.destiny.gg',
           Host: 'chat.destiny.gg',
         },
-        onProxyReqWs: (proxyReq) => {
-          bakeCookies(proxyReq);
+        on: {
+          proxyReqWs: (proxyReq) => {
+            bakeCookies(proxyReq);
+          },
         },
       },
     ],
