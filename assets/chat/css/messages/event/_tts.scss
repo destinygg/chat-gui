@@ -1,26 +1,8 @@
 @use '../../abstracts/' as a;
-@use 'donation';
 
+// A TTS event renders exactly like a donation (see _donation and _event); the
+// only addition is the "Play TTS" button stacked below the message.
 .msg-tts {
-  // Staff-sent TTS (no amount) shares the amount-0 accent.
-  &.amount-0 {
-    border-color: #1c5cdb;
-  }
-
-  @each $amount, $color in donation.$amount-color-map {
-    &.amount-#{$amount} {
-      border-color: $color;
-    }
-  }
-
-  .event-icon {
-    filter: invert(100%);
-
-    &.tts-icon {
-      @include a.icon-background('../img/icon-tts.svg');
-    }
-  }
-
   .event-bottom {
     display: flex;
     flex-direction: column;

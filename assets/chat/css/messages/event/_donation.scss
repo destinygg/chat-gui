@@ -8,7 +8,8 @@ $amount-color-map: (
   100: #e62117,
 );
 
-.msg-donation {
+.msg-donation,
+.msg-tts {
   &.amount-0 {
     border-color: #1c5cdb;
   }

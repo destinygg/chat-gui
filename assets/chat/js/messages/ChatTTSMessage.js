@@ -39,19 +39,19 @@ export default class ChatTTSMessage extends ChatEventMessage {
     }
     user.innerText = this.user.displayName;
 
-    // Staff-sent TTS carries no amount.
-    const suffix =
-      this.amount > 0
-        ? ` sent a ${(this.amount / 100).toLocaleString('en-US', {
-            style: 'currency',
-            currency: 'USD',
-          })} TTS`
-        : ' sent a TTS';
+    // A TTS chat event is only ever a real donation (admin sends don't
+    // announce), so it reads exactly like a donation line.
+    const suffix = ` donated ${(this.amount / 100).toLocaleString('en-US', {
+      style: 'currency',
+      currency: 'USD',
+    })}`;
     eventTemplate.querySelector('.event-info').append(user, suffix);
 
     const donationTier = selectDonationTier(this.amount);
     eventTemplate.classList.add(donationTier[0]);
-    eventTemplate.querySelector('.event-icon').classList.add('tts-icon');
+    eventTemplate
+      .querySelector('.event-icon')
+      .classList.add('donation-icon', donationTier[0]);
 
     const bottom = eventTemplate.querySelector('.event-bottom');
     if (bottom && this.audio) {
