@@ -8,8 +8,7 @@ $amount-color-map: (
   100: #e62117,
 );
 
-.msg-donation,
-.msg-tts {
+.msg-donation {
   &.amount-0 {
     border-color: #1c5cdb;
   }
@@ -25,6 +24,35 @@ $amount-color-map: (
       &.amount-#{$amount} {
         @include a.icon-background('../img/donation-amount-#{$amount}.png');
       }
+    }
+  }
+
+  // A read-aloud donation stacks a "Play TTS" button below the message.
+  .event-bottom:has(.event-bottom-action) {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+
+  .event-bottom-action {
+    display: inline-flex;
+    align-items: center;
+    margin-bottom: 0.25rem;
+    padding: 0.25em a.$gutter-md;
+    border: none;
+    border-radius: 6px;
+    background-color: #2a2a2a;
+    color: a.$color-chat-text1;
+    text-decoration: none;
+    font-weight: 600;
+    line-height: 1;
+    cursor: pointer;
+
+    &:hover,
+    &:focus-visible {
+      background-color: #353535;
+      color: a.$color-chat-text1;
     }
   }
 }

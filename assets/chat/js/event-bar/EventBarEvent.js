@@ -62,8 +62,7 @@ export default class EventBarEvent extends EventEmitter {
         }
         break;
       }
-      case MessageTypes.DONATION:
-      case MessageTypes.TTS: {
+      case MessageTypes.DONATION: {
         const user = new ChatUser(this.data.user);
         const colorFlair = usernameColorFlair(chat.flairs, user);
         if (colorFlair) {
@@ -157,9 +156,6 @@ export default class EventBarEvent extends EventEmitter {
       }
       case MessageTypes.DONATION: {
         return MessageBuilder.donation(this.data);
-      }
-      case MessageTypes.TTS: {
-        return MessageBuilder.tts(this.data);
       }
       case MessageTypes.XPOST: {
         return MessageBuilder.xpost(this.data);

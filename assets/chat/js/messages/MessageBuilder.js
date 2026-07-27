@@ -6,7 +6,6 @@ import ChatUserMessage from './ChatUserMessage';
 import ChatEmoteMessage from './ChatEmoteMessage';
 import PinnedMessage from './PinnedMessage';
 import ChatDonationMessage from './ChatDonationMessage';
-import ChatTTSMessage from './ChatTTSMessage';
 import ChatXPostMessage from './ChatXPostMessage';
 import ChatVestaboardMessage from './ChatVestaboardMessage';
 import ChatRegularSubscriptionMessage from './subscriptions/ChatRegularSubscriptionMessage';
@@ -116,18 +115,7 @@ export default class MessageBuilder {
       data.timestamp,
       data.expirationTimestamp,
       data.uuid,
-    );
-  }
-
-  static tts(data) {
-    return new ChatTTSMessage(
-      data.data,
-      new ChatUser(data.user),
-      data.amount,
-      data.audio,
-      data.timestamp,
-      data.expirationTimestamp,
-      data.uuid,
+      data.audio ?? null,
     );
   }
 
