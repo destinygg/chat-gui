@@ -160,6 +160,7 @@ class Chat {
     this.source.on('GIFTSUB', (data) => this.onGIFTSUB(data));
     this.source.on('MASSGIFT', (data) => this.onMASSGIFT(data));
     this.source.on('DONATION', (data) => this.onDONATION(data));
+    this.source.on('TTS', (data) => this.onTTS(data));
     this.source.on('XPOST', (data) => this.onXPOST(data));
     this.source.on('VESTABOARD_LEAD', (data) => this.onVESTABOARD_LEAD(data));
     this.source.on('VESTABOARD_HOURLY', (data) =>
@@ -592,6 +593,12 @@ class Chat {
       return false;
     });
 
+    // TTS click-to-play (never autoplays)
+    this.output.on('click', '.tts-play', (e) => {
+      this.toggleTTSAudio(e.currentTarget);
+      return false;
+    });
+
     // Censored
     this.output.on('click', '.censored', (e) => {
       const nick = $(e.currentTarget).closest('.msg-chat').data('username');
@@ -899,6 +906,7 @@ class Chat {
         MessageTypes.GIFTSUB,
         MessageTypes.MASSGIFT,
         MessageTypes.DONATION,
+        MessageTypes.TTS,
         MessageTypes.BROADCAST,
         MessageTypes.DEATH,
       ].includes(message.type)
@@ -1586,6 +1594,51 @@ class Chat {
         MessageTypes.DONATION,
         data,
       );
+      this.eventBar.add(eventBarEvent);
+      if (this.eventBar.length === 1) {
+        this.mainwindow.update();
+      }
+    }
+  }
+
+  toggleTTSAudio(button) {
+    const url = button.dataset.audio;
+    if (!url) {
+      return;
+    }
+    if (this.ttsAudio && this.ttsAudioButton === button) {
+      if (this.ttsAudio.paused) {
+        this.ttsAudio.play().catch(() => {});
+      } else {
+        this.ttsAudio.pause();
+      }
+      return;
+    }
+    if (this.ttsAudio) {
+      this.ttsAudio.pause();
+    }
+    const audio = new Audio(url);
+    this.ttsAudio = audio;
+    this.ttsAudioButton = button;
+    const stopped = () => {
+      button.classList.remove('playing');
+      button.textContent = 'Play TTS';
+    };
+    audio.addEventListener('play', () => {
+      button.classList.add('playing');
+      button.textContent = 'Pause TTS';
+    });
+    audio.addEventListener('pause', stopped);
+    audio.addEventListener('ended', stopped);
+    audio.addEventListener('error', stopped);
+    audio.play().catch(stopped);
+  }
+
+  onTTS(data) {
+    MessageBuilder.tts(data).into(this);
+
+    if (!this.backlogloading) {
+      const eventBarEvent = new EventBarEvent(this, MessageTypes.TTS, data);
       this.eventBar.add(eventBarEvent);
       if (this.eventBar.length === 1) {
         this.mainwindow.update();
