@@ -15,12 +15,23 @@ export function selectDonationTier(amount) {
 }
 
 export default class ChatDonationMessage extends ChatEventMessage {
-  constructor(message, user, amount, timestamp, expirationTimestamp, uuid) {
+  constructor(
+    message,
+    user,
+    amount,
+    timestamp,
+    expirationTimestamp,
+    uuid,
+    audio = null,
+  ) {
     super(message, timestamp, uuid);
     this.user = user;
     this.type = MessageTypes.DONATION;
     this.amount = amount;
     this.expirationTimestamp = expirationTimestamp;
+    // Set when the donation's message is read aloud: the TTS clip URL, which
+    // adds a click-to-play button to the event.
+    this.audio = audio;
 
     this.generateMessageHash();
   }
@@ -54,6 +65,23 @@ export default class ChatDonationMessage extends ChatEventMessage {
     eventTemplate
       .querySelector('.event-icon')
       .classList.add('donation-icon', donationTier[0]);
+
+    const bottom = eventTemplate.querySelector('.event-bottom');
+    if (bottom && this.audio) {
+      const text = document.createElement('span');
+      text.className = 'event-bottom-text';
+      while (bottom.firstChild) {
+        text.append(bottom.firstChild);
+      }
+      bottom.append(text);
+
+      /** @type HTMLButtonElement */
+      const playButton = document
+        .querySelector('#tts-play-template')
+        ?.content.cloneNode(true).firstElementChild;
+      playButton.dataset.audio = this.audio;
+      bottom.append(playButton);
+    }
 
     const classes = Array.from(eventTemplate.classList);
     const attributes = eventTemplate
