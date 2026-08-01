@@ -702,23 +702,36 @@ class Chat {
       .catch(() => {});
   }
 
-  async loadWhispers() {
-    fetch(`${this.config.api.base}/api/messages/unread`, {
+  async loadUnreadCount() {
+    fetch(`${this.config.api.base}/api/messages/unread-count`, {
       credentials: 'include',
     })
       .then((res) => res.json())
       .then((d) => {
-        d.forEach((e) =>
-          this.whispers.set(e.username.toLowerCase(), {
-            id: e.messageid,
-            nick: e.username,
-            unread: Number(e.unread),
-            open: false,
-          }),
-        );
+        this.menus.get('whisper-users').seedUnread(Number(d.count) || 0);
       })
-      .then(() => this.menus.get('whisper-users').redraw())
       .catch(() => {});
+  }
+
+  /**
+   * Ensure a conversation exists in the whispers Map with the full shape the
+   * conversations panel renders. Returns the entry.
+   */
+  ensureConversation(nick) {
+    const normalized = nick.toLowerCase();
+    if (!this.whispers.has(normalized)) {
+      this.whispers.set(normalized, {
+        id: null,
+        nick,
+        username: normalized,
+        unread: 0,
+        open: false,
+        lastMessage: '',
+        timestamp: null,
+        lastMessageFromMe: false,
+      });
+    }
+    return this.whispers.get(normalized);
   }
 
   setPreLoginText() {
@@ -1046,7 +1059,7 @@ class Chat {
             } ${w.visible ? 'active' : ''}"><i class="dgg-icon"></i></span>`,
           );
         } else {
-          const conv = this.whispers.get(w.name);
+          const conv = this.whispers.get(w.name) || { unread: 0 };
           this.windowselect.append(`<span title="${w.label}" data-name="${
             w.name
           }" class="tab win-${w.name} tag-${w.tag} ${
@@ -1235,7 +1248,8 @@ class Chat {
     if (this.authenticated) {
       // If is a logged in user.
       this.loadSettings();
-      this.loadWhispers();
+      this.loadUnreadCount();
+      this.menus.get('whisper-users').invalidate();
       this.refreshEmoteAutocomplete();
     }
   }
@@ -1701,19 +1715,17 @@ class Chat {
   onPRIVMSG(data) {
     const normalized = data.nick.toLowerCase();
     if (!this.ignored(normalized, data.data)) {
-      if (!this.whispers.has(normalized)) {
-        this.whispers.set(normalized, {
-          nick: data.nick,
-          unread: 0,
-          open: false,
-        });
-      }
+      const conv = this.ensureConversation(data.nick);
+      conv.nick = data.nick;
+      conv.lastMessage = data.data;
+      conv.timestamp = data.timestamp;
+      conv.lastMessageFromMe = false;
 
-      const conv = this.whispers.get(normalized);
       const user = this.users.get(normalized) || new ChatUser(data.nick);
       const messageid = Object.hasOwn(data, 'messageid')
         ? data.messageid
         : null;
+      const whisperMenu = this.menus.get('whisper-users');
 
       if (this.settings.get('showhispersinchat')) {
         MessageBuilder.whisper(
@@ -1748,9 +1760,10 @@ class Chat {
         }).catch();
       } else {
         conv.unread += 1;
+        whisperMenu.incrementUnread(1);
       }
       this.replyusername = user.displayName;
-      this.menus.get('whisper-users').redraw();
+      whisperMenu.bumpConversation(normalized);
       this.redrawWindowIndicators();
     }
   }
@@ -1795,6 +1808,7 @@ class Chat {
       else if (win !== this.mainwindow) {
         MessageBuilder.message(raw, this.user).into(this, win);
         this.source.send('PRIVMSG', { nick: win.name, data: raw });
+        this.recordSentWhisper(win.name, raw);
         this.input.val('');
       }
       // VOTE
@@ -2246,7 +2260,21 @@ class Chat {
       const data = parts.slice(1, parts.length).join(' ');
       this.replyusername = parts[0];
       this.source.send('PRIVMSG', { nick: parts[0], data });
+      this.recordSentWhisper(parts[0], data);
     }
+  }
+
+  /**
+   * Record a whisper the user just sent so its conversation shows the latest
+   * message and floats to the top of the list. Never touches the unread badge
+   * — sending does not create unread mail for the sender.
+   */
+  recordSentWhisper(nick, text) {
+    const conv = this.ensureConversation(nick);
+    conv.lastMessage = text;
+    conv.timestamp = Date.now();
+    conv.lastMessageFromMe = true;
+    this.menus.get('whisper-users').bumpConversation(nick.toLowerCase());
   }
 
   cmdCONNECT(parts) {
@@ -2532,13 +2560,7 @@ class Chat {
     if (win != null) {
       this.windowToFront(normalized);
     } else {
-      if (!this.whispers.has(normalized)) {
-        this.whispers.set(normalized, {
-          nick: normalized,
-          unread: 0,
-          open: false,
-        });
-      }
+      this.ensureConversation(normalized);
       this.openConversation(normalized);
     }
   }
@@ -2887,6 +2909,9 @@ class Chat {
             win,
           ),
         );
+      }
+      if (conv.unread > 0) {
+        this.menus.get('whisper-users').decrementUnread(conv.unread);
       }
       conv.unread = 0;
       conv.open = true;

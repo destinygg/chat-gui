@@ -1,18 +1,23 @@
 @use '../abstracts/' as a;
 
 #chat-whisper-users {
+  // Leave room for the bottom search field, as the user list does.
+  .scrollable {
+    max-height: calc(100% - 3em);
+  }
+
   .content > ul {
     margin: 0;
     padding: a.$gutter-md 0;
   }
 
+  // Read conversations: hide the empty badge and dim the name.
   .unread-0 {
     .badge {
       display: none;
     }
 
-    .user,
-    .user:hover {
+    .conversation__user {
       color: a.$text-color1;
     }
   }
@@ -21,58 +26,90 @@
     color: a.$text-color1;
     margin: a.$gutter-lg;
   }
+
+  #chat-whisper-search input {
+    padding: a.$gutter-lg a.$gutter-lg;
+    border: none;
+    background: none;
+    border-radius: 0;
+  }
+
+  .whisper-load-more {
+    padding: a.$gutter-md a.$gutter-lg;
+
+    .chat-load-more-btn {
+      width: 100%;
+      padding: a.$gutter-md;
+      color: a.$text-color1;
+      background: a.$color-surface-dark4;
+      border: none;
+      border-radius: a.$bradius;
+      cursor: pointer;
+
+      &:hover {
+        color: a.$color-chat-text1;
+        background: a.$color-surface-dark2;
+      }
+
+      &:disabled {
+        opacity: 0.5;
+        cursor: default;
+      }
+    }
+  }
 }
 
 .conversation {
   list-style: none;
   position: relative;
   cursor: pointer;
-  padding-left: a.$gutter-md;
+  padding: a.$gutter-xs a.$gutter-md;
   display: flex;
-  align-items: center;
+  flex-direction: column;
 
-  .user {
-    color: a.$color-accent;
-    display: block;
-
-    &:hover {
-      color: a.$color-accent-light;
-
-      .badge {
-        color: a.$color-chat-text1;
-      }
-    }
+  &:hover {
+    background: a.$color-surface-dark4;
   }
 
-  .badge,
-  .remove {
-    float: right;
-    margin-right: a.$gutter-md;
+  .conversation__header {
+    display: flex;
+    align-items: baseline;
+  }
+
+  .conversation__user {
+    color: a.$color-accent;
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &:hover .conversation__user {
+    color: a.$color-accent-light;
+  }
+
+  .conversation__time {
+    flex-shrink: 0;
+    margin: 0 a.$gutter-md;
+    color: a.$text-color1;
+    font-size: 0.8em;
+  }
+
+  .conversation__preview {
+    color: a.$text-color1;
+    font-size: 0.9em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .badge {
+    flex-shrink: 0;
     font-size: 0.8em;
     padding: 0 a.$gutter-md;
     display: inline-block;
     background: a.$color-surface-dark4;
     border-radius: 50%;
-    margin: a.$gutter-xs 0;
     color: a.$color-chat-text2;
-  }
-
-  .remove {
-    opacity: 0.25;
-    display: inline-block;
-    text-decoration: none;
-    text-align: center;
-    line-height: 1.3em;
-    width: 1.3em;
-    height: 1.3em;
-
-    @include a.icon-background('../img/icon-close.svg');
-
-    &:hover {
-      opacity: 1;
-    }
   }
 }
