@@ -288,29 +288,39 @@ export default class ChatWhisperUsers extends ChatMenu {
     const user = this.chat.users.get(key) || new ChatUser(conv.nick);
     const unread = conv.unread || 0;
 
-    const row = $(`<li class="conversation unread-${unread}"></li>`).attr(
-      'data-username',
-      user.username,
-    );
-    const header = $('<div class="conversation__header"></div>');
+    const row = $('<li class="conversation"></li>')
+      .toggleClass('conversation--unread', unread > 0)
+      .attr('data-username', user.username);
+
+    // A dot rather than a coloured name signals unread (blue) vs read (grey).
+    $('<span class="conversation__indicator"></span>').appendTo(row);
+
+    const body = $('<div class="conversation__body"></div>').appendTo(row);
+    const header = $('<div class="conversation__header"></div>').appendTo(body);
     // .text() throughout: the preview is arbitrary user-authored message text.
     $('<span class="conversation__user"></span>')
       .text(user.displayName)
       .appendTo(header);
+
+    const meta = $('<span class="conversation__meta"></span>').appendTo(header);
+    // New-message count badge, to the left of the last-activity time.
+    if (unread > 0) {
+      $('<span class="conversation__count"></span>')
+        .text(`${unread} new`)
+        .appendTo(meta);
+    }
     if (conv.timestamp != null) {
       const when = moment(conv.timestamp);
       $('<time class="conversation__time"></time>')
         .attr('datetime', when.toISOString())
         .attr('title', when.format(DATE_FORMATS.FULL))
-        .text(when.fromNow(true))
-        .appendTo(header);
+        .text(when.fromNow())
+        .appendTo(meta);
     }
-    $('<span class="badge"></span>').text(unread).appendTo(header);
-    row.append(header);
 
     const preview =
       (conv.lastMessageFromMe ? 'You: ' : '') + (conv.lastMessage || '');
-    $('<div class="conversation__preview"></div>').text(preview).appendTo(row);
+    $('<div class="conversation__preview"></div>').text(preview).appendTo(body);
 
     return row;
   }

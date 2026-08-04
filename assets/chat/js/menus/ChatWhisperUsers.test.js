@@ -81,11 +81,16 @@ describe('ChatWhisperUsers list', () => {
     const rows = ui.find('.conversation');
     expect(rows.length).toBe(2);
     expect(rows.eq(0).find('.conversation__user').text()).toBe('Alice');
-    expect(rows.eq(0).find('.badge').text()).toBe('2');
+    // Unread row: a "N new" count badge left of the time, flagged for the dot.
+    expect(rows.eq(0).find('.conversation__count').text()).toBe('2 new');
+    expect(rows.eq(0).hasClass('conversation--unread')).toBe(true);
+    // Relative time carries the "ago" suffix.
+    expect(rows.eq(0).find('.conversation__time').text()).toContain('ago');
     // "You:" prefix when the last message was sent by the viewer.
     expect(rows.eq(1).find('.conversation__preview').text()).toBe('You: yo');
-    // Read row is marked so CSS can dim it.
-    expect(rows.eq(1).hasClass('unread-0')).toBe(true);
+    // Read row: no count, not flagged.
+    expect(rows.eq(1).find('.conversation__count').length).toBe(0);
+    expect(rows.eq(1).hasClass('conversation--unread')).toBe(false);
   });
 
   it('appends the next page and passes the cursor, hiding the button when done', async () => {
