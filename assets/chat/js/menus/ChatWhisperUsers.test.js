@@ -192,6 +192,22 @@ describe('ChatWhisperUsers badge', () => {
     menu.decrementUnread(5);
     expect(menu.notif.text()).toBe('0');
   });
+
+  it('caps the total and title at 99+ and does not stack the prefix', () => {
+    const { menu } = makeMenu();
+    window.parent.document.title = 'Destiny';
+
+    menu.seedUnread(150);
+    expect(menu.notif.text()).toBe('99+');
+    expect(window.parent.document.title).toBe('(99+) Destiny');
+
+    // Re-seeding replaces the capped prefix rather than stacking it.
+    menu.seedUnread(120);
+    expect(window.parent.document.title).toBe('(99+) Destiny');
+
+    menu.seedUnread(0);
+    expect(window.parent.document.title).toBe('Destiny');
+  });
 });
 
 describe('ChatWhisperUsers rows', () => {
@@ -210,6 +226,21 @@ describe('ChatWhisperUsers rows', () => {
     const preview = row.find('.conversation__preview');
     expect(preview.text()).toBe('<b>pwned</b>');
     expect(preview.find('b').length).toBe(0);
+  });
+
+  it('caps the count badge at 99+', () => {
+    const { menu, chat } = makeMenu();
+    chat.whispers.set('alice', {
+      nick: 'Alice',
+      username: 'alice',
+      unread: 150,
+      lastMessage: 'hi',
+      timestamp: null,
+      lastMessageFromMe: false,
+    });
+
+    const row = menu.buildRow('alice');
+    expect(row.find('.conversation__count').text()).toBe('99+ new');
   });
 
   it('moves a conversation to the top and dedupes', () => {

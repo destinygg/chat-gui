@@ -5,6 +5,12 @@ import ChatMenu from './ChatMenu';
 import ChatUser from '../user';
 import { DATE_FORMATS } from '../const';
 
+// Unread counts past this render as "99+".
+const MAX_DISPLAY_COUNT = 99;
+function formatCount(n) {
+  return n > MAX_DISPLAY_COUNT ? `${MAX_DISPLAY_COUNT}+` : String(n);
+}
+
 /**
  * The conversations panel: all of the user's DM threads, newest first,
  * cursor-paginated with a "Load more" button and searchable by username.
@@ -85,13 +91,16 @@ export default class ChatWhisperUsers extends ChatMenu {
       setTimeout(() => this.btn.removeClass('ping'), 2000);
     }
     this.prevUnread = this.unread;
-    this.notif.text(this.unread);
+    const shown = formatCount(this.unread);
+    this.notif.text(shown);
     this.notif.toggle(this.unread > 0);
     try {
-      // Mirror the unread total into the parent window title.
-      const t = window.parent.document.title.replace(/\([0-9]+\) /, '');
+      // Mirror the unread total into the parent window title. The strip regex
+      // allows a trailing "+" so a capped "(99+) " prefix is replaced, not
+      // stacked, on the next update.
+      const t = window.parent.document.title.replace(/\([0-9]+\+?\) /, '');
       window.parent.document.title =
-        this.unread > 0 ? `(${this.unread}) ${t}` : `${t}`;
+        this.unread > 0 ? `(${shown}) ${t}` : `${t}`;
     } catch {} // eslint-disable-line no-empty
   }
 
@@ -306,7 +315,7 @@ export default class ChatWhisperUsers extends ChatMenu {
     // New-message count badge, to the left of the last-activity time.
     if (unread > 0) {
       $('<span class="conversation__count"></span>')
-        .text(`${unread} new`)
+        .text(`${formatCount(unread)} new`)
         .appendTo(meta);
     }
     if (conv.timestamp != null) {
