@@ -24,6 +24,11 @@ const MENU_HTML = `
 
 const EMPTY_PAGE = { results: [], more: false, nextPageOffset: null };
 
+// Wrap a page payload in the JsonResponse envelope the endpoints return.
+function envelope(data) {
+  return JSON.stringify({ success: true, message: null, data, error: null });
+}
+
 function dto(username, overrides = {}) {
   return {
     userId: username.length,
@@ -58,13 +63,13 @@ async function flush() {
 
 beforeEach(() => {
   fetch.resetMocks();
-  fetch.mockResponse(JSON.stringify(EMPTY_PAGE));
+  fetch.mockResponse(envelope(EMPTY_PAGE));
 });
 
 describe('ChatWhisperUsers list', () => {
   it('loads the first page on show and renders rows newest-first', async () => {
     fetch.mockResponseOnce(
-      JSON.stringify({
+      envelope({
         results: [
           dto('Alice', { unread: 2 }),
           dto('Bob', { lastMessage: 'yo', lastMessageFromMe: true }),
@@ -95,7 +100,7 @@ describe('ChatWhisperUsers list', () => {
 
   it('appends the next page and passes the cursor, hiding the button when done', async () => {
     fetch.mockResponseOnce(
-      JSON.stringify({
+      envelope({
         results: [dto('Alice')],
         more: true,
         nextPageOffset: { timestamp: '2026-01-01 09:00:00.000', id: 42 },
@@ -107,7 +112,7 @@ describe('ChatWhisperUsers list', () => {
     expect(menu.loadMoreEl.get(0).style.display).not.toBe('none');
 
     fetch.mockResponseOnce(
-      JSON.stringify({
+      envelope({
         results: [dto('Bob')],
         more: false,
         nextPageOffset: null,
@@ -127,7 +132,7 @@ describe('ChatWhisperUsers list', () => {
 
   it('searches server-side and restores the normal list on clear without refetching', async () => {
     fetch.mockResponseOnce(
-      JSON.stringify({
+      envelope({
         results: [dto('Alice'), dto('Bob')],
         more: false,
         nextPageOffset: null,
@@ -139,7 +144,7 @@ describe('ChatWhisperUsers list', () => {
     expect(ui.find('.conversation').length).toBe(2);
 
     fetch.mockResponseOnce(
-      JSON.stringify({
+      envelope({
         results: [dto('Alice')],
         more: false,
         nextPageOffset: null,

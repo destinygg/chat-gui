@@ -708,7 +708,7 @@ class Chat {
     })
       .then((res) => res.json())
       .then((d) => {
-        this.menus.get('whisper-users').seedUnread(Number(d.count) || 0);
+        this.menus.get('whisper-users').seedUnread(Number(d?.data?.count) || 0);
       })
       .catch(() => {});
   }

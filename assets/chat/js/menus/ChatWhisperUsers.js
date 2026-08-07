@@ -143,7 +143,8 @@ export default class ChatWhisperUsers extends ChatMenu {
       const res = await fetch(this.buildUrl(search, cursor), {
         credentials: 'include',
       });
-      const data = await res.json();
+      // Unwrap the JsonResponse envelope: { success, data: { results, ... } }.
+      const { data } = await res.json();
       return data && Array.isArray(data.results) ? data : empty;
     } catch {
       return empty;
