@@ -1,25 +1,54 @@
 @use '../abstracts/' as a;
 
 #chat-whisper-users {
-  .content > ul {
-    margin: 0;
-    padding: a.$gutter-md 0;
+  // Leave room for the bottom search field, as the user list does.
+  .scrollable {
+    max-height: calc(100% - 3em);
   }
 
-  .unread-0 {
-    .badge {
-      display: none;
-    }
-
-    .user,
-    .user:hover {
-      color: a.$text-color1;
-    }
+  .content > ul {
+    margin: 0;
+    padding: a.$gutter-sm 0;
   }
 
   .empty {
     color: a.$text-color1;
     margin: a.$gutter-lg;
+  }
+
+  #chat-whisper-search input {
+    padding: a.$gutter-lg a.$gutter-lg;
+    border: none;
+    background: none;
+    border-radius: 0;
+  }
+
+  .whisper-load-more {
+    padding: a.$gutter-md a.$gutter-lg;
+    text-align: center;
+
+    // Matches the .event-bottom-action button rendered in chat event messages.
+    .chat-load-more-btn {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.25em a.$gutter-md;
+      border: none;
+      border-radius: 6px;
+      background-color: #2a2a2a;
+      color: a.$color-chat-text1;
+      font-weight: 600;
+      line-height: 1;
+      cursor: pointer;
+
+      &:hover {
+        background-color: #353535;
+      }
+
+      &:disabled {
+        opacity: 0.5;
+        cursor: default;
+      }
+    }
   }
 }
 
@@ -27,52 +56,85 @@
   list-style: none;
   position: relative;
   cursor: pointer;
-  padding-left: a.$gutter-md;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
+  gap: a.$gutter-md;
+  padding: a.$gutter-lg;
 
-  .user {
-    color: a.$color-accent;
-    display: block;
-
-    &:hover {
-      color: a.$color-accent-light;
-
-      .badge {
-        color: a.$color-chat-text1;
-      }
-    }
-  }
-
-  .badge,
-  .remove {
-    float: right;
-    margin-right: a.$gutter-md;
-  }
-
-  .badge {
-    font-size: 0.8em;
-    padding: 0 a.$gutter-md;
-    display: inline-block;
+  &:hover {
     background: a.$color-surface-dark4;
-    border-radius: 50%;
-    margin: a.$gutter-xs 0;
-    color: a.$color-chat-text2;
   }
 
-  .remove {
-    opacity: 0.25;
-    display: inline-block;
-    text-decoration: none;
-    text-align: center;
-    line-height: 1.3em;
-    width: 1.3em;
-    height: 1.3em;
+  // Unread indicator: dim grey when nothing new, blue when there is.
+  .conversation__indicator {
+    flex-shrink: 0;
+    width: 0.5em;
+    height: 0.5em;
+    margin-top: 0.4em;
+    border-radius: 50%;
+    background: a.$text-color1;
+    opacity: 0.35;
+  }
 
-    @include a.icon-background('../img/icon-close.svg');
+  &.conversation--unread .conversation__indicator {
+    background: a.$color-accent;
+    opacity: 1;
+  }
 
-    &:hover {
-      opacity: 1;
-    }
+  // min-width: 0 lets the name and preview ellipsis inside the flex row.
+  .conversation__body {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: a.$gutter-sm;
+  }
+
+  .conversation__header {
+    display: flex;
+    align-items: baseline;
+    gap: a.$gutter-md;
+  }
+
+  .conversation__user {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: a.$color-chat-text1;
+  }
+
+  .conversation__meta {
+    flex-shrink: 0;
+    display: flex;
+    align-items: baseline;
+    gap: a.$gutter-md;
+  }
+
+  // A quiet neutral chip — the blue indicator dot is the eye-catching signal,
+  // not this. Recessed (darker than the row, even on hover) so it stays legible
+  // without drawing attention.
+  .conversation__count {
+    flex-shrink: 0;
+    padding: 0 a.$gutter-md;
+    border-radius: 1em;
+    background: a.$color-surface-dark2;
+    color: a.$color-chat-text2;
+    font-size: 0.75em;
+    font-weight: 600;
+  }
+
+  .conversation__time {
+    color: a.$color-chat-text3;
+    font-size: 0.8em;
+  }
+
+  .conversation__preview {
+    color: a.$text-color1;
+    font-size: 0.9em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 }
