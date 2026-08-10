@@ -140,6 +140,7 @@ class Chat {
     this.source.on('HISTORY', (data) => this.onHISTORY(data));
     this.source.on('PIN', (data) => this.onPIN(data));
     this.source.on('QUIT', (data) => this.onQUIT(data));
+    this.source.on('USERSDELTA', (data) => this.onUSERSDELTA(data));
     this.source.on('MSG', (data) => this.onMSG(data));
     this.source.on('MUTE', (data) => this.onMUTE(data));
     this.source.on('UNMUTE', (data) => this.onUNMUTE(data));
@@ -1307,6 +1308,17 @@ class Chat {
       this.users.delete(normalized);
       this.autocomplete.remove(data.nick, true);
     }
+  }
+
+  /**
+   * A batch of presence changes, sent in place of individual JOIN/QUIT events
+   * when a lot of them land at once (a chat restart, say). Joiners arrive under
+   * `users` and are already picked up by `onDISPATCH`, which harvests that key
+   * from any event — only the departures need handling here.
+   * @param {{users?: object[], removed?: object[]}} data
+   */
+  onUSERSDELTA(data) {
+    (data.removed ?? []).forEach((user) => this.onQUIT(user));
   }
 
   onMSG(data) {
