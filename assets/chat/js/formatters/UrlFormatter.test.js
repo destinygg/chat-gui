@@ -67,7 +67,7 @@ describe('Normalizing URLs', () => {
     );
   });
 
-  test('Remove the share tracking query param from a instagram.com link', () => {
+  test('Remove the `igsh` share tracking query param from a instagram.com link', () => {
     expect(
       urlFormatter.normalizeUrl(
         'https://www.instagram.com/reel/DMv28huPlan?igsh=cW93Y2FheGtxMmJi',
@@ -75,7 +75,39 @@ describe('Normalizing URLs', () => {
     ).toBe('https://www.instagram.com/reel/DMv28huPlan');
   });
 
-  test("Don't modify a instagram.com link that doesn't contain the share tracking query param", () => {
+  test('Remove the `igshid` share tracking query param from a instagram.com link', () => {
+    expect(
+      urlFormatter.normalizeUrl(
+        'https://www.instagram.com/reel/DMv28huPlan?igshid=cW93Y2FheGtxMmJi',
+      ),
+    ).toBe('https://www.instagram.com/reel/DMv28huPlan');
+  });
+
+  test('Remove the `igsi` share tracking query param from a instagram.com link', () => {
+    expect(
+      urlFormatter.normalizeUrl(
+        'https://www.instagram.com/p/DcUzMENEQp8/?igsi=MzRlODBiNWFlZA%3D%3D',
+      ),
+    ).toBe('https://www.instagram.com/p/DcUzMENEQp8/');
+  });
+
+  test('Remove the `utm_source` share tracking query param from a instagram.com link', () => {
+    expect(
+      urlFormatter.normalizeUrl(
+        'https://www.instagram.com/reel/DMv28huPlan?utm_source=ig_web_copy_link',
+      ),
+    ).toBe('https://www.instagram.com/reel/DMv28huPlan');
+  });
+
+  test('Remove every share tracking query param from a instagram.com link that carries more than one', () => {
+    expect(
+      urlFormatter.normalizeUrl(
+        'https://www.instagram.com/p/Dbweq11Ppg1/?igsh=NHh4NHh4ZzJweG1j&igsi=NHh4NHh4ZzJweG1j',
+      ),
+    ).toBe('https://www.instagram.com/p/Dbweq11Ppg1/');
+  });
+
+  test("Don't modify a instagram.com link that doesn't contain any of the share tracking query params", () => {
     expect(
       urlFormatter.normalizeUrl('https://www.instagram.com/reel/DMv28huPlan'),
     ).toBe('https://www.instagram.com/reel/DMv28huPlan');

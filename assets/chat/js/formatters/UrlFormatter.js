@@ -104,10 +104,13 @@ export default class UrlFormatter {
     }
 
     if (/^(?:(?:https?):\/\/)?(?:www\.)?instagram\.com/i.test(url)) {
-      // Remove igsh query that shows the account that shared the instagram post.
+      // Remove the share tracking queries instagram adds to copied links.
       try {
         const instagramLink = new URL(url);
         instagramLink.searchParams.delete('igsh');
+        instagramLink.searchParams.delete('igshid');
+        instagramLink.searchParams.delete('igsi');
+        instagramLink.searchParams.delete('utm_source');
         return instagramLink.href;
       } catch {
         return url;
