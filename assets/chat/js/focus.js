@@ -18,7 +18,11 @@ class ChatUserFocus {
     const t = $(target);
     if (t.hasClass('chat-user')) {
       if (!this.chat.settings.get('focusmentioned')) {
-        this.toggleFocus(t.closest('.msg-user').data('username'), false, true);
+        // Keep the message the mention sits in visible as well. `.msg-chat`
+        // rather than `.msg-user`: mentions are formatted into event messages
+        // (deaths, broadcasts, donations, subscriptions) too, and those carry
+        // `data-username` without being `.msg-user`.
+        this.toggleFocus(t.closest('.msg-chat').data('username'), false, true);
       }
       this.toggleFocus(t.text());
     } else if (
@@ -35,7 +39,13 @@ class ChatUserFocus {
   }
 
   toggleFocus(value = '', isFlair = false, onlyAdd = false) {
-    const normalized = value.toLowerCase();
+    const normalized = (value ?? '').toLowerCase();
+    // A missing nick or flair would otherwise insert a rule matching nothing,
+    // leaving `isFocused()` true with the whole chat dimmed and no way back.
+    if (normalized === '') {
+      return this;
+    }
+
     const index = this.focused.indexOf(normalized);
     const focused = index !== -1;
 
