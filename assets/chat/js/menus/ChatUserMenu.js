@@ -43,6 +43,7 @@ export default class ChatUserMenu extends ChatMenu {
     this.sections = new Map();
     this.header = this.ui.find('h5 span');
     this.container = this.ui.find('.content:first');
+    this.buildSections();
     this.searchinput = this.ui.find(
       '#chat-user-list-search .form-control:first',
     );
@@ -75,6 +76,7 @@ export default class ChatUserMenu extends ChatMenu {
     this.chat.source.on('JOIN', (data) => this.addAndRedraw(data));
     this.chat.source.on('QUIT', (data) => this.removeAndRedraw(data));
     this.chat.source.on('NAMES', (data) => this.addAll(data.users));
+    this.chat.source.on('USERSDELTA', (data) => this.applyDelta(data));
     this.chat.source.on('UPDATEUSER', (data) => this.replaceAndRedraw(data));
     this.searchinput.on(
       'keyup',
@@ -151,7 +153,12 @@ export default class ChatUserMenu extends ChatMenu {
     return features !== '' ? `<span class="features">${features}</span>` : '';
   }
 
-  addAll(users) {
+  /**
+   * Lay out the fixed set of sections users get bucketed into. Called up front
+   * as well as on NAMES: presence events can arrive before the first snapshot
+   * does, and every user lookup needs the sections to already exist.
+   */
+  buildSections() {
     this.totalcount = 0;
     this.container.empty();
     this.sections = new Map();
@@ -162,6 +169,10 @@ export default class ChatUserMenu extends ChatMenu {
         this.flairSection.set(flair, data.name),
       );
     });
+  }
+
+  addAll(users) {
+    this.buildSections();
     users.forEach((u) => this.addElement(u));
     this.sort();
     this.filter();
@@ -180,6 +191,38 @@ export default class ChatUserMenu extends ChatMenu {
     const el = this.getElement(user);
     if (el) {
       this.removeElement(el);
+      this.redraw();
+    }
+  }
+
+  /**
+   * Apply a batch of presence changes. The server sends these instead of
+   * individual JOIN/QUIT events once enough of them land in one tick, so this
+   * favours one bulk sort and a single redraw over per-user insertion and a
+   * redraw each.
+   * @param {{users?: object[], removed?: object[]}} data
+   */
+  applyDelta(data) {
+    let changed = false;
+
+    (data.removed ?? []).forEach((user) => {
+      const el = this.getElement(user);
+      if (el) {
+        this.removeElement(el);
+        changed = true;
+      }
+    });
+
+    (data.users ?? []).forEach((user) => {
+      if (!this.getElement(user)) {
+        this.addElement(user);
+        changed = true;
+      }
+    });
+
+    if (changed) {
+      this.sort();
+      this.filter();
       this.redraw();
     }
   }
