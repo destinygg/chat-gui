@@ -1,9 +1,9 @@
 import $ from 'jquery';
-import ChatMenu from './ChatMenu';
 import ChatMenuFloating from './ChatMenuFloating';
 
 /**
- * The dropdown shown when a username is left-clicked in chat.
+ * The dropdown shown when a username is left-clicked, either in chat or in the
+ * user list.
  *
  * Left-clicking a name used to highlight that user's messages outright, which
  * left the user-info menu behind a right-click — unreachable on touch devices
@@ -14,9 +14,9 @@ export default class ChatUserActionMenu extends ChatMenuFloating {
   constructor(ui, btn, chat) {
     super(ui, btn, chat);
 
-    /** The `.user` / `.chat-user` element the menu was opened from. */
+    /** The element the menu was opened from, whose text is the nick. */
     this.usernameElement = null;
-    /** The `.msg-chat` the clicked username belongs to. */
+    /** What the user info menu reads its content out of. See `openMenu`. */
     this.message = null;
     this.clickedNick = '';
 
@@ -24,7 +24,7 @@ export default class ChatUserActionMenu extends ChatMenuFloating {
 
     // Layouts without the menu markup (the on-stream overlay, the vote chat)
     // keep the old behavior — the click falls through to `ChatUserFocus`.
-    if (this.ui.length) {
+    if (this.available) {
       this.chat.output.on(
         'click',
         '.msg-chat .user, .msg-chat .chat-user',
@@ -34,6 +34,11 @@ export default class ChatUserActionMenu extends ChatMenuFloating {
 
     this.ui.on('click', '#highlight-user-button', () => this.highlightUser());
     this.ui.on('click', '#user-info-button', (e) => this.showUserInfo(e));
+  }
+
+  /** Whether this layout ships the menu's markup. */
+  get available() {
+    return this.ui.length > 0;
   }
 
   onUsernameClick(e) {
@@ -56,7 +61,7 @@ export default class ChatUserActionMenu extends ChatMenuFloating {
       return undefined;
     }
 
-    this.openMenu(e);
+    this.openMenu(e, e.currentTarget, $(e.currentTarget).closest('.msg-chat'));
 
     // Returning false stops the click reaching `ChatUserFocus`, which is bound
     // directly to the output and would otherwise clear the current highlight.
@@ -64,21 +69,34 @@ export default class ChatUserActionMenu extends ChatMenuFloating {
     return false;
   }
 
-  openMenu(e) {
+  /**
+   * `usernameElement` is the element whose text is the nick — a `.user` link
+   * or `.chat-user` mention in chat, the `.user` span of a user list entry.
+   * `container` is what the user info menu reads the clicked user's message and
+   * flairs out of: the surrounding `.msg-chat`, or the `.user-entry` itself.
+   */
+  openMenu(e, usernameElement, container) {
     // Clicking the same name again dismisses the menu.
     const openForSameUsername =
-      this.visible && this.usernameElement === e.currentTarget;
+      this.visible && this.usernameElement === usernameElement;
 
-    ChatMenu.closeMenus(this.chat);
+    // Close the other menus — but not one the click came from, so opening this
+    // off a user list entry leaves the list up behind it.
+    this.chat.menus.forEach((menu) => {
+      if (!menu.ui[0]?.contains(e.currentTarget)) {
+        menu.hide();
+      }
+    });
+
     if (openForSameUsername) {
       return;
     }
 
-    this.usernameElement = e.currentTarget;
-    this.message = $(e.currentTarget).closest('.msg-chat');
+    this.usernameElement = usernameElement;
+    this.message = container;
     // `textContent` rather than `innerText` so the nick matches the one
     // `ChatUserFocus` keys its highlight rules on.
-    this.clickedNick = e.currentTarget.textContent;
+    this.clickedNick = usernameElement.textContent;
 
     this.highlightButton.text(
       this.chat.userfocus.isFocusedOn(this.clickedNick)

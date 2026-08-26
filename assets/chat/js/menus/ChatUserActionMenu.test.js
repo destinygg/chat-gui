@@ -41,7 +41,11 @@ function setup({ focused = [] } = {}) {
     toggleElement: jest.fn(),
     isFocusedOn: (value) => focused.includes(value.toLowerCase()),
   };
-  const userInfoMenu = { showUser: jest.fn(), hide: jest.fn() };
+  const userInfoMenu = {
+    ui: $('<div id="chat-user-info"></div>'),
+    showUser: jest.fn(),
+    hide: jest.fn(),
+  };
 
   const chat = { output, userfocus, menus: new Map() };
   const menu = new ChatUserActionMenu(ui, $('<div></div>'), chat);
@@ -54,6 +58,13 @@ function setup({ focused = [] } = {}) {
 function clickUsername(output, selector) {
   output.find(selector).trigger($.Event('click', { clientX: 10, clientY: 10 }));
 }
+
+// A user list entry, which `ChatUserMenu` hands to `openMenu` directly.
+const USER_ENTRY_HTML = `
+  <div class="user-entry" data-username="destiny">
+    <span class="user flair13">Destiny</span>
+    <div class="user-actions"><i class="whisper-nick"></i></div>
+  </div>`;
 
 describe('ChatUserActionMenu', () => {
   it('opens on a left click on a message author, offering both actions', () => {
@@ -146,6 +157,37 @@ describe('ChatUserActionMenu', () => {
     clickUsername(output, '.msg-whisper .user');
 
     expect(menu.visible).toBe(false);
+  });
+
+  it('opens for a user list entry, keeping the list it was opened from', () => {
+    const { menu, ui, userInfoMenu } = setup();
+    // Stand in for the user list: a menu whose ui contains the clicked entry.
+    const list = $('<div id="chat-user-list"></div>').append(USER_ENTRY_HTML);
+    $(document.body).append(list);
+    const listMenu = { ui: list, hide: jest.fn() };
+    menu.chat.menus.set('users', listMenu);
+
+    const entry = list.find('.user-entry')[0];
+    menu.openMenu(
+      $.Event('click', { currentTarget: entry, clientX: 10, clientY: 10 }),
+      entry.querySelector('.user'),
+      $(entry),
+    );
+
+    expect(menu.visible).toBe(true);
+    expect(ui.find('#highlight-user-button').text()).toBe('Highlight');
+    expect(menu.clickedNick).toBe('Destiny');
+    expect(listMenu.hide).not.toHaveBeenCalled();
+    expect(userInfoMenu.hide).toHaveBeenCalled();
+  });
+
+  it('reports whether the layout ships its markup', () => {
+    const { menu } = setup();
+
+    expect(menu.available).toBe(true);
+    expect(
+      new ChatUserActionMenu($(), $('<div></div>'), menu.chat).available,
+    ).toBe(false);
   });
 
   it('leaves username clicks alone when the menu markup is absent', () => {
