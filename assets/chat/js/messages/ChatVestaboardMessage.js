@@ -2,39 +2,54 @@ import ChatEventMessage from './ChatEventMessage';
 import MessageTypes from './MessageTypes';
 import { buildBoardElement } from './vestaboardCharacters';
 
+// Header verb for the single-user announcements. LEAD is handled separately
+// because its copy depends on whether the leader is a brand-new design or an
+// existing one that a contribution pushed to #1.
 const VESTABOARD_VERBS = {
-  [MessageTypes.VESTABOARD_LEAD]: 'took the lead on the Vestaboard',
   [MessageTypes.VESTABOARD_HOURLY]: 'is leading the Vestaboard',
-  [MessageTypes.VESTABOARD_RESET]: 'won the Vestaboard',
+  [MessageTypes.VESTABOARD_RESET]: 'won the Vestaboard auction',
 };
+const LEAD_NEW_DESIGN_VERB = 'took the lead with a new design';
 
-// Call-to-action line shown above the auction link, tailored to each event. The
-// hourly line avoids referencing "the board" since that card shows no board.
+// Call-to-action line shown above the auction link, tailored to each event.
 const VESTABOARD_PROMPTS = {
   [MessageTypes.VESTABOARD_LEAD]:
     'Think you can top it? Fund a challenger or submit your own.',
   [MessageTypes.VESTABOARD_HOURLY]:
     "The auction's live. Fund a design to take the lead.",
   [MessageTypes.VESTABOARD_RESET]:
-    "Today's auction is open. Submit or fund a design.",
+    'A new auction begins now! Submit a design to claim the board.',
 };
 
 // Shown when the hourly nudge fires with no submissions yet, so there is no
-// leader to name.
+// leader to name (the board carries the "waiting for the first design" default).
 const VESTABOARD_OPEN_HEADER = 'No designs on the Vestaboard yet';
 const VESTABOARD_OPEN_PROMPT =
   'Be the first. Submit a design to claim the board.';
 
-// The board render is reserved for the milestone announcements; the recurring
-// hourly update stays a compact text card so the same board isn't repeated.
-const TYPES_WITH_BOARD = new Set([
-  MessageTypes.VESTABOARD_LEAD,
-  MessageTypes.VESTABOARD_RESET,
-]);
+function formatUsd(cents) {
+  return (cents / 100).toLocaleString('en-US', {
+    style: 'currency',
+    currency: 'USD',
+  });
+}
+
+// A right-clickable username element (matches `.msg-chat .user`, which the
+// user-info context menu binds to), falling back to a bare anchor if the
+// template is missing.
+function userChip(name) {
+  const el =
+    document.querySelector('#user-template')?.content.cloneNode(true)
+      .firstElementChild ?? document.createElement('a');
+  el.classList.add('user');
+  el.textContent = name;
+  return el;
+}
 
 /**
- * One message class for all three Vestaboard announcements; the header text
- * varies by `type`, and LEAD/RESET additionally render the design board.
+ * One message class for all three Vestaboard announcements. Every card renders
+ * the design's board and, when present, its top contributors; the header text
+ * varies by `type` (and, for LEAD, by whether the design is new).
  */
 export default class ChatVestaboardMessage extends ChatEventMessage {
   constructor(
@@ -43,6 +58,9 @@ export default class ChatVestaboardMessage extends ChatEventMessage {
     total,
     designId,
     characters,
+    artist,
+    contributors,
+    isNewDesign,
     timestamp,
     expirationTimestamp,
     uuid,
@@ -53,6 +71,9 @@ export default class ChatVestaboardMessage extends ChatEventMessage {
     this.total = total;
     this.designId = designId;
     this.characters = characters;
+    this.artist = artist;
+    this.contributors = Array.isArray(contributors) ? contributors : [];
+    this.isNewDesign = isNewDesign;
     this.expirationTimestamp = expirationTimestamp;
 
     this.generateMessageHash();
@@ -69,37 +90,45 @@ export default class ChatVestaboardMessage extends ChatEventMessage {
     const isOpenHourly =
       this.type === MessageTypes.VESTABOARD_HOURLY && !this.submitter;
     const info = eventTemplate.querySelector('.event-info');
+    const amount = formatUsd(this.total);
 
     if (isOpenHourly) {
       info.textContent = VESTABOARD_OPEN_HEADER;
+    } else if (
+      this.type === MessageTypes.VESTABOARD_LEAD &&
+      !this.isNewDesign
+    ) {
+      // A contribution pushed an existing design to #1: credit the backer and
+      // name whose design they lifted (both right-clickable).
+      info.append(
+        userChip(this.submitter),
+        ' funded ',
+        userChip(this.artist),
+        `'s design into the lead · ${amount}`,
+      );
     } else {
-      const submitter = document
-        .querySelector('#user-template')
-        ?.content.cloneNode(true).firstElementChild;
-      submitter.textContent = this.submitter;
-
-      const verb = VESTABOARD_VERBS[this.type] ?? 'is on the Vestaboard';
-      const amount = (this.total / 100).toLocaleString('en-US', {
-        style: 'currency',
-        currency: 'USD',
-      });
-
-      info.append(submitter, ` ${verb} · ${amount}`);
+      const verb =
+        this.type === MessageTypes.VESTABOARD_LEAD
+          ? LEAD_NEW_DESIGN_VERB
+          : (VESTABOARD_VERBS[this.type] ?? 'is on the Vestaboard');
+      info.append(userChip(this.submitter), ` ${verb} · ${amount}`);
     }
 
     eventTemplate.classList.add('msg-vestaboard');
     eventTemplate.querySelector('.event-icon').classList.add('vestaboard');
 
     // The base event template drops `.event-bottom` for empty messages, so
-    // build the body (optional board + call-to-action) explicitly.
+    // build the body (board + contributors + call-to-action) explicitly.
     const bottom = document.createElement('div');
     bottom.className = 'event-bottom';
 
-    if (TYPES_WITH_BOARD.has(this.type)) {
-      const board = buildBoardElement(this.characters);
-      if (board) {
-        bottom.append(board);
-      }
+    const board = buildBoardElement(this.characters);
+    if (board) {
+      bottom.append(board);
+    }
+
+    if (this.contributors.length > 0) {
+      bottom.append(this.buildContributors());
     }
 
     const prompt = document.createElement('span');
@@ -134,5 +163,33 @@ export default class ChatVestaboardMessage extends ChatEventMessage {
       }, {});
 
     return this.wrap(eventTemplate.innerHTML, classes, attributes);
+  }
+
+  // "Top contributors" line: each backer as a right-clickable @user chip plus
+  // their total, separated by dots.
+  buildContributors() {
+    const wrap = document.createElement('div');
+    wrap.className = 'event-bottom-contributors';
+
+    const label = document.createElement('span');
+    label.className = 'event-bottom-contributors__label';
+    label.textContent = 'Top contributors';
+    wrap.append(label);
+
+    const list = document.createElement('span');
+    list.className = 'event-bottom-contributors__list';
+    this.contributors.forEach((contributor, index) => {
+      if (index > 0) {
+        list.append(' · ');
+      }
+      list.append(
+        '@',
+        userChip(contributor.name),
+        ` ${formatUsd(contributor.amountCents)}`,
+      );
+    });
+    wrap.append(list);
+
+    return wrap;
   }
 }

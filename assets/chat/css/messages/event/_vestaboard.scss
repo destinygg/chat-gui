@@ -37,6 +37,30 @@ $vb-colors: (
     color: a.$color-chat-text2;
   }
 
+  .event-bottom-contributors {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+
+  .event-bottom-contributors__label {
+    color: a.$color-chat-text2;
+    font-weight: 600;
+    font-size: 0.85em;
+  }
+
+  .event-bottom-contributors__list {
+    color: a.$color-chat-text2;
+    line-height: 1.5;
+
+    // Contributor names are user chips but shouldn't carry the medium weight
+    // or username color `.user` gets elsewhere — keep the list visually quiet.
+    .user {
+      color: inherit;
+      font-weight: normal;
+    }
+  }
+
   .event-bottom-action {
     display: inline-flex;
     align-items: center;
