@@ -115,8 +115,13 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     this.chat.source.on('MSG', this.handleNewMessage.bind(this));
   }
 
-  showUser(e, message) {
-    this.clickedNick = e.currentTarget.innerText.toLowerCase();
+  /**
+   * `nick` defaults to the text of the clicked element, which is right when the
+   * menu is opened straight off a username. Callers that open it from somewhere
+   * else — the user action menu's "User info" button — pass the nick explicitly.
+   */
+  showUser(e, message, nick = e.currentTarget.innerText.toLowerCase()) {
+    this.clickedNick = nick;
 
     this.setActionsVisibility();
     this.addContent(message);

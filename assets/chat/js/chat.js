@@ -32,6 +32,7 @@ import {
   ChatEmoteTooltip,
   ChatSettingsMenu,
   ChatUserInfoMenu,
+  ChatUserActionMenu,
   ChatEventActionMenu,
 } from './menus';
 import ChatEventBar from './event-bar/EventBar';
@@ -398,6 +399,14 @@ class Chat {
       'user-info',
       new ChatUserInfoMenu(
         this.ui.find('#chat-user-info'),
+        this.output.find('.msg-user .user'),
+        this,
+      ),
+    );
+    this.menus.set(
+      'user-action',
+      new ChatUserActionMenu(
+        this.ui.find('#user-action-menu'),
         this.output.find('.msg-user .user'),
         this,
       ),

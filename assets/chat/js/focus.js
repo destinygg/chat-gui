@@ -52,6 +52,11 @@ class ChatUserFocus {
     return this.focused.length > 0;
   }
 
+  /** Whether `value` (a nick or a flair name) currently has a focus rule. */
+  isFocusedOn(value = '') {
+    return this.focused.includes(value.toLowerCase());
+  }
+
   addCssRule(value, isFlair) {
     let rule;
     if (isFlair) {
