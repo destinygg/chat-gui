@@ -535,7 +535,9 @@ class Chat {
       if (isKeyCode(e, KEYCODES.ESC)) {
         const activeWindow = this.getActiveWindow();
         if (this.getActiveMenu()) {
-          ChatMenu.closeMenus(this);
+          // ESC is a deliberate dismissal, so it closes the menus that a click
+          // elsewhere leaves alone as well.
+          ChatMenu.closeMenus(this, { all: true });
         } else if (this.eventBar.isEventSelected()) {
           this.eventBar.unselect();
         } else if (!activeWindow.isScrollPinned()) {

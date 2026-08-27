@@ -1,4 +1,5 @@
 import $ from 'jquery';
+import ChatMenu from './ChatMenu';
 import ChatMenuFloating from './ChatMenuFloating';
 
 /**
@@ -82,11 +83,7 @@ export default class ChatUserActionMenu extends ChatMenuFloating {
 
     // Close the other menus — but not one the click came from, so opening this
     // off a user list entry leaves the list up behind it.
-    this.chat.menus.forEach((menu) => {
-      if (!menu.ui[0]?.contains(e.currentTarget)) {
-        menu.hide();
-      }
-    });
+    ChatMenu.closeMenus(this.chat, { except: e.currentTarget });
 
     if (openForSameUsername) {
       return;

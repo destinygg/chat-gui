@@ -23,6 +23,15 @@ export default class ChatMenuFloating extends ChatMenu {
       this.draggable.on('pointermove', (e) => this.drag(e));
       this.draggable.on('pointerup pointercancel', () => this.endDrag());
     }
+
+    // A menu that outlives a resize -- the bigscreen chat panel has a drag bar
+    // -- would otherwise be left outside the shrunken chat and clipped away,
+    // with its close control out of reach.
+    window.addEventListener('resize', () => {
+      if (this.visible) {
+        this.moveTo(this.ui[0].offsetLeft, this.ui[0].offsetTop);
+      }
+    });
   }
 
   startDrag(e) {

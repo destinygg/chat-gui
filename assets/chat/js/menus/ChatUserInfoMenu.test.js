@@ -6,6 +6,7 @@
 jest.mock('../scroll', () => ({ __esModule: true, default: class {} }));
 
 import $ from 'jquery';
+import ChatMenu from './ChatMenu';
 import ChatUserInfoMenu from './ChatUserInfoMenu';
 import ChatUser from '../user';
 
@@ -41,6 +42,21 @@ function makeMenu() {
   const menu = new ChatUserInfoMenu(ui, $('<div></div>'), chat);
   return { menu, ui };
 }
+
+describe('ChatUserInfoMenu dismissal', () => {
+  it('is not closed by an interaction elsewhere', () => {
+    const { menu } = makeMenu();
+    const chat = { menus: new Map([['user-info', menu]]) };
+    menu.show();
+
+    ChatMenu.closeMenus(chat);
+    expect(menu.visible).toBe(true);
+
+    // Its own close control still hides it, and so does ESC.
+    ChatMenu.closeMenus(chat, { all: true });
+    expect(menu.visible).toBe(false);
+  });
+});
 
 describe('ChatUserInfoMenu.renderUserDetails', () => {
   it('renders age, gender, and bio with mapped labels when set', () => {

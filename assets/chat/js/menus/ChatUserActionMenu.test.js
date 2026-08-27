@@ -41,8 +41,10 @@ function setup({ focused = [] } = {}) {
     toggleElement: jest.fn(),
     isFocusedOn: (value) => focused.includes(value.toLowerCase()),
   };
+  // Mirrors the real user info menu, which only its own close control hides.
   const userInfoMenu = {
     ui: $('<div id="chat-user-info"></div>'),
+    closesOnOutsideInteraction: false,
     showUser: jest.fn(),
     hide: jest.fn(),
   };
@@ -164,7 +166,11 @@ describe('ChatUserActionMenu', () => {
     // Stand in for the user list: a menu whose ui contains the clicked entry.
     const list = $('<div id="chat-user-list"></div>').append(USER_ENTRY_HTML);
     $(document.body).append(list);
-    const listMenu = { ui: list, hide: jest.fn() };
+    const listMenu = {
+      ui: list,
+      closesOnOutsideInteraction: true,
+      hide: jest.fn(),
+    };
     menu.chat.menus.set('users', listMenu);
 
     const entry = list.find('.user-entry')[0];
@@ -178,7 +184,22 @@ describe('ChatUserActionMenu', () => {
     expect(ui.find('#highlight-user-button').text()).toBe('Highlight');
     expect(menu.clickedNick).toBe('Destiny');
     expect(listMenu.hide).not.toHaveBeenCalled();
-    expect(userInfoMenu.hide).toHaveBeenCalled();
+    // Nor the user info window, which a click elsewhere never dismisses.
+    expect(userInfoMenu.hide).not.toHaveBeenCalled();
+  });
+
+  it('closes the other menus it opens over', () => {
+    const { menu, output } = setup();
+    const emotes = {
+      ui: $('<div id="chat-emote-list"></div>'),
+      closesOnOutsideInteraction: true,
+      hide: jest.fn(),
+    };
+    menu.chat.menus.set('emotes', emotes);
+
+    clickUsername(output, '.msg-user:first .user');
+
+    expect(emotes.hide).toHaveBeenCalled();
   });
 
   it('reports whether the layout ships its markup', () => {
