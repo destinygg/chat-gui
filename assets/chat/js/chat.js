@@ -32,6 +32,7 @@ import {
   ChatEmoteTooltip,
   ChatSettingsMenu,
   ChatUserInfoMenu,
+  ChatUserActionMenu,
   ChatEventActionMenu,
 } from './menus';
 import ChatEventBar from './event-bar/EventBar';
@@ -402,6 +403,14 @@ class Chat {
         this,
       ),
     );
+    this.menus.set(
+      'user-action',
+      new ChatUserActionMenu(
+        this.ui.find('#user-action-menu'),
+        this.output.find('.msg-user .user'),
+        this,
+      ),
+    );
 
     const eventActionMenu = new ChatEventActionMenu(
       this.ui.find('#event-action-menu'),
@@ -526,7 +535,9 @@ class Chat {
       if (isKeyCode(e, KEYCODES.ESC)) {
         const activeWindow = this.getActiveWindow();
         if (this.getActiveMenu()) {
-          ChatMenu.closeMenus(this);
+          // ESC is a deliberate dismissal, so it closes the menus that a click
+          // elsewhere leaves alone as well.
+          ChatMenu.closeMenus(this, { all: true });
         } else if (this.eventBar.isEventSelected()) {
           this.eventBar.unselect();
         } else if (!activeWindow.isScrollPinned()) {
