@@ -3,6 +3,10 @@ export { default as MessageTypes } from './MessageTypes';
 export { default as ChatMessage } from './ChatMessage';
 export { default as ChatDonationMessage } from './ChatDonationMessage';
 export { default as ChatXPostMessage } from './ChatXPostMessage';
+export {
+  default as ChatSpotlightMessage,
+  spotlightAuthor,
+} from './ChatSpotlightMessage';
 export { default as ChatEmoteMessage } from './ChatEmoteMessage';
 export { default as ChatUIMessage } from './ChatUIMessage';
 export { default as ChatUserMessage } from './ChatUserMessage';
