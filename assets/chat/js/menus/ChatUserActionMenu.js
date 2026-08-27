@@ -22,6 +22,7 @@ export default class ChatUserActionMenu extends ChatMenuFloating {
     this.clickedNick = '';
 
     this.highlightButton = this.ui.find('#highlight-user-button');
+    this.spotlightButton = this.ui.find('#spotlight-message-button');
 
     // Layouts without the menu markup (the on-stream overlay, the vote chat)
     // keep the old behavior — the click falls through to `ChatUserFocus`.
@@ -34,6 +35,9 @@ export default class ChatUserActionMenu extends ChatMenuFloating {
     }
 
     this.ui.on('click', '#highlight-user-button', () => this.highlightUser());
+    this.ui.on('click', '#spotlight-message-button', () =>
+      this.toggleSpotlight(),
+    );
     this.ui.on('click', '#user-info-button', (e) => this.showUserInfo(e));
   }
 
@@ -101,8 +105,62 @@ export default class ChatUserActionMenu extends ChatMenuFloating {
         : 'Highlight',
     );
 
+    this.updateSpotlightButton();
+
     this.position(e);
     this.show();
+  }
+
+  /**
+   * A spotlight targets one message, so the button only makes sense on a user
+   * message in the chat log — not on a user list entry, an event card, or a
+   * whisper, all of which can also open this menu.
+   *
+   * The current state is read straight off the element rather than looked up:
+   * `setSpotlight` maintains `data-spotlight-key` in lockstep with the class,
+   * and it is also exactly what `UNSPOTLIGHT` needs to send.
+   */
+  updateSpotlightButton() {
+    const message = this.message?.get(0);
+    const spotlightable =
+      Boolean(message?.classList.contains('msg-user')) &&
+      !message.classList.contains('msg-whisper') &&
+      Boolean(this.chat.user?.hasModPowers());
+
+    this.spotlightKey = message?.dataset.spotlightKey ?? null;
+
+    this.spotlightButton.toggleClass('hidden', !spotlightable);
+    this.spotlightButton.text(
+      this.spotlightKey ? 'Remove spotlight' : 'Spotlight message',
+    );
+  }
+
+  /**
+   * Removing a spotlight clears the message's emphasis only. Its chip in the
+   * event bar is a separate record with its own removal action, so it stays
+   * until it expires.
+   */
+  toggleSpotlight() {
+    const element = this.message?.get(0);
+    this.hide();
+
+    if (this.spotlightKey) {
+      this.chat.source.send('UNSPOTLIGHT', { data: this.spotlightKey });
+      return;
+    }
+
+    const message = this.chat.mainwindow.messages.find((m) => m.ui === element);
+    if (!message?.user) {
+      return;
+    }
+
+    this.chat.source.send('SPOTLIGHT', {
+      nick: message.user.displayName,
+      messageTimestamp: message.timestamp.valueOf(),
+      // The raw text, so the server hashes what the author actually sent —
+      // a leading `/me`, emote codes and all.
+      data: message.message,
+    });
   }
 
   highlightUser() {

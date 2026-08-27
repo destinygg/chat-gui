@@ -173,6 +173,9 @@ class Chat {
     this.source.on('REMOVEPHRASE', (data) => this.onREMOVEPHRASE(data));
     this.source.on('DEATH', (data) => this.onDEATH(data));
     this.source.on('PAIDEVENTS', (data) => this.onPAIDEVENTS(data));
+    this.source.on('SPOTLIGHT', (data) => this.onSPOTLIGHT(data));
+    this.source.on('UNSPOTLIGHT', (data) => this.onUNSPOTLIGHT(data));
+    this.source.on('SPOTLIGHTS', (data) => this.onSPOTLIGHTS(data));
 
     this.control.on('SEND', (data) => this.cmdSEND(data));
     this.control.on('HINT', (data) => this.cmdHINT(data));
@@ -352,6 +355,19 @@ class Chat {
     this.eventBar.on('eventUnselected', () => this.onEVENTUNSELECTED());
 
     this.pinnedMessage = null;
+
+    /**
+     * Messages a moderator has spotlighted, keyed by message hash.
+     *
+     * This is kept separate from the event bar on purpose. The bar holds the
+     * one-minute chips and is fully rebuilt from `PAIDEVENTS`; the emphasis
+     * outlives the chip and is reconciled only from `SPOTLIGHTS`, `SPOTLIGHT`
+     * and `UNSPOTLIGHT`. Because the emphasis is never derived from
+     * `PAIDEVENTS`, a chip being removed cannot strip it.
+     *
+     * @type {Map<string, *>}
+     */
+    this.spotlights = new Map();
 
     this.windowToFront('main');
 
@@ -1703,6 +1719,74 @@ class Chat {
         this.mainwindow.update();
       }
     }
+  }
+
+  onSPOTLIGHT(data) {
+    this.applySpotlight(data);
+
+    if (!this.backlogloading) {
+      const eventBarEvent = new EventBarEvent(
+        this,
+        MessageTypes.SPOTLIGHT,
+        data,
+      );
+      this.eventBar.add(eventBarEvent);
+      if (this.eventBar.length === 1) {
+        this.mainwindow.update();
+      }
+    }
+  }
+
+  onUNSPOTLIGHT(data) {
+    this.removeSpotlight(data.key);
+  }
+
+  /**
+   * Reconciles the spotlighted messages against the server's list, which is
+   * replayed on every connection.
+   *
+   * Unlike `onPAIDEVENTS` this never touches the event bar: a spotlight older
+   * than a minute has no chip left but still carries its emphasis.
+   */
+  onSPOTLIGHTS(spotlights) {
+    const list = spotlights ?? [];
+    const active = new Set(list.map((data) => data.key));
+
+    for (const key of [...this.spotlights.keys()]) {
+      if (!active.has(key)) {
+        this.removeSpotlight(key);
+      }
+    }
+
+    for (const data of list) {
+      this.applySpotlight(data);
+    }
+  }
+
+  /**
+   * Marks a message as spotlighted.
+   *
+   * This re-asserts rather than diffing: on a reconnect `this.spotlights`
+   * survives in memory while the window may have been rebuilt, so "already
+   * known" must not be taken to mean "already on the DOM".
+   */
+  applySpotlight(data) {
+    this.spotlights.set(data.key, data);
+    this.findSpotlightedMessage(data.key)?.setSpotlight(data.key);
+  }
+
+  removeSpotlight(key) {
+    this.spotlights.delete(key);
+    this.findSpotlightedMessage(key)?.setSpotlight(null);
+  }
+
+  /**
+   * The message may legitimately be missing: it can predate the server's
+   * backlog, or have been pruned from the window. The spotlight payload carries
+   * the quoted text precisely so the chip and its card still work when it is.
+   */
+  findSpotlightedMessage(key) {
+    return this.mainwindow.messages.find((message) => message.md5 === key);
   }
 
   onPAIDEVENTS(lines) {

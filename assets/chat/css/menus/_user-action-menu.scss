@@ -22,4 +22,11 @@
       background-color: a.$color-surface-dark4;
     }
   }
+
+  // Actions that only apply to some of the things this menu opens over hide
+  // themselves with this, the same way the user info menu's do. Without it the
+  // class is inert and the action offers itself everywhere.
+  .hidden {
+    display: none !important;
+  }
 }

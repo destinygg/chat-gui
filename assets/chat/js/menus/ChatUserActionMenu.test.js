@@ -5,6 +5,8 @@
 // stays JS-only.
 jest.mock('../scroll', () => ({ __esModule: true, default: class {} }));
 
+import { readFileSync } from 'fs';
+import { resolve } from 'path';
 import $ from 'jquery';
 import ChatUserActionMenu from './ChatUserActionMenu';
 
@@ -12,6 +14,9 @@ const MENU_HTML = `
   <div id="user-action-menu" class="chat-menu">
     <div class="chat-menu-inner floating-window">
       <button id="highlight-user-button" class="user-action">Highlight</button>
+      <button id="spotlight-message-button" class="user-action hidden">
+        Spotlight message
+      </button>
       <button id="user-info-button" class="user-action">User info</button>
     </div>
   </div>`;
@@ -30,12 +35,37 @@ const OUTPUT_HTML = `
       <a class="user">Cake</a>
       <span class="text">hey</span>
     </div>
+    <div class="msg-chat msg-subscription msg-event">
+      <span class="event-info"><a class="user">Rain</a> is now a subscriber</span>
+    </div>
+    <div
+      class="msg-chat msg-user msg-spotlighted"
+      data-username="sally"
+      data-spotlight-key="abc123"
+    >
+      <a class="user">Sally</a>
+      <span class="text">already spotlighted</span>
+    </div>
   </div>`;
 
-function setup({ focused = [] } = {}) {
+function setup({ focused = [], modPowers = true } = {}) {
   const ui = $(MENU_HTML);
   const output = $(OUTPUT_HTML);
   $(document.body).empty().append(output).append(ui);
+
+  // Stand in for the chat window's retained message objects. `ui` is the
+  // rendered element, which is how the menu finds the message it was opened
+  // from.
+  const messages = output
+    .find('.msg-user')
+    .toArray()
+    .map((element, index) => ({
+      ui: element,
+      user: { displayName: element.dataset.username },
+      timestamp: { valueOf: () => 1711503299000 + index },
+      message: element.querySelector('.text')?.textContent ?? '',
+    }));
+  const source = { send: jest.fn() };
 
   const userfocus = {
     toggleElement: jest.fn(),
@@ -49,12 +79,19 @@ function setup({ focused = [] } = {}) {
     hide: jest.fn(),
   };
 
-  const chat = { output, userfocus, menus: new Map() };
+  const chat = {
+    output,
+    userfocus,
+    menus: new Map(),
+    source,
+    mainwindow: { messages },
+    user: { hasModPowers: () => modPowers },
+  };
   const menu = new ChatUserActionMenu(ui, $('<div></div>'), chat);
   chat.menus.set('user-info', userInfoMenu);
   chat.menus.set('user-action', menu);
 
-  return { menu, ui, output, userfocus, userInfoMenu };
+  return { menu, ui, output, userfocus, userInfoMenu, source, messages };
 }
 
 function clickUsername(output, selector) {
@@ -200,6 +237,114 @@ describe('ChatUserActionMenu', () => {
     clickUsername(output, '.msg-user:first .user');
 
     expect(emotes.hide).toHaveBeenCalled();
+  });
+
+  describe('spotlight action', () => {
+    it('offers the action to mods on a message in the log', () => {
+      const { ui, output } = setup();
+
+      clickUsername(output, '.msg-user:first .user');
+
+      const button = ui.find('#spotlight-message-button');
+      expect(button.hasClass('hidden')).toBe(false);
+      expect(button.text().trim()).toBe('Spotlight message');
+    });
+
+    it('hides the action from users without mod powers', () => {
+      const { ui, output } = setup({ modPowers: false });
+
+      clickUsername(output, '.msg-user:first .user');
+
+      expect(ui.find('#spotlight-message-button').hasClass('hidden')).toBe(
+        true,
+      );
+    });
+
+    it('hides the action on an event card, which is not a user message', () => {
+      const { ui, output } = setup();
+
+      clickUsername(output, '.msg-subscription .user');
+
+      expect(ui.find('#spotlight-message-button').hasClass('hidden')).toBe(
+        true,
+      );
+    });
+
+    // The `hidden` class is only defined scoped to each menu, so it does
+    // nothing on a menu that never declared it. When `#user-action-menu`
+    // lacked this rule the class was set correctly and the action still
+    // offered itself on every message — which no class-presence assertion
+    // above can catch, because jsdom never loads the stylesheet.
+    it('has a stylesheet rule that makes the hidden class bite', () => {
+      const scss = readFileSync(
+        resolve(__dirname, '../../css/menus/_user-action-menu.scss'),
+        'utf8',
+      );
+
+      expect(scss).toMatch(
+        /#user-action-menu[\s\S]*\.hidden\s*\{[^}]*display:\s*none/,
+      );
+    });
+
+    it('hides the action for a user list entry, which has no message', () => {
+      const { menu, ui } = setup();
+      const list = $('<div id="chat-user-list"></div>').append(USER_ENTRY_HTML);
+      $(document.body).append(list);
+
+      const entry = list.find('.user-entry')[0];
+      menu.openMenu(
+        $.Event('click', { currentTarget: entry, clientX: 10, clientY: 10 }),
+        entry.querySelector('.user'),
+        $(entry),
+      );
+
+      expect(ui.find('#spotlight-message-button').hasClass('hidden')).toBe(
+        true,
+      );
+    });
+
+    it('sends the message that was clicked', () => {
+      const { ui, output, source, messages } = setup();
+
+      clickUsername(output, '.msg-user:first .user');
+      ui.find('#spotlight-message-button').trigger('click');
+
+      expect(source.send).toHaveBeenCalledWith('SPOTLIGHT', {
+        nick: 'destiny',
+        messageTimestamp: messages[0].timestamp.valueOf(),
+        data: messages[0].message,
+      });
+    });
+
+    it('labels the action as a removal when the message is already spotlighted', () => {
+      const { ui, output } = setup();
+
+      clickUsername(output, '.msg-spotlighted .user');
+
+      expect(ui.find('#spotlight-message-button').text().trim()).toBe(
+        'Remove spotlight',
+      );
+    });
+
+    it('clears an existing spotlight by its key', () => {
+      const { ui, output, source } = setup();
+
+      clickUsername(output, '.msg-spotlighted .user');
+      ui.find('#spotlight-message-button').trigger('click');
+
+      expect(source.send).toHaveBeenCalledWith('UNSPOTLIGHT', {
+        data: 'abc123',
+      });
+    });
+
+    it('closes the menu either way', () => {
+      const { menu, ui, output } = setup();
+
+      clickUsername(output, '.msg-user:first .user');
+      ui.find('#spotlight-message-button').trigger('click');
+
+      expect(menu.visible).toBe(false);
+    });
   });
 
   it('reports whether the layout ships its markup', () => {
