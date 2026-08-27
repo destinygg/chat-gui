@@ -6,18 +6,14 @@
 .msg-massgift,
 .msg-xpost,
 .msg-broadcast,
-.msg-vestaboard {
-  text-shadow: 1px 1px 3px rgba(0, 0, 0, 1);
-  font-size: 1.1em;
-  font-weight: 400;
+.msg-vestaboard,
+.msg-spotlight {
+  @include a.event-card-frame;
+
   padding: unset;
-  border-radius: 10px;
-  border-style: solid;
   border-color: unset;
-  border-width: 3px;
   display: flex;
   flex-direction: column;
-  margin: a.$gutter-sm a.$gutter-md * 2 a.$gutter-sm a.$gutter-sm;
 
   .event-wrapper {
     border-radius: 10px;
@@ -104,7 +100,8 @@
   .msg-massgift,
   .msg-xpost,
   .msg-broadcast,
-  .msg-vestaboard {
+  .msg-vestaboard,
+  .msg-spotlight {
     text-shadow: none;
     padding: 0;
     border-style: none none none solid;

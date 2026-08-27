@@ -1,5 +1,23 @@
+@use 'vars' as *;
+
 @mixin icon-background($url) {
   background: transparent url($url) no-repeat center center / contain;
+}
+
+// The chrome shared by the event cards and by a spotlighted message.
+//
+// Only the structure-independent tokens live here: the event cards style
+// `.event-wrapper > .event-top + .event-bottom` from `#event-template`, whereas
+// a spotlighted user message is flat, so there is nothing else the two can
+// share.
+@mixin event-card-frame {
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 1);
+  font-size: 1.1em;
+  font-weight: 400;
+  border-radius: 10px;
+  border-style: solid;
+  border-width: 3px;
+  margin: $gutter-sm $gutter-md * 2 $gutter-sm $gutter-sm;
 }
 
 @mixin msg-icon($posX, $posY, $width: 16px, $height: 16px) {

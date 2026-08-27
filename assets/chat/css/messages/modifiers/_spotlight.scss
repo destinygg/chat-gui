@@ -1,0 +1,29 @@
+@use '../../abstracts/' as a;
+
+// A message a moderator has spotlighted.
+//
+// This is the inline emphasis applied to the message where it already sits in
+// the log, not the event card shown when its chip in the event bar is opened —
+// that is `.msg-spotlight`, styled in `../event/_spotlight.scss`. The two names
+// are deliberately distinct so the selectors cannot collide.
+//
+// The emphasis outlives the chip, so this styling is what a spotlight leaves
+// behind once its minute in the event bar is up.
+.msg-spotlighted {
+  @include a.event-card-frame;
+
+  padding: a.$gutter-xs a.$gutter-md;
+  border-color: a.$color-accent;
+  background-color: a.$color-chat-emphasize;
+}
+
+.onstreamchat {
+  .msg-spotlighted {
+    text-shadow: none;
+    padding: 0 0 0 a.$gutter-md;
+    border-style: none none none solid;
+    border-width: 6px;
+    border-radius: 0;
+    background: none;
+  }
+}
