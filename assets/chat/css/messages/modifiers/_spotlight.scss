@@ -1,29 +1,50 @@
 @use '../../abstracts/' as a;
 
-// A message a moderator has spotlighted.
+// A message a moderator has spotlighted, emphasized where it already sits in
+// the log. `setSpotlight` rebuilds it into the same frame the event cards use,
+// so the shared chrome comes from `../event/_event.scss` and only what is
+// specific to a spotlight lives here.
 //
-// This is the inline emphasis applied to the message where it already sits in
-// the log, not the event card shown when its chip in the event bar is opened —
-// that is `.msg-spotlight`, styled in `../event/_spotlight.scss`. The two names
-// are deliberately distinct so the selectors cannot collide.
+// Not to be confused with `.msg-spotlight`, the card shown when the
+// spotlight's chip in the event bar is opened. The names are deliberately
+// distinct so the selectors cannot collide.
 //
-// The emphasis outlives the chip, so this styling is what a spotlight leaves
-// behind once its minute in the event bar is up.
+// The emphasis outlives the chip, so this is what a spotlight leaves behind
+// once its minute in the event bar is up.
 .msg-spotlighted {
-  @include a.event-card-frame;
-
-  padding: a.$gutter-xs a.$gutter-md;
   border-color: a.$color-accent;
-  background-color: a.$color-chat-emphasize;
-}
 
-.onstreamchat {
-  .msg-spotlighted {
-    text-shadow: none;
-    padding: 0 0 0 a.$gutter-md;
-    border-style: none none none solid;
-    border-width: 6px;
-    border-radius: 0;
-    background: none;
+  .event-info {
+    // A run of messages from one author hides the repeated username, but the
+    // header of a card has to name whoever is being spotlighted.
+    .features,
+    .user {
+      display: inline;
+    }
+
+    // The trailing ": " separates a username from its message. In the header
+    // there is nothing left for it to separate.
+    .ctrl {
+      display: none;
+    }
+  }
+
+  .event-bottom .text:before {
+    // Stands in for the hidden username on a continued message, and is
+    // redundant now that the header shows it.
+    content: none;
+  }
+
+  // The other event cards hang their icon inside `.event-button`, which is what
+  // makes their header taller than the line of text in it. This card has no
+  // button — removing a spotlight from the event bar is the chip's job — so the
+  // icon carries the button's footprint itself, and the headers line up.
+  .event-icon.spotlight {
+    @include a.icon-background('../img/icon-spotlight.svg');
+
+    width: 2.25em;
+    height: 2.25em;
+    flex-shrink: 0;
+    filter: invert(100%);
   }
 }

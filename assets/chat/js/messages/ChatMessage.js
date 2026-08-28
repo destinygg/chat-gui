@@ -184,9 +184,73 @@ export default class ChatMessage extends ChatUIMessage {
     this.ui.classList.toggle('msg-spotlighted', Boolean(key));
     if (key) {
       this.ui.dataset.spotlightKey = key;
+      this.buildSpotlightFrame();
     } else {
       delete this.ui.dataset.spotlightKey;
+      this.removeSpotlightFrame();
     }
+  }
+
+  /**
+   * Rebuilds the message as an event card: the timestamp, flairs and username
+   * become the header, alongside the spotlight icon, and the message body
+   * becomes the card's lower half.
+   *
+   * The existing nodes are moved rather than rebuilt, so everything that
+   * mutates a rendered message in place — censoring, tagging, the timestamp
+   * format — keeps finding what it looks for.
+   *
+   * @private
+   */
+  buildSpotlightFrame() {
+    // An event message already has a frame of its own, and re-asserting a
+    // spotlight must not build a second one.
+    if (this.ui.querySelector('.event-wrapper')) {
+      return;
+    }
+
+    const wrapper = document.createElement('div');
+    wrapper.className = 'event-wrapper spotlight-frame';
+
+    const top = document.createElement('div');
+    top.className = 'event-top';
+
+    const info = document.createElement('span');
+    info.className = 'event-info';
+
+    const icon = document.createElement('i');
+    icon.className = 'event-icon spotlight';
+
+    const bottom = document.createElement('div');
+    bottom.className = 'event-bottom';
+
+    // Everything ahead of the message body is header material.
+    const text = this.ui.querySelector('.text');
+    for (const node of [...this.ui.childNodes]) {
+      (node === text ? bottom : info).append(node);
+    }
+
+    top.append(info, icon);
+    wrapper.append(top, bottom);
+    this.ui.append(wrapper);
+  }
+
+  /**
+   * Returns the message to its flat form, in the order it was built in.
+   *
+   * @private
+   */
+  removeSpotlightFrame() {
+    // Only unwrap a frame this built — an event message owns its own.
+    const wrapper = this.ui.querySelector('.spotlight-frame');
+    if (!wrapper) {
+      return;
+    }
+
+    const header = [...wrapper.querySelector('.event-info').childNodes];
+    const body = [...wrapper.querySelector('.event-bottom').childNodes];
+    this.ui.append(...header, ...body);
+    wrapper.remove();
   }
 
   highlight(shouldHighlight = true) {
