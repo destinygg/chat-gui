@@ -28,6 +28,10 @@ export default class ChatUserMessage extends ChatMessage {
     this.title = '';
     this.slashme = false;
     this.mentioned = [];
+    this.likes = 0;
+    this.likedByUser = false;
+    this.likeEl = null;
+    this.hoverTarget = null;
 
     this.generateMessageHash();
   }
@@ -152,5 +156,117 @@ export default class ChatUserMessage extends ChatMessage {
     }
 
     this.slashme = isSlashMe;
+  }
+
+  /**
+   * Set up the like hover target after message is rendered
+   * @param {Function} onLikeClick - Callback for when like is clicked
+   */
+  setupLikeTarget(onLikeClick) {
+    if (!this.ui || this.hoverTarget) {
+      return;
+    }
+
+    this.hoverTarget = document.createElement('span');
+    this.hoverTarget.className = 'like-hover-target';
+    this.hoverTarget.addEventListener('click', () => {
+      if (!this.user || !this.user.username) {
+        console.error('Cannot like message: user or username is missing', this);
+        return;
+      }
+      if (this.likedByUser) {
+        return;
+      }
+      onLikeClick({
+        messageNick: this.user.displayName,
+        messageTimestamp: this.timestamp.valueOf(),
+      });
+    });
+    this.ui.appendChild(this.hoverTarget);
+  }
+
+  /**
+   * Add a like to this message
+   * @param {boolean} isCurrentUser - Whether the current user liked it
+   * @param {Function} onLikeClick - Callback for when like is clicked
+   */
+  addLike(isCurrentUser, onLikeClick) {
+    this.likes += 1;
+
+    if (isCurrentUser) {
+      this.likedByUser = true;
+    }
+
+    // Create like element if it doesn't exist
+    if (!this.likeEl) {
+      this.likeEl = document.createElement('span');
+      this.likeEl.className = 'msg-likes';
+      this.likeEl.innerHTML = `
+        <span class="heart-glow"></span>
+        <span class="like-heart"></span>`;
+      this.likeEl.style.cursor = 'pointer';
+      this.likeEl.addEventListener('click', () => {
+        if (!this.user || !this.user.username) {
+          console.error(
+            'Cannot like message: user or username is missing',
+            this,
+          );
+          return;
+        }
+        // Prevent multiple likes from the same user
+        if (this.likedByUser) {
+          return;
+        }
+        onLikeClick({
+          messageNick: this.user.displayName,
+          messageTimestamp: this.timestamp.valueOf(),
+        });
+      });
+      this.ui.appendChild(this.likeEl);
+    }
+
+    // Update like level
+    this.updateLikeLevel();
+
+    // Update liked state
+    this.likeEl.classList.toggle('liked', this.likedByUser);
+
+    // Create and animate floating ghost heart
+    const ghost = document.createElement('span');
+    ghost.className = 'heart-float-ghost';
+    this.likeEl.appendChild(ghost);
+
+    // Remove ghost after animation completes
+    ghost.addEventListener('animationend', () => ghost.remove());
+  }
+
+  /**
+   * Update the heart level based on like count
+   * Levels will show different hearts (defined using like-heart CSS class)
+   */
+  updateLikeLevel() {
+    if (!this.likeEl) {
+      return;
+    }
+
+    let heartLevel = 0;
+    if (this.likes >= 100) {
+      heartLevel = 6;
+    } else if (this.likes >= 50) {
+      heartLevel = 5;
+    } else if (this.likes >= 20) {
+      heartLevel = 4;
+    } else if (this.likes >= 10) {
+      heartLevel = 3;
+    } else if (this.likes >= 5) {
+      heartLevel = 2;
+    } else if (this.likes >= 1) {
+      heartLevel = 1;
+    }
+
+    const heartEl = this.likeEl.querySelector('.like-heart');
+    if (heartEl) {
+      heartEl.dataset.level = heartLevel;
+    }
   }
 }
