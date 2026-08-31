@@ -96,6 +96,37 @@ export default class ChatMenuFloating extends ChatMenu {
     this.draggable[0].style.cursor = 'grab';
   }
 
+  /**
+   * Places the menu under `anchor`, aligned to its right edge.
+   *
+   * `position` puts a menu wherever the pointer was, which is what a menu
+   * opened by clicking a username or a message wants. A menu opened by a
+   * toggle button belongs to the button, so it hangs off it instead — landing
+   * on top of the control that opened it reads as the menu having moved.
+   *
+   * The menu has to be visible before this runs: `.chat-menu` is `display:
+   * none` until it is shown, and a hidden element measures zero.
+   */
+  positionUnder(anchor, gap = 4) {
+    this.dragging = false;
+
+    const menu = this.ui[0];
+    const bounds = menu.offsetParent ?? document.documentElement;
+    const origin = bounds.getBoundingClientRect();
+    const rect = anchor.getBoundingClientRect();
+
+    // Right-aligned, because the anchor sits against the right edge of the
+    // chat and a left-aligned menu would hang off it.
+    const left = rect.right - origin.left - menu.offsetWidth;
+    const below = rect.bottom - origin.top + gap;
+    const above = rect.top - origin.top - gap - menu.offsetHeight;
+
+    // Flip above the anchor when there is no room beneath it.
+    const top = below + menu.offsetHeight > bounds.clientHeight ? above : below;
+
+    this.moveTo(left, top);
+  }
+
   position(e) {
     this.dragging = false;
     // calculating floating window location (if it doesn't fit on screen, adjusting it a bit so it does)

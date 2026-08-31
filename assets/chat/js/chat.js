@@ -33,6 +33,7 @@ import {
   ChatSettingsMenu,
   ChatUserInfoMenu,
   ChatEventActionMenu,
+  ChatMessageActionMenu,
 } from './menus';
 import ChatEventBar from './event-bar/EventBar';
 import ChatAutoComplete from './autocomplete';
@@ -418,6 +419,15 @@ class Chat {
         this,
       ),
     );
+    this.menus.set(
+      'message-action-menu',
+      new ChatMessageActionMenu(
+        this.ui.find('#message-action-menu'),
+        this.ui.find('.message-actions-trigger'),
+        this,
+      ),
+    );
+
     const eventActionMenu = new ChatEventActionMenu(
       this.ui.find('#event-action-menu'),
       this.ui.find('.msg-event .event-button'),
