@@ -122,6 +122,26 @@ const MESSAGES = [
   'PepeLaugh he lacks critical information',
 ];
 
+// Long enough to wrap onto several lines at a normal chat width. Real chat is
+// full of these, and they are the case anything positioned against a message
+// has to prove itself on, so the pool keeps a few.
+const LONG_MESSAGES = [
+  'ok but hear me out, the entire argument falls apart the moment you accept the first premise, because everything after it is just a restatement of the same claim in slightly different words, and nobody in the thread seems to have noticed',
+  "I've been watching this stream for about four years now and I genuinely cannot remember a single time where this particular topic came up and the chat didn't immediately descend into the exact same three arguments, every single time, without fail",
+  "the thing people keep missing is that it isn't a question of whether it works in principle, it's whether it survives contact with the people who actually have to use it every day, and historically the answer to that has been a pretty firm no",
+  'genuinely one of the funniest things I have seen on this stream and I say that as someone who has watched an unreasonable number of hours of it, absolutely no notes, perfect from start to finish',
+  "hold on, scroll back up, I don't think that link says what you think it says — the summary at the top is contradicted about halfway down by the actual data, which is a little inconvenient for the point being made",
+];
+
+// Long messages are a minority of chat, but common enough to keep running into.
+const LONG_MESSAGE_CHANCE = 0.15;
+
+function pickMessage() {
+  return Math.random() < LONG_MESSAGE_CHANCE
+    ? pick(LONG_MESSAGES)
+    : pick(MESSAGES);
+}
+
 const EMOTES = [
   'PEPE',
   'YEE',
@@ -397,7 +417,7 @@ function buildHistoryMessages() {
   const now = Date.now();
   for (let i = 0; i < count; i += 1) {
     const user = pick(ALL_USERS);
-    const msg = pick(MESSAGES);
+    const msg = pickMessage();
     const ts = now - (count - i) * 15000;
     msgs.push(
       `MSG ${JSON.stringify({
@@ -437,7 +457,7 @@ function buildPaidEvents() {
 
 function randomMSG() {
   const user = pick(ALL_USERS);
-  return buildMSG(user.nick, pick(MESSAGES), user.features, user.roles || []);
+  return buildMSG(user.nick, pickMessage(), user.features, user.roles || []);
 }
 
 function randomEmoteCombo() {
@@ -513,6 +533,8 @@ export {
   PLAIN_USERS,
   MOD_USERS,
   MESSAGES,
+  LONG_MESSAGES,
+  pickMessage,
   EMOTES,
   pick,
   randomInt,
