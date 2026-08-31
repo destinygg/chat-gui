@@ -65,6 +65,7 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     this.muteUserBtn = this.ui.find('#mute-user-btn');
     this.banUserBtn = this.ui.find('#ban-user-btn');
     this.logsUserBtn = this.ui.find('#logs-user-btn');
+    this.highlightUserBtn = this.ui.find('#highlight-user-btn');
     this.whisperUserBtn = this.ui.find('#whisper-user-btn');
     this.ignoreUserBtn = this.ui.find('#ignore-user-btn');
     this.unignoreUserBtn = this.ui.find('#unignore-user-btn');
@@ -200,6 +201,14 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
       this.hide();
     });
 
+    // Focusing by nick rather than by the element that was clicked: the menu
+    // has already resolved which user it is about, so the author/mention
+    // distinction `toggleElement` draws no longer applies.
+    this.highlightUserBtn.on('click', () => {
+      this.chat.userfocus.toggleFocus(this.clickedNick);
+      this.setHighlightState();
+    });
+
     this.logsUserBtn.on('click', () => {
       this.chat.cmdSTALK([this.clickedNick]);
       this.hide();
@@ -221,7 +230,24 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     });
   }
 
+  /**
+   * Reflects whether the clicked user's messages are currently highlighted.
+   *
+   * The tooltip is set through the tippy instance rather than the attribute it
+   * was built from, which is only read once at startup.
+   */
+  setHighlightState() {
+    const focused = this.chat.userfocus.isFocusedOn(this.clickedNick);
+    const label = focused ? 'Remove highlight' : 'Highlight';
+
+    this.highlightUserBtn.toggleClass('active', focused);
+    this.highlightUserBtn.attr('aria-label', label);
+    this.highlightUserBtn[0]?._tippy?.setContent(label);
+  }
+
   setActionsVisibility(clickedUser = this.chat.users.get(this.clickedNick)) {
+    this.setHighlightState();
+
     if (this.chat.user.hasModPowers()) {
       this.muteUserBtn.toggleClass('hidden', false);
       this.banUserBtn.toggleClass('hidden', false);
