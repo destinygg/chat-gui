@@ -21,7 +21,7 @@ const USER_ENTRY_HTML = `
     <div class="user-actions"><i class="whisper-nick"></i></div>
   </div>`;
 
-function setup({ userAction } = {}) {
+function setup({ userInfo } = {}) {
   const ui = $(MENU_HTML);
   $(document.body).empty().append(ui);
 
@@ -34,8 +34,8 @@ function setup({ userAction } = {}) {
     userfocus,
   };
   const menu = new ChatUserMenu(ui, $('<div></div>'), chat);
-  if (userAction) {
-    chat.menus.set('user-action', userAction);
+  if (userInfo) {
+    chat.menus.set('user-info', userInfo);
   }
 
   const entry = $(USER_ENTRY_HTML);
@@ -49,30 +49,30 @@ function clickEntry(entry) {
 }
 
 describe('ChatUserMenu user entry clicks', () => {
-  it('opens the user action menu on the entry it was clicked in', () => {
-    const userAction = { available: true, openMenu: jest.fn() };
-    const { entry, userfocus } = setup({ userAction });
+  it('opens the user info menu on the entry it was clicked in', () => {
+    const userInfo = { available: true, showUser: jest.fn() };
+    const { entry, userfocus } = setup({ userInfo });
 
     clickEntry(entry);
 
     expect(userfocus.toggleFocus).not.toHaveBeenCalled();
-    expect(userAction.openMenu).toHaveBeenCalledTimes(1);
-    const [, usernameElement, container] = userAction.openMenu.mock.calls[0];
-    expect(usernameElement).toBe(entry.find('.user')[0]);
+    expect(userInfo.showUser).toHaveBeenCalledTimes(1);
+    const [, container, nick] = userInfo.showUser.mock.calls[0];
     expect(container[0]).toBe(entry[0]);
+    expect(nick).toBe('destiny');
   });
 
-  it('highlights outright when the action menu markup is absent', () => {
-    const userAction = { available: false, openMenu: jest.fn() };
-    const { entry, userfocus } = setup({ userAction });
+  it('highlights outright when the user info markup is absent', () => {
+    const userInfo = { available: false, showUser: jest.fn() };
+    const { entry, userfocus } = setup({ userInfo });
 
     clickEntry(entry);
 
-    expect(userAction.openMenu).not.toHaveBeenCalled();
+    expect(userInfo.showUser).not.toHaveBeenCalled();
     expect(userfocus.toggleFocus).toHaveBeenCalledWith('destiny');
   });
 
-  it('highlights outright when there is no action menu at all', () => {
+  it('highlights outright when there is no user info menu at all', () => {
     const { entry, userfocus } = setup();
 
     clickEntry(entry);

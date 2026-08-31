@@ -78,6 +78,10 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
 
     this.configureButtons();
 
+    this.chat.output.on('click', '.msg-chat .user, .msg-chat .chat-user', (e) =>
+      this.onUsernameClick(e),
+    );
+
     this.chat.output.on(
       'contextmenu',
       '.msg-chat .user, .msg-chat .chat-user',
@@ -128,6 +132,51 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
    * menu is opened straight off a username. Callers that open it from somewhere
    * else — the user action menu's "User info" button — pass the nick explicitly.
    */
+  /** Whether this layout ships the menu's markup. */
+  get available() {
+    return this.ui.length > 0;
+  }
+
+  /**
+   * A left click on a username opens this menu directly. It used to open a
+   * small dropdown that offered this menu behind one more click, which left
+   * the two actions it held stranded on any message without a username to
+   * click — a continued message shows none.
+   */
+  onUsernameClick(e) {
+    const username = e.currentTarget;
+
+    // `tier` is a sub-tier label styled to match the sub's username color
+    // (which requires the `user` class), and `non-chat-user` marks a user-like
+    // reference that isn't a chat user (e.g. an X handle on an XPOST event).
+    // Neither one has anything to show.
+    if (
+      username.classList.contains('tier') ||
+      username.classList.contains('non-chat-user')
+    ) {
+      return undefined;
+    }
+
+    // Clicking the author of a whisper opens the conversation with them (see
+    // `chat.js`), so leave that click alone.
+    if (username.matches('a.user') && username.closest('.msg-whisper')) {
+      return undefined;
+    }
+
+    // Layouts without the menu's markup (the on-stream overlay, the vote chat)
+    // keep the old behavior — the click falls through to `ChatUserFocus`.
+    if (!this.available) {
+      return undefined;
+    }
+
+    this.showUser(e, $(username).closest('.msg-chat'));
+
+    // Returning false stops the click reaching `ChatUserFocus`, which is bound
+    // directly to the output and would otherwise dim the chat at the same
+    // time. jQuery runs delegated handlers before direct ones, so this wins.
+    return false;
+  }
+
   showUser(e, message, nick = e.currentTarget.innerText.toLowerCase()) {
     this.clickedNick = nick;
 

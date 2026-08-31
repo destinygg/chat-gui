@@ -48,15 +48,15 @@ export default class ChatUserMenu extends ChatMenu {
       '#chat-user-list-search .form-control:first',
     );
     this.container.on('click', '.user-entry', (e) => {
-      // Same reasoning as in chat: a left click opens the menu so the user info
-      // menu isn't stranded behind a right click. Layouts without the menu's
-      // markup fall back to highlighting outright.
-      const userAction = this.chat.menus.get('user-action');
-      if (userAction?.available) {
-        userAction.openMenu(
+      // Same reasoning as in chat: a left click opens the user info menu, so it
+      // isn't stranded behind a right click. Layouts without the menu's markup
+      // fall back to highlighting outright.
+      const userinfo = this.chat.menus.get('user-info');
+      if (userinfo?.available) {
+        userinfo.showUser(
           e,
-          e.currentTarget.querySelector('.user'),
           $(e.currentTarget),
+          e.currentTarget.getAttribute('data-username'),
         );
         return;
       }
