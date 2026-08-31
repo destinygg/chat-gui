@@ -271,6 +271,28 @@ class ChatPoll {
     this.ui.moreBelow.toggle(below);
   }
 
+  /**
+   * Scroll the options list so `option` sits in the middle of it. Used for the
+   * winner, which is easily out of sight in a long poll: centring it keeps it
+   * away from the edges, where a scroll hint would cover it. Scrolls the list
+   * itself rather than going through scrollIntoView, which would also scroll
+   * whatever the chat is embedded in.
+   * @param {HTMLElement|undefined} option
+   */
+  centerOnOption(option) {
+    const viewport = this.ui.options.get(0);
+    if (!viewport || !option) {
+      return;
+    }
+
+    const viewportRect = viewport.getBoundingClientRect();
+    const optionRect = option.getBoundingClientRect();
+    viewport.scrollTop +=
+      optionRect.top -
+      viewportRect.top -
+      (viewportRect.height - optionRect.height) / 2;
+  }
+
   endPoll() {
     this.voting = false;
     clearTimeout(this.timerHidePoll);
@@ -295,8 +317,7 @@ class ChatPoll {
 
     const winner = this.ui.options.children().eq(winnerIndex);
     winner.addClass('opt-winner');
-    // The winner may well be scrolled out of sight in a long poll.
-    winner.get(0)?.scrollIntoView({ block: 'nearest' });
+    this.centerOnOption(winner.get(0));
     this.updateOptionOverflow();
 
     this.pollEndMessage(winnerIndex + 1, winner.data('percentage'));
