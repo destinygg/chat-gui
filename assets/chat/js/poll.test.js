@@ -1,4 +1,4 @@
-import { buildPollOptionHtml, countClippedOptions } from './poll';
+import { buildPollOptionHtml, hasClippedOptions } from './poll';
 
 /**
  * Parse an option's rendered HTML into a detached DOM node so we can inspect
@@ -68,43 +68,43 @@ function optionRects(count, scrollTop, optionHeight = 40) {
   }));
 }
 
-describe('Counting the poll options cut off by the scroller', () => {
+describe('Detecting poll options cut off by the scroller', () => {
   // A viewport showing exactly three 40px options.
   const viewport = { top: 0, bottom: 120 };
 
-  test('reports nothing hidden when every option fits', () => {
-    expect(countClippedOptions(viewport, optionRects(3, 0))).toEqual({
-      above: 0,
-      below: 0,
+  test('finds nothing cut off when every option fits', () => {
+    expect(hasClippedOptions(viewport, optionRects(3, 0))).toEqual({
+      above: false,
+      below: false,
     });
   });
 
-  test('counts the options below when scrolled to the top', () => {
-    expect(countClippedOptions(viewport, optionRects(12, 0))).toEqual({
-      above: 0,
-      below: 9,
+  test('points down only when scrolled to the top', () => {
+    expect(hasClippedOptions(viewport, optionRects(12, 0))).toEqual({
+      above: false,
+      below: true,
     });
   });
 
-  test('counts the options above when scrolled to the bottom', () => {
-    expect(countClippedOptions(viewport, optionRects(12, 360))).toEqual({
-      above: 9,
-      below: 0,
+  test('points up only when scrolled to the bottom', () => {
+    expect(hasClippedOptions(viewport, optionRects(12, 360))).toEqual({
+      above: true,
+      below: false,
     });
   });
 
-  test('counts in both directions when scrolled to the middle', () => {
-    expect(countClippedOptions(viewport, optionRects(12, 160))).toEqual({
-      above: 4,
-      below: 5,
+  test('points both ways when scrolled to the middle', () => {
+    expect(hasClippedOptions(viewport, optionRects(12, 160))).toEqual({
+      above: true,
+      below: true,
     });
   });
 
-  test('counts a partly visible option as hidden, since it still needs scrolling to', () => {
+  test('counts a partly visible option as cut off, since it still needs scrolling to', () => {
     // Scrolled by half an option, so the first and last are each half cut off.
-    expect(countClippedOptions(viewport, optionRects(4, 20))).toEqual({
-      above: 1,
-      below: 1,
+    expect(hasClippedOptions(viewport, optionRects(4, 20))).toEqual({
+      above: true,
+      below: true,
     });
   });
 
@@ -115,9 +115,9 @@ describe('Counting the poll options cut off by the scroller', () => {
       { top: 79.6, bottom: 120.4 },
     ];
 
-    expect(countClippedOptions(viewport, flush)).toEqual({
-      above: 0,
-      below: 0,
+    expect(hasClippedOptions(viewport, flush)).toEqual({
+      above: false,
+      below: false,
     });
   });
 });

@@ -79,26 +79,19 @@ function buildPollOptionHtml(option, index) {
 }
 
 /**
- * How many of `optionRects` are cut off by the top and bottom edges of
- * `viewportRect`. An option that is only half visible counts as hidden in that
+ * Whether any of `optionRects` is cut off by the top or the bottom edge of
+ * `viewportRect`. An option that is only half visible counts as cut off in that
  * direction -- the reader still has to scroll to finish reading it.
  * @param {{top: number, bottom: number}} viewportRect
  * @param {Array<{top: number, bottom: number}>} optionRects
- * @return {{above: number, below: number}}
+ * @return {{above: boolean, below: boolean}}
  */
-function countClippedOptions(viewportRect, optionRects) {
-  let above = 0;
-  let below = 0;
-  optionRects.forEach((rect) => {
-    // A pixel of slack, since subpixel layout leaves flush edges just over.
-    if (rect.top < viewportRect.top - 1) {
-      above += 1;
-    }
-    if (rect.bottom > viewportRect.bottom + 1) {
-      below += 1;
-    }
-  });
-  return { above, below };
+function hasClippedOptions(viewportRect, optionRects) {
+  // A pixel of slack, since subpixel layout leaves flush edges just over.
+  return {
+    above: optionRects.some((rect) => rect.top < viewportRect.top - 1),
+    below: optionRects.some((rect) => rect.bottom > viewportRect.bottom + 1),
+  };
 }
 
 class ChatPoll {
@@ -257,8 +250,8 @@ class ChatPoll {
   }
 
   /**
-   * Label the hints with how many options are cut off above and below the
-   * scroller, so it is obvious there is more of the poll to scroll to.
+   * Show a hint over whichever edge of the scroller is cutting options off, so
+   * it is obvious there is more of the poll to scroll to.
    */
   updateOptionOverflow() {
     const viewport = this.ui.options.get(0);
@@ -266,7 +259,7 @@ class ChatPoll {
       return;
     }
 
-    const { above, below } = countClippedOptions(
+    const { above, below } = hasClippedOptions(
       viewport.getBoundingClientRect(),
       this.ui.options
         .children('.opt')
@@ -274,16 +267,8 @@ class ChatPoll {
         .get(),
     );
 
-    ChatPoll.labelOverflowHint(this.ui.moreAbove, above);
-    ChatPoll.labelOverflowHint(this.ui.moreBelow, below);
-  }
-
-  static labelOverflowHint(hint, count) {
-    if (count > 0) {
-      hint.text(`${count} more`).show();
-    } else {
-      hint.hide();
-    }
+    this.ui.moreAbove.toggle(above);
+    this.ui.moreBelow.toggle(below);
   }
 
   endPoll() {
@@ -392,5 +377,5 @@ export {
   ChatPoll,
   parseQuestionAndTime,
   buildPollOptionHtml,
-  countClippedOptions,
+  hasClippedOptions,
 };
