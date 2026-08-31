@@ -1,13 +1,20 @@
+@use 'sass:color';
 @use '../abstracts/' as a;
+
+$poll-background: #2f2f2f;
 
 #chat-poll-frame {
   display: none;
+  flex-direction: column;
   transform: translateY(-100%);
   transition: transform 250ms ease-out;
+  // Never let a poll with a lot of options swallow the chat behind it. This
+  // resolves against #chat, which is a flex column of a known height.
+  max-height: 40%;
 
   &.active {
     transform: translateY(0);
-    display: block;
+    display: flex;
   }
 
   &:not(.poll-completed) {
@@ -45,8 +52,11 @@
 }
 
 .poll-frame {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
   padding: 0.5em 0.75em;
-  background: #2f2f2f;
+  background: $poll-background;
   border-radius: 4px;
   margin: 4px;
   color: a.$text-color;
@@ -112,6 +122,93 @@
     &:hover {
       opacity: 1;
     }
+  }
+}
+
+// The options list scrolls on its own so that a poll with a dozen answers stays
+// the same size as a poll with two. `.poll-options-frame` is the sized box; the
+// hints are laid over its edges, outside the scroller, so they stay put.
+.poll-options-frame {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  // Roughly four options before scrolling kicks in. `min-height` keeps a couple
+  // of options readable when the 40% cap on the frame squeezes this further.
+  min-height: 4.5em;
+  max-height: 15em;
+}
+
+.poll-options-scroller {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  flex: 1;
+}
+
+.poll-options {
+  min-height: 0;
+  flex: 1;
+  overflow-y: auto;
+
+  .opt:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.poll-options-more {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2.4em;
+  display: none;
+  font-size: 0.75em;
+  line-height: 1.6em;
+  font-weight: 500;
+  color: a.$text-color1;
+  text-align: center;
+  // Purely an affordance -- clicks belong to the option underneath.
+  pointer-events: none;
+  user-select: none;
+
+  &::before {
+    content: '';
+    display: inline-block;
+    width: 0;
+    height: 0;
+    margin-right: 0.4em;
+    vertical-align: middle;
+    border-left: 0.3em solid transparent;
+    border-right: 0.3em solid transparent;
+  }
+}
+
+.poll-options-more-up {
+  top: 0;
+  background: linear-gradient(
+    to bottom,
+    $poll-background 0%,
+    color.change($poll-background, $alpha: 0.85) 55%,
+    color.change($poll-background, $alpha: 0) 100%
+  );
+
+  &::before {
+    border-bottom: 0.35em solid currentColor;
+  }
+}
+
+.poll-options-more-down {
+  bottom: 0;
+  // The label sits at the bottom of the box, so the fade runs the other way.
+  padding-top: 0.8em;
+  background: linear-gradient(
+    to top,
+    $poll-background 0%,
+    color.change($poll-background, $alpha: 0.85) 55%,
+    color.change($poll-background, $alpha: 0) 100%
+  );
+
+  &::before {
+    border-top: 0.35em solid currentColor;
   }
 }
 

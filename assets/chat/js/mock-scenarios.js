@@ -162,6 +162,23 @@ const POLL_QUESTIONS = [
     question: 'Is this take based?',
     options: ['Yes', 'No', 'Depends'],
   },
+  {
+    question: 'Which month is the best month?',
+    options: [
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
+    ],
+  },
 ];
 
 function pick(arr) {
