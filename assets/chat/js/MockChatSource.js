@@ -1,8 +1,11 @@
 import EventEmitter from './emitter';
 import {
   USERS,
+  ALL_USERS,
   buildMSG,
   buildPin,
+  buildSpotlight,
+  buildSpotlights,
   buildNamesData,
   buildHistoryMessages,
   buildPaidEvents,
@@ -57,6 +60,10 @@ class MockChatSource extends EventEmitter {
     this.loopTimer = null;
     this.running = false;
     this.pollActive = false;
+    this.localIsMod = false;
+    // Packed "TYPE {json}" lines for everything currently in the event bar, so
+    // REMOVEEVENT can rebroadcast the list the way the server does.
+    this.barEvents = [];
     this.subonlyOn = false;
   }
 
@@ -119,6 +126,51 @@ class MockChatSource extends EventEmitter {
       return;
     }
 
+    // Mirrors the server: the author is resolved here rather than trusted from
+    // the payload, and the key is computed from what was resolved.
+    if (eventname === 'SPOTLIGHT') {
+      const parsed = JSON.parse(payload);
+      const author = ALL_USERS.find(
+        (u) => u.nick.toLowerCase() === parsed.nick.toLowerCase(),
+      );
+      if (!author) {
+        this.emit('ERR', { description: 'notfound' });
+        return;
+      }
+
+      const spotlight = buildSpotlight(
+        author,
+        parsed.data,
+        parsed.messageTimestamp,
+        USERS.local.nick,
+      );
+      this.emitBarEvent('SPOTLIGHT', spotlight);
+      return;
+    }
+
+    if (eventname === 'UNSPOTLIGHT') {
+      const parsed = JSON.parse(payload);
+      this.emit('UNSPOTLIGHT', {
+        nick: USERS.local.nick,
+        timestamp: Date.now(),
+        key: parsed.data,
+      });
+      return;
+    }
+
+    // Mirrors the server, which removes the event then rebroadcasts the whole
+    // list. Note this leaves any inline spotlight alone - the emphasis is a
+    // separate record, cleared only by UNSPOTLIGHT.
+    if (eventname === 'REMOVEEVENT') {
+      const { data: removedUuid } = JSON.parse(payload);
+      this.barEvents = this.barEvents.filter((line) => {
+        const event = JSON.parse(line.slice(line.indexOf(' ') + 1));
+        return event.uuid !== removedUuid;
+      });
+      this.emit('PAIDEVENTS', this.barEvents);
+      return;
+    }
+
     if (eventname === 'VOTE') {
       this.emit('VOTECOUNTED', { vote: JSON.parse(payload).vote });
     }
@@ -172,11 +224,60 @@ class MockChatSource extends EventEmitter {
       case 'death':
         this.emitEvent('DEATH');
         break;
+      case 'mod': {
+        // Mod-gated UI is otherwise unreachable in mock mode, since the local
+        // user is a plain subscriber. Toggling goes through the real
+        // UPDATEUSER path, so it also exercises the settings reconcile.
+        this.localIsMod = !this.localIsMod;
+        const features = this.localIsMod
+          ? [...USERS.local.features, 'moderator']
+          : [...USERS.local.features];
+        const updated = { ...USERS.local, features };
+        this.emit('DISPATCH', { data: updated, event: 'UPDATEUSER' });
+        this.emit('UPDATEUSER', updated);
+        this.emitInfo(
+          this.localIsMod
+            ? 'You are now a moderator.'
+            : 'You are no longer a moderator.',
+        );
+        break;
+      }
+      case 'spotlight': {
+        // Post a message and spotlight it a beat later, so there is always
+        // something concrete on screen to target.
+        const user = USERS.t2;
+        const text = 'this one is worth reading';
+        const msg = buildMSG(user.nick, text, user.features, user.roles || []);
+        this.lastMessage = msg;
+        this.emit('DISPATCH', { data: msg, event: 'MSG' });
+        this.emit('MSG', msg);
+
+        this.schedule(400, () => {
+          const spotlight = buildSpotlight(
+            user,
+            text,
+            msg.timestamp,
+            USERS.mod.nick,
+          );
+          this.emitBarEvent('SPOTLIGHT', spotlight);
+        });
+        break;
+      }
       default:
         this.emitInfo(
-          'Mock commands: stop, start, ban, sub, combo, poll, flood, donation, gift, massgift, mute, broadcast, death',
+          'Mock commands: stop, start, mod, ban, sub, combo, poll, flood, donation, gift, massgift, mute, broadcast, death, spotlight',
         );
     }
+  }
+
+  /**
+   * Emits an event that belongs in the event bar, remembering it so
+   * REMOVEEVENT can rebroadcast the remaining list.
+   */
+  emitBarEvent(type, data) {
+    this.barEvents.push(`${type} ${JSON.stringify(data)}`);
+    this.emit('DISPATCH', { data, event: type });
+    this.emit(type, data);
   }
 
   emitInfo(message) {
@@ -200,12 +301,15 @@ class MockChatSource extends EventEmitter {
       this.emit('NAMES', names);
     });
     this.schedule(80, () => {
-      const history = buildHistoryMessages();
-      this.emit('HISTORY', history);
+      this.history = buildHistoryMessages();
+      this.emit('HISTORY', this.history);
     });
     this.schedule(90, () => {
-      const paidEvents = buildPaidEvents();
-      this.emit('PAIDEVENTS', paidEvents);
+      this.barEvents = buildPaidEvents();
+      this.emit('PAIDEVENTS', this.barEvents);
+    });
+    this.schedule(95, () => {
+      this.emit('SPOTLIGHTS', buildSpotlights(this.history));
     });
     this.schedule(100, () => {
       const pin = buildPin(
@@ -271,6 +375,7 @@ class MockChatSource extends EventEmitter {
     switch (type) {
       case 'MSG': {
         const msg = randomMSG();
+        this.lastMessage = msg;
         this.emit('DISPATCH', { data: msg, event: 'MSG' });
         this.emit('MSG', msg);
         break;
@@ -287,26 +392,22 @@ class MockChatSource extends EventEmitter {
       }
       case 'SUBSCRIPTION': {
         const sub = randomSubscription();
-        this.emit('DISPATCH', { data: sub, event: 'SUBSCRIPTION' });
-        this.emit('SUBSCRIPTION', sub);
+        this.emitBarEvent('SUBSCRIPTION', sub);
         break;
       }
       case 'DONATION': {
         const don = randomDonation();
-        this.emit('DISPATCH', { data: don, event: 'DONATION' });
-        this.emit('DONATION', don);
+        this.emitBarEvent('DONATION', don);
         break;
       }
       case 'GIFTSUB': {
         const gift = randomGiftSub();
-        this.emit('DISPATCH', { data: gift, event: 'GIFTSUB' });
-        this.emit('GIFTSUB', gift);
+        this.emitBarEvent('GIFTSUB', gift);
         break;
       }
       case 'MASSGIFT': {
         const mg = randomMassGift();
-        this.emit('DISPATCH', { data: mg, event: 'MASSGIFT' });
-        this.emit('MASSGIFT', mg);
+        this.emitBarEvent('MASSGIFT', mg);
         break;
       }
       case 'BAN': {

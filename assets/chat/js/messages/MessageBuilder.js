@@ -7,6 +7,7 @@ import ChatEmoteMessage from './ChatEmoteMessage';
 import PinnedMessage from './PinnedMessage';
 import ChatDonationMessage from './ChatDonationMessage';
 import ChatXPostMessage from './ChatXPostMessage';
+import ChatSpotlightMessage, { spotlightAuthor } from './ChatSpotlightMessage';
 import ChatVestaboardMessage from './ChatVestaboardMessage';
 import ChatRegularSubscriptionMessage from './subscriptions/ChatRegularSubscriptionMessage';
 import ChatGiftedSubscriptionMessage from './subscriptions/ChatGiftedSubscriptionMessage';
@@ -121,6 +122,17 @@ export default class MessageBuilder {
 
   static death(message, user, timestamp = null) {
     return new ChatDeathMessage(message, user, timestamp);
+  }
+
+  static spotlight(data) {
+    return new ChatSpotlightMessage(
+      data.data,
+      spotlightAuthor(data),
+      data.spotlightedBy,
+      data.timestamp,
+      data.expirationTimestamp,
+      data.uuid,
+    );
   }
 
   static xpost(data) {

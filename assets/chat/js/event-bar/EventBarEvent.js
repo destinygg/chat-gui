@@ -160,6 +160,9 @@ export default class EventBarEvent extends EventEmitter {
       case MessageTypes.XPOST: {
         return MessageBuilder.xpost(this.data);
       }
+      case MessageTypes.SPOTLIGHT: {
+        return MessageBuilder.spotlight(this.data);
+      }
       case MessageTypes.VESTABOARD_LEAD:
       case MessageTypes.VESTABOARD_HOURLY:
       case MessageTypes.VESTABOARD_RESET: {

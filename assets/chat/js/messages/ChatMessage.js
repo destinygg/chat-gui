@@ -15,6 +15,23 @@ import {
 } from '../formatters';
 import { DATE_FORMATS } from '../const';
 
+/**
+ * Identifies a chat message by its content.
+ *
+ * The server computes this same hash to name the message a moderator
+ * spotlighted (see `SpotlightKey` in `chat/events/spotlight.go`), so the recipe
+ * must stay byte-identical on both sides. Fixture vectors are asserted in
+ * `ChatMessage.test.js` and mirrored in `chat/events/spotlight_test.go`.
+ *
+ * @param {number} timestamp
+ * @param {number|undefined} userId
+ * @param {string} message
+ * @returns {string}
+ */
+export function messageHash(timestamp, userId, message) {
+  return md5(`${timestamp}${userId ?? ''}${message}`);
+}
+
 const formatters = new Map();
 formatters.set('html', new HtmlTextFormatter());
 formatters.set('amazon', new AmazonAssociatesTagInjector());
@@ -141,6 +158,101 @@ export default class ChatMessage extends ChatUIMessage {
     this.title = newTitle;
   }
 
+  /**
+   * Marks the message as spotlighted by a moderator, or clears it.
+   *
+   * The class is deliberately `msg-spotlighted` rather than `msg-spotlight`:
+   * the event card shown when the spotlight's chip is opened wraps into
+   * `msg-spotlight` via `ChatUIMessage.wrap`, and the two must not share a
+   * selector.
+   *
+   * `data-spotlight-key` carries the state back out to the DOM so the user
+   * dropdown can tell whether the message it was opened from is spotlighted
+   * without having to find the message object.
+   *
+   * @param {string|null} key
+   */
+  setSpotlight(key) {
+    this.spotlightKey = key ?? null;
+
+    // A message can be spotlighted before it renders, or after it has been
+    // pruned from the window.
+    if (!this.ui) {
+      return;
+    }
+
+    this.ui.classList.toggle('msg-spotlighted', Boolean(key));
+    if (key) {
+      this.ui.dataset.spotlightKey = key;
+      this.buildSpotlightFrame();
+    } else {
+      delete this.ui.dataset.spotlightKey;
+      this.removeSpotlightFrame();
+    }
+  }
+
+  /**
+   * Rebuilds the message as an event card: the timestamp, flairs and username
+   * become the header, alongside the spotlight icon, and the message body
+   * becomes the card's lower half.
+   *
+   * The existing nodes are moved rather than rebuilt, so everything that
+   * mutates a rendered message in place — censoring, tagging, the timestamp
+   * format — keeps finding what it looks for.
+   *
+   * @private
+   */
+  buildSpotlightFrame() {
+    // An event message already has a frame of its own, and re-asserting a
+    // spotlight must not build a second one.
+    if (this.ui.querySelector('.event-wrapper')) {
+      return;
+    }
+
+    const wrapper = document.createElement('div');
+    wrapper.className = 'event-wrapper spotlight-frame';
+
+    const top = document.createElement('div');
+    top.className = 'event-top';
+
+    const info = document.createElement('span');
+    info.className = 'event-info';
+
+    const icon = document.createElement('i');
+    icon.className = 'event-icon spotlight';
+
+    const bottom = document.createElement('div');
+    bottom.className = 'event-bottom';
+
+    // Everything ahead of the message body is header material.
+    const text = this.ui.querySelector('.text');
+    for (const node of [...this.ui.childNodes]) {
+      (node === text ? bottom : info).append(node);
+    }
+
+    top.append(info, icon);
+    wrapper.append(top, bottom);
+    this.ui.append(wrapper);
+  }
+
+  /**
+   * Returns the message to its flat form, in the order it was built in.
+   *
+   * @private
+   */
+  removeSpotlightFrame() {
+    // Only unwrap a frame this built — an event message owns its own.
+    const wrapper = this.ui.querySelector('.spotlight-frame');
+    if (!wrapper) {
+      return;
+    }
+
+    const header = [...wrapper.querySelector('.event-info').childNodes];
+    const body = [...wrapper.querySelector('.event-bottom').childNodes];
+    this.ui.append(...header, ...body);
+    wrapper.remove();
+  }
+
   highlight(shouldHighlight = true) {
     this.highlighted = shouldHighlight;
     this.ui.classList.toggle('msg-highlight', shouldHighlight);
@@ -183,8 +295,10 @@ export default class ChatMessage extends ChatUIMessage {
   }
 
   generateMessageHash() {
-    this.md5 = md5(
-      `${this.timestamp.valueOf()}${this.user?.id ?? ''}${this.message}`,
+    this.md5 = messageHash(
+      this.timestamp.valueOf(),
+      this.user?.id,
+      this.message,
     );
   }
 }

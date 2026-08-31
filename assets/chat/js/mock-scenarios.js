@@ -1,3 +1,5 @@
+import { messageHash } from './messages/ChatMessage';
+
 const USERS = {
   local: {
     id: 9999,
@@ -323,6 +325,65 @@ function buildPin(user, message) {
   };
 }
 
+/**
+ * Builds a spotlight payload for an existing message.
+ *
+ * The key is computed with the same recipe the server uses, so a spotlight
+ * built here matches the rendered message the client is holding.
+ */
+function buildSpotlight(
+  author,
+  text,
+  messageTimestamp,
+  byNick = USERS.mod.nick,
+) {
+  const now = Date.now();
+  return {
+    timestamp: now,
+    expirationTimestamp: now + 60000,
+    retentionTimestamp: now + 1800000,
+    uuid: uuid(),
+    key: messageHash(messageTimestamp, author.id, text),
+    user: author,
+    nick: author.nick,
+    data: text,
+    messageTimestamp,
+    spotlightedBy: byNick,
+  };
+}
+
+/**
+ * Builds the spotlight replay a client receives on connect.
+ *
+ * The one spotlight it returns is deliberately aged past its chip lifetime but
+ * within retention, which is the state a client reconnecting to a minutes-old
+ * spotlight lands in: the message is still emphasized, but nothing appears in
+ * the event bar.
+ */
+function buildSpotlights(historyLines) {
+  if (!historyLines?.length) {
+    return [];
+  }
+
+  const parsed = JSON.parse(historyLines[0].slice('MSG '.length));
+  const author = ALL_USERS.find((u) => u.nick === parsed.nick);
+  if (!author) {
+    return [];
+  }
+
+  const now = Date.now();
+  const spotlight = buildSpotlight(
+    author,
+    parsed.data,
+    parsed.timestamp,
+    USERS.mod.nick,
+  );
+  spotlight.timestamp = now - 300000;
+  spotlight.expirationTimestamp = now - 240000;
+
+  return [spotlight];
+}
+
 function buildNamesData() {
   return {
     connectioncount: 1234,
@@ -467,6 +528,8 @@ export {
   buildDeath,
   buildPollStart,
   buildPin,
+  buildSpotlight,
+  buildSpotlights,
   buildNamesData,
   buildHistoryMessages,
   buildPaidEvents,

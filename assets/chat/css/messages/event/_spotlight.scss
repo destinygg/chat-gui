@@ -1,0 +1,16 @@
+@use '../../abstracts/' as a;
+
+// The expanded card shown when a spotlight's chip in the event bar is opened.
+// The inline emphasis on the message itself is `.msg-spotlighted`, in
+// `../modifiers/_spotlight.scss`.
+.msg-spotlight {
+  border-color: a.$color-accent;
+
+  .event-icon {
+    filter: invert(100%);
+
+    &.spotlight {
+      @include a.icon-background('../img/icon-spotlight.svg');
+    }
+  }
+}

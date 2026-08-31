@@ -53,6 +53,10 @@
       @include a.icon-background('../img/icon-x-post.svg');
     }
 
+    &.spotlight {
+      @include a.icon-background('../img/icon-spotlight.svg');
+    }
+
     &.vestaboard_lead,
     &.vestaboard_hourly,
     &.vestaboard_reset {
@@ -62,6 +66,10 @@
 
   &.xpost {
     border-color: #ffffff;
+  }
+
+  &.spotlight {
+    border-color: a.$color-accent;
   }
 
   &.vestaboard_lead,
