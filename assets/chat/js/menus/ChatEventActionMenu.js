@@ -14,8 +14,12 @@ export default class ChatEventActionMenu extends ChatMenuFloating {
 
   openMenu(e) {
     this.eventElement = e.currentTarget.closest('.msg-event');
-    this.position(e);
+
+    // Shown before it is placed: `.chat-menu` is `display: none` until then,
+    // and a hidden element measures zero. Both happen in the same task, so
+    // neither state is painted on its own.
     this.show();
+    this.positionUnder(e.currentTarget);
   }
 
   removeEvent() {
