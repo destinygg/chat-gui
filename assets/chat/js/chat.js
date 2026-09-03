@@ -693,7 +693,7 @@ class Chat {
         this.cacheSettings();
         this.getActiveWindow().update(true);
       })
-      .catch();
+      .catch(() => {});
   }
 
   async loadEmotesAndFlairs() {
