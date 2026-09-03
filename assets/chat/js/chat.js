@@ -871,6 +871,12 @@ class Chat {
     $(document.body).toggleClass(`pref-fontscale`, fontscale !== 'auto');
     $(document.body).attr('data-fontscale', fontscale);
 
+    // Autocomplete emote display
+    this.ui.attr(
+      'data-autocompleteemotedisplay',
+      this.settings.get('autocompleteemotedisplay') || 'both',
+    );
+
     for (const window of this.windows.values()) {
       window.updateMessages(this);
     }
