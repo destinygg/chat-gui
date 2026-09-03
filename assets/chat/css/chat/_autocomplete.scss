@@ -66,6 +66,30 @@
   }
 }
 
+#chat[data-autocompleteemotedisplay='name'] .autocomplete-entry__emote {
+  display: none;
+}
+
+#chat[data-autocompleteemotedisplay='emote'] {
+  .autocomplete-entry__emote + .autocomplete-entry__name {
+    display: none;
+  }
+
+  .autocomplete-entry__emote {
+    border-radius: a.$bradius;
+  }
+
+  .autocomplete-entry:hover .autocomplete-entry__emote {
+    background: rgba(a.$color-surface-light1, 0.08);
+  }
+
+  .autocomplete-entry.active .autocomplete-entry__emote {
+    background: rgba(a.$color-surface-light1, 0.16);
+    box-shadow: 0 0 0 3px rgba(a.$color-surface-light1, 0.16);
+    filter: drop-shadow(0 0 4px a.$color-surface-light1);
+  }
+}
+
 #chat:not(.pref-autocompletehelper) #chat-auto-complete {
   display: none;
 }
