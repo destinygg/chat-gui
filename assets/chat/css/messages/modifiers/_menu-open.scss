@@ -1,0 +1,21 @@
+@use '../../abstracts/' as a;
+
+// The message whose action menu is currently open.
+//
+// The trigger is only shown while the pointer is over its message, so it has
+// gone by the time the menu is being read — this is what keeps the message the
+// menu belongs to identifiable.
+//
+// A translucent layer rather than a background colour, so it lifts the message
+// off whatever it already sits on. A spotlighted message needs that: its card
+// paints over the row, so a colour set here would never be seen.
+$tint: linear-gradient(rgb(255 255 255 / 5%), rgb(255 255 255 / 5%));
+
+.msg-menu-open {
+  background-image: $tint;
+
+  .event-top,
+  .event-bottom {
+    background-image: $tint;
+  }
+}

@@ -153,6 +153,56 @@ describe('ChatMessageActionMenu', () => {
     expect(source.send).toHaveBeenCalledWith('UNSPOTLIGHT', { data: 'abc123' });
   });
 
+  describe('marking the selected message', () => {
+    it('marks the message the menu was opened for', () => {
+      const { output } = setup();
+      const message = output.find('.msg-continue')[0];
+
+      hover(output, '.msg-continue');
+      trigger().trigger($.Event('click', { clientX: 10, clientY: 10 }));
+
+      expect(message.classList.contains('msg-menu-open')).toBe(true);
+    });
+
+    it('unmarks it when the menu closes', () => {
+      const { menu, output } = setup();
+      const message = output.find('.msg-continue')[0];
+
+      hover(output, '.msg-continue');
+      trigger().trigger($.Event('click', { clientX: 10, clientY: 10 }));
+      menu.hide();
+
+      expect(message.classList.contains('msg-menu-open')).toBe(false);
+    });
+
+    // The trigger moves between messages without the menu closing in between.
+    it('moves the mark rather than leaving two behind', () => {
+      const { output } = setup();
+      const first = output.find('.msg-user:first')[0];
+      const second = output.find('.msg-continue')[0];
+
+      hover(output, '.msg-user:first');
+      trigger().trigger($.Event('click', { clientX: 10, clientY: 10 }));
+      hover(output, '.msg-continue');
+      trigger().trigger($.Event('click', { clientX: 10, clientY: 10 }));
+
+      expect(first.classList.contains('msg-menu-open')).toBe(false);
+      expect(second.classList.contains('msg-menu-open')).toBe(true);
+      expect(document.querySelectorAll('.msg-menu-open')).toHaveLength(1);
+    });
+
+    // The mark is only a class; without a stylesheet behind it nothing lights
+    // up, and jsdom never loads the SCSS to notice.
+    it('has a stylesheet rule that tints the marked message', () => {
+      const scss = readFileSync(
+        resolve(__dirname, '../../css/messages/modifiers/_menu-open.scss'),
+        'utf8',
+      );
+
+      expect(scss).toMatch(/\.msg-menu-open\s*\{[^{}]*background-image/);
+    });
+  });
+
   it('reports whether the layout ships its markup', () => {
     const { menu } = setup();
 

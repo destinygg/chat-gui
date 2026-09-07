@@ -56,6 +56,9 @@ export default class ChatMessageActionMenu extends ChatMenuFloating {
     );
 
     this.trigger.on('click', () => this.openMenu());
+    // Covers every way the menu closes — its own action, a click elsewhere,
+    // escape, or another menu opening over it.
+    this.on('hide', () => this.clearSelection());
     this.ui.on('click', '#spotlight-message-button', () =>
       this.toggleSpotlight(),
     );
@@ -122,7 +125,9 @@ export default class ChatMessageActionMenu extends ChatMenuFloating {
   }
 
   openMenu() {
+    this.clearSelection();
     this.message = this.hovered;
+    this.message?.classList.add('msg-menu-open');
     this.spotlightKey = this.message?.dataset.spotlightKey ?? null;
     this.spotlightButton.text(
       this.spotlightKey ? 'Remove spotlight' : 'Spotlight message',
@@ -133,6 +138,11 @@ export default class ChatMessageActionMenu extends ChatMenuFloating {
     this.show();
     this.positionUnder(this.trigger[0]);
     return false;
+  }
+
+  /** Drops the mark identifying the message the menu was opened for. */
+  clearSelection() {
+    this.message?.classList.remove('msg-menu-open');
   }
 
   /**
