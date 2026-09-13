@@ -224,9 +224,14 @@ export default class ChatMessage extends ChatUIMessage {
     const bottom = document.createElement('div');
     bottom.className = 'event-bottom';
 
-    // Everything ahead of the message body is header material.
+    // Everything ahead of the message body is header material — except the
+    // action trigger, which belongs to the message rather than to its content
+    // and stays where it is, positioned against the message itself.
     const text = this.ui.querySelector('.text');
     for (const node of [...this.ui.childNodes]) {
+      if (node.classList?.contains('message-actions-trigger')) {
+        continue;
+      }
       (node === text ? bottom : info).append(node);
     }
 

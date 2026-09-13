@@ -7,6 +7,8 @@ $link-color-map: (
 );
 
 .msg-chat {
+  // Anchors the message action trigger, which sits against the message.
+  position: relative;
   word-wrap: break-word;
   padding: a.$gutter-xs a.$gutter-md * 2 a.$gutter-xs a.$gutter-md;
   color: a.$color-chat-text2;

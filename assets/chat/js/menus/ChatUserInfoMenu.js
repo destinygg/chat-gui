@@ -65,6 +65,7 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     this.muteUserBtn = this.ui.find('#mute-user-btn');
     this.banUserBtn = this.ui.find('#ban-user-btn');
     this.logsUserBtn = this.ui.find('#logs-user-btn');
+    this.highlightUserBtn = this.ui.find('#highlight-user-btn');
     this.whisperUserBtn = this.ui.find('#whisper-user-btn');
     this.ignoreUserBtn = this.ui.find('#ignore-user-btn');
     this.unignoreUserBtn = this.ui.find('#unignore-user-btn');
@@ -76,6 +77,10 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     this.banDurations = ['1d', '7d', '30d', 'Perm'];
 
     this.configureButtons();
+
+    this.chat.output.on('click', '.msg-chat .user, .msg-chat .chat-user', (e) =>
+      this.onUsernameClick(e),
+    );
 
     this.chat.output.on(
       'contextmenu',
@@ -127,6 +132,51 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
    * menu is opened straight off a username. Callers that open it from somewhere
    * else — the user action menu's "User info" button — pass the nick explicitly.
    */
+  /** Whether this layout ships the menu's markup. */
+  get available() {
+    return this.ui.length > 0;
+  }
+
+  /**
+   * A left click on a username opens this menu directly. It used to open a
+   * small dropdown that offered this menu behind one more click, which left
+   * the two actions it held stranded on any message without a username to
+   * click — a continued message shows none.
+   */
+  onUsernameClick(e) {
+    const username = e.currentTarget;
+
+    // `tier` is a sub-tier label styled to match the sub's username color
+    // (which requires the `user` class), and `non-chat-user` marks a user-like
+    // reference that isn't a chat user (e.g. an X handle on an XPOST event).
+    // Neither one has anything to show.
+    if (
+      username.classList.contains('tier') ||
+      username.classList.contains('non-chat-user')
+    ) {
+      return undefined;
+    }
+
+    // Clicking the author of a whisper opens the conversation with them (see
+    // `chat.js`), so leave that click alone.
+    if (username.matches('a.user') && username.closest('.msg-whisper')) {
+      return undefined;
+    }
+
+    // Layouts without the menu's markup (the on-stream overlay, the vote chat)
+    // keep the old behavior — the click falls through to `ChatUserFocus`.
+    if (!this.available) {
+      return undefined;
+    }
+
+    this.showUser(e, $(username).closest('.msg-chat'));
+
+    // Returning false stops the click reaching `ChatUserFocus`, which is bound
+    // directly to the output and would otherwise dim the chat at the same
+    // time. jQuery runs delegated handlers before direct ones, so this wins.
+    return false;
+  }
+
   showUser(e, message, nick = e.currentTarget.innerText.toLowerCase()) {
     this.clickedNick = nick;
 
@@ -200,6 +250,14 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
       this.hide();
     });
 
+    // Focusing by nick rather than by the element that was clicked: the menu
+    // has already resolved which user it is about, so the author/mention
+    // distinction `toggleElement` draws no longer applies.
+    this.highlightUserBtn.on('click', () => {
+      this.chat.userfocus.toggleFocus(this.clickedNick);
+      this.setHighlightState();
+    });
+
     this.logsUserBtn.on('click', () => {
       this.chat.cmdSTALK([this.clickedNick]);
       this.hide();
@@ -221,7 +279,24 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     });
   }
 
+  /**
+   * Reflects whether the clicked user's messages are currently highlighted.
+   *
+   * The tooltip is set through the tippy instance rather than the attribute it
+   * was built from, which is only read once at startup.
+   */
+  setHighlightState() {
+    const focused = this.chat.userfocus.isFocusedOn(this.clickedNick);
+    const label = focused ? 'Remove highlight' : 'Highlight';
+
+    this.highlightUserBtn.toggleClass('active', focused);
+    this.highlightUserBtn.attr('aria-label', label);
+    this.highlightUserBtn[0]?._tippy?.setContent(label);
+  }
+
   setActionsVisibility(clickedUser = this.chat.users.get(this.clickedNick)) {
+    this.setHighlightState();
+
     if (this.chat.user.hasModPowers()) {
       this.muteUserBtn.toggleClass('hidden', false);
       this.banUserBtn.toggleClass('hidden', false);

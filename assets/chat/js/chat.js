@@ -32,8 +32,8 @@ import {
   ChatEmoteTooltip,
   ChatSettingsMenu,
   ChatUserInfoMenu,
-  ChatUserActionMenu,
   ChatEventActionMenu,
+  ChatMessageActionMenu,
 } from './menus';
 import ChatEventBar from './event-bar/EventBar';
 import ChatAutoComplete from './autocomplete';
@@ -276,6 +276,10 @@ class Chat {
     this.commands
       .generateAutocomplete(this.user.hasModPowers())
       .forEach((command) => this.autocomplete.add(command));
+    // Drives the visibility of anything only a moderator can use. Set here
+    // rather than per message, so a change of powers reaches messages already
+    // on screen instead of only the ones rendered afterwards.
+    this.ui?.toggleClass('chat-mod', this.user.hasModPowers());
     this.setDefaultPlaceholderText();
     return this;
   }
@@ -420,10 +424,10 @@ class Chat {
       ),
     );
     this.menus.set(
-      'user-action',
-      new ChatUserActionMenu(
-        this.ui.find('#user-action-menu'),
-        this.output.find('.msg-user .user'),
+      'message-action-menu',
+      new ChatMessageActionMenu(
+        this.ui.find('#message-action-menu'),
+        this.ui.find('.message-actions-trigger'),
         this,
       ),
     );

@@ -1,0 +1,78 @@
+@use '../abstracts/' as a;
+
+#message-action-menu {
+  height: fit-content;
+  width: fit-content;
+  min-width: 75px;
+  max-width: 250px;
+  z-index: 221;
+
+  .chat-menu-inner {
+    background-color: a.$color-surface-dark3;
+  }
+
+  .message-action {
+    transition: background-color 150ms ease;
+    color: a.$color-light;
+    padding: 0.5rem 1rem;
+    text-align: left;
+    white-space: nowrap;
+
+    &:hover {
+      background-color: a.$color-surface-dark4;
+    }
+  }
+}
+
+// Rendered into every user message by `ChatUserMessage` and revealed here, so
+// it travels with its message through scrolling, wrapping and pruning without
+// anything having to track it.
+//
+// Gated in CSS rather than at render time: whether someone can act on a message
+// changes with `UPDATEUSER`, and a decision baked into the markup would leave
+// every message already on screen stale. `.chat-mod` is refreshed on every
+// `setUser`, so it reaches all of them at once.
+// The overlay scrollbar is a fixed 10px wide regardless of the message font
+// (see `chat/_scrollbar-theme.scss`), so the clearance is fixed too and only
+// the gap beside it scales.
+$scrollbar-width: 10px;
+
+.message-actions-trigger {
+  display: none;
+  position: absolute;
+  // Against the last line rather than the first: on a message that wraps, the
+  // last line is usually the short one, so the button covers less of it.
+  bottom: a.$gutter-xs;
+  right: calc(#{$scrollbar-width} + #{a.$gutter-sm});
+  align-items: center;
+  justify-content: center;
+  width: 1.75em;
+  height: 1.75em;
+  border-radius: 4px;
+  background-color: a.$color-surface-dark3;
+  box-shadow: 0 1px 4px rgb(0 0 0 / 40%);
+  transition: background-color 150ms ease;
+
+  &:hover {
+    background-color: a.$color-surface-dark4;
+  }
+
+  .btn-icon {
+    @include a.icon-background('../img/icon-ellipsis-vertical.svg');
+
+    width: 1em;
+    height: 1em;
+    opacity: 0.75;
+  }
+}
+
+.chat-mod {
+  // A whisper is a conversation rather than something said in chat, so there is
+  // nothing here to act on.
+  .msg-user:not(.msg-whisper):hover > .message-actions-trigger,
+  // Kept up while its own menu is open, once the pointer has moved off the
+  // message and onto the menu.
+  .msg-user.msg-menu-open > .message-actions-trigger {
+    display: flex;
+  }
+}
