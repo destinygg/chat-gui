@@ -14,6 +14,20 @@
 .msg-spotlighted {
   border-color: a.$color-accent;
 
+  // A highlight is a background on the row, which the card's halves would
+  // otherwise paint straight over — spotlighting a highlighted message made it
+  // look unhighlighted. They let it show through instead, with the header
+  // lifted by a translucent layer so the two halves still read apart.
+  &.msg-highlight {
+    .event-top {
+      background-color: rgb(255 255 255 / 6%);
+    }
+
+    .event-bottom {
+      background-color: transparent;
+    }
+  }
+
   .event-info {
     // A run of messages from one author hides the repeated username, but the
     // header of a card has to name whoever is being spotlighted.

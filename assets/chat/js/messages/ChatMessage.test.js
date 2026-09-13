@@ -1,5 +1,7 @@
 // @ts-nocheck
 
+import { readFileSync } from 'fs';
+import { resolve } from 'path';
 import ChatMessage, { messageHash } from './ChatMessage';
 
 // These vectors pin the message-identity recipe, which the Go server
@@ -140,6 +142,20 @@ describe('setSpotlight', () => {
 
     message.setSpotlight(null);
     expect(button.parentElement).toBe(message.ui);
+  });
+
+  // A highlight is a background on the row, and the card built above paints
+  // over the whole row. Only the stylesheet decides whether it shows through,
+  // and jsdom never loads it, so the rule is read directly.
+  it('has a stylesheet rule that keeps a highlight visible through the card', () => {
+    const scss = readFileSync(
+      resolve(__dirname, '../../css/messages/modifiers/_spotlight.scss'),
+      'utf8',
+    );
+
+    expect(scss).toMatch(
+      /&\.msg-highlight\s*\{[\s\S]*?\.event-bottom\s*\{[^{}]*background-color:\s*transparent/,
+    );
   });
 
   it("leaves an event message's own frame alone", () => {
