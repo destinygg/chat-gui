@@ -32,11 +32,18 @@
 // changes with `UPDATEUSER`, and a decision baked into the markup would leave
 // every message already on screen stale. `.chat-mod` is refreshed on every
 // `setUser`, so it reaches all of them at once.
+// The overlay scrollbar is a fixed 10px wide regardless of the message font
+// (see `chat/_scrollbar-theme.scss`), so the clearance is fixed too and only
+// the gap beside it scales.
+$scrollbar-width: 10px;
+
 .message-actions-trigger {
   display: none;
   position: absolute;
-  top: a.$gutter-xs;
-  right: a.$gutter-sm;
+  // Against the last line rather than the first: on a message that wraps, the
+  // last line is usually the short one, so the button covers less of it.
+  bottom: a.$gutter-xs;
+  right: calc(#{$scrollbar-width} + #{a.$gutter-sm});
   align-items: center;
   justify-content: center;
   width: 1.75em;
