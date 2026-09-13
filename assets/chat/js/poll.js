@@ -3,6 +3,7 @@ import { throttle } from 'throttle-debounce';
 import UserFeatures from './features';
 import UserRoles from './roles';
 import { MessageBuilder } from './messages';
+import ChatScrollPlugin from './scroll';
 import encodeUrl from './encodeUrl';
 
 const POLL_CONJUNCTION = /\bor\b/i;
@@ -77,6 +78,22 @@ function buildPollOptionHtml(option, index) {
       `;
 }
 
+/**
+ * Whether any of `optionRects` is cut off by the top or the bottom edge of
+ * `viewportRect`. An option that is only half visible counts as cut off in that
+ * direction -- the reader still has to scroll to finish reading it.
+ * @param {{top: number, bottom: number}} viewportRect
+ * @param {Array<{top: number, bottom: number}>} optionRects
+ * @return {{above: boolean, below: boolean}}
+ */
+function hasClippedOptions(viewportRect, optionRects) {
+  // A pixel of slack, since subpixel layout leaves flush edges just over.
+  return {
+    above: optionRects.some((rect) => rect.top < viewportRect.top - 1),
+    below: optionRects.some((rect) => rect.bottom > viewportRect.bottom + 1),
+  };
+}
+
 class ChatPoll {
   constructor(chat) {
     this.chat = chat;
@@ -85,6 +102,8 @@ class ChatPoll {
     this.ui.votes = this.ui.find('.poll-votes');
     this.ui.question = this.ui.find('.poll-question');
     this.ui.options = this.ui.find('.poll-options');
+    this.ui.moreAbove = this.ui.find('.poll-options-more-up');
+    this.ui.moreBelow = this.ui.find('.poll-options-more-down');
     this.ui.timer = this.ui.find('.poll-timer-inner');
     this.ui.endmsg = this.ui.find('.poll-end');
     this.poll = null;
@@ -106,6 +125,26 @@ class ChatPoll {
     this.throttleVoteCast = throttle(100, () => {
       this.updateBars();
     });
+
+    // The options list is capped in height, so it gets the same overlay
+    // scrollbar the menus use, plus hints marking what is cut off. Layouts
+    // without a poll frame (the vote-only GUI) have nothing to set up.
+    const optionsViewport = this.ui.options.get(0);
+    if (optionsViewport) {
+      this.scrollplugin = new ChatScrollPlugin(
+        optionsViewport,
+        this.ui.find('.poll-options-scroller').get(0),
+      );
+      this.throttleOptionOverflow = throttle(50, () =>
+        this.updateOptionOverflow(),
+      );
+      this.ui.options.on('scroll', () => this.throttleOptionOverflow());
+      // Resizing the chat window changes how many options fit.
+      this.optionsResizeObserver = new ResizeObserver(() =>
+        this.updateOptionOverflow(),
+      );
+      this.optionsResizeObserver.observe(optionsViewport);
+    }
   }
 
   hide() {
@@ -121,6 +160,8 @@ class ChatPoll {
       this.hidden = false;
       this.ui.addClass('active');
       this.chat.mainwindow.update();
+      // Nothing inside the frame could be measured while it was hidden.
+      this.scrollplugin?.reset();
     }
   }
 
@@ -194,6 +235,10 @@ class ChatPoll {
     }
 
     this.show();
+    // Only once the frame is back on screen: while it is hidden the scroller
+    // has no layout, and showing it restores the offset the last poll left.
+    this.ui.options.scrollTop(0);
+    this.updateOptionOverflow();
   }
 
   reset() {
@@ -204,15 +249,61 @@ class ChatPoll {
     this.ui.timer.parent().show();
   }
 
+  /**
+   * Show a hint over whichever edge of the scroller is cutting options off, so
+   * it is obvious there is more of the poll to scroll to.
+   */
+  updateOptionOverflow() {
+    const viewport = this.ui.options.get(0);
+    if (!viewport) {
+      return;
+    }
+
+    const { above, below } = hasClippedOptions(
+      viewport.getBoundingClientRect(),
+      this.ui.options
+        .children('.opt')
+        .map((_, opt) => opt.getBoundingClientRect())
+        .get(),
+    );
+
+    this.ui.moreAbove.toggle(above);
+    this.ui.moreBelow.toggle(below);
+  }
+
+  /**
+   * Scroll the options list so `option` sits in the middle of it. Used for the
+   * winner, which is easily out of sight in a long poll: centring it keeps it
+   * away from the edges, where a scroll hint would cover it. Scrolls the list
+   * itself rather than going through scrollIntoView, which would also scroll
+   * whatever the chat is embedded in.
+   * @param {HTMLElement|undefined} option
+   */
+  centerOnOption(option) {
+    const viewport = this.ui.options.get(0);
+    if (!viewport || !option) {
+      return;
+    }
+
+    const viewportRect = viewport.getBoundingClientRect();
+    const optionRect = option.getBoundingClientRect();
+    viewport.scrollTop +=
+      optionRect.top -
+      viewportRect.top -
+      (viewportRect.height - optionRect.height) / 2;
+  }
+
   endPoll() {
     this.voting = false;
     clearTimeout(this.timerHidePoll);
-    this.markWinner();
+    // Swap the timer for the end message first: markWinner() scrolls and
+    // measures the options, and both change with the height of the footer.
     this.ui.timer.parent().hide();
     this.ui.endmsg
       .text(`Poll ended! ${this.poll.votesCast} votes cast.`)
       .show();
     this.ui.addClass('poll-completed');
+    this.markWinner();
     this.timerHidePoll = setTimeout(() => this.hide(), POLL_END_TIME);
   }
 
@@ -224,12 +315,12 @@ class ChatPoll {
       0,
     );
 
-    this.ui.options.children().eq(winnerIndex).addClass('opt-winner');
+    const winner = this.ui.options.children().eq(winnerIndex);
+    winner.addClass('opt-winner');
+    this.centerOnOption(winner.get(0));
+    this.updateOptionOverflow();
 
-    this.pollEndMessage(
-      winnerIndex + 1,
-      this.ui.options.children().eq(winnerIndex).data('percentage'),
-    );
+    this.pollEndMessage(winnerIndex + 1, winner.data('percentage'));
   }
 
   markVote(opt) {
@@ -303,4 +394,9 @@ class ChatPoll {
   }
 }
 
-export { ChatPoll, parseQuestionAndTime, buildPollOptionHtml };
+export {
+  ChatPoll,
+  parseQuestionAndTime,
+  buildPollOptionHtml,
+  hasClippedOptions,
+};
