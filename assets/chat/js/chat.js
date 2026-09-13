@@ -276,6 +276,10 @@ class Chat {
     this.commands
       .generateAutocomplete(this.user.hasModPowers())
       .forEach((command) => this.autocomplete.add(command));
+    // Drives the visibility of anything only a moderator can use. Set here
+    // rather than per message, so a change of powers reaches messages already
+    // on screen instead of only the ones rendered afterwards.
+    this.ui?.toggleClass('chat-mod', this.user.hasModPowers());
     this.setDefaultPlaceholderText();
     return this;
   }

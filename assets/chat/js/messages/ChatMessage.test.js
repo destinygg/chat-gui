@@ -118,6 +118,30 @@ describe('setSpotlight', () => {
     expect(message.ui.querySelector('.user')).not.toBeNull();
   });
 
+  // The action trigger is rendered into the message, so it sits among the
+  // nodes the frame is built from. It belongs to the message rather than to
+  // its content, and is positioned against it — swept into the header it would
+  // land in the wrong place and move with the wrong thing.
+  it('leaves the action trigger where it is', () => {
+    const message = renderedMessage();
+    const button = document.createElement('button');
+    button.className = 'message-actions-trigger';
+    message.ui.append(button);
+
+    message.setSpotlight('abc123');
+
+    expect(button.parentElement).toBe(message.ui);
+    expect(
+      message.ui.querySelector('.event-info .message-actions-trigger'),
+    ).toBeNull();
+    expect(
+      message.ui.querySelector('.event-bottom .message-actions-trigger'),
+    ).toBeNull();
+
+    message.setSpotlight(null);
+    expect(button.parentElement).toBe(message.ui);
+  });
+
   it("leaves an event message's own frame alone", () => {
     const message = new ChatMessage('donated');
     message.ui = document.createElement('div');

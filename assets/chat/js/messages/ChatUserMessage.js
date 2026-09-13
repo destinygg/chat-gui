@@ -89,10 +89,20 @@ export default class ChatUserMessage extends ChatMessage {
     )}" class="${['user', colorFlair?.name].filter(Boolean).join(' ')}">${
       this.user.displayName
     }</a>`;
+    // Opens the message action menu. Rendered for everyone and revealed by CSS
+    // only to those who can use it, rather than gated here: whether someone can
+    // act on a message changes with `UPDATEUSER`, and a decision baked in at
+    // render time would leave every message already on screen stale.
+    const actions =
+      this.type === MessageTypes.USER
+        ? '<button class="message-actions-trigger" title="Message actions">' +
+          '<i class="btn-icon"></i></button>'
+        : '';
+
     return this.wrap(
       `${this.buildTime()} ${user}<span class="ctrl">${ctrl}</span> ${this.buildMessageTxt(
         chat,
-      )}`,
+      )}${actions}`,
       classes,
       attr,
     );
