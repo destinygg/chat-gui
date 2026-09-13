@@ -189,7 +189,15 @@ describe('ChatMessageActionMenu', () => {
     it('tints the message whose menu is open', () => {
       const scss = styles('messages/modifiers/_menu-open.scss');
 
-      expect(scss).toMatch(/\.msg-menu-open\s*\{[^{}]*background-image/);
+      expect(scss).toMatch(/\.msg-menu-open[^{}]*\{[^{}]*background-image/);
+    });
+
+    it('tints a message while the trigger is showing on it', () => {
+      const scss = styles('messages/modifiers/_menu-open.scss');
+
+      expect(scss).toMatch(
+        /\.chat-mod\s+\.chat-lines\s+\.msg-user:not\(\.msg-whisper\):hover[^{}]*\{[^{}]*background-image/,
+      );
     });
   });
 });
