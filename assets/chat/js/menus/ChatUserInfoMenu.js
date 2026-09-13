@@ -179,6 +179,11 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
 
   showUser(e, message, nick = e.currentTarget.innerText.toLowerCase()) {
     this.clickedNick = nick;
+    // The username or mention the menu was opened from, if it was opened from
+    // one in chat. See the highlight button for why it is kept.
+    this.clickedUsername = e.currentTarget?.matches?.('.user, .chat-user')
+      ? e.currentTarget
+      : null;
 
     this.setActionsVisibility();
     this.addContent(message);
@@ -250,11 +255,18 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
       this.hide();
     });
 
-    // Focusing by nick rather than by the element that was clicked: the menu
-    // has already resolved which user it is about, so the author/mention
-    // distinction `toggleElement` draws no longer applies.
+    // Highlighting goes through the username that opened the menu, the way a
+    // click on it did before this menu took that click over. That matters for
+    // a mention: with "Include mentions" off, `toggleElement` also keeps the
+    // message the mention sits in visible, which focusing the nick alone
+    // loses. A user list entry is no username, so it focuses by nick — as a
+    // click on an entry always has.
     this.highlightUserBtn.on('click', () => {
-      this.chat.userfocus.toggleFocus(this.clickedNick);
+      if (this.clickedUsername) {
+        this.chat.userfocus.toggleElement(this.clickedUsername);
+      } else {
+        this.chat.userfocus.toggleFocus(this.clickedNick);
+      }
       this.setHighlightState();
     });
 

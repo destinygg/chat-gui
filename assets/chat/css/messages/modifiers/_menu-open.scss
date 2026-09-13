@@ -1,17 +1,21 @@
 @use '../../abstracts/' as a;
 
-// The message whose action menu is currently open.
+// The message the action trigger belongs to: the one the pointer is over, and
+// the one whose action menu is open. The tint says which message the button
+// acts on, which the button alone doesn't — it sits at the edge of the row, and
+// on a busy chat that edge is shared by the lines above and below.
 //
-// The trigger is only shown while the pointer is over its message, so it has
-// gone by the time the menu is being read — this is what keeps the message the
-// menu belongs to identifiable.
+// The hover selector matches where the trigger itself is revealed, in
+// `menus/_message-action-menu.scss`; a tint anywhere the button can't appear
+// would promise an action that isn't there.
 //
 // A translucent layer rather than a background colour, so it lifts the message
 // off whatever it already sits on. A spotlighted message needs that: its card
 // paints over the row, so a colour set here would never be seen.
 $tint: linear-gradient(rgb(255 255 255 / 5%), rgb(255 255 255 / 5%));
 
-.msg-menu-open {
+.msg-menu-open,
+.chat-mod .chat-lines .msg-user:not(.msg-whisper):hover {
   background-image: $tint;
 
   .event-top,

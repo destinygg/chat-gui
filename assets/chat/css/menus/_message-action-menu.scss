@@ -66,7 +66,10 @@ $scrollbar-width: 10px;
   }
 }
 
-.chat-mod {
+// Only in a chat window's lines. The same messages are rendered into the user
+// info menu's history too, which sits under `.chat-mod` as well but is a record
+// to read, not a place to act on what was said.
+.chat-mod .chat-lines {
   // A whisper is a conversation rather than something said in chat, so there is
   // nothing here to act on.
   .msg-user:not(.msg-whisper):hover > .message-actions-trigger,
