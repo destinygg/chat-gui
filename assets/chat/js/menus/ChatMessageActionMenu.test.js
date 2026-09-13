@@ -172,11 +172,11 @@ describe('ChatMessageActionMenu', () => {
       );
     });
 
-    it('reveals it only for moderators, and not on whispers', () => {
+    it('reveals it only for moderators, in the chat, and not on whispers', () => {
       const scss = styles('menus/_message-action-menu.scss');
 
       expect(scss).toMatch(
-        /\.chat-mod\s*\{[\s\S]*\.msg-user:not\(\.msg-whisper\):hover\s*>\s*\.message-actions-trigger/,
+        /\.chat-mod\s+\.chat-lines\s*\{[^{}]*\.msg-user:not\(\.msg-whisper\):hover\s*>\s*\.message-actions-trigger/,
       );
     });
 
