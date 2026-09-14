@@ -14,20 +14,45 @@ $toolbar-icons-map: (
 
 #chat-user-info {
   height: fit-content;
+  // Never taller than the chat it floats in, which would clip it. The message
+  // history is the part that gives up its height to fit.
+  max-height: 100%;
   bottom: unset;
   min-width: 250px;
   max-width: 350px;
 
+  // Flex columns all the way down to the history, so the cap above reaches it.
+  // Everything else on the way keeps its size.
+  &.active {
+    display: flex;
+    flex-direction: column;
+  }
+
   .floating-window {
+    min-height: 0;
     box-shadow: 0px 0px 6px black;
     border-radius: 6px;
   }
 
-  .user-info h5 {
-    padding-left: a.$gutter-md;
-    margin-top: unset;
-    margin-bottom: unset;
-    border-bottom: 1px solid a.$color-surface-dark4;
+  .toolbar,
+  .user-not-found,
+  .user-info-loading,
+  .actions {
+    flex-shrink: 0;
+  }
+
+  .user-info {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+
+    h5 {
+      flex-shrink: 0;
+      padding-left: a.$gutter-md;
+      margin-top: unset;
+      margin-bottom: unset;
+      border-bottom: 1px solid a.$color-surface-dark4;
+    }
   }
 
   // The bio can be up to 160 characters, so let it wrap onto multiple lines
@@ -61,6 +86,7 @@ $toolbar-icons-map: (
   }
 
   .flairs {
+    flex-shrink: 0;
     margin-top: a.$gutter-lg;
     margin-bottom: a.$gutter-lg;
     padding-left: a.$gutter-md;
@@ -74,8 +100,12 @@ $toolbar-icons-map: (
     margin-left: -0.2em;
   }
 
+  // A third of the chat's height when there's room for it, so more of the
+  // history shows at once, shrinking to fit a short chat — but no shorter than
+  // this used to be.
   .stalk {
-    height: 100px;
+    height: 33vh;
+    min-height: 100px;
 
     .scrollable {
       background: a.$color-chat-bg;

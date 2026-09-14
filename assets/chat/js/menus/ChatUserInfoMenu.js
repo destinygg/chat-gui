@@ -203,6 +203,19 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     this.notFoundNotice.toggleClass('hidden', state !== 'notFound');
   }
 
+  /**
+   * The menu is placed while it may still only hold a loading spinner, and
+   * the user's details and history land after that. Filled in, it can reach
+   * past the bottom of the chat, where it would be clipped — so it moves back
+   * inside whenever it's redrawn.
+   */
+  redraw() {
+    super.redraw();
+    if (this.visible) {
+      this.moveTo(this.ui[0].offsetLeft, this.ui[0].offsetTop);
+    }
+  }
+
   // Collapses the menu to a minimal "user not found" view.
   showUserNotFound() {
     this.setMenuBodyState('notFound');

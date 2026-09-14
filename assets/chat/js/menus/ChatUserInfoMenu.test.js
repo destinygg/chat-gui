@@ -274,3 +274,43 @@ describe('ChatUserInfoMenu message history', () => {
     expect(message).not.toHaveBeenCalled();
   });
 });
+
+describe('ChatUserInfoMenu redraw', () => {
+  it('moves back inside the chat once its content has grown it', () => {
+    const chatEl = document.createElement('div');
+    const ui = $(`
+      <div id="chat-user-info">
+        <div class="toolbar"><span></span></div>
+      </div>`);
+    const menuEl = ui[0];
+    chatEl.append(menuEl);
+
+    // jsdom lays nothing out. A 600px-tall chat, and a menu that has grown to
+    // 300px while placed 500px down it.
+    Object.defineProperties(chatEl, {
+      clientWidth: { get: () => 800 },
+      clientHeight: { get: () => 600 },
+    });
+    Object.defineProperties(menuEl, {
+      offsetParent: { get: () => chatEl },
+      offsetWidth: { get: () => 250 },
+      offsetHeight: { get: () => 300 },
+      offsetLeft: { get: () => parseInt(menuEl.style.left, 10) || 0 },
+      offsetTop: { get: () => parseInt(menuEl.style.top, 10) || 0 },
+    });
+    menuEl.style.left = '100px';
+    menuEl.style.top = '500px';
+
+    const chat = {
+      output: { on: () => {} },
+      source: { on: () => {} },
+    };
+    const menu = new ChatUserInfoMenu(ui, $('<div></div>'), chat);
+    menu.visible = true;
+
+    menu.redraw();
+
+    expect(menuEl.style.left).toBe('100px');
+    expect(menuEl.style.top).toBe('300px');
+  });
+});
