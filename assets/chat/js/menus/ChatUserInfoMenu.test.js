@@ -10,6 +10,7 @@ import ChatMenu from './ChatMenu';
 import ChatUserInfoMenu from './ChatUserInfoMenu';
 import ChatUser from '../user';
 import { MessageBuilder } from '../messages';
+import ChatUserMessage from '../messages/ChatUserMessage';
 
 // A minimal `.user-info` subtree containing the subheader rows that
 // `renderUserDetails` reads. `.scrollable` is intentionally omitted so the base
@@ -272,6 +273,36 @@ describe('ChatUserInfoMenu message history', () => {
     await new Promise((resolve) => setTimeout(resolve, 0));
 
     expect(message).not.toHaveBeenCalled();
+  });
+
+  // Every message is from the user the menu is titled with, so the name gives
+  // way to chat's continuation arrow.
+  it('renders each message as a continuation', () => {
+    const chat = {
+      output: { on: () => {} },
+      source: { on: () => {} },
+      flairs: [],
+      flairsMap: new Map(),
+    };
+    const menu = new ChatUserInfoMenu(
+      $(MENU_WITH_MESSAGES),
+      $('<div></div>'),
+      chat,
+    );
+    // The formatters need far more of the chat than this, and the body isn't
+    // what's under test.
+    jest
+      .spyOn(ChatUserMessage.prototype, 'buildMessageTxt')
+      .mockReturnValue('<span class="text">hey</span>');
+
+    const element = menu.buildMessageMarkup({
+      username: 'Cake',
+      messageText: 'hey',
+      timestamp: 1000,
+    });
+
+    expect(element.classList.contains('msg-continue')).toBe(true);
+    expect(element.querySelector('.ctrl').textContent).toBe('');
   });
 });
 

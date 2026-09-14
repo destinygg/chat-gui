@@ -684,6 +684,9 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
       user,
       message.timestamp,
     );
+    // Every message here is from the user the menu is titled with, so each
+    // one reads as a continuation, the way a run of them does in chat.
+    messageObject.continued = true;
 
     return messageObject.html(this.chat);
   }
