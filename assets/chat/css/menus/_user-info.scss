@@ -110,6 +110,12 @@ $toolbar-icons-map: (
     .scrollable {
       background: a.$color-chat-bg;
     }
+
+    // Chat spaces its lines through `.chat-lines`, which the history isn't
+    // inside, so it would otherwise sit tighter than the same messages in chat.
+    .messages {
+      line-height: 1.65em;
+    }
   }
 
   .chat-tool-btn {
