@@ -49,34 +49,13 @@ function clickEntry(entry) {
 }
 
 describe('ChatUserMenu user entry clicks', () => {
-  it('opens the user info menu on the entry it was clicked in', () => {
-    const userInfo = { available: true, showUser: jest.fn() };
-    const { entry, userfocus } = setup({ userInfo });
-
-    clickEntry(entry);
-
-    expect(userfocus.toggleFocus).not.toHaveBeenCalled();
-    expect(userInfo.showUser).toHaveBeenCalledTimes(1);
-    const [, container, nick] = userInfo.showUser.mock.calls[0];
-    expect(container[0]).toBe(entry[0]);
-    expect(nick).toBe('destiny');
-  });
-
-  it('highlights outright when the user info markup is absent', () => {
-    const userInfo = { available: false, showUser: jest.fn() };
+  it('highlights the user on a left click', () => {
+    const userInfo = { showUser: jest.fn() };
     const { entry, userfocus } = setup({ userInfo });
 
     clickEntry(entry);
 
     expect(userInfo.showUser).not.toHaveBeenCalled();
-    expect(userfocus.toggleFocus).toHaveBeenCalledWith('destiny');
-  });
-
-  it('highlights outright when there is no user info menu at all', () => {
-    const { entry, userfocus } = setup();
-
-    clickEntry(entry);
-
     expect(userfocus.toggleFocus).toHaveBeenCalledWith('destiny');
   });
 });
