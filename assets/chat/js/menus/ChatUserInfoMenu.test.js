@@ -9,6 +9,7 @@ import $ from 'jquery';
 import ChatMenu from './ChatMenu';
 import ChatUserInfoMenu from './ChatUserInfoMenu';
 import ChatUser from '../user';
+import { MessageBuilder } from '../messages';
 
 // A minimal `.user-info` subtree containing the subheader rows that
 // `renderUserDetails` reads. `.scrollable` is intentionally omitted so the base
@@ -212,5 +213,64 @@ describe('ChatUserInfoMenu highlight action', () => {
 
     expect(userfocus.toggleElement).not.toHaveBeenCalled();
     expect(userfocus.toggleFocus).toHaveBeenCalledWith('destiny');
+  });
+});
+
+describe('ChatUserInfoMenu message history', () => {
+  const MENU_WITH_MESSAGES = `
+    <div id="chat-user-info">
+      <div class="toolbar"><span></span></div>
+      <div class="user-info">
+        <h5 class="tag-subheader"></h5>
+        <div class="content">
+          <div class="message-history-status"></div>
+          <div class="no-messages-notice"></div>
+          <div class="messages"></div>
+        </div>
+      </div>
+    </div>`;
+
+  afterEach(() => jest.restoreAllMocks());
+
+  it("drops a history that lands after another user's menu opened", async () => {
+    let resolveHistory;
+    const history = new Promise((resolve) => {
+      resolveHistory = resolve;
+    });
+    const chat = {
+      output: { on: () => {} },
+      source: { on: () => {} },
+      user: { hasModPowers: () => false },
+      users: new Map(),
+      taggednotes: new Map(),
+      userInfoService: {
+        getUserInfo: async () => ({ nick: 'Cake', features: [] }),
+      },
+      userMessageService: { getUserMessages: () => history },
+    };
+    const menu = new ChatUserInfoMenu(
+      $(MENU_WITH_MESSAGES),
+      $('<div></div>'),
+      chat,
+    );
+    menu.scrollplugin = { scrollBottom: () => {}, reset: () => {} };
+
+    // Rendering a message for real runs every formatter, which needs far more
+    // of the chat than this. What matters here is whether it's rendered at all.
+    const message = jest
+      .spyOn(MessageBuilder, 'message')
+      .mockImplementation(() => ({ html: () => '<div></div>' }));
+    jest.spyOn(menu, 'renderUserDetails').mockImplementation(() => {});
+    jest.spyOn(menu, 'setActionsVisibility').mockImplementation(() => {});
+
+    // Opened from a user list entry, which carries no username for
+    // `addContent` to read through `innerText` — jsdom doesn't implement it.
+    menu.clickedNick = 'cake';
+    menu.addContent($('<div class="user-entry"></div>'));
+    menu.clickedNick = 'destiny';
+    resolveHistory([{ messageText: 'hey', timestamp: 1000 }]);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(message).not.toHaveBeenCalled();
   });
 });

@@ -510,6 +510,10 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     this.setMessageHistoryStatus('Loading history...');
     this.loadMessageHistory(displayName)
       .then((messages) => {
+        // Bail if a different user's menu was opened while this was in flight.
+        if (this.clickedNick !== requestedNick) {
+          return;
+        }
         messages.forEach((m) => {
           const messageElement = this.buildMessageMarkup({
             username: displayName,
@@ -522,6 +526,9 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
         this.setMessageHistoryStatus(null);
       })
       .catch((error) => {
+        if (this.clickedNick !== requestedNick) {
+          return;
+        }
         this.setMessageHistoryStatus(
           `Failed to load history: ${error.message}`,
         );
