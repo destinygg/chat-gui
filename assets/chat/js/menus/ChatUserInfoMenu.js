@@ -1,6 +1,7 @@
 import $ from 'jquery';
 import moment from 'moment';
-import { MessageBuilder } from '../messages';
+import { MessageBuilder, MessageTypes } from '../messages';
+import { DATE_FORMATS } from '../const';
 import ChatUser from '../user';
 import UserFeatures from '../features';
 import UserRoles from '../roles';
@@ -38,6 +39,12 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     )[0];
 
     this.createdDateSubheader = this.ui.find('.user-info h5.date-subheader')[0];
+
+    this.lastMessageSubheader = this.ui.find(
+      '.user-info h5.last-message-subheader',
+    )[0];
+    // When the newest message the menu knows of was sent. See `noteMessageSent`.
+    this.lastMessageAt = null;
 
     this.ageSubheader = this.ui.find('.user-info h5.age-subheader')[0];
 
@@ -118,6 +125,16 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     );
 
     this.chat.source.on('MSG', this.handleNewMessage.bind(this));
+
+    // The last message is shown relative to now, which moves on while the menu
+    // stays open.
+    this.on('show', () => {
+      this.lastMessageTimer = setInterval(
+        () => this.renderLastMessage(),
+        15000,
+      );
+    });
+    this.on('hide', () => clearInterval(this.lastMessageTimer));
   }
 
   // Dismissed only by its own close control or ESC. It is a window the user
@@ -201,6 +218,19 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     this.actionsSection.toggleClass('hidden', state !== 'loaded');
     this.loadingNotice.toggleClass('hidden', state !== 'loading');
     this.notFoundNotice.toggleClass('hidden', state !== 'notFound');
+  }
+
+  /**
+   * The menu is placed while it may still only hold a loading spinner, and
+   * the user's details and history land after that. Filled in, it can reach
+   * past the bottom of the chat, where it would be clipped — so it moves back
+   * inside whenever it's redrawn.
+   */
+  redraw() {
+    super.redraw();
+    if (this.visible) {
+      this.moveTo(this.ui[0].offsetLeft, this.ui[0].offsetTop);
+    }
   }
 
   // Collapses the menu to a minimal "user not found" view.
@@ -456,6 +486,9 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     this.messagesContainer.empty();
     this.updateNoMessagesNotice(true);
 
+    this.lastMessageAt = null;
+    this.noteMessageSent(this.lastMessageInChat(this.clickedNick));
+
     this.header.text(displayName);
     this.header.addClass(usernameFeatures);
 
@@ -510,6 +543,10 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     this.setMessageHistoryStatus('Loading history...');
     this.loadMessageHistory(displayName)
       .then((messages) => {
+        // Bail if a different user's menu was opened while this was in flight.
+        if (this.clickedNick !== requestedNick) {
+          return;
+        }
         messages.forEach((m) => {
           const messageElement = this.buildMessageMarkup({
             username: displayName,
@@ -518,10 +555,16 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
           });
           this.messagesContainer.prepend(messageElement);
         });
+        if (messages.length > 0) {
+          this.noteMessageSent(Math.max(...messages.map((m) => m.timestamp)));
+        }
         this.updateNoMessagesNotice();
         this.setMessageHistoryStatus(null);
       })
       .catch((error) => {
+        if (this.clickedNick !== requestedNick) {
+          return;
+        }
         this.setMessageHistoryStatus(
           `Failed to load history: ${error.message}`,
         );
@@ -530,6 +573,59 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
         this.redraw();
         this.scrollplugin.scrollBottom();
       });
+  }
+
+  /**
+   * When the user last spoke among the messages chat still holds, or `null`.
+   * The history is read from RustleSearch's logs rather than from chat, so it
+   * can be missing a message chat has already shown.
+   */
+  lastMessageInChat(nick) {
+    const sent = (this.chat.mainwindow?.messages ?? [])
+      // An emote combo holds the messages that built it up.
+      .flatMap((m) => (m.type === MessageTypes.EMOTE ? m.messages : [m]))
+      .filter(
+        (m) =>
+          m.type === MessageTypes.USER &&
+          !m.target &&
+          m.user?.username === nick,
+      )
+      .map((m) => m.timestamp.valueOf());
+
+    return sent.length > 0 ? Math.max(...sent) : null;
+  }
+
+  /**
+   * Keeps `timestamp` as the user's last message if it's newer than the one
+   * already known, and shows how long ago the last message was.
+   */
+  noteMessageSent(timestamp) {
+    if (timestamp != null) {
+      const sent = moment(timestamp);
+      if (!this.lastMessageAt || sent.isAfter(this.lastMessageAt)) {
+        this.lastMessageAt = sent;
+      }
+    }
+    this.renderLastMessage();
+  }
+
+  renderLastMessage() {
+    if (!this.lastMessageAt) {
+      this.lastMessageSubheader.style.display = 'none';
+      this.lastMessageSubheader.replaceChildren();
+      return;
+    }
+
+    const time = document.createElement('time');
+    time.className = 'time';
+    time.setAttribute('datetime', this.lastMessageAt.toISOString());
+    time.title = this.lastMessageAt.format(DATE_FORMATS.FULL);
+    // A timestamp from a clock slightly ahead of this one would otherwise read
+    // "in a few seconds".
+    time.textContent = moment.min(this.lastMessageAt, moment()).fromNow();
+
+    this.lastMessageSubheader.style.display = '';
+    this.lastMessageSubheader.replaceChildren('Last message: ', time);
   }
 
   /**
@@ -664,6 +760,9 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
       user,
       message.timestamp,
     );
+    // Every message here is from the user the menu is titled with, so each
+    // one reads as a continuation, the way a run of them does in chat.
+    messageObject.continued = true;
 
     return messageObject.html(this.chat);
   }
@@ -674,6 +773,8 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     }
 
     if (message.nick?.toLowerCase() === this.clickedNick) {
+      this.noteMessageSent(message.timestamp);
+
       const messageElement = this.buildMessageMarkup({
         username: message.nick,
         messageText: message.data,

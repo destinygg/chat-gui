@@ -9,6 +9,8 @@ import $ from 'jquery';
 import ChatMenu from './ChatMenu';
 import ChatUserInfoMenu from './ChatUserInfoMenu';
 import ChatUser from '../user';
+import { MessageBuilder, MessageTypes } from '../messages';
+import ChatUserMessage from '../messages/ChatUserMessage';
 
 // A minimal `.user-info` subtree containing the subheader rows that
 // `renderUserDetails` reads. `.scrollable` is intentionally omitted so the base
@@ -212,5 +214,269 @@ describe('ChatUserInfoMenu highlight action', () => {
 
     expect(userfocus.toggleElement).not.toHaveBeenCalled();
     expect(userfocus.toggleFocus).toHaveBeenCalledWith('destiny');
+  });
+});
+
+describe('ChatUserInfoMenu message history', () => {
+  const MENU_WITH_MESSAGES = `
+    <div id="chat-user-info">
+      <div class="toolbar"><span></span></div>
+      <div class="user-info">
+        <h5 class="last-message-subheader"></h5>
+        <h5 class="tag-subheader"></h5>
+        <div class="content">
+          <div class="message-history-status"></div>
+          <div class="no-messages-notice"></div>
+          <div class="messages"></div>
+        </div>
+      </div>
+    </div>`;
+
+  afterEach(() => jest.restoreAllMocks());
+
+  it("drops a history that lands after another user's menu opened", async () => {
+    let resolveHistory;
+    const history = new Promise((resolve) => {
+      resolveHistory = resolve;
+    });
+    const chat = {
+      output: { on: () => {} },
+      source: { on: () => {} },
+      user: { hasModPowers: () => false },
+      users: new Map(),
+      taggednotes: new Map(),
+      userInfoService: {
+        getUserInfo: async () => ({ nick: 'Cake', features: [] }),
+      },
+      userMessageService: { getUserMessages: () => history },
+    };
+    const menu = new ChatUserInfoMenu(
+      $(MENU_WITH_MESSAGES),
+      $('<div></div>'),
+      chat,
+    );
+    menu.scrollplugin = { scrollBottom: () => {}, reset: () => {} };
+
+    // Rendering a message for real runs every formatter, which needs far more
+    // of the chat than this. What matters here is whether it's rendered at all.
+    const message = jest
+      .spyOn(MessageBuilder, 'message')
+      .mockImplementation(() => ({ html: () => '<div></div>' }));
+    jest.spyOn(menu, 'renderUserDetails').mockImplementation(() => {});
+    jest.spyOn(menu, 'setActionsVisibility').mockImplementation(() => {});
+
+    // Opened from a user list entry, which carries no username for
+    // `addContent` to read through `innerText` — jsdom doesn't implement it.
+    menu.clickedNick = 'cake';
+    menu.addContent($('<div class="user-entry"></div>'));
+    menu.clickedNick = 'destiny';
+    resolveHistory([{ messageText: 'hey', timestamp: 1000 }]);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(message).not.toHaveBeenCalled();
+  });
+
+  // Every message is from the user the menu is titled with, so the name gives
+  // way to chat's continuation arrow.
+  it('renders each message as a continuation', () => {
+    const chat = {
+      output: { on: () => {} },
+      source: { on: () => {} },
+      flairs: [],
+      flairsMap: new Map(),
+    };
+    const menu = new ChatUserInfoMenu(
+      $(MENU_WITH_MESSAGES),
+      $('<div></div>'),
+      chat,
+    );
+    // The formatters need far more of the chat than this, and the body isn't
+    // what's under test.
+    jest
+      .spyOn(ChatUserMessage.prototype, 'buildMessageTxt')
+      .mockReturnValue('<span class="text">hey</span>');
+
+    const element = menu.buildMessageMarkup({
+      username: 'Cake',
+      messageText: 'hey',
+      timestamp: 1000,
+    });
+
+    expect(element.classList.contains('msg-continue')).toBe(true);
+    expect(element.querySelector('.ctrl').textContent).toBe('');
+  });
+});
+
+describe('ChatUserInfoMenu last message', () => {
+  const NOW = Date.parse('2026-09-13T12:00:00Z');
+  const MINUTE = 60 * 1000;
+
+  beforeEach(() => jest.useFakeTimers({ now: NOW }));
+  afterEach(() => {
+    jest.useRealTimers();
+    jest.restoreAllMocks();
+  });
+
+  function setup({ history = [], chatMessages = [] } = {}) {
+    const ui = $(`
+      <div id="chat-user-info">
+        <div class="toolbar"><span></span></div>
+        <div class="user-info">
+          <h5 class="last-message-subheader"></h5>
+          <h5 class="tag-subheader"></h5>
+          <div class="content">
+            <div class="message-history-status"></div>
+            <div class="no-messages-notice"></div>
+            <div class="messages"></div>
+          </div>
+        </div>
+      </div>`);
+    const chat = {
+      output: { on: () => {} },
+      source: { on: () => {} },
+      user: { hasModPowers: () => false },
+      users: new Map(),
+      taggednotes: new Map(),
+      mainwindow: { messages: chatMessages },
+      userInfoService: {
+        getUserInfo: async () => ({ nick: 'Cake', features: [] }),
+      },
+      userMessageService: { getUserMessages: async () => history },
+    };
+    const menu = new ChatUserInfoMenu(ui, $('<div></div>'), chat);
+    menu.scrollplugin = { scrollBottom: () => {}, reset: () => {} };
+
+    // None of this is what's under test, and rendering a message for real
+    // needs far more of the chat.
+    jest
+      .spyOn(MessageBuilder, 'message')
+      .mockImplementation(() => ({ html: () => '<div></div>' }));
+    jest.spyOn(menu, 'renderUserDetails').mockImplementation(() => {});
+    jest.spyOn(menu, 'setActionsVisibility').mockImplementation(() => {});
+
+    // Opened from a user list entry, which carries no username for
+    // `addContent` to read through `innerText` — jsdom doesn't implement it.
+    const open = async () => {
+      menu.clickedNick = 'cake';
+      menu.addContent($('<div class="user-entry"></div>'));
+      await jest.advanceTimersByTimeAsync(0);
+    };
+    const row = ui.find('.last-message-subheader')[0];
+
+    return { menu, open, row };
+  }
+
+  const said = (nick, ago, target = null) => {
+    const message = new ChatUserMessage('hi', new ChatUser(nick), NOW - ago);
+    message.target = target;
+    return message;
+  };
+
+  it('shows how long ago the newest message in the history was sent', async () => {
+    const { open, row } = setup({
+      history: [
+        { timestamp: NOW - 5 * MINUTE },
+        { timestamp: NOW - 20 * MINUTE },
+      ],
+    });
+
+    await open();
+
+    expect(row.style.display).toBe('');
+    expect(row.textContent).toBe('Last message: 5 minutes ago');
+    expect(row.querySelector('time').getAttribute('datetime')).toBe(
+      new Date(NOW - 5 * MINUTE).toISOString(),
+    );
+  });
+
+  it('takes a newer message that chat still holds', async () => {
+    const { open, row } = setup({
+      history: [{ timestamp: NOW - 30 * MINUTE }],
+      chatMessages: [
+        said('Cake', 10 * MINUTE),
+        { type: MessageTypes.EMOTE, messages: [said('Cake', 2 * MINUTE)] },
+        // Neither of these is Cake speaking in chat.
+        said('Destiny', MINUTE / 2),
+        said('Cake', MINUTE / 2, 'destiny'),
+      ],
+    });
+
+    await open();
+
+    expect(row.textContent).toBe('Last message: 2 minutes ago');
+  });
+
+  it('moves on to a message sent while the menu is open', async () => {
+    const { menu, open, row } = setup({
+      history: [{ timestamp: NOW - 60 * MINUTE }],
+    });
+    await open();
+    menu.visible = true;
+
+    menu.handleNewMessage({ nick: 'Cake', data: 'hi', timestamp: NOW });
+
+    expect(row.textContent).toBe('Last message: a few seconds ago');
+  });
+
+  it('is hidden when the user has no messages', async () => {
+    const { open, row } = setup();
+
+    await open();
+
+    expect(row.style.display).toBe('none');
+    expect(row.textContent).toBe('');
+  });
+
+  it('keeps the time current only while the menu is open', async () => {
+    const { menu, open, row } = setup({ history: [{ timestamp: NOW }] });
+    await open();
+    menu.show();
+
+    jest.advanceTimersByTime(2 * MINUTE);
+    expect(row.textContent).toBe('Last message: 2 minutes ago');
+
+    menu.hide();
+    jest.advanceTimersByTime(10 * MINUTE);
+    expect(row.textContent).toBe('Last message: 2 minutes ago');
+  });
+});
+
+describe('ChatUserInfoMenu redraw', () => {
+  it('moves back inside the chat once its content has grown it', () => {
+    const chatEl = document.createElement('div');
+    const ui = $(`
+      <div id="chat-user-info">
+        <div class="toolbar"><span></span></div>
+      </div>`);
+    const menuEl = ui[0];
+    chatEl.append(menuEl);
+
+    // jsdom lays nothing out. A 600px-tall chat, and a menu that has grown to
+    // 300px while placed 500px down it.
+    Object.defineProperties(chatEl, {
+      clientWidth: { get: () => 800 },
+      clientHeight: { get: () => 600 },
+    });
+    Object.defineProperties(menuEl, {
+      offsetParent: { get: () => chatEl },
+      offsetWidth: { get: () => 250 },
+      offsetHeight: { get: () => 300 },
+      offsetLeft: { get: () => parseInt(menuEl.style.left, 10) || 0 },
+      offsetTop: { get: () => parseInt(menuEl.style.top, 10) || 0 },
+    });
+    menuEl.style.left = '100px';
+    menuEl.style.top = '500px';
+
+    const chat = {
+      output: { on: () => {} },
+      source: { on: () => {} },
+    };
+    const menu = new ChatUserInfoMenu(ui, $('<div></div>'), chat);
+    menu.visible = true;
+
+    menu.redraw();
+
+    expect(menuEl.style.left).toBe('100px');
+    expect(menuEl.style.top).toBe('300px');
   });
 });
