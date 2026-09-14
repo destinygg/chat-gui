@@ -115,6 +115,24 @@ $toolbar-icons-map: (
     // inside, so it would otherwise sit tighter than the same messages in chat.
     .messages {
       line-height: 1.65em;
+
+      // A message that is one long unbroken string should start beside the
+      // arrow and break where the line runs out. `break-word` only breaks a
+      // string too long for a line of its own, so a space anywhere ahead of it
+      // lets the whole string drop to the next line first. Those spaces are the
+      // ones between the message's parts — after the timestamp — and the one
+      // inside the arrow.
+      .msg-chat {
+        white-space: nowrap;
+
+        .text {
+          white-space: normal;
+        }
+      }
+
+      .msg-continue .text:before {
+        content: '>\00a0';
+      }
     }
   }
 
