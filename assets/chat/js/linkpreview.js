@@ -5,6 +5,17 @@ import { youtubeidregex } from './regex';
 const IMAGE_EXTENSION_REGEX = /\.(?:png|jpe?g|gif|webp|avif)$/i;
 const IMGUR_HOSTS = new Set(['imgur.com', 'www.imgur.com', 'm.imgur.com']);
 const IMGUR_ID_REGEX = /^\/(\w{5,8})(?:\.(?:gifv|mp4))?$/;
+// Upload hosts that serve the file itself at a short link, so a link without
+// an extension is still an image.
+const SHORT_LINK_IMAGE_HOSTS = new Set([
+  'catbox.moe',
+  'files.catbox.moe',
+  'kappa.lol',
+  'gachi.gay',
+  'femboy.beauty',
+  'segs.lol',
+]);
+const SHORT_LINK_PATH_REGEX = /^\/\w+$/;
 const X_HOSTS = new Set([
   'x.com',
   'www.x.com',
@@ -32,9 +43,10 @@ function parseUrl(href) {
 }
 
 /**
- * The image to preview for a link: a direct image link on any host, or the
- * medium thumbnail of a single-image Imgur page. Only HTTPS images are
- * previewed so the chat never loads mixed content.
+ * The image to preview for a link: a direct image link on any host, a short
+ * link on an upload host that serves images at one, or the medium thumbnail
+ * of a single-image Imgur page. Only HTTPS images are previewed so the chat
+ * never loads mixed content.
  *
  * @param {string} href
  * @return {string|null}
@@ -52,6 +64,15 @@ export function getImagePreviewUrl(href) {
     if (match) {
       return `https://i.imgur.com/${match[1]}m.jpg`;
     }
+  }
+
+  // A short link may also be a video or other file, which fails to load as
+  // an image and so shows no preview.
+  if (
+    SHORT_LINK_IMAGE_HOSTS.has(url.hostname) &&
+    SHORT_LINK_PATH_REGEX.test(url.pathname)
+  ) {
+    return url.href;
   }
 
   return IMAGE_EXTENSION_REGEX.test(url.pathname) ? url.href : null;

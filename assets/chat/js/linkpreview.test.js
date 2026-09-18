@@ -11,6 +11,15 @@ describe('getImagePreviewUrl', () => {
     ['https://imgur.com/0KFBHTB', 'https://i.imgur.com/0KFBHTBm.jpg'],
     ['https://m.imgur.com/0KFBHTB', 'https://i.imgur.com/0KFBHTBm.jpg'],
     ['https://i.imgur.com/0KFBHTB.gifv', 'https://i.imgur.com/0KFBHTBm.jpg'],
+    [
+      'https://files.catbox.moe/h06d7u.png',
+      'https://files.catbox.moe/h06d7u.png',
+    ],
+    ['https://kappa.lol/NodsrJ.png', 'https://kappa.lol/NodsrJ.png'],
+    ['https://kappa.lol/NodsrJ', 'https://kappa.lol/NodsrJ'],
+    ['https://gachi.gay/NodsrJ', 'https://gachi.gay/NodsrJ'],
+    ['https://femboy.beauty/ZFNKk6', 'https://femboy.beauty/ZFNKk6'],
+    ['https://segs.lol/GdrAPC', 'https://segs.lol/GdrAPC'],
   ])('Should preview %s as %s', (href, expected) => {
     expect(getImagePreviewUrl(href)).toBe(expected);
   });
@@ -21,6 +30,9 @@ describe('getImagePreviewUrl', () => {
     'https://example.com/image.png.html',
     'https://imgur.com/a/abcdefg',
     'https://imgur.com/gallery/cute-dog-5eBAyD4',
+    'https://segs.lol/',
+    'https://kappa.lol/some/page',
+    'https://example.com/GdrAPC',
     'not a url',
   ])('Should not preview %s', (href) => {
     expect(getImagePreviewUrl(href)).toBeNull();
