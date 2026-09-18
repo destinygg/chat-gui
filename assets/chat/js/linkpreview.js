@@ -16,6 +16,16 @@ const SHORT_LINK_IMAGE_HOSTS = new Set([
   'segs.lol',
 ]);
 const SHORT_LINK_PATH_REGEX = /^\/\w+$/;
+// Hosts whose direct image links are previewed by default: the ones the other
+// previews already load from. Loading an image from any other host would
+// share the viewer's IP address with a host the poster picked, so those are
+// only previewed once the viewer turns that on.
+const KNOWN_IMAGE_HOSTS = new Set([
+  ...IMGUR_HOSTS,
+  'i.imgur.com',
+  ...SHORT_LINK_IMAGE_HOSTS,
+  'pbs.twimg.com',
+]);
 const X_HOSTS = new Set([
   'x.com',
   'www.x.com',
@@ -43,15 +53,16 @@ function parseUrl(href) {
 }
 
 /**
- * The image to preview for a link: a direct image link on any host, a short
- * link on an upload host that serves images at one, or the medium thumbnail
- * of a single-image Imgur page. Only HTTPS images are previewed so the chat
- * never loads mixed content.
+ * The image to preview for a link: a direct image link on a known image host
+ * (or on any host with `previewAllImages`), a short link on an upload host
+ * that serves images at one, or the medium thumbnail of a single-image Imgur
+ * page. Only HTTPS images are previewed so the chat never loads mixed content.
  *
  * @param {string} href
+ * @param {boolean} [previewAllImages]
  * @return {string|null}
  */
-export function getImagePreviewUrl(href) {
+export function getImagePreviewUrl(href, previewAllImages = false) {
   const url = parseUrl(href);
   if (url?.protocol !== 'https:') {
     return null;
@@ -73,6 +84,10 @@ export function getImagePreviewUrl(href) {
     SHORT_LINK_PATH_REGEX.test(url.pathname)
   ) {
     return url.href;
+  }
+
+  if (!previewAllImages && !KNOWN_IMAGE_HOSTS.has(url.hostname)) {
+    return null;
   }
 
   return IMAGE_EXTENSION_REGEX.test(url.pathname) ? url.href : null;
@@ -140,10 +155,15 @@ function textElement(tagName, className, text) {
  *   youtubeOEmbedService: import('./services').YouTubeOEmbedService,
  *   xPostService: import('./services').XPostService,
  * }} services
+ * @param {{ previewAllImages?: boolean }} [options]
  * @return {Promise<HTMLElement|null>}
  * @throws {Error} When the preview's data or image can't be loaded.
  */
-export async function buildLinkPreview(link, services) {
+export async function buildLinkPreview(
+  link,
+  services,
+  { previewAllImages = false } = {},
+) {
   const { href } = link;
 
   const youtubeMatch = href.match(youtubeidregex);
@@ -181,7 +201,7 @@ export async function buildLinkPreview(link, services) {
     return container(...children);
   }
 
-  const imageUrl = getImagePreviewUrl(href);
+  const imageUrl = getImagePreviewUrl(href, previewAllImages);
   if (imageUrl) {
     return container(await loadImage(imageUrl));
   }

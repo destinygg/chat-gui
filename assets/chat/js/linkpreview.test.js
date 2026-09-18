@@ -3,7 +3,6 @@ import { getImagePreviewUrl, getXPostId } from './linkpreview';
 describe('getImagePreviewUrl', () => {
   it.each([
     ['https://i.imgur.com/0KFBHTB.jpg', 'https://i.imgur.com/0KFBHTB.jpg'],
-    ['https://i.redd.it/abc123.PNG', 'https://i.redd.it/abc123.PNG'],
     [
       'https://pbs.twimg.com/media/abc.webp?name=large',
       'https://pbs.twimg.com/media/abc.webp?name=large',
@@ -24,6 +23,14 @@ describe('getImagePreviewUrl', () => {
     expect(getImagePreviewUrl(href)).toBe(expected);
   });
 
+  it.each(['https://i.redd.it/abc123.PNG', 'https://example.com/image.png'])(
+    'Should preview %s only when previewing all images',
+    (href) => {
+      expect(getImagePreviewUrl(href)).toBeNull();
+      expect(getImagePreviewUrl(href, true)).toBe(href);
+    },
+  );
+
   it.each([
     'http://example.com/image.png',
     'https://example.com/page',
@@ -34,8 +41,8 @@ describe('getImagePreviewUrl', () => {
     'https://kappa.lol/some/page',
     'https://example.com/GdrAPC',
     'not a url',
-  ])('Should not preview %s', (href) => {
-    expect(getImagePreviewUrl(href)).toBeNull();
+  ])('Should not preview %s even when previewing all images', (href) => {
+    expect(getImagePreviewUrl(href, true)).toBeNull();
   });
 });
 

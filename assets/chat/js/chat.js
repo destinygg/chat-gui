@@ -508,12 +508,19 @@ class Chat {
       target.dataset.tipped = true;
 
       try {
-        const content = await buildLinkPreview(target, {
-          youtubeOEmbedService: this.youtubeOEmbedService,
-          xPostService: this.xPostService,
-        });
+        const content = await buildLinkPreview(
+          target,
+          {
+            youtubeOEmbedService: this.youtubeOEmbedService,
+            xPostService: this.xPostService,
+          },
+          { previewAllImages: this.settings.get('previewallimages') },
+        );
 
+        // Nothing was requested, so unmark the link: the viewer may turn on
+        // previews for all images before hovering it again.
         if (!content) {
+          delete target.dataset.tipped;
           return;
         }
 
