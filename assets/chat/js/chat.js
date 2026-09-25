@@ -51,6 +51,7 @@ import {
   UserInfoService,
   UserMessageService,
   YouTubeOEmbedService,
+  XPostService,
 } from './services';
 import makeSafeForRegex, {
   regextime,
@@ -58,13 +59,13 @@ import makeSafeForRegex, {
   nickregex,
   nsfwregex,
   nsflregex,
-  youtubeidregex,
 } from './regex';
 import { HashLinkConverter, MISSING_ARG_ERROR } from './hashlinkconverter';
 import ChatCommands, { getSlashCommand, removeSlashCommand } from './commands';
 import MessageTemplateHTML from '../../views/templates.html';
 import EventBarEvent from './event-bar/EventBarEvent';
 import Mentions from './mentions';
+import { buildLinkPreview } from './linkpreview';
 
 class Chat {
   constructor(config) {
@@ -100,6 +101,7 @@ class Chat {
     this.userMessageService = new UserMessageService();
     this.userInfoService = new UserInfoService(this.config.api.base);
     this.youtubeOEmbedService = new YouTubeOEmbedService();
+    this.xPostService = new XPostService();
 
     this.user = new ChatUser();
     this.users = new Map();
@@ -489,7 +491,7 @@ class Chat {
       this.focusIfNothingSelected();
     });
 
-    // Youtube oEmbed tooltip
+    // Link preview tooltip (YouTube, X posts, images)
     this.ui.on('mouseover', 'a.externallink', async (e) => {
       const { target } = e;
 
@@ -498,40 +500,32 @@ class Chat {
         return;
       }
 
-      // Already processed
+      // Already processed. Marked before the preview loads so hovering again
+      // while it's in flight doesn't request and attach a second one.
       if (target.dataset.tipped) {
         return;
       }
-
-      const match = target.href.match(youtubeidregex);
-
-      // Not a youtube id
-      if (!match) {
-        return;
-      }
+      target.dataset.tipped = true;
 
       try {
-        const result = await this.youtubeOEmbedService.getOEmbed(match[1]);
+        const content = await buildLinkPreview(
+          target,
+          {
+            youtubeOEmbedService: this.youtubeOEmbedService,
+            xPostService: this.xPostService,
+          },
+          { previewAllImages: this.settings.get('previewallimages') },
+        );
 
-        const container = document.createElement('div');
-        container.style.display = 'flex';
-        container.style.flexDirection = 'column';
-        container.style.marginTop = '4px';
-        container.style.gap = '0.25em';
+        // Nothing was requested, so unmark the link: the viewer may turn on
+        // previews for all images before hovering it again.
+        if (!content) {
+          delete target.dataset.tipped;
+          return;
+        }
 
-        const img = document.createElement('img');
-        img.src = result.thumbnail_url;
-
-        const title = document.createElement('strong');
-        title.textContent = result.title;
-
-        const author = document.createElement('span');
-        author.textContent = result.author_name;
-
-        container.append(img, title, author);
-
-        const youtubeTippy = tippy(target, {
-          content: container,
+        const previewTippy = tippy(target, {
+          content,
           allowHTML: true,
           arrow: roundArrow,
           duration: 0,
@@ -539,11 +533,9 @@ class Chat {
           maxWidth: 250,
         });
 
-        target.dataset.tipped = true;
-
         // If still hovering show immediately.
         if (target.matches(':hover')) {
-          youtubeTippy.show();
+          previewTippy.show();
         }
       } catch {
         /* Do nothing */
