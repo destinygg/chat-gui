@@ -229,10 +229,10 @@ class MockChatSource extends EventEmitter {
         // user is a plain subscriber. Toggling goes through the real
         // UPDATEUSER path, so it also exercises the settings reconcile.
         this.localIsMod = !this.localIsMod;
-        const features = this.localIsMod
-          ? [...USERS.local.features, 'moderator']
-          : [...USERS.local.features];
-        const updated = { ...USERS.local, features };
+        const roles = this.localIsMod
+          ? [...USERS.local.roles, 'MODERATOR']
+          : [...USERS.local.roles];
+        const updated = { ...USERS.local, roles };
         this.emit('DISPATCH', { data: updated, event: 'UPDATEUSER' });
         this.emit('UPDATEUSER', updated);
         this.emitInfo(
@@ -281,7 +281,7 @@ class MockChatSource extends EventEmitter {
   }
 
   emitInfo(message) {
-    const msg = buildMSG('InfoBot', message, ['bot', 'flair11'], ['user']);
+    const msg = buildMSG('InfoBot', message, ['bot', 'flair11'], ['BOT']);
     this.emit('DISPATCH', { data: msg, event: 'MSG' });
     this.emit('MSG', msg);
   }

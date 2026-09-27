@@ -3,8 +3,6 @@ import moment from 'moment';
 import { MessageBuilder, MessageTypes } from '../messages';
 import { DATE_FORMATS } from '../const';
 import ChatUser from '../user';
-import UserFeatures from '../features';
-import UserRoles from '../roles';
 import ChatMenuFloating from './ChatMenuFloating';
 
 // Display labels for the raw gender/age enum values sent by the user-info API.
@@ -302,7 +300,7 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     this.banUserBtn.removeClass('active');
     this.muteUserBtn.removeClass('active');
 
-    const isBot = clickedUser?.hasFeature(UserFeatures.BOT);
+    const isBot = clickedUser?.isBot();
     if (isBot) {
       this.ignoreUserBtn.toggleClass('hidden', true);
       this.unignoreUserBtn.toggleClass('hidden', true);
@@ -320,11 +318,7 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     );
 
     const clickedUserId = clickedUser?.id;
-    if (
-      (this.chat.user.hasModPowers() ||
-        this.chat.user.hasRole(UserRoles.MODERATOR)) &&
-      clickedUserId
-    ) {
+    if (this.chat.user.hasModPowers() && clickedUserId) {
       this.adminUserBtn.toggleClass('hidden', false);
       this.adminUserBtn.attr(
         'href',
