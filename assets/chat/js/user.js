@@ -133,7 +133,6 @@ class ChatUser {
       UserRole.MODERATOR,
       UserRole.PROTECTED,
       UserRole.ADMIN,
-      UserRole.VIP,
     );
   }
 

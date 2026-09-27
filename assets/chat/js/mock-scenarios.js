@@ -66,7 +66,7 @@ const USERS = {
     id: 1010,
     nick: 'VIPVictor',
     features: ['vip', 'subscriber', 'flair13'],
-    roles: ['VIP'],
+    roles: ['user'],
   },
   bot: {
     id: 1011,
