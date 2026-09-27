@@ -53,6 +53,8 @@ export default class EmoteService {
 
   setEmotes(emotes) {
     this.emotes = emotes;
+    this.tiers = new Set();
+    this.emotesMapped = new Map();
     emotes.forEach((e) => {
       this.tiers.add(e.minimumSubTier);
       this.emotesMapped.set(e.prefix, e);

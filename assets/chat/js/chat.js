@@ -98,6 +98,7 @@ class Chat {
     this.flairs = [];
     this.flairsMap = new Map();
     this.emoteService = new EmoteService();
+    this.cssLinks = new Map();
     this.userMessageService = new UserMessageService();
     this.userInfoService = new UserInfoService(this.config.api.base);
     this.youtubeOEmbedService = new YouTubeOEmbedService();
@@ -154,6 +155,9 @@ class Chat {
     this.source.on('SUBONLY', (data) => this.onSUBONLY(data));
     this.source.on('BROADCAST', (data) => this.onBROADCAST(data));
     this.source.on('RELOAD', () => this.onRELOAD());
+    this.source.on('REFRESHCHATASSETS', (data) =>
+      this.onREFRESHCHATASSETS(data),
+    );
     this.source.on('PRIVMSGSENT', (data) => this.onPRIVMSGSENT(data));
     this.source.on('PRIVMSG', (data) => this.onPRIVMSG(data));
     this.source.on('POLLSTART', (data) => this.onPOLLSTART(data));
@@ -700,6 +704,7 @@ class Chat {
   async loadEmotes() {
     this.loadCss(
       `${this.config.cdn.base}/emotes/emotes.css?_=${this.config.cacheKey}`,
+      'emotes',
     );
     return fetch(
       `${this.config.cdn.base}/emotes/emotes.json?_=${this.config.cacheKey}`,
@@ -715,6 +720,7 @@ class Chat {
   async loadFlairs() {
     this.loadCss(
       `${this.config.cdn.base}/flairs/flairs.css?_=${this.config.cacheKey}`,
+      'flairs',
     );
     return fetch(
       `${this.config.cdn.base}/flairs/flairs.json?_=${this.config.cacheKey}`,
@@ -768,7 +774,12 @@ class Chat {
   }
 
   setEmotes(emotes) {
+    const previous = this.emoteService.prefixes;
     this.emoteService.setEmotes(emotes);
+    const current = new Set(this.emoteService.prefixes);
+    previous
+      .filter((prefix) => !current.has(prefix))
+      .forEach((prefix) => this.autocomplete.remove(prefix));
     return this;
   }
 
@@ -1584,6 +1595,14 @@ class Chat {
       }),
       '',
     ).into(this);
+  }
+
+  async onREFRESHCHATASSETS(data) {
+    if (!data?.cacheKey || data.cacheKey === this.config.cacheKey) {
+      return;
+    }
+    this.config.cacheKey = data.cacheKey;
+    await this.loadEmotesAndFlairs();
   }
 
   onSUBSCRIPTION(data) {
@@ -3123,12 +3142,32 @@ class Chat {
     );
   }
 
-  loadCss(url) {
+  /**
+   * @param {string} url
+   * @param {string} [key] Replaces the stylesheet previously loaded under this
+   *   key once the new one has loaded, so reloading doesn't flash unstyled.
+   */
+  loadCss(url, key) {
     const link = document.createElement('link');
     link.href = url;
     link.type = 'text/css';
     link.rel = 'stylesheet';
     link.media = 'screen';
+    if (key) {
+      link.dataset.chatCss = key;
+      this.cssLinks.set(key, link);
+      const removeStale = () => {
+        // A newer reload may have superseded this one; it cleans up instead.
+        if (this.cssLinks.get(key) !== link) {
+          return;
+        }
+        document
+          .querySelectorAll(`link[data-chat-css="${key}"]`)
+          .forEach((el) => el !== link && el.remove());
+      };
+      link.addEventListener('load', removeStale, { once: true });
+      link.addEventListener('error', removeStale, { once: true });
+    }
     document.getElementsByTagName('head')[0].appendChild(link);
     return link;
   }
