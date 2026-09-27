@@ -171,7 +171,6 @@ class ChatPoll {
   hasPermission(user) {
     return user.hasAnyRoles(
       UserRoles.ADMIN,
-      UserRoles.BOT,
       UserRoles.MODERATOR,
       UserRoles.POLLS,
     );
