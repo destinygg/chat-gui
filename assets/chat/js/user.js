@@ -1,4 +1,5 @@
 import UserFeature from './features';
+import UserRole from './roles';
 
 /**
  * @typedef {Object} User
@@ -122,19 +123,21 @@ class ChatUser {
     return this.roles.includes(role);
   }
 
+  // Privileges come only from roles; features (flairs) are cosmetic.
   hasModPowers() {
-    return this.hasAnyFeatures(UserFeature.ADMIN, UserFeature.MODERATOR);
+    return this.hasAnyRoles(UserRole.ADMIN, UserRole.MODERATOR);
   }
 
   isPrivileged() {
-    return this.hasAnyFeatures(
-      UserFeature.MODERATOR,
-      UserFeature.PROTECTED,
-      UserFeature.ADMIN,
-      UserFeature.BROADCASTER,
-      UserFeature.VIP,
-      UserFeature.MICRO,
+    return this.hasAnyRoles(
+      UserRole.MODERATOR,
+      UserRole.PROTECTED,
+      UserRole.ADMIN,
     );
+  }
+
+  isBot() {
+    return this.hasRole(UserRole.BOT);
   }
 
   isSubscriber() {

@@ -3,4 +3,6 @@ export default {
   MODERATOR: 'MODERATOR',
   HOST: 'HOST',
   POLLS: 'POLLS',
+  PROTECTED: 'PROTECTED',
+  BOT: 'BOT',
 };

@@ -45,7 +45,6 @@ import ChatWindow from './window';
 import { ChatPoll, parseQuestionAndTime } from './poll';
 import { isMuteActive, MutedTimer } from './mutedtimer';
 import EmoteService from './emotes';
-import UserFeatures from './features';
 import UserRoles from './roles';
 import {
   UserInfoService,
@@ -1140,7 +1139,7 @@ class Chat {
     const normalizedNick = nick.toLowerCase();
     if (ignore) {
       const user = this.users.get(normalizedNick);
-      if (user?.hasFeature(UserFeatures.BOT)) {
+      if (user?.isBot()) {
         return;
       }
     }
@@ -2115,7 +2114,7 @@ class Chat {
       if (!failure) {
         validUsernames.forEach((username) => {
           const user = this.users.get(username);
-          if (user?.hasFeature(UserFeatures.BOT)) {
+          if (user?.isBot()) {
             MessageBuilder.info(
               `You cannot ignore ${username} because they are a bot.`,
             ).into(this);
@@ -2907,7 +2906,7 @@ class Chat {
   }
 
   cmdADDPHRASE(parts) {
-    if (!this.user.hasAnyFeatures(UserFeatures.ADMIN, UserFeatures.MODERATOR)) {
+    if (!this.user.hasModPowers()) {
       MessageBuilder.error(errorstrings.get('nopermission')).into(this);
       return;
     }
@@ -2923,7 +2922,7 @@ class Chat {
   }
 
   cmdREMOVEPHRASE(parts) {
-    if (!this.user.hasAnyFeatures(UserFeatures.ADMIN, UserFeatures.MODERATOR)) {
+    if (!this.user.hasModPowers()) {
       MessageBuilder.error(errorstrings.get('nopermission')).into(this);
       return;
     }

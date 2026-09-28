@@ -1,6 +1,5 @@
 import $ from 'jquery';
 import { throttle } from 'throttle-debounce';
-import UserFeatures from './features';
 import UserRoles from './roles';
 import { MessageBuilder } from './messages';
 import ChatScrollPlugin from './scroll';
@@ -170,12 +169,10 @@ class ChatPoll {
   }
 
   hasPermission(user) {
-    return (
-      user.hasAnyFeatures(
-        UserFeatures.ADMIN,
-        UserFeatures.BOT,
-        UserFeatures.MODERATOR,
-      ) || user.hasRole(UserRoles.POLLS)
+    return user.hasAnyRoles(
+      UserRoles.ADMIN,
+      UserRoles.MODERATOR,
+      UserRoles.POLLS,
     );
   }
 
