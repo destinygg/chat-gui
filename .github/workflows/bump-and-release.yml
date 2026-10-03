@@ -16,6 +16,12 @@ on:
 jobs:
   bump-and-release:
     runs-on: ubuntu-latest
+    # Must match the environment configured on the npm trusted publisher,
+    # otherwise the OIDC claim is rejected.
+    environment: release
+    permissions:
+      contents: write
+      id-token: write
     steps:
       - uses: actions/checkout@v7
 
@@ -23,6 +29,9 @@ jobs:
         with:
           node-version: 22
           registry-url: https://registry.npmjs.org
+
+      - name: Upgrade npm
+        run: npm install -g npm@latest
 
       - name: Install Node.js dependencies
         run: npm ci
@@ -51,7 +60,7 @@ jobs:
           tag_name: ${{ steps.bump.outputs.tag }}
           generate_release_notes: true
 
-      - name: Publish to npm public registry
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm publish
+      # Authenticated by OIDC trusted publishing — no NPM_TOKEN. The version
+      # goes live once a maintainer runs 'npm stage approve <stage-id>'.
+      - name: Stage publish to npm public registry
+        run: npm stage publish
