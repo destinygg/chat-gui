@@ -37,7 +37,7 @@
     "linkify-html": "^4.3.2",
     "linkifyjs": "^4.3.2",
     "md5": "^2.3.0",
-    "moment": "~2.30.1",
+    "moment": "~2.31.0",
     "normalize.css": "~8.0.1",
     "overlayscrollbars": "^2.0.3",
     "sass-loader": "^17.0.0",
