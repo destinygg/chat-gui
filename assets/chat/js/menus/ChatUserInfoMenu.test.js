@@ -35,7 +35,10 @@ function makeMenu() {
     output: { on: () => {} },
     source: { on: () => {} },
     user: { hasModPowers: () => false },
-    config: { dggOrigin: 'https://www.destiny.gg' },
+    config: {
+      dggOrigin: 'https://www.destiny.gg',
+      profilePhotos: { alien: 'https://cdn.destiny.gg/img/alien.png' },
+    },
     bigscreenPath: '/bigscreen',
     isBigscreenEmbed: () => false,
     isDesktop: false,
@@ -525,5 +528,50 @@ describe('ChatUserInfoMenu profile action', () => {
     expect(ui.find('#profile-user-btn').attr('href')).toBe(
       'https://www.destiny.gg/u/a%20b',
     );
+  });
+});
+
+describe('ChatUserInfoMenu header photo', () => {
+  const photoIn = (ui) => ui.find('.toolbar .profile-photo');
+
+  it("shows the user's photo ahead of their name", () => {
+    const { menu, ui } = makeMenu();
+
+    menu.renderUserDetails(new ChatUser({ nick: 'a', photo: 'alien' }), '');
+
+    const photo = photoIn(ui);
+    expect(photo).toHaveLength(1);
+    expect(photo[0].src).toBe('https://cdn.destiny.gg/img/alien.png');
+    expect(photo[0].nextElementSibling).toBe(ui.find('.toolbar span')[0]);
+  });
+
+  it('shows one photo however often the details are rendered', () => {
+    const { menu, ui } = makeMenu();
+    const user = new ChatUser({ nick: 'a', photo: 'alien' });
+
+    menu.renderUserDetails(user, '');
+    menu.renderUserDetails(user, '');
+
+    expect(photoIn(ui)).toHaveLength(1);
+  });
+
+  it.each([
+    [
+      'a user without one',
+      (menu) => menu.renderUserDetails(new ChatUser('a'), ''),
+    ],
+    [
+      'a user chat has not loaded',
+      (menu) => menu.renderUserDetails(undefined, ''),
+    ],
+    ['a user that does not exist', (menu) => menu.showUserNotFound()],
+  ])("drops the last user's photo for %s", (_name, render) => {
+    const { menu, ui } = makeMenu();
+    jest.spyOn(menu, 'redraw').mockImplementation(() => {});
+    menu.renderUserDetails(new ChatUser({ nick: 'b', photo: 'alien' }), '');
+
+    render(menu);
+
+    expect(photoIn(ui)).toHaveLength(0);
   });
 });

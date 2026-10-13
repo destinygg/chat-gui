@@ -35,6 +35,20 @@ $toolbar-icons-map: (
     border-radius: 6px;
   }
 
+  .toolbar {
+    .profile-photo {
+      width: 1.5em;
+      height: 1.5em;
+      margin-right: a.$gutter-md;
+    }
+
+    // Keeps the close control at the end when a photo comes first.
+    .username {
+      flex: 1;
+      min-width: 0;
+    }
+  }
+
   .toolbar,
   .user-not-found,
   .user-info-loading,
