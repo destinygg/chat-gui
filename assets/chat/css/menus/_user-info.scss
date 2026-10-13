@@ -8,7 +8,6 @@ $toolbar-icons-map: (
   'whisper': 'whispers',
   'ignore': 'ignore',
   'unignore': 'unignore',
-  'profile': 'profile',
   'rustle': 'rustle',
   'admin': 'settings',
 );
@@ -35,21 +34,46 @@ $toolbar-icons-map: (
     border-radius: 6px;
   }
 
-  .toolbar {
+  // Who the menu is about, beneath the header the menu is dragged by. Only the
+  // photo and name are the link, not the rest of the row.
+  .user-identity {
+    display: flex;
+    padding: a.$gutter-md;
+    border-bottom: 1px solid a.$color-surface-dark4;
+    font-size: 1.1em;
+  }
+
+  .user-identity-link {
+    display: inline-flex;
+    align-items: center;
+    min-width: 0;
+    color: inherit;
+    text-decoration: none;
+
+    // A user that doesn't exist has no profile to go to.
+    &:not([href]) {
+      cursor: default;
+    }
+
+    &[href]:hover .username {
+      text-decoration: underline;
+    }
+
     .profile-photo {
-      width: 1.5em;
-      height: 1.5em;
+      width: 1.75em;
+      height: 1.75em;
       margin-right: a.$gutter-md;
     }
 
-    // Keeps the close control at the end when a photo comes first.
     .username {
-      flex: 1;
-      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
   }
 
   .toolbar,
+  .user-identity,
   .user-not-found,
   .user-info-loading,
   .actions {

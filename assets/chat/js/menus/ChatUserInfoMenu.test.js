@@ -17,7 +17,10 @@ import ChatUserMessage from '../messages/ChatUserMessage';
 // menu skips building a scroll plugin.
 const MENU_HTML = `
   <div id="chat-user-info">
-    <div class="toolbar"><span></span></div>
+    <div class="toolbar"><span>User Info</span></div>
+    <div class="user-identity">
+      <a class="user-identity-link"><span class="username"></span></a>
+    </div>
     <div class="user-info">
       <h5 class="watching-subheader"></h5>
       <h5 class="date-subheader"></h5>
@@ -484,15 +487,13 @@ describe('ChatUserInfoMenu redraw', () => {
   });
 });
 
-describe('ChatUserInfoMenu profile action', () => {
+describe('ChatUserInfoMenu profile link', () => {
   function setup() {
     const ui = $(`
       <div id="chat-user-info">
-        <div class="toolbar"><span></span></div>
-        <div class="actions">
-          <div class="action-buttons">
-            <a id="profile-user-btn" class="chat-tool-btn"></a>
-          </div>
+        <div class="toolbar"><span>User Info</span></div>
+        <div class="user-identity">
+          <a class="user-identity-link"><span class="username"></span></a>
         </div>
       </div>`);
     const chat = {
@@ -505,34 +506,41 @@ describe('ChatUserInfoMenu profile action', () => {
       config: { dggOrigin: 'https://www.destiny.gg' },
     };
     const menu = new ChatUserInfoMenu(ui, $('<div></div>'), chat);
-    return { menu, ui };
+    jest.spyOn(menu, 'redraw').mockImplementation(() => {});
+    return { menu, ui, link: () => ui.find('.user-identity-link') };
   }
 
-  it("links to the user's profile under their own spelling", () => {
-    const { menu, ui } = setup();
+  it("links the name to the user's profile under their own spelling", () => {
+    const { menu, link } = setup();
     menu.clickedNick = 'destiny';
 
     menu.setActionsVisibility(new ChatUser({ nick: 'Destiny' }));
 
-    expect(ui.find('#profile-user-btn').attr('href')).toBe(
-      'https://www.destiny.gg/u/Destiny',
-    );
+    expect(link().attr('href')).toBe('https://www.destiny.gg/u/Destiny');
   });
 
   it('falls back to the clicked nick for a user chat has not loaded', () => {
-    const { menu, ui } = setup();
+    const { menu, link } = setup();
     menu.clickedNick = 'a b';
 
     menu.setActionsVisibility(undefined);
 
-    expect(ui.find('#profile-user-btn').attr('href')).toBe(
-      'https://www.destiny.gg/u/a%20b',
-    );
+    expect(link().attr('href')).toBe('https://www.destiny.gg/u/a%20b');
+  });
+
+  it('links nowhere for a user that does not exist', () => {
+    const { menu, link } = setup();
+    menu.clickedNick = 'nobody';
+    menu.setActionsVisibility(undefined);
+
+    menu.showUserNotFound();
+
+    expect(link().attr('href')).toBeUndefined();
   });
 });
 
-describe('ChatUserInfoMenu header photo', () => {
-  const photoIn = (ui) => ui.find('.toolbar .profile-photo');
+describe('ChatUserInfoMenu photo', () => {
+  const photoIn = (ui) => ui.find('.user-identity-link .profile-photo');
 
   it("shows the user's photo ahead of their name", () => {
     const { menu, ui } = makeMenu();
@@ -542,7 +550,9 @@ describe('ChatUserInfoMenu header photo', () => {
     const photo = photoIn(ui);
     expect(photo).toHaveLength(1);
     expect(photo[0].src).toBe('https://cdn.destiny.gg/img/alien.png');
-    expect(photo[0].nextElementSibling).toBe(ui.find('.toolbar span')[0]);
+    expect(photo[0].nextElementSibling).toBe(
+      ui.find('.user-identity-link .username')[0],
+    );
   });
 
   it('shows one photo however often the details are rendered', () => {

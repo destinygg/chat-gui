@@ -31,7 +31,9 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     this.clickedNick = '';
     this.messageArray = [];
 
-    this.header = this.ui.find('.toolbar span');
+    // The user's photo and name, linking to their profile.
+    this.identityLink = this.ui.find('.user-identity-link');
+    this.header = this.identityLink.find('.username');
     // The photo shown ahead of the name, while the user has one.
     this.headerPhoto = null;
 
@@ -77,7 +79,6 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     this.whisperUserBtn = this.ui.find('#whisper-user-btn');
     this.ignoreUserBtn = this.ui.find('#ignore-user-btn');
     this.unignoreUserBtn = this.ui.find('#unignore-user-btn');
-    this.profileUserBtn = this.ui.find('#profile-user-btn');
     this.rustleUserBtn = this.ui.find('#rustle-user-btn');
     this.adminUserBtn = this.ui.find('#admin-user-btn');
 
@@ -189,6 +190,7 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
   // Collapses the menu to a minimal "user not found" view.
   showUserNotFound() {
     this.renderHeaderPhoto(null);
+    this.identityLink.removeAttr('href');
     this.setMenuBodyState('notFound');
     this.redraw();
   }
@@ -317,7 +319,7 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
       this.unignoreUserBtn.toggleClass('hidden', true);
     }
 
-    this.profileUserBtn.attr(
+    this.identityLink.attr(
       'href',
       `${this.chat.config.dggOrigin}/u/${encodeURIComponent(clickedUser?.displayName ?? this.clickedNick)}`,
     );
