@@ -74,6 +74,7 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     this.whisperUserBtn = this.ui.find('#whisper-user-btn');
     this.ignoreUserBtn = this.ui.find('#ignore-user-btn');
     this.unignoreUserBtn = this.ui.find('#unignore-user-btn');
+    this.profileUserBtn = this.ui.find('#profile-user-btn');
     this.rustleUserBtn = this.ui.find('#rustle-user-btn');
     this.adminUserBtn = this.ui.find('#admin-user-btn');
 
@@ -311,6 +312,11 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
       this.ignoreUserBtn.toggleClass('hidden', false);
       this.unignoreUserBtn.toggleClass('hidden', true);
     }
+
+    this.profileUserBtn.attr(
+      'href',
+      `${this.chat.config.dggOrigin}/u/${encodeURIComponent(clickedUser?.displayName ?? this.clickedNick)}`,
+    );
 
     this.rustleUserBtn.attr(
       'href',

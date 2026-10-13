@@ -480,3 +480,50 @@ describe('ChatUserInfoMenu redraw', () => {
     expect(menuEl.style.top).toBe('300px');
   });
 });
+
+describe('ChatUserInfoMenu profile action', () => {
+  function setup() {
+    const ui = $(`
+      <div id="chat-user-info">
+        <div class="toolbar"><span></span></div>
+        <div class="actions">
+          <div class="action-buttons">
+            <a id="profile-user-btn" class="chat-tool-btn"></a>
+          </div>
+        </div>
+      </div>`);
+    const chat = {
+      output: { on: () => {} },
+      source: { on: () => {} },
+      user: { hasModPowers: () => false },
+      userfocus: { isFocusedOn: () => false },
+      ignoring: new Set(),
+      users: new Map(),
+      config: { dggOrigin: 'https://www.destiny.gg' },
+    };
+    const menu = new ChatUserInfoMenu(ui, $('<div></div>'), chat);
+    return { menu, ui };
+  }
+
+  it("links to the user's profile under their own spelling", () => {
+    const { menu, ui } = setup();
+    menu.clickedNick = 'destiny';
+
+    menu.setActionsVisibility(new ChatUser({ nick: 'Destiny' }));
+
+    expect(ui.find('#profile-user-btn').attr('href')).toBe(
+      'https://www.destiny.gg/u/Destiny',
+    );
+  });
+
+  it('falls back to the clicked nick for a user chat has not loaded', () => {
+    const { menu, ui } = setup();
+    menu.clickedNick = 'a b';
+
+    menu.setActionsVisibility(undefined);
+
+    expect(ui.find('#profile-user-btn').attr('href')).toBe(
+      'https://www.destiny.gg/u/a%20b',
+    );
+  });
+});
