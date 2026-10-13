@@ -4,6 +4,7 @@ import { getTierStyles } from '../messages/subscriptions/ChatSubscriptionMessage
 import { MessageBuilder, MessageTypes } from '../messages';
 import ChatUser from '../user';
 import EventEmitter from '../emitter';
+import profilePhotoElement from '../profilePhoto';
 
 export default class EventBarEvent extends EventEmitter {
   /**
@@ -96,7 +97,15 @@ export default class EventBarEvent extends EventEmitter {
       }
     }
 
-    this.selectedElement = this.buildSelected().html(chat);
+    const selected = this.buildSelected();
+    if (selected?.showsPhoto) {
+      const photo = profilePhotoElement(chat, selected.user);
+      if (photo) {
+        eventTemplate.querySelector('.event-info').before(photo);
+      }
+    }
+
+    this.selectedElement = selected.html(chat);
 
     return eventTemplate;
   }
