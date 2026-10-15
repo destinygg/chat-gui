@@ -139,11 +139,10 @@ $toolbar-icons-map: (
     margin-left: -0.2em;
   }
 
-  // A third of the chat's height when there's room for it, so more of the
-  // history shows at once, shrinking to fit a short chat — but no shorter than
-  // this used to be.
+  // The same height in any chat that has room for it, shrinking to fit a short
+  // chat — but never below `min-height`.
   .stalk {
-    height: 33vh;
+    height: 220px;
     min-height: 100px;
 
     .scrollable {
