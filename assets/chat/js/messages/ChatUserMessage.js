@@ -1,4 +1,5 @@
 import encodeUrl from '../encodeUrl';
+import escapeHtml from '../escapeHtml';
 import ChatMessage from './ChatMessage';
 import MessageTypes from './MessageTypes';
 
@@ -114,7 +115,7 @@ export default class ChatUserMessage extends ChatMessage {
       .map((e) => chat.flairsMap.get(e))
       .reduce(
         (str, e) =>
-          `${str}<i data-flair="${e.name}" class="flair ${e.name}" title="${e.label}"></i> `,
+          `${str}<i data-flair="${escapeHtml(e.name)}" class="flair ${escapeHtml(e.name)}" title="${escapeHtml(e.label)}"></i> `,
         '',
       );
     return features !== '' ? `<span class="features">${features}</span>` : '';

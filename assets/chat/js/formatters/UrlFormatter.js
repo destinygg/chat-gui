@@ -1,17 +1,9 @@
 import linkifyHtml from 'linkify-html';
 import { HashLinkConverter } from '../hashlinkconverter';
 import { nsflregex, nsfwregex, spoilersregex } from '../regex';
+import escapeHtml from '../escapeHtml';
 
 const MAX_URL_LENGTH = 90;
-
-function escapeHtml(str) {
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
-}
 
 export default class UrlFormatter {
   constructor() {

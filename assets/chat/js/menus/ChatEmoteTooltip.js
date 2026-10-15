@@ -1,5 +1,6 @@
 import $ from 'jquery';
 import ChatMenuFloating from './ChatMenuFloating';
+import escapeHtml from '../escapeHtml';
 
 export default class ChatEmoteTooltip extends ChatMenuFloating {
   constructor(ui, btn, chat) {
@@ -72,7 +73,9 @@ export default class ChatEmoteTooltip extends ChatMenuFloating {
    */
   set emote(emote) {
     this.ui.name.text(emote);
-    this.ui.emote.html(`<div class="emote ${emote}">${emote}</div>`);
+    this.ui.emote.html(
+      `<div class="emote ${escapeHtml(emote)}">${escapeHtml(emote)}</div>`,
+    );
   }
 
   /**

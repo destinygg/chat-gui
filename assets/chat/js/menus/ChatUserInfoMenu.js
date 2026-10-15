@@ -3,6 +3,7 @@ import moment from 'moment';
 import { MessageBuilder, MessageTypes } from '../messages';
 import { DATE_FORMATS } from '../const';
 import ChatUser from '../user';
+import escapeHtml from '../escapeHtml';
 import ChatMenuFloating from './ChatMenuFloating';
 
 // Display labels for the raw gender/age enum values sent by the user-info API.
@@ -691,9 +692,9 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
       .map((e) => this.chat.flairsMap.get(e))
       .reduce((str, e) => {
         if (e.hidden !== true) {
-          return `${str}<i class="flair ${e.name}" title="${e.label}"></i> `;
+          return `${str}<i class="flair ${escapeHtml(e.name)}" title="${escapeHtml(e.label)}"></i> `;
         }
-        return `${str}<div class="flair" title="${e.label}">${e.label}</div> `;
+        return `${str}<div class="flair" title="${escapeHtml(e.label)}">${escapeHtml(e.label)}</div> `;
       }, '');
   }
 

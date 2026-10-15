@@ -1,5 +1,6 @@
 import { debounce } from 'throttle-debounce';
 import ChatMenu from './ChatMenu';
+import escapeHtml from '../escapeHtml';
 
 export default class ChatEmoteMenu extends ChatMenu {
   constructor(ui, btn, chat) {
@@ -97,9 +98,10 @@ export default class ChatEmoteMenu extends ChatMenu {
     return '';
   }
 
-  buildEmoteItem(emote, favorite, disabled) {
+  buildEmoteItem(prefix, favorite, disabled) {
+    const emote = escapeHtml(prefix);
     if (this.searchterm && this.searchterm.length > 0) {
-      if (emote.toLowerCase().indexOf(this.searchterm.toLowerCase()) >= 0) {
+      if (prefix.toLowerCase().indexOf(this.searchterm.toLowerCase()) >= 0) {
         return `<div class="emote-item${favorite ? ' favorite-emote' : ''}"><span title="${emote}" class="emote ${emote}${
           disabled ? ' disabled' : ''
         }">${emote}</span></div>`;
