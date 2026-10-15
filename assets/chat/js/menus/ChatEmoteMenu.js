@@ -61,13 +61,6 @@ export default class ChatEmoteMenu extends ChatMenu {
         ),
       );
     });
-
-    const twitchEmotes = this.chat.emoteService.twitchEmotePrefixes;
-    if (twitchEmotes.length) {
-      this.emoteMenuContent.append(
-        this.buildEmoteMenuSection('Twitch Subscribers', twitchEmotes),
-      );
-    }
   }
 
   buildEmoteMenuSection(title, emotes, favoriteEmotes, disabled = false) {

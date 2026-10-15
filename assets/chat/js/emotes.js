@@ -20,15 +20,7 @@ export default class EmoteService {
       return this.emotes;
     }
 
-    let emotes = this.emotes.filter(
-      (e) => e.minimumSubTier <= user.subTier && !e.twitch,
-    );
-
-    if (user.isTwitchSub()) {
-      emotes = emotes.concat(this.emotes.filter((e) => e.twitch));
-    }
-
-    return emotes;
+    return this.emotes.filter((e) => e.minimumSubTier <= user.subTier);
   }
 
   get prefixes() {
@@ -37,10 +29,6 @@ export default class EmoteService {
 
   get systemEmoteRegex() {
     return this.regexForEmotes(this.emotes);
-  }
-
-  get twitchEmotePrefixes() {
-    return this.emotes.filter((e) => e.twitch).map((e) => e.prefix);
   }
 
   hasEmote(emote) {
@@ -64,7 +52,7 @@ export default class EmoteService {
 
   emotePrefixesForTier(tier) {
     return this.emotes
-      .filter((e) => e.minimumSubTier === tier && !e.twitch)
+      .filter((e) => e.minimumSubTier === tier)
       .map((e) => e.prefix);
   }
 
