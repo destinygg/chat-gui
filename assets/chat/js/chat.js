@@ -920,6 +920,9 @@ class Chat {
       ) {
         user.watching = data.watching;
       }
+      if (Object.hasOwn(data, 'subscription')) {
+        user.subscription = data.subscription ?? null;
+      }
     }
     return user;
   }
