@@ -58,9 +58,6 @@ export default class EmoteService {
 
   canUserUseEmote(user, text) {
     const emote = this.getEmote(text);
-    if (emote) {
-      return user.subTier >= emote.minimumSubTier;
-    }
-    return false;
+    return emote !== undefined && this.emotesForUser(user).includes(emote);
   }
 }
