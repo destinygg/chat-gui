@@ -144,10 +144,6 @@ class ChatUser {
     return this.hasFeature(UserFeature.SUBSCRIBER);
   }
 
-  isTwitchSub() {
-    return this.hasFeature(UserFeature.TWITCHSUB);
-  }
-
   get subTier() {
     if (this.hasFeature(UserFeature.SUB_TIER_5)) {
       return 5;

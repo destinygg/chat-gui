@@ -3,7 +3,6 @@ import EmoteService from './emotes';
 const emote = (prefix, minimumSubTier = 0) => ({
   prefix,
   minimumSubTier,
-  twitch: false,
 });
 
 describe('EmoteService.setEmotes', () => {
