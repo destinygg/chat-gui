@@ -1,5 +1,10 @@
-import UserFeature from './features';
 import UserRole from './roles';
+
+/**
+ * @typedef {Object} Subscription
+ * @property {Number} tier 1-5
+ * @property {string} source
+ */
 
 /**
  * @typedef {Object} User
@@ -8,6 +13,7 @@ import UserRole from './roles';
  * @property {string} createdDate
  * @property {string[]} features
  * @property {string[]} roles
+ * @property {?Subscription} [subscription]
  * @property {?string} [bio]
  * @property {?string} [gender]
  * @property {?string} [age]
@@ -58,6 +64,12 @@ class ChatUser {
   watching = null;
 
   /**
+   * User's highest subscription across platforms, or null if they have none.
+   * @type {?Subscription}
+   */
+  subscription = null;
+
+  /**
    * User's profile bio.
    * @type {?string}
    */
@@ -97,6 +109,7 @@ class ChatUser {
       this.features = user.features || [];
       this.roles = user.roles || [];
       this.watching = user.watching || null;
+      this.subscription = user.subscription ?? null;
       this.bio = user.bio ?? null;
       this.gender = user.gender ?? null;
       this.age = user.age ?? null;
@@ -150,26 +163,11 @@ class ChatUser {
   }
 
   isSubscriber() {
-    return this.hasFeature(UserFeature.SUBSCRIBER);
+    return this.subTier > 0;
   }
 
   get subTier() {
-    if (this.hasFeature(UserFeature.SUB_TIER_5)) {
-      return 5;
-    }
-    if (this.hasFeature(UserFeature.SUB_TIER_4)) {
-      return 4;
-    }
-    if (this.hasFeature(UserFeature.SUB_TIER_3)) {
-      return 3;
-    }
-    if (this.hasFeature(UserFeature.SUB_TIER_2)) {
-      return 2;
-    }
-    if (this.hasFeature(UserFeature.SUB_TIER_1)) {
-      return 1;
-    }
-    return 0;
+    return this.subscription?.tier ?? 0;
   }
 
   equalWatching(embed) {

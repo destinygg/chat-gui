@@ -1,6 +1,5 @@
 import EmoteService from './emotes';
 import ChatUser from './user';
-import UserFeature from './features';
 import UserRole from './roles';
 
 const emote = (prefix, minimumSubTier = 0) => ({
@@ -29,7 +28,7 @@ describe('EmoteService.canUserUseEmote', () => {
   test('lets a user use emotes at or below their sub tier', () => {
     const user = new ChatUser({
       nick: 'sub',
-      features: [UserFeature.SUB_TIER_2],
+      subscription: { tier: 2, source: 'dgg' },
     });
 
     expect(service.canUserUseEmote(user, 'PepeLaugh')).toBe(true);
@@ -40,6 +39,12 @@ describe('EmoteService.canUserUseEmote', () => {
     const user = new ChatUser('pleb');
 
     expect(service.canUserUseEmote(user, 'PepeLaugh')).toBe(true);
+    expect(service.canUserUseEmote(user, 'OMEGALUL')).toBe(false);
+  });
+
+  test('ignores sub tier flairs without a subscription', () => {
+    const user = new ChatUser({ nick: 'flaired', features: ['flair1'] });
+
     expect(service.canUserUseEmote(user, 'OMEGALUL')).toBe(false);
   });
 
