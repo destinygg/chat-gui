@@ -36,6 +36,18 @@
     border-top-left-radius: 10px;
   }
 
+  // The info takes the room the photo leaves, so the button stays at the end.
+  .profile-photo {
+    width: 2em;
+    height: 2em;
+    margin-right: a.$gutter-md;
+  }
+
+  .event-top:has(.profile-photo) .event-info {
+    flex: 1;
+    min-width: 0;
+  }
+
   .event-icon {
     color: a.$color-chat-disabled;
     position: relative;

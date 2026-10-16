@@ -4,6 +4,7 @@ import { MessageBuilder, MessageTypes } from '../messages';
 import { DATE_FORMATS } from '../const';
 import ChatUser from '../user';
 import ChatMenuFloating from './ChatMenuFloating';
+import profilePhotoElement from '../profilePhoto';
 
 // Display labels for the raw gender/age enum values sent by the user-info API.
 // Unknown values fall back to the raw value so a new server-side case still
@@ -30,7 +31,11 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     this.clickedNick = '';
     this.messageArray = [];
 
-    this.header = this.ui.find('.toolbar span');
+    // The user's photo and name, linking to their profile.
+    this.identityLink = this.ui.find('.user-identity-link');
+    this.header = this.identityLink.find('.username');
+    // The photo shown ahead of the name, while the user has one.
+    this.headerPhoto = null;
 
     this.watchingSubheader = this.ui.find(
       '.user-info h5.watching-subheader',
@@ -184,6 +189,8 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
 
   // Collapses the menu to a minimal "user not found" view.
   showUserNotFound() {
+    this.renderHeaderPhoto(null);
+    this.identityLink.removeAttr('href');
     this.setMenuBodyState('notFound');
     this.redraw();
   }
@@ -312,6 +319,11 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
       this.unignoreUserBtn.toggleClass('hidden', true);
     }
 
+    this.identityLink.attr(
+      'href',
+      `${this.chat.config.dggOrigin}/u/${encodeURIComponent(clickedUser?.displayName ?? this.clickedNick)}`,
+    );
+
     this.rustleUserBtn.attr(
       'href',
       `https://rustlesearch.dev/?username=${encodeURIComponent(this.clickedNick)}`,
@@ -428,6 +440,8 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
 
     this.header.text('');
     this.header.attr('class', 'username');
+    // Until this user's details arrive, the last user's photo isn't theirs.
+    this.renderHeaderPhoto(null);
     this.messagesContainer.empty();
     this.updateNoMessagesNotice(true);
 
@@ -582,6 +596,8 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
    * which only come from the API) stay hidden.
    */
   renderUserDetails(user, usernameFeatures) {
+    this.renderHeaderPhoto(user);
+
     const watchingEmbed = this.buildWatchingEmbed(user);
     if (watchingEmbed !== '') {
       this.watchingSubheader.style.display = '';
@@ -627,6 +643,15 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
     } else {
       this.flairList.toggleClass('hidden', true);
       this.flairSubheader.style.display = 'none';
+    }
+  }
+
+  /** Shows the user's profile photo ahead of their name, if they have one. */
+  renderHeaderPhoto(user) {
+    this.headerPhoto?.remove();
+    this.headerPhoto = profilePhotoElement(this.chat, user);
+    if (this.headerPhoto) {
+      this.header[0]?.before(this.headerPhoto);
     }
   }
 

@@ -11,6 +11,7 @@ import UserRole from './roles';
  * @property {?string} [bio]
  * @property {?string} [gender]
  * @property {?string} [age]
+ * @property {?string} [photo]
  */
 
 class ChatUser {
@@ -75,6 +76,13 @@ class ChatUser {
   age = null;
 
   /**
+   * User's profile photo as a raw enum value (e.g. 'buddy'); mapped to a URL
+   * through the chat's `profilePhotos` config.
+   * @type {?string}
+   */
+  photo = null;
+
+  /**
    * @param {string|User} user
    */
   constructor(user = '') {
@@ -92,6 +100,7 @@ class ChatUser {
       this.bio = user.bio ?? null;
       this.gender = user.gender ?? null;
       this.age = user.age ?? null;
+      this.photo = user.photo ?? null;
     }
   }
 

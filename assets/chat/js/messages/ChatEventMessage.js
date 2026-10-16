@@ -1,4 +1,5 @@
 import ChatMessage from './ChatMessage';
+import profilePhotoElement from '../profilePhoto';
 
 export default class ChatEventMessage extends ChatMessage {
   constructor(message, timestamp, uuid) {
@@ -29,6 +30,13 @@ export default class ChatEventMessage extends ChatMessage {
       eventTemplate.classList.add('msg-me');
     }
 
+    if (this.showsPhoto) {
+      const photo = profilePhotoElement(chat, this.user);
+      if (photo) {
+        eventTemplate.querySelector('.event-info').before(photo);
+      }
+    }
+
     if (this.message) {
       eventTemplate.querySelector('.event-bottom').innerHTML =
         this.buildMessageTxt(chat);
@@ -52,5 +60,13 @@ export default class ChatEventMessage extends ChatMessage {
 
   get hasActions() {
     return true;
+  }
+
+  /**
+   * Whether the event shows its user's profile photo: those about something
+   * a user did, not announcements that only name who sent them.
+   */
+  get showsPhoto() {
+    return false;
   }
 }

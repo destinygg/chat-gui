@@ -17,7 +17,10 @@ import ChatUserMessage from '../messages/ChatUserMessage';
 // menu skips building a scroll plugin.
 const MENU_HTML = `
   <div id="chat-user-info">
-    <div class="toolbar"><span></span></div>
+    <div class="toolbar"><span>User Info</span></div>
+    <div class="user-identity">
+      <a class="user-identity-link"><span class="username"></span></a>
+    </div>
     <div class="user-info">
       <h5 class="watching-subheader"></h5>
       <h5 class="date-subheader"></h5>
@@ -35,7 +38,10 @@ function makeMenu() {
     output: { on: () => {} },
     source: { on: () => {} },
     user: { hasModPowers: () => false },
-    config: { dggOrigin: 'https://www.destiny.gg' },
+    config: {
+      dggOrigin: 'https://www.destiny.gg',
+      profilePhotos: { alien: 'https://cdn.destiny.gg/img/alien.png' },
+    },
     bigscreenPath: '/bigscreen',
     isBigscreenEmbed: () => false,
     isDesktop: false,
@@ -478,5 +484,104 @@ describe('ChatUserInfoMenu redraw', () => {
 
     expect(menuEl.style.left).toBe('100px');
     expect(menuEl.style.top).toBe('300px');
+  });
+});
+
+describe('ChatUserInfoMenu profile link', () => {
+  function setup() {
+    const ui = $(`
+      <div id="chat-user-info">
+        <div class="toolbar"><span>User Info</span></div>
+        <div class="user-identity">
+          <a class="user-identity-link"><span class="username"></span></a>
+        </div>
+      </div>`);
+    const chat = {
+      output: { on: () => {} },
+      source: { on: () => {} },
+      user: { hasModPowers: () => false },
+      userfocus: { isFocusedOn: () => false },
+      ignoring: new Set(),
+      users: new Map(),
+      config: { dggOrigin: 'https://www.destiny.gg' },
+    };
+    const menu = new ChatUserInfoMenu(ui, $('<div></div>'), chat);
+    jest.spyOn(menu, 'redraw').mockImplementation(() => {});
+    return { menu, ui, link: () => ui.find('.user-identity-link') };
+  }
+
+  it("links the name to the user's profile under their own spelling", () => {
+    const { menu, link } = setup();
+    menu.clickedNick = 'destiny';
+
+    menu.setActionsVisibility(new ChatUser({ nick: 'Destiny' }));
+
+    expect(link().attr('href')).toBe('https://www.destiny.gg/u/Destiny');
+  });
+
+  it('falls back to the clicked nick for a user chat has not loaded', () => {
+    const { menu, link } = setup();
+    menu.clickedNick = 'a b';
+
+    menu.setActionsVisibility(undefined);
+
+    expect(link().attr('href')).toBe('https://www.destiny.gg/u/a%20b');
+  });
+
+  it('links nowhere for a user that does not exist', () => {
+    const { menu, link } = setup();
+    menu.clickedNick = 'nobody';
+    menu.setActionsVisibility(undefined);
+
+    menu.showUserNotFound();
+
+    expect(link().attr('href')).toBeUndefined();
+  });
+});
+
+describe('ChatUserInfoMenu photo', () => {
+  const photoIn = (ui) => ui.find('.user-identity-link .profile-photo');
+
+  it("shows the user's photo ahead of their name", () => {
+    const { menu, ui } = makeMenu();
+
+    menu.renderUserDetails(new ChatUser({ nick: 'a', photo: 'alien' }), '');
+
+    const photo = photoIn(ui);
+    expect(photo).toHaveLength(1);
+    expect(photo[0].src).toBe('https://cdn.destiny.gg/img/alien.png');
+    expect(photo[0].nextElementSibling).toBe(
+      ui.find('.user-identity-link .username')[0],
+    );
+  });
+
+  it('shows one photo however often the details are rendered', () => {
+    const { menu, ui } = makeMenu();
+    const user = new ChatUser({ nick: 'a', photo: 'alien' });
+
+    menu.renderUserDetails(user, '');
+    menu.renderUserDetails(user, '');
+
+    expect(photoIn(ui)).toHaveLength(1);
+  });
+
+  it.each([
+    [
+      'a user without one',
+      (menu) => menu.renderUserDetails(new ChatUser('a'), ''),
+    ],
+    [
+      'a user chat has not loaded',
+      (menu) => menu.renderUserDetails(undefined, ''),
+    ],
+    ['a user that does not exist', (menu) => menu.showUserNotFound()],
+  ])("drops the last user's photo for %s", (_name, render) => {
+    const { menu, ui } = makeMenu();
+    jest.spyOn(menu, 'redraw').mockImplementation(() => {});
+    menu.renderUserDetails(new ChatUser({ nick: 'b', photo: 'alien' }), '');
+
+    render(menu);
+
+    expect(photoIn(ui)).toHaveLength(0);
   });
 });

@@ -21,6 +21,10 @@ export default class ChatSpotlightMessage extends ChatEventMessage {
     this.generateMessageHash();
   }
 
+  get showsPhoto() {
+    return true;
+  }
+
   html(chat = null) {
     const eventTemplate = super.html(chat);
 

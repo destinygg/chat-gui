@@ -35,6 +35,10 @@ export default class ChatSubscriptionMessage extends ChatEventMessage {
     this.expirationTimestamp = expirationTimestamp;
   }
 
+  get showsPhoto() {
+    return true;
+  }
+
   html(chat = null) {
     const eventTemplate = super.html(chat);
 

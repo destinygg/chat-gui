@@ -1,0 +1,10 @@
+@use '../abstracts/' as a;
+
+// A user's profile photo, as a small circle. Sized and placed by whoever
+// shows it.
+.profile-photo {
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: a.$color-surface-dark3;
+  object-fit: cover;
+}
