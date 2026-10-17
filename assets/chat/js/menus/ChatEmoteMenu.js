@@ -61,6 +61,20 @@ export default class ChatEmoteMenu extends ChatMenu {
         ),
       );
     });
+
+    const patreonEmotes = this.chat.emoteService.patreonEmotePrefixes;
+    if (patreonEmotes.length) {
+      const locked =
+        !this.chat.user.patreonMember && !this.chat.user.isPrivileged();
+      this.emoteMenuContent.append(
+        this.buildEmoteMenuSection(
+          'Patreon Members',
+          patreonEmotes,
+          favoriteEmotes.filter((fav) => patreonEmotes.includes(fav)),
+          locked,
+        ),
+      );
+    }
   }
 
   buildEmoteMenuSection(title, emotes, favoriteEmotes, disabled = false) {

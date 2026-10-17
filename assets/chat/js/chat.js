@@ -923,6 +923,9 @@ class Chat {
       if (Object.hasOwn(data, 'subscription')) {
         user.subscription = data.subscription ?? null;
       }
+      if (Object.hasOwn(data, 'patreonMember')) {
+        user.patreonMember = data.patreonMember ?? false;
+      }
     }
     return user;
   }
