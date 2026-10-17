@@ -14,6 +14,7 @@ import UserRole from './roles';
  * @property {string[]} features
  * @property {string[]} roles
  * @property {?Subscription} [subscription]
+ * @property {boolean} [patreonMember]
  * @property {?string} [bio]
  * @property {?string} [gender]
  * @property {?string} [age]
@@ -70,6 +71,12 @@ class ChatUser {
   subscription = null;
 
   /**
+   * Whether the user pays for any Patreon tier, which some emotes require.
+   * @type {boolean}
+   */
+  patreonMember = false;
+
+  /**
    * User's profile bio.
    * @type {?string}
    */
@@ -110,6 +117,7 @@ class ChatUser {
       this.roles = user.roles || [];
       this.watching = user.watching || null;
       this.subscription = user.subscription ?? null;
+      this.patreonMember = user.patreonMember ?? false;
       this.bio = user.bio ?? null;
       this.gender = user.gender ?? null;
       this.age = user.age ?? null;

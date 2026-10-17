@@ -20,7 +20,9 @@ export default class EmoteService {
       return this.emotes;
     }
 
-    return this.emotes.filter((e) => e.minimumSubTier <= user.subTier);
+    return this.emotes.filter((e) =>
+      e.patreonOnly ? user.patreonMember : e.minimumSubTier <= user.subTier,
+    );
   }
 
   get prefixes() {
@@ -52,8 +54,12 @@ export default class EmoteService {
 
   emotePrefixesForTier(tier) {
     return this.emotes
-      .filter((e) => e.minimumSubTier === tier)
+      .filter((e) => e.minimumSubTier === tier && !e.patreonOnly)
       .map((e) => e.prefix);
+  }
+
+  get patreonEmotePrefixes() {
+    return this.emotes.filter((e) => e.patreonOnly).map((e) => e.prefix);
   }
 
   canUserUseEmote(user, text) {

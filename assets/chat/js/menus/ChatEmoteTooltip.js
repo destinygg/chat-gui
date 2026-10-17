@@ -40,13 +40,13 @@ export default class ChatEmoteTooltip extends ChatMenuFloating {
 
   contextmenu(e) {
     const emote = $(e.currentTarget).closest('.emote')[0].innerText;
-    const { creator, minimumSubTier } =
+    const { creator, minimumSubTier, patreonOnly } =
       this.chat.emoteService.getEmote(emote) ?? {};
 
     this.emote = emote;
     this.favorite = this.chat.favoriteemotes.has(emote);
     this.creator = creator;
-    this.tier = minimumSubTier;
+    this.requirement = { minimumSubTier, patreonOnly };
 
     this.position(e);
     this.show();
@@ -84,10 +84,16 @@ export default class ChatEmoteTooltip extends ChatMenuFloating {
   }
 
   /**
-   * @param {number} minimumSubTier
+   * @param {{minimumSubTier?: number, patreonOnly?: boolean}} requirement
    */
-  set tier(minimumSubTier) {
-    this.ui.tier.text(`Tier ${minimumSubTier}`);
-    this.ui.tier[minimumSubTier > 0 ? 'show' : 'hide']();
+  set requirement({ minimumSubTier = 0, patreonOnly = false }) {
+    let label = '';
+    if (patreonOnly) {
+      label = 'Patreon';
+    } else if (minimumSubTier > 0) {
+      label = `Tier ${minimumSubTier}`;
+    }
+    this.ui.tier.text(label);
+    this.ui.tier[label ? 'show' : 'hide']();
   }
 }
