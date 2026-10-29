@@ -1469,16 +1469,19 @@ class Chat {
   }
 
   onUNMUTE(data) {
+    // Chat sends this as System when the website lifts the mute (subscribing,
+    // donating): there is no moderator to name.
+    const by = new ChatUser(data).isSystem() ? '' : ` by ${data.nick}`;
     if (this.user.username === data.data.toLowerCase()) {
       MessageBuilder.command(
-        `You have been unmuted by ${data.nick}.`,
+        `You have been unmuted${by}.`,
         data.timestamp,
       ).into(this);
 
       this.mutedtimer.stopTimer();
     } else {
       MessageBuilder.command(
-        `${data.data} unmuted by ${data.nick}.`,
+        by ? `${data.data} unmuted${by}.` : `${data.data} has been unmuted.`,
         data.timestamp,
       ).into(this);
     }
