@@ -59,3 +59,62 @@ describe('ChatUserMenu user entry clicks', () => {
     expect(userfocus.toggleFocus).toHaveBeenCalledWith('destiny');
   });
 });
+
+describe('ChatUserMenu presence', () => {
+  function setupList() {
+    const ui = $(MENU_HTML);
+    $(document.body).empty().append(ui);
+
+    const handlers = {};
+    const chat = {
+      source: {
+        on: (event, fn) => {
+          handlers[event] = fn;
+        },
+      },
+      menus: new Map(),
+      flairsMap: new Map(),
+      isDesktop: false,
+      userfocus: { toggleFocus: jest.fn() },
+    };
+    new ChatUserMenu(ui, $('<div></div>'), chat);
+
+    const entries = () =>
+      [...ui.find('.user-entry')].map(
+        (el) =>
+          `${el.closest('.section').dataset.section}: ${el.dataset.username}`,
+      );
+    return { handlers, entries };
+  }
+
+  const viewer = { id: 7, nick: 'Viewer', features: [], roles: ['user'] };
+  const subscribed = { ...viewer, features: ['flair13'] };
+
+  it('moves a user to their new section on UPDATEUSER', () => {
+    const { handlers, entries } = setupList();
+
+    handlers.JOIN(viewer);
+    handlers.UPDATEUSER(subscribed);
+
+    expect(entries()).toEqual(['Subscriber Tier 1: viewer']);
+  });
+
+  it('removes a user who leaves after changing section', () => {
+    const { handlers, entries } = setupList();
+
+    handlers.JOIN(viewer);
+    handlers.UPDATEUSER(subscribed);
+    handlers.QUIT(subscribed);
+
+    expect(entries()).toEqual([]);
+  });
+
+  it('removes a user whose QUIT carries features from another section', () => {
+    const { handlers, entries } = setupList();
+
+    handlers.JOIN(viewer);
+    handlers.USERSDELTA({ removed: [subscribed] });
+
+    expect(entries()).toEqual([]);
+  });
+});
