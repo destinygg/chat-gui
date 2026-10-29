@@ -197,10 +197,13 @@ export default class EventBarEvent extends EventEmitter {
     this.stopUpdatingExpirationProgressBar();
 
     if (animate) {
-      this.element.addEventListener('animationend', () => {
-        this.element.remove();
-      });
       this.element.classList.add('removed');
+      // Not on `animationend`: it never fires while the bar is hidden (the
+      // on-stream chat), and Firefox never frees an element removed inside its
+      // own animation's end event, so remove it in a task of its own.
+      Promise.allSettled(
+        this.element.getAnimations().map((animation) => animation.finished),
+      ).then(() => setTimeout(() => this.element.remove()));
     } else {
       this.element.remove();
     }

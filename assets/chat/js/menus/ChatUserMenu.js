@@ -333,8 +333,9 @@ export default class ChatUserMenu extends ChatMenu {
   }
 
   getElement(user) {
-    const section = this.sections.get(this.highestSection(user));
-    return section.users.querySelector(
+    // Search every section: after UPDATEUSER the user's features point at their
+    // new section while their entry is still in the old one.
+    return this.container[0].querySelector(
       `.user-entry[data-user-id="${user.id}"]`,
     );
   }
