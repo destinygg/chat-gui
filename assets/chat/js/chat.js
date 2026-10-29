@@ -1313,6 +1313,17 @@ class Chat {
   }
 
   onNAMES(data) {
+    // A fresh connection: anyone who left while we were disconnected (or who
+    // was only ever seen in an event, like a sub bought on the website) has no
+    // QUIT coming, so drop everyone who isn't in the new list.
+    const present = new Set(data.users.map((u) => u.nick.toLowerCase()));
+    for (const [normalized, user] of this.users) {
+      if (!present.has(normalized) && normalized !== this.user?.username) {
+        this.users.delete(normalized);
+        this.autocomplete.remove(user.displayName, true);
+      }
+    }
+
     MessageBuilder.status(
       `Connected as ${
         this.authenticated ? this.user.displayName : 'Guest'
