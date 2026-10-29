@@ -66,6 +66,20 @@ import EventBarEvent from './event-bar/EventBarEvent';
 import Mentions from './mentions';
 import { buildLinkPreview } from './linkpreview';
 
+// What the chat server answers a MSG with instead of broadcasting it.
+const MESSAGE_REJECTED_ERRORS = new Set([
+  'needlogin',
+  'nochatting',
+  'msgempty',
+  'msgtoolong',
+  'invalidmsg',
+  'muted',
+  'submode',
+  'throttled',
+  'bannedphrase',
+  'duplicate',
+]);
+
 class Chat {
   constructor(config) {
     this.config = {
@@ -1498,6 +1512,14 @@ class Chat {
     const desc = data.description;
     if (desc === 'toomanyconnections' || desc === 'banned') {
       this.source.retryOnDisconnect = false;
+    }
+
+    // A rejected message is never echoed back, so stop waiting for it. The
+    // error doesn't say which message it was for, but it's the one just sent
+    // that trips the throttle and duplicate checks (`unresolved` is newest
+    // first).
+    if (MESSAGE_REJECTED_ERRORS.has(desc)) {
+      this.unresolved.shift();
     }
 
     let message;
