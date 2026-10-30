@@ -1,4 +1,6 @@
+import ChatMenu from './ChatMenu';
 import ChatMenuFloating from './ChatMenuFloating';
+import onLongPress from '../longpress';
 
 /**
  * Actions that apply to a message rather than to its author.
@@ -7,6 +9,9 @@ import ChatMenuFloating from './ChatMenuFloating';
  * no tracking of its own: it scrolls, wraps and is pruned with the message it
  * belongs to. Which messages carry one, and who gets to see it, is settled in
  * CSS — `ChatUserMessage` renders it, `.chat-mod` reveals it.
+ *
+ * A touch screen has no hover to reveal it with, so there the menu opens on a
+ * long-press of the message instead.
  */
 export default class ChatMessageActionMenu extends ChatMenuFloating {
   constructor(ui, btn, chat) {
@@ -20,6 +25,17 @@ export default class ChatMessageActionMenu extends ChatMenuFloating {
 
     this.chat.output.on('click', '.message-actions-trigger', (e) =>
       this.openMenu(e),
+    );
+
+    onLongPress(
+      this.chat.output[0],
+      (element) => this.actionableMessage(element),
+      (e) => {
+        // What the click on the trigger gets from the chat output's `mouseup`,
+        // which a long-press doesn't send.
+        ChatMenu.closeMenus(this.chat);
+        this.openFor(e.currentTarget);
+      },
     );
 
     // Covers every way the menu closes — its own action, a click elsewhere,
@@ -36,24 +52,50 @@ export default class ChatMessageActionMenu extends ChatMenuFloating {
     return this.ui.length > 0;
   }
 
+  /**
+   * The message a press on `element` would act on, if it can be acted on here.
+   * Mirrors where the stylesheet reveals the trigger. Usernames open the user
+   * info menu instead, and links and buttons keep their own long-press.
+   */
+  actionableMessage(element) {
+    if (!this.available || element.closest('.user, .chat-user, a, button')) {
+      return null;
+    }
+
+    const message = element.closest('.msg-user');
+    return message?.matches(
+      '.chat-mod .chat-lines .msg-user:not(.msg-whisper)',
+    ) && message.querySelector(':scope > .message-actions-trigger')
+      ? message
+      : null;
+  }
+
   openMenu(e) {
-    if (!this.available) {
+    return this.openFor(e.currentTarget.closest('.msg-chat'));
+  }
+
+  openFor(message) {
+    if (!this.available || !message) {
       return undefined;
     }
 
     this.clearSelection();
-    this.message = e.currentTarget.closest('.msg-chat');
-    this.message?.classList.add('msg-menu-open');
+    this.message = message;
+    this.message.classList.add('msg-menu-open');
 
-    this.spotlightKey = this.message?.dataset.spotlightKey ?? null;
+    this.spotlightKey = this.message.dataset.spotlightKey ?? null;
     this.spotlightButton.text(
       this.spotlightKey ? 'Remove spotlight' : 'Spotlight message',
     );
 
     // Shown first so the menu has dimensions to be placed by; the browser
-    // paints neither state until this returns, so there is no flicker.
+    // paints neither state until this returns, so there is no flicker. It
+    // hangs off the message's trigger however it was opened: marking the
+    // message open is what keeps the trigger up, so it has a box to measure.
     this.show();
-    this.positionUnder(e.currentTarget);
+    this.positionUnder(
+      this.message.querySelector(':scope > .message-actions-trigger'),
+    );
     return false;
   }
 

@@ -5,6 +5,7 @@ import { DATE_FORMATS } from '../const';
 import ChatUser from '../user';
 import ChatMenuFloating from './ChatMenuFloating';
 import profilePhotoElement from '../profilePhoto';
+import onLongPress from '../longpress';
 
 // Display labels for the raw gender/age enum values sent by the user-info API.
 // Unknown values fall back to the raw value so a new server-side case still
@@ -112,6 +113,18 @@ export default class ChatUserInfoMenu extends ChatMenuFloating {
         // gotta return false so that the actual context menu doesn't show up
         return false;
       },
+    );
+
+    // The touch counterpart of the right-click above, which iOS never sends.
+    onLongPress(
+      this.chat.output[0],
+      (element) => {
+        const username = element.closest(
+          '.msg-chat .user, .msg-chat .chat-user',
+        );
+        return username?.matches('.tier, .non-chat-user') ? null : username;
+      },
+      (e) => this.showUser(e, $(e.currentTarget).closest('.msg-chat')),
     );
 
     // preventing the window from closing instantly

@@ -36,6 +36,16 @@ $link-color-map: (
     }
   }
 
+  // A long-press on a name opens the user info menu (see `ChatUserInfoMenu`),
+  // so it can't also select the name or bring up the platform's callout.
+  @media (hover: none) {
+    .user:not(.tier, .non-chat-user),
+    .chat-user:not(.non-chat-user) {
+      -webkit-touch-callout: none;
+      user-select: none;
+    }
+  }
+
   .greentext {
     color: a.$color-green-text;
   }
