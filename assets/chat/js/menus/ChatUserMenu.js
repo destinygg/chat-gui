@@ -3,6 +3,7 @@ import { debounce } from 'throttle-debounce';
 import tippy, { roundArrow } from 'tippy.js';
 import ChatMenu from './ChatMenu';
 import ChatUser from '../user';
+import escapeHtml from '../escapeHtml';
 
 // sections in order.
 const UserMenuSections = [
@@ -147,7 +148,7 @@ export default class ChatUserMenu extends ChatMenu {
       .sort((a, b) => a.priority - b.priority)
       .reduce(
         (str, e) =>
-          `${str}<i data-flair="${e.name}" class="flair ${e.name}" title="${e.label}"></i> `,
+          `${str}<i data-flair="${escapeHtml(e.name)}" class="flair ${escapeHtml(e.name)}" title="${escapeHtml(e.label)}"></i> `,
         '',
       );
     return features !== '' ? `<span class="features">${features}</span>` : '';
