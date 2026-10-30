@@ -66,6 +66,20 @@ import EventBarEvent from './event-bar/EventBarEvent';
 import Mentions from './mentions';
 import { buildLinkPreview } from './linkpreview';
 
+// What the chat server answers a MSG with instead of broadcasting it.
+const MESSAGE_REJECTED_ERRORS = new Set([
+  'needlogin',
+  'nochatting',
+  'msgempty',
+  'msgtoolong',
+  'invalidmsg',
+  'muted',
+  'submode',
+  'throttled',
+  'bannedphrase',
+  'duplicate',
+]);
+
 class Chat {
   constructor(config) {
     this.config = {
@@ -920,6 +934,12 @@ class Chat {
       ) {
         user.watching = data.watching;
       }
+      if (Object.hasOwn(data, 'subscription')) {
+        user.subscription = data.subscription ?? null;
+      }
+      if (Object.hasOwn(data, 'patreonMember')) {
+        user.patreonMember = data.patreonMember ?? false;
+      }
     }
     return user;
   }
@@ -1293,6 +1313,17 @@ class Chat {
   }
 
   onNAMES(data) {
+    // A fresh connection: anyone who left while we were disconnected (or who
+    // was only ever seen in an event, like a sub bought on the website) has no
+    // QUIT coming, so drop everyone who isn't in the new list.
+    const present = new Set(data.users.map((u) => u.nick.toLowerCase()));
+    for (const [normalized, user] of this.users) {
+      if (!present.has(normalized) && normalized !== this.user?.username) {
+        this.users.delete(normalized);
+        this.autocomplete.remove(user.displayName, true);
+      }
+    }
+
     MessageBuilder.status(
       `Connected as ${
         this.authenticated ? this.user.displayName : 'Guest'
@@ -1438,16 +1469,19 @@ class Chat {
   }
 
   onUNMUTE(data) {
+    // Chat sends this as System when the website lifts the mute (subscribing,
+    // donating): there is no moderator to name.
+    const by = new ChatUser(data).isSystem() ? '' : ` by ${data.nick}`;
     if (this.user.username === data.data.toLowerCase()) {
       MessageBuilder.command(
-        `You have been unmuted by ${data.nick}.`,
+        `You have been unmuted${by}.`,
         data.timestamp,
       ).into(this);
 
       this.mutedtimer.stopTimer();
     } else {
       MessageBuilder.command(
-        `${data.data} unmuted by ${data.nick}.`,
+        by ? `${data.data} unmuted${by}.` : `${data.data} has been unmuted.`,
         data.timestamp,
       ).into(this);
     }
@@ -1492,6 +1526,14 @@ class Chat {
     const desc = data.description;
     if (desc === 'toomanyconnections' || desc === 'banned') {
       this.source.retryOnDisconnect = false;
+    }
+
+    // A rejected message is never echoed back, so stop waiting for it. The
+    // error doesn't say which message it was for, but it's the one just sent
+    // that trips the throttle and duplicate checks (`unresolved` is newest
+    // first).
+    if (MESSAGE_REJECTED_ERRORS.has(desc)) {
+      this.unresolved.shift();
     }
 
     let message;

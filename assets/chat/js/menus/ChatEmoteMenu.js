@@ -63,10 +63,17 @@ export default class ChatEmoteMenu extends ChatMenu {
       );
     });
 
-    const twitchEmotes = this.chat.emoteService.twitchEmotePrefixes;
-    if (twitchEmotes.length) {
+    const patreonEmotes = this.chat.emoteService.patreonEmotePrefixes;
+    if (patreonEmotes.length) {
+      const locked =
+        !this.chat.user.patreonMember && !this.chat.user.isPrivileged();
       this.emoteMenuContent.append(
-        this.buildEmoteMenuSection('Twitch Subscribers', twitchEmotes),
+        this.buildEmoteMenuSection(
+          'Patreon Members',
+          patreonEmotes,
+          favoriteEmotes.filter((fav) => patreonEmotes.includes(fav)),
+          locked,
+        ),
       );
     }
   }

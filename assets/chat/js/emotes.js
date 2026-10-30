@@ -23,15 +23,9 @@ export default class EmoteService {
       return this.emotes;
     }
 
-    let emotes = this.emotes.filter(
-      (e) => e.minimumSubTier <= user.subTier && !e.twitch,
+    return this.emotes.filter((e) =>
+      e.patreonOnly ? user.patreonMember : e.minimumSubTier <= user.subTier,
     );
-
-    if (user.isTwitchSub()) {
-      emotes = emotes.concat(this.emotes.filter((e) => e.twitch));
-    }
-
-    return emotes;
   }
 
   get prefixes() {
@@ -40,10 +34,6 @@ export default class EmoteService {
 
   get systemEmoteRegex() {
     return this.regexForEmotes(this.emotes);
-  }
-
-  get twitchEmotePrefixes() {
-    return this.emotes.filter((e) => e.twitch).map((e) => e.prefix);
   }
 
   hasEmote(emote) {
@@ -67,15 +57,16 @@ export default class EmoteService {
 
   emotePrefixesForTier(tier) {
     return this.emotes
-      .filter((e) => e.minimumSubTier === tier && !e.twitch)
+      .filter((e) => e.minimumSubTier === tier && !e.patreonOnly)
       .map((e) => e.prefix);
+  }
+
+  get patreonEmotePrefixes() {
+    return this.emotes.filter((e) => e.patreonOnly).map((e) => e.prefix);
   }
 
   canUserUseEmote(user, text) {
     const emote = this.getEmote(text);
-    if (emote) {
-      return user.subTier >= emote.minimumSubTier;
-    }
-    return false;
+    return emote !== undefined && this.emotesForUser(user).includes(emote);
   }
 }

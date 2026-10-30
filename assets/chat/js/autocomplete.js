@@ -11,31 +11,6 @@ function getBucketId(id) {
   return (id.match(/[\S]/)[0] || '_').toLowerCase();
 }
 
-function sortResults(a, b) {
-  if (!a || !b) {
-    return 0;
-  }
-
-  // order emotes second
-  if (a.isemote !== b.isemote) {
-    return a.isemote && !b.isemote ? -1 : 1;
-  }
-
-  // order according to recency third
-  if (a.weight !== b.weight) {
-    return a.weight > b.weight ? -1 : 1;
-  }
-
-  // order lexically fourth
-  const lowerA = a.data.toLowerCase();
-  const lowerB = b.data.toLowerCase();
-
-  if (lowerA === lowerB) {
-    return 0;
-  }
-
-  return lowerA > lowerB ? 1 : -1;
-}
 function buildSearchCriteria(str, offset) {
   let pre = str.substring(0, offset);
   let post = str.substring(offset);
@@ -255,6 +230,42 @@ class ChatAutoComplete {
     });
   }
 
+  sortResults(a, b) {
+    if (!a || !b) {
+      return 0;
+    }
+
+    // order emotes first
+    if (a.isemote !== b.isemote) {
+      return a.isemote && !b.isemote ? -1 : 1;
+    }
+
+    // order favorite emotes before other emotes, regardless of recency
+    if (a.isemote && b.isemote) {
+      const favoriteEmotes = this.chat.favoriteemotes;
+      const favoriteA = favoriteEmotes.has(a.data);
+      const favoriteB = favoriteEmotes.has(b.data);
+      if (favoriteA !== favoriteB) {
+        return favoriteA ? -1 : 1;
+      }
+    }
+
+    // order according to recency third
+    if (a.weight !== b.weight) {
+      return a.weight > b.weight ? -1 : 1;
+    }
+
+    // order lexically fourth
+    const lowerA = a.data.toLowerCase();
+    const lowerB = b.data.toLowerCase();
+
+    if (lowerA === lowerB) {
+      return 0;
+    }
+
+    return lowerA > lowerB ? 1 : -1;
+  }
+
   search(criteria, useronly = false) {
     this.selected = -1;
     this.results = [];
@@ -271,7 +282,7 @@ class ChatAutoComplete {
             (!a.isemote || !(criteria.useronly || useronly)) &&
             regex.test(a.data),
         )
-        .sort(sortResults)
+        .sort(this.sortResults.bind(this))
         .slice(0, maxResults);
     }
     this.buildHelpers();

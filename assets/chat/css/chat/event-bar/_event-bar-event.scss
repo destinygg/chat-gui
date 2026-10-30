@@ -23,6 +23,12 @@
     border-radius: 10px;
   }
 
+  .profile-photo {
+    width: 1.4em;
+    height: 1.4em;
+    margin-right: a.$gutter-sm;
+  }
+
   .event-info {
     margin-right: a.$gutter-xs;
     max-width: 12ch;

@@ -4,6 +4,7 @@ import { getTierStyles } from '../messages/subscriptions/ChatSubscriptionMessage
 import { MessageBuilder, MessageTypes } from '../messages';
 import ChatUser from '../user';
 import EventEmitter from '../emitter';
+import profilePhotoElement from '../profilePhoto';
 
 export default class EventBarEvent extends EventEmitter {
   /**
@@ -96,7 +97,15 @@ export default class EventBarEvent extends EventEmitter {
       }
     }
 
-    this.selectedElement = this.buildSelected().html(chat);
+    const selected = this.buildSelected();
+    if (selected?.showsPhoto) {
+      const photo = profilePhotoElement(chat, selected.user);
+      if (photo) {
+        eventTemplate.querySelector('.event-info').before(photo);
+      }
+    }
+
+    this.selectedElement = selected.html(chat);
 
     return eventTemplate;
   }
@@ -188,10 +197,13 @@ export default class EventBarEvent extends EventEmitter {
     this.stopUpdatingExpirationProgressBar();
 
     if (animate) {
-      this.element.addEventListener('animationend', () => {
-        this.element.remove();
-      });
       this.element.classList.add('removed');
+      // Not on `animationend`: it never fires while the bar is hidden (the
+      // on-stream chat), and Firefox never frees an element removed inside its
+      // own animation's end event, so remove it in a task of its own.
+      Promise.allSettled(
+        this.element.getAnimations().map((animation) => animation.finished),
+      ).then(() => setTimeout(() => this.element.remove()));
     } else {
       this.element.remove();
     }
