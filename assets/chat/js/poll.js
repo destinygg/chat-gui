@@ -18,6 +18,18 @@ const PollType = {
   Weighted: 1,
 };
 
+/**
+ * Strip a leading `--hidden` from a poll command's arguments.
+ * @param {string[]} parts
+ * @return {{hidden: boolean, parts: string[]}}
+ */
+function parsePollFlags(parts) {
+  if (parts[0]?.toLowerCase() === '--hidden') {
+    return { hidden: true, parts: parts.slice(1) };
+  }
+  return { hidden: false, parts };
+}
+
 function parseQuestion(msg) {
   if (msg.indexOf('?') === -1) {
     throw new Error('Must contain a ?');
@@ -185,7 +197,10 @@ class ChatPoll {
   }
 
   castVote(data) {
-    this.poll.totals[data.vote - 1] += data.quantity;
+    // A hidden poll's votes arrive without the option they went to.
+    if (!this.poll.hidden) {
+      this.poll.totals[data.vote - 1] += data.quantity;
+    }
     this.poll.votesCast += data.quantity;
     this.throttleVoteCast(data.vote);
   }
@@ -198,6 +213,7 @@ class ChatPoll {
       canVote: data.canvote,
       myVote: data.myvote,
       type: data.weighted ? PollType.Weighted : PollType.Normal,
+      hidden: Boolean(data.hidden),
       start: new Date(data.start),
       offset: new Date(data.now).getTime() - new Date().getTime(),
       time: data.time,
@@ -209,10 +225,10 @@ class ChatPoll {
     };
 
     this.reset();
+    const kind =
+      this.poll.type === PollType.Weighted ? 'sub-weighted poll' : 'poll';
     this.ui.title.text(
-      `${
-        this.poll.type === PollType.Weighted ? 'Sub-weighted poll' : 'Poll'
-      } started by ${this.poll.user} for ${Math.floor(
+      `${this.poll.hidden ? `Hidden ${kind}` : `${kind[0].toUpperCase()}${kind.slice(1)}`} started by ${this.poll.user} for ${Math.floor(
         this.poll.time / 1000,
       )} seconds.`,
     );
@@ -290,17 +306,32 @@ class ChatPoll {
       (viewportRect.height - optionRect.height) / 2;
   }
 
-  endPoll() {
+  /**
+   * @param {object} [data] the POLLSTOP event, carrying the final totals. Absent
+   *   when chat ends the poll itself, on disconnect.
+   */
+  endPoll(data) {
     this.voting = false;
     clearTimeout(this.timerHidePoll);
     // Swap the timer for the end message first: markWinner() scrolls and
     // measures the options, and both change with the height of the footer.
     this.ui.timer.parent().hide();
+    if (this.poll.hidden && data?.totals) {
+      this.poll.hidden = false;
+      this.poll.totals = data.totals;
+      this.poll.votesCast = data.totalvotes;
+      this.renderBars();
+    }
     this.ui.endmsg
       .text(`Poll ended! ${this.poll.votesCast} votes cast.`)
       .show();
     this.ui.addClass('poll-completed');
-    this.markWinner();
+    if (this.poll.hidden) {
+      // The results never arrived, so there is no winner to name.
+      MessageBuilder.info('The poll has ended.').into(this.chat);
+    } else {
+      this.markWinner();
+    }
     this.timerHidePoll = setTimeout(() => this.hide(), POLL_END_TIME);
   }
 
@@ -341,6 +372,21 @@ class ChatPoll {
 
   updateBars() {
     if (this.voting) {
+      this.renderBars();
+    }
+  }
+
+  renderBars() {
+    this.ui.toggleClass('poll-hidden', this.poll.hidden);
+    if (this.poll.hidden) {
+      // Every bar fills up and gets hatched, so none of them reads as zero.
+      this.ui.options.find('.opt-bar-inner').css('width', '100%');
+      this.ui.options
+        .find('.opt-bar-value')
+        .text('?')
+        .attr('title', 'Hidden until the poll ends');
+    } else {
+      this.ui.options.find('.opt-bar-value').removeAttr('title');
       this.poll.options.forEach((_, i) => {
         const percent =
           this.poll.votesCast > 0
@@ -375,6 +421,9 @@ class ChatPoll {
         .map((_, i) => i + 1)
         .join(' or ')} in chat to participate.`;
     }
+    if (this.poll.hidden) {
+      message += ' Results are hidden until the poll ends.';
+    }
 
     MessageBuilder.info(message).into(this.chat);
   }
@@ -393,6 +442,7 @@ class ChatPoll {
 
 export {
   ChatPoll,
+  parsePollFlags,
   parseQuestionAndTime,
   buildPollOptionHtml,
   hasClippedOptions,

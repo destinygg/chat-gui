@@ -1,4 +1,9 @@
-import { buildPollOptionHtml, hasClippedOptions } from './poll';
+import {
+  buildPollOptionHtml,
+  hasClippedOptions,
+  parsePollFlags,
+  parseQuestionAndTime,
+} from './poll';
 
 /**
  * Parse an option's rendered HTML into a detached DOM node so we can inspect
@@ -119,5 +124,33 @@ describe('Detecting poll options cut off by the scroller', () => {
       above: false,
       below: false,
     });
+  });
+});
+
+describe('Parsing the --hidden poll flag', () => {
+  test('strips a leading --hidden and marks the poll hidden', () => {
+    expect(parsePollFlags(['--hidden', 'Pizza?', 'yes', 'or', 'no'])).toEqual({
+      hidden: true,
+      parts: ['Pizza?', 'yes', 'or', 'no'],
+    });
+  });
+
+  test('is case-insensitive', () => {
+    expect(parsePollFlags(['--HIDDEN', 'Pizza?']).hidden).toBe(true);
+  });
+
+  test('leaves a poll without the flag untouched', () => {
+    const parts = ['Pizza?', 'yes', 'or', 'no'];
+    expect(parsePollFlags(parts)).toEqual({ hidden: false, parts });
+  });
+
+  test('only reads the flag at the start, so it can still be an option', () => {
+    const parts = ['Which', 'flag?', '--hidden', 'or', '--shown'];
+    expect(parsePollFlags(parts)).toEqual({ hidden: false, parts });
+  });
+
+  test('leaves no question when the flag is all there is', () => {
+    const { parts } = parsePollFlags(['--hidden']);
+    expect(() => parseQuestionAndTime(parts.join(' '))).toThrow();
   });
 });

@@ -42,7 +42,7 @@ import ChatUserFocus from './focus';
 import ChatStore from './store';
 import Settings from './settings';
 import ChatWindow from './window';
-import { ChatPoll, parseQuestionAndTime } from './poll';
+import { ChatPoll, parsePollFlags, parseQuestionAndTime } from './poll';
 import { isMuteActive, MutedTimer } from './mutedtimer';
 import EmoteService from './emotes';
 import UserRoles from './roles';
@@ -1433,8 +1433,8 @@ class Chat {
     this.chatpoll.startPoll(data);
   }
 
-  onPOLLSTOP() {
-    this.chatpoll.endPoll();
+  onPOLLSTOP(data) {
+    this.chatpoll.endPoll(data);
   }
 
   onVOTECAST(data) {
@@ -2057,8 +2057,9 @@ class Chat {
     }
   }
 
-  cmdPOLL(parts, command) {
+  cmdPOLL(args, command) {
     const slashCommand = `/${command.toLowerCase()}`;
+    const { hidden, parts } = parsePollFlags(args);
     const textOnly = parts.join(' ');
 
     try {
@@ -2066,7 +2067,7 @@ class Chat {
       parseQuestionAndTime(textOnly);
     } catch {
       MessageBuilder.info(
-        `Usage: ${slashCommand} <question>? <option 1> or <option 2> [or <option 3> [or <option 4> ... [or <option n>]]] [<time>].`,
+        `Usage: ${slashCommand} [--hidden] <question>? <option 1> or <option 2> [or <option 3> [or <option 4> ... [or <option n>]]] [<time>].`,
       ).into(this);
       return;
     }
@@ -2086,6 +2087,7 @@ class Chat {
     const { question, options, time } = parseQuestionAndTime(textOnly);
     const dataOut = {
       weighted: slashCommand === '/spoll',
+      hidden,
       time,
       question,
       options,
