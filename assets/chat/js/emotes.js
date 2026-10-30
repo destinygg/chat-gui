@@ -1,3 +1,5 @@
+import makeSafeForRegex from './regex';
+
 export default class EmoteService {
   tiers = new Set();
 
@@ -6,7 +8,8 @@ export default class EmoteService {
   emotes = [];
 
   regexForEmotes(emotes) {
-    const prefixes = emotes.map((e) => e.prefix);
+    // Escaped, so a prefix can't break or slow down matching for everyone.
+    const prefixes = emotes.map((e) => makeSafeForRegex(e.prefix));
     return new RegExp(`(^|\\s)(${prefixes.join('|')})(?=$|\\s)`, 'gm');
   }
 

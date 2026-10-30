@@ -1,6 +1,7 @@
 import $ from 'jquery';
 import { KEYCODES, getKeyCode } from './const';
 import makeSafeForRegex from './regex';
+import escapeHtml from './escapeHtml';
 
 let suggestTimeoutId;
 const minWordLength = 1;
@@ -366,8 +367,8 @@ class ChatAutoComplete {
         .map(
           (res, k) =>
             `<li data-index="${k}" class="autocomplete-entry">
-              ${res.isemote ? `<div class="autocomplete-entry__emote"><div class="emote ${res.data}">${res.data}</div></div>` : ''}
-              <span class="autocomplete-entry__name">${res.data}</span>
+              ${res.isemote ? `<div class="autocomplete-entry__emote"><div class="emote ${escapeHtml(res.data)}">${escapeHtml(res.data)}</div></div>` : ''}
+              <span class="autocomplete-entry__name">${escapeHtml(res.data)}</span>
             </li>`,
         )
         .join('');
