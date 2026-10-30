@@ -24,6 +24,7 @@ const trigger = '<button class="message-actions-trigger"></button>';
 
 const OUTPUT_HTML = `
   <div id="chat-output-frame">
+   <div class="chat-lines">
     <div class="msg-chat msg-user" data-username="destiny">
       <a class="user">Destiny</a><span class="text">yo</span>${trigger}
     </div>
@@ -37,6 +38,10 @@ const OUTPUT_HTML = `
     >
       <a class="user">Sally</a><span class="text">already lit</span>${trigger}
     </div>
+    <div class="msg-chat msg-user msg-whisper" data-username="sally">
+      <a class="user">Sally</a><span class="text">psst</span>${trigger}
+    </div>
+   </div>
   </div>`;
 
 function setup() {
@@ -150,6 +155,72 @@ describe('ChatMessageActionMenu', () => {
     });
   });
 
+  // A touch screen has no hover to reveal the trigger with.
+  describe('on a long-press', () => {
+    const press = (element, type = 'pointerdown') => {
+      const event = new Event(type, { bubbles: true, cancelable: true });
+      Object.assign(event, {
+        pointerType: 'touch',
+        isPrimary: true,
+        pointerId: 1,
+        clientX: 10,
+        clientY: 10,
+      });
+      element.dispatchEvent(event);
+    };
+    const hold = (element) => {
+      press(element);
+      jest.advanceTimersByTime(500);
+      press(element, 'pointerup');
+    };
+
+    beforeEach(() => {
+      jest.useFakeTimers();
+      document.body.classList.add('chat-mod');
+    });
+    afterEach(() => {
+      jest.useRealTimers();
+      document.body.classList.remove('chat-mod');
+    });
+
+    it('opens for the message held', () => {
+      const { ui, output } = setup();
+
+      hold(output.find('.msg-continue .text')[0]);
+
+      expect(ui.hasClass('active')).toBe(true);
+      expect(
+        output.find('.msg-continue')[0].classList.contains('msg-menu-open'),
+      ).toBe(true);
+    });
+
+    // That opens the user info menu instead.
+    it('leaves a press on the username alone', () => {
+      const { ui, output } = setup();
+
+      hold(output.find('.msg-user:first .user')[0]);
+
+      expect(ui.hasClass('active')).toBe(false);
+    });
+
+    it('leaves whispers alone, as the trigger does', () => {
+      const { ui, output } = setup();
+
+      hold(output.find('.msg-whisper .text')[0]);
+
+      expect(ui.hasClass('active')).toBe(false);
+    });
+
+    it('does nothing for someone who cannot act on messages', () => {
+      const { ui, output } = setup();
+      document.body.classList.remove('chat-mod');
+
+      hold(output.find('.msg-continue .text')[0]);
+
+      expect(ui.hasClass('active')).toBe(false);
+    });
+  });
+
   it('reports whether the layout ships its markup', () => {
     const { menu } = setup();
 
@@ -176,7 +247,20 @@ describe('ChatMessageActionMenu', () => {
       const scss = styles('menus/_message-action-menu.scss');
 
       expect(scss).toMatch(
-        /\.chat-mod\s+\.chat-lines\s*\{[^{}]*\.msg-user:not\(\.msg-whisper\):hover\s*>\s*\.message-actions-trigger/,
+        /\.chat-mod\s+\.chat-lines\s*\{[^{}]*@media\s*\(hover:\s*hover\)\s*\{[^{}]*\.msg-user:not\(\.msg-whisper\):hover\s*>\s*\.message-actions-trigger/,
+      );
+    });
+
+    // Revealing it on a tap is what made iOS drop the tap's click, so tapping
+    // a username took two taps to highlight it.
+    it('reveals it on hover only where there is a real hover', () => {
+      const scss = styles('menus/_message-action-menu.scss');
+
+      expect(
+        scss.match(/:hover\s*>\s*\.message-actions-trigger/g),
+      ).toHaveLength(1);
+      expect(scss).not.toMatch(
+        /\(hover:\s*none\)\s*\{[^{}]*:hover\s*>\s*\.message-actions-trigger/,
       );
     });
 

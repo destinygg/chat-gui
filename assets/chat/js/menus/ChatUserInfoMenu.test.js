@@ -35,7 +35,7 @@ const MENU_HTML = `
 function makeMenu() {
   const ui = $(MENU_HTML);
   const chat = {
-    output: { on: () => {} },
+    output: $('<div></div>'),
     source: { on: () => {} },
     user: { hasModPowers: () => false },
     config: {
@@ -149,7 +149,7 @@ describe('ChatUserInfoMenu highlight action', () => {
       isFocusedOn: () => false,
     };
     const chat = {
-      output: { on: () => {} },
+      output: $('<div></div>'),
       source: { on: () => {} },
       user: { hasModPowers: () => false },
       userfocus,
@@ -246,7 +246,7 @@ describe('ChatUserInfoMenu message history', () => {
       resolveHistory = resolve;
     });
     const chat = {
-      output: { on: () => {} },
+      output: $('<div></div>'),
       source: { on: () => {} },
       user: { hasModPowers: () => false },
       users: new Map(),
@@ -286,7 +286,7 @@ describe('ChatUserInfoMenu message history', () => {
   // way to chat's continuation arrow.
   it('renders each message as a continuation', () => {
     const chat = {
-      output: { on: () => {} },
+      output: $('<div></div>'),
       source: { on: () => {} },
       flairs: [],
       flairsMap: new Map(),
@@ -338,7 +338,7 @@ describe('ChatUserInfoMenu last message', () => {
         </div>
       </div>`);
     const chat = {
-      output: { on: () => {} },
+      output: $('<div></div>'),
       source: { on: () => {} },
       user: { hasModPowers: () => false },
       users: new Map(),
@@ -474,7 +474,7 @@ describe('ChatUserInfoMenu redraw', () => {
     menuEl.style.top = '500px';
 
     const chat = {
-      output: { on: () => {} },
+      output: $('<div></div>'),
       source: { on: () => {} },
     };
     const menu = new ChatUserInfoMenu(ui, $('<div></div>'), chat);
@@ -497,7 +497,7 @@ describe('ChatUserInfoMenu profile link', () => {
         </div>
       </div>`);
     const chat = {
-      output: { on: () => {} },
+      output: $('<div></div>'),
       source: { on: () => {} },
       user: { hasModPowers: () => false },
       userfocus: { isFocusedOn: () => false },
@@ -583,5 +583,80 @@ describe('ChatUserInfoMenu photo', () => {
     render(menu);
 
     expect(photoIn(ui)).toHaveLength(0);
+  });
+});
+
+// The touch counterpart of right-clicking a name, which iOS never sends.
+describe('ChatUserInfoMenu long-press', () => {
+  const OUTPUT = `
+    <div>
+      <div class="msg-chat msg-user">
+        <a class="user">Cake</a>
+        <span class="text">
+          hey <span class="chat-user">Destiny</span>
+          <span class="chat-user non-chat-user">@someone</span>
+        </span>
+      </div>
+      <div class="msg-chat msg-subscription"><span class="user tier">T2</span></div>
+    </div>`;
+
+  const hold = (element) => {
+    ['pointerdown', 'pointerup'].forEach((type, i) => {
+      const event = new Event(type, { bubbles: true, cancelable: true });
+      Object.assign(event, {
+        pointerType: 'touch',
+        isPrimary: true,
+        pointerId: 1,
+        clientX: 10,
+        clientY: 10,
+      });
+      element.dispatchEvent(event);
+      if (i === 0) {
+        jest.advanceTimersByTime(500);
+      }
+    });
+  };
+
+  function setup() {
+    const output = $(OUTPUT);
+    const chat = { output, source: { on: () => {} } };
+    const menu = new ChatUserInfoMenu($(MENU_HTML), $('<div></div>'), chat);
+    // Opening it for real loads the user, which isn't what is under test.
+    jest.spyOn(menu, 'showUser').mockImplementation(() => {});
+    return { menu, output };
+  }
+
+  beforeEach(() => jest.useFakeTimers());
+  afterEach(() => jest.useRealTimers());
+
+  it("opens for the message's author", () => {
+    const { menu, output } = setup();
+    const author = output.find('.user:first')[0];
+
+    hold(author);
+
+    expect(menu.showUser).toHaveBeenCalledTimes(1);
+    const [event, message] = menu.showUser.mock.calls[0];
+    expect(event.currentTarget).toBe(author);
+    expect(message[0]).toBe(output.find('.msg-user')[0]);
+  });
+
+  it('opens for a mention', () => {
+    const { menu, output } = setup();
+    const mention = output.find('.chat-user:first')[0];
+
+    hold(mention);
+
+    expect(menu.showUser.mock.calls[0][0].currentTarget).toBe(mention);
+  });
+
+  it('leaves names that are not chat users, and sub tiers, alone', () => {
+    const { menu, output } = setup();
+
+    hold(output.find('.non-chat-user')[0]);
+    hold(output.find('.tier')[0]);
+    hold(output.find('.text')[0]);
+
+    expect(menu.showUser).not.toHaveBeenCalled();
   });
 });

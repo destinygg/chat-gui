@@ -14,12 +14,24 @@
 // paints over the row, so a colour set here would never be seen.
 $tint: linear-gradient(rgb(255 255 255 / 5%), rgb(255 255 255 / 5%));
 
-.msg-menu-open,
-.chat-mod .chat-lines .msg-user:not(.msg-whisper):hover {
+.msg-menu-open {
   background-image: $tint;
 
   .event-top,
   .event-bottom {
     background-image: $tint;
+  }
+}
+
+// Only where there is a real hover, like the trigger it goes with. On touch the
+// tint would stick to whichever message was last tapped.
+@media (hover: hover) {
+  .chat-mod .chat-lines .msg-user:not(.msg-whisper):hover {
+    background-image: $tint;
+
+    .event-top,
+    .event-bottom {
+      background-image: $tint;
+    }
   }
 }
