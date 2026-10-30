@@ -2,19 +2,68 @@
 @use '../abstracts/' as a;
 
 $poll-background: #2f2f2f;
+// The most a poll ever takes, however tall the chat: about ten options.
+$poll-max-height: 40em;
 
 #chat-poll-frame {
   display: none;
   flex-direction: column;
   transform: translateY(-100%);
   transition: transform 250ms ease-out;
-  // Never let a poll with a lot of options swallow the chat behind it. This
-  // resolves against #chat, which is a flex column of a known height.
-  max-height: 40%;
+  // Never let a poll with a lot of options swallow the chat behind it. The
+  // percentage resolves against #chat, which is a flex column of a known
+  // height.
+  max-height: min(60%, $poll-max-height);
 
   &.active {
     transform: translateY(0);
     display: flex;
+  }
+
+  // Too tall for that, so only the question shows until the poll is tapped.
+  // A finished poll shows its winner as well.
+  &.poll-collapsed {
+    max-height: none;
+
+    .poll-frame {
+      cursor: pointer;
+    }
+
+    .poll-show-all {
+      display: block;
+    }
+
+    &:not(.poll-completed) .poll-options-frame {
+      display: none;
+    }
+
+    &.poll-completed {
+      .opt:not(.opt-winner) {
+        display: none;
+      }
+
+      .poll-show-all {
+        margin-top: a.$gutter-md;
+      }
+    }
+  }
+
+  // Tapped open: the poll may take the whole chat, up to the same cap, and the
+  // options scroll if even that is not enough.
+  &.poll-expanded {
+    max-height: $poll-max-height;
+    min-height: 0;
+
+    .poll-toggle::before {
+      transform: rotate(180deg);
+    }
+  }
+
+  &.poll-collapsed,
+  &.poll-expanded {
+    .poll-toggle {
+      display: flex;
+    }
   }
 
   &:not(.poll-completed) {
@@ -110,7 +159,32 @@ $poll-background: #2f2f2f;
     font-weight: 700;
   }
 
+  .poll-toggle {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    margin-left: auto;
+    width: 1.5em;
+    height: 1.2em;
+    opacity: 0.5;
+    cursor: pointer;
+
+    &::before {
+      content: '';
+      width: 0;
+      height: 0;
+      border-left: 0.35em solid transparent;
+      border-right: 0.35em solid transparent;
+      border-top: 0.4em solid currentColor;
+    }
+
+    &:hover {
+      opacity: 1;
+    }
+  }
+
   .poll-close {
+    flex-shrink: 0;
     width: 2em;
     height: 1em;
     opacity: 0.5;
@@ -125,17 +199,29 @@ $poll-background: #2f2f2f;
   }
 }
 
-// The options list scrolls on its own so that a poll with a dozen answers stays
-// the same size as a poll with two. `.poll-options-frame` is the sized box; the
-// hints are laid over its edges, outside the scroller, so they stay put.
+// The options list scrolls on its own when an expanded poll is taller than the
+// chat. `.poll-options-frame` is the sized box; the hints are laid over its
+// edges, outside the scroller, so they stay put.
 .poll-options-frame {
   position: relative;
   display: flex;
   flex-direction: column;
-  // Roughly four options before scrolling kicks in. `min-height` keeps a couple
-  // of options readable when the 40% cap on the frame squeezes this further.
-  min-height: 4.5em;
-  max-height: 15em;
+  min-height: 0;
+}
+
+.poll-show-all {
+  display: none;
+  padding: 4px;
+  border-radius: 6px;
+  background-color: a.$color-surface-dark3;
+  color: a.$text-color1;
+  font-size: 0.85em;
+  font-weight: 500;
+  text-align: center;
+
+  &:hover {
+    background-color: a.$color-surface-dark2;
+  }
 }
 
 .poll-options-scroller {

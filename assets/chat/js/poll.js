@@ -105,11 +105,28 @@ class ChatPoll {
     this.ui.moreBelow = this.ui.find('.poll-options-more-down');
     this.ui.timer = this.ui.find('.poll-timer-inner');
     this.ui.endmsg = this.ui.find('.poll-end');
+    this.ui.showAll = this.ui.find('.poll-show-all');
+    this.ui.toggle = this.ui.find('.poll-toggle');
     this.poll = null;
     this.voting = false;
     this.hidden = true;
+    // Whether the reader asked to see every option of a poll too tall for the
+    // space it gets. Only ever set by a click, and cleared for each new poll.
+    this.expanded = false;
     this.timerHidePoll = -1;
     this.ui.on('click touch', '.poll-close', () => this.hide());
+    // A collapsed poll expands wherever it is tapped; an expanded one only
+    // collapses from its toggle, so that tapping an option still votes.
+    this.ui.on('click touch', '.poll-frame', (e) => {
+      if ($(e.target).closest('.poll-close').length > 0) {
+        return;
+      }
+      if (this.ui.hasClass('poll-collapsed')) {
+        this.setExpanded(true);
+      } else if ($(e.target).closest('.poll-toggle').length > 0) {
+        this.setExpanded(false);
+      }
+    });
     this.ui.on('click touch', '.opt', (e) => {
       if (this.voting) {
         if (this.poll.canVote) {
@@ -125,9 +142,10 @@ class ChatPoll {
       this.updateBars();
     });
 
-    // The options list is capped in height, so it gets the same overlay
-    // scrollbar the menus use, plus hints marking what is cut off. Layouts
-    // without a poll frame (the vote-only GUI) have nothing to set up.
+    // An expanded poll can still be taller than the chat, so the options list
+    // gets the same overlay scrollbar the menus use, plus hints marking what is
+    // cut off. Layouts without a poll frame (the vote-only GUI) have nothing
+    // to set up.
     const optionsViewport = this.ui.options.get(0);
     if (optionsViewport) {
       this.scrollplugin = new ChatScrollPlugin(
@@ -143,6 +161,12 @@ class ChatPoll {
         this.updateOptionOverflow(),
       );
       this.optionsResizeObserver.observe(optionsViewport);
+      // Resizing the chat window also changes whether the poll fits at all.
+      // Watching the chat rather than the poll, which collapsing resizes.
+      this.chatResizeObserver = new ResizeObserver(() =>
+        this.updateCollapsed(),
+      );
+      this.chatResizeObserver.observe(this.chat.ui.get(0));
     }
   }
 
@@ -160,8 +184,42 @@ class ChatPoll {
       this.ui.addClass('active');
       this.chat.mainwindow.update();
       // Nothing inside the frame could be measured while it was hidden.
+      this.updateCollapsed();
       this.scrollplugin?.reset();
     }
+  }
+
+  setExpanded(expanded) {
+    this.expanded = expanded;
+    this.updateCollapsed();
+    // The options list was out of the layout while collapsed.
+    this.scrollplugin?.reset();
+  }
+
+  /**
+   * Collapse the poll down to its question if all of its options do not fit in
+   * the space a poll gets by default, unless the reader expanded it.
+   */
+  updateCollapsed() {
+    const viewport = this.ui.options.get(0);
+    if (!viewport || this.hidden) {
+      return;
+    }
+
+    // Lay the poll out as it is by default and see whether its options would
+    // have to scroll. Both classes go straight back on before anything paints.
+    this.ui.removeClass('poll-collapsed poll-expanded');
+    // A pixel of slack, since subpixel layout leaves flush edges just over.
+    const fits = viewport.scrollHeight <= viewport.clientHeight + 1;
+    this.ui.toggleClass('poll-collapsed', !fits && !this.expanded);
+    this.ui.toggleClass('poll-expanded', !fits && this.expanded);
+    this.ui.toggle.attr(
+      'title',
+      this.expanded ? 'Hide options' : 'Show all options',
+    );
+    // Laying the poll out differently, even for a moment, moves the chat under
+    // it, which would otherwise come unstuck from the latest message.
+    this.chat.mainwindow.update();
   }
 
   isPollStarted() {
@@ -209,6 +267,7 @@ class ChatPoll {
     };
 
     this.reset();
+    this.expanded = false;
     this.ui.title.text(
       `${
         this.poll.type === PollType.Weighted ? 'Sub-weighted poll' : 'Poll'
@@ -222,6 +281,7 @@ class ChatPoll {
         .map((option, i) => buildPollOptionHtml(option, i))
         .join(''),
     );
+    this.ui.showAll.text(`Show all ${this.poll.options.length} options`);
 
     this.pollStartMessage();
     this.updateTimer();
@@ -258,8 +318,9 @@ class ChatPoll {
 
     const { above, below } = hasClippedOptions(
       viewport.getBoundingClientRect(),
+      // A collapsed poll that has ended hides all but its winner.
       this.ui.options
-        .children('.opt')
+        .children('.opt:visible')
         .map((_, opt) => opt.getBoundingClientRect())
         .get(),
     );
@@ -300,6 +361,8 @@ class ChatPoll {
       .text(`Poll ended! ${this.poll.votesCast} votes cast.`)
       .show();
     this.ui.addClass('poll-completed');
+    // A collapsed poll now shows its winner, which takes room in the chat.
+    this.chat.mainwindow.update();
     this.markWinner();
     this.timerHidePoll = setTimeout(() => this.hide(), POLL_END_TIME);
   }
@@ -364,6 +427,8 @@ class ChatPoll {
     }
 
     this.ui.votes.text(`${this.poll.votesCast} votes`);
+    // A longer vote count can wrap an option onto a second line.
+    this.updateCollapsed();
   }
 
   pollStartMessage() {
