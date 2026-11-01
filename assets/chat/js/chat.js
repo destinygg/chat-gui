@@ -41,6 +41,7 @@ import ChatInputHistory from './history';
 import ChatUserFocus from './focus';
 import ChatStore from './store';
 import Settings from './settings';
+import { SYNCED_KEY, resolveSettings } from './settingssync';
 import ChatWindow from './window';
 import { ChatPoll, parsePollFlags, parseQuestionAndTime } from './poll';
 import { isMuteActive, MutedTimer } from './mutedtimer';
@@ -122,6 +123,7 @@ class Chat {
     this.whispers = new Map();
     this.windows = new Map();
     this.settings = new Map(settingsdefault);
+    this.settingsLoadedFor = null;
     this.commands = new ChatCommands();
     this.autocomplete = new ChatAutoComplete();
     this.mentions = new Mentions();
@@ -691,22 +693,53 @@ class Chat {
     this.source.connect(this.config.url);
   }
 
+  /**
+   * Loads the settings saved to the user's profile. Every logged-in device
+   * saves its settings there, but only once this has finished: until then a
+   * save could replace the profile copy with settings that are about to be
+   * replaced themselves. See settingssync.js for how a device's first sync
+   * reconciles its local settings with the profile copy.
+   */
   async loadSettings() {
-    return fetch(`${this.config.api.base}/api/chat/me/settings`, {
-      credentials: 'include',
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        // Set user settings.
-        const settings = new Map(data);
-        if (!settings.get('profilesettings')) {
-          return;
-        }
-        this.setSettings(settings);
-        this.cacheSettings();
-        this.getActiveWindow().update(true);
-      })
-      .catch(() => {});
+    const userId = this.user.id;
+    let data;
+    try {
+      const res = await fetch(`${this.config.api.base}/api/chat/me/settings`, {
+        credentials: 'include',
+      });
+      if (!res.ok) {
+        return;
+      }
+      data = await res.json();
+    } catch {
+      // A failed load must not look like an empty profile copy, or the
+      // upload below would overwrite the real one.
+      return;
+    }
+    if (!Array.isArray(data) || userId !== this.user.id) {
+      return;
+    }
+
+    const { settings, upload } = resolveSettings(
+      new Map(data),
+      new Map(this.settings),
+      ChatStore.read(SYNCED_KEY) === userId,
+    );
+    this.setSettings(settings);
+    this.cacheSettings();
+    this.getActiveWindow()?.update(true);
+    this.settingsLoadedFor = userId;
+
+    if (!upload) {
+      ChatStore.write(SYNCED_KEY, userId);
+      return;
+    }
+    try {
+      const res = await this.uploadSettings();
+      if (res.ok) {
+        ChatStore.write(SYNCED_KEY, userId);
+      }
+    } catch {} // eslint-disable-line no-empty
   }
 
   async loadEmotesAndFlairs() {
@@ -812,14 +845,18 @@ class Chat {
 
   saveSettings() {
     this.cacheSettings();
-    if (this.authenticated && this.settings.get('profilesettings')) {
-      fetch(`${this.config.api.base}/api/chat/me/settings`, {
-        body: JSON.stringify([...this.settings]),
-        credentials: 'include',
-        method: 'POST',
-        headers: { 'X-CSRF-Guard': 'YEE' },
-      }).catch();
+    if (this.authenticated && this.settingsLoadedFor === this.user.id) {
+      this.uploadSettings().catch(() => {});
     }
+  }
+
+  uploadSettings() {
+    return fetch(`${this.config.api.base}/api/chat/me/settings`, {
+      body: JSON.stringify([...this.settings]),
+      credentials: 'include',
+      method: 'POST',
+      headers: { 'X-CSRF-Guard': 'YEE' },
+    });
   }
 
   cacheSettings() {
