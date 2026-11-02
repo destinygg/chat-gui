@@ -14,18 +14,24 @@ const BOOKKEEPING = new Set(['schemaversion', 'profilesettings']);
 // List settings whose items are [key, value] pairs (they become Maps).
 const PAIR_LISTS = new Set(['taggednicks', 'taggednotes']);
 
+// The user whose settings this device's local copy holds: written whenever a
+// load from the profile is applied. Unset on a device that has never synced.
 const SYNCED_KEY = 'chat.settings.synced';
+
+// {user, token}: this device has changes for that user that the profile copy
+// doesn't have yet. Cleared when an upload succeeds.
+const PENDING_KEY = 'chat.settings.pending';
 
 function sameValue(a, b) {
   return JSON.stringify(a) === JSON.stringify(b);
 }
 
+function hasValue(value) {
+  return value !== undefined && value !== null;
+}
+
 function isCustomized(key, value) {
-  return (
-    value !== undefined &&
-    value !== null &&
-    !sameValue(value, settingsdefault.get(key))
-  );
+  return hasValue(value) && !sameValue(value, settingsdefault.get(key));
 }
 
 function unionList(key, server, local) {
@@ -43,17 +49,25 @@ function unionList(key, server, local) {
  * device's settings with defaults. Lists are combined; when both sides
  * customized a single value differently, the profile copy wins.
  *
+ * A legacy profile copy, saved by a device that opted in before syncing was
+ * automatic, holds choices the user made on purpose, defaults included, so
+ * all its single values win. Its lists are still combined: the device may
+ * never have opted in, and its ignore list and tags are its own. The cost is
+ * that a device that had opted in brings back entries removed elsewhere since
+ * it last loaded.
+ *
  * @param {Map} server the profile copy
  * @param {Map} local this device's settings
+ * @param {boolean} legacy whether the profile copy is a legacy one
  * @returns {Map}
  */
-function mergeSettings(server, local) {
+function mergeSettings(server, local, legacy = false) {
   const merged = new Map();
   for (const key of settingsdefault.keys()) {
     const serverValue = server.get(key);
     const localValue = local.get(key);
     if (BOOKKEEPING.has(key)) {
-      if (serverValue !== undefined && serverValue !== null) {
+      if (hasValue(serverValue)) {
         merged.set(key, serverValue);
       } else if (key === 'schemaversion' && isCustomized(key, localValue)) {
         merged.set(key, localValue);
@@ -61,15 +75,16 @@ function mergeSettings(server, local) {
       continue;
     }
 
+    const isList = Array.isArray(settingsdefault.get(key));
     const serverSet = isCustomized(key, serverValue);
     const localSet = isCustomized(key, localValue);
-    if (serverSet && localSet && Array.isArray(settingsdefault.get(key))) {
+    if (isList && serverSet && localSet) {
       merged.set(key, unionList(key, serverValue, localValue));
-    } else if (serverSet) {
+    } else if (serverSet || (legacy && !isList && hasValue(serverValue))) {
       merged.set(key, serverValue);
     } else if (localSet) {
       merged.set(key, localValue);
-    } else if (serverValue !== undefined && serverValue !== null) {
+    } else if (hasValue(serverValue)) {
       merged.set(key, serverValue);
     }
   }
@@ -90,29 +105,66 @@ function sameSettings(a, b) {
 }
 
 /**
+ * Every setting, from `settings` where it has a value and the defaults
+ * otherwise. Applying a partial map leaves the missing settings as they were,
+ * which is wrong when they belong to someone else.
+ */
+function withDefaults(settings) {
+  return new Map(
+    [...settingsdefault].map(([key, fallback]) => [
+      key,
+      settings.get(key) ?? fallback,
+    ]),
+  );
+}
+
+/**
  * Decides what a device does with the profile copy it just loaded.
  *
- * - The device has synced before for this user, or the profile copy was
- *   saved by a device that opted in before syncing became automatic: the
- *   profile copy is the truth.
- * - Otherwise (the device's first sync): merge, and upload if the merge
- *   changed the profile copy.
+ * - The local copy is another account's (the device last synced for someone
+ *   else): none of it is this user's, so the profile copy is taken, with
+ *   defaults for whatever it lacks. Nothing is uploaded.
+ * - The device has synced for this user and has changes the profile copy
+ *   doesn't (an upload failed, was cancelled by a reload, or was held back
+ *   while the profile copy loaded): they are the newest, so they're kept and
+ *   uploaded, replacing the profile copy.
+ * - The device has synced for this user: the profile copy is the truth.
+ * - Otherwise (the device's first sync, or an empty profile copy): merge, and
+ *   upload if the merge changed the profile copy.
  *
  * @param {Map} server the profile copy
  * @param {Map} local this device's settings
- * @param {boolean} synced whether this device has synced for this user
+ * @param {object} state
+ * @param {number} state.userId the logged-in user
+ * @param {?number} state.syncedFor SYNCED_KEY: the user this device last
+ *   synced for, or null if it never has
+ * @param {boolean} state.pending whether this device has changes for this
+ *   user that the profile copy doesn't have
  * @returns {{settings: Map, upload: boolean}}
  */
-function resolveSettings(server, local, synced) {
-  const legacyOptIn = server.get('profilesettings') === true;
-  if (server.size > 0 && (synced || legacyOptIn)) {
+function resolveSettings(server, local, { userId, syncedFor, pending }) {
+  if (hasValue(syncedFor) && syncedFor !== userId) {
+    return { settings: withDefaults(server), upload: false };
+  }
+  if (syncedFor === userId && pending) {
+    // Except the legacy mark, which only the profile copy carries: the local
+    // copy is always cached without it.
+    const settings = new Map(local);
+    if (hasValue(server.get('profilesettings'))) {
+      settings.set('profilesettings', server.get('profilesettings'));
+    }
+    return { settings, upload: true };
+  }
+  if (syncedFor === userId && server.size > 0) {
     return { settings: server, upload: false };
   }
-  const settings = mergeSettings(server, local);
+  const legacy = server.get('profilesettings') === true;
+  const settings = mergeSettings(server, local, legacy);
   return { settings, upload: !sameSettings(settings, server) };
 }
 
 export {
+  PENDING_KEY,
   SYNCED_KEY,
   isCustomized,
   mergeSettings,
