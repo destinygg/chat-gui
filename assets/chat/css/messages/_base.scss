@@ -112,6 +112,15 @@ $link-color-map: (
   }
 }
 
+// Rainbow names, in place of flairs.css's `background-position` slide: the
+// gradient stays still and only its hue turns, which the compositor can
+// animate without repainting the name. See rainbowFlairs.js.
+@keyframes rainbow-hue {
+  to {
+    filter: hue-rotate(-360deg);
+  }
+}
+
 .onstreamchat {
   .msg-chat {
     color: a.$text-color;
