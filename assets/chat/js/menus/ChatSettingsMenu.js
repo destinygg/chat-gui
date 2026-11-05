@@ -1,5 +1,4 @@
 import $ from 'jquery';
-import { fetch } from 'whatwg-fetch';
 import ChatMenu from './ChatMenu';
 import { isKeyCode, KEYCODES } from '../const';
 import { Notification } from '../notification';
@@ -36,14 +35,6 @@ export default class ChatSettingsMenu extends ChatMenu {
     const name = e.target.getAttribute('name');
     if (val !== undefined) {
       switch (name) {
-        case 'profilesettings':
-          if (!val && this.chat.authenticated) {
-            fetch(`${this.chat.config.api.base}/api/chat/me/settings`, {
-              credentials: 'include',
-              method: 'DELETE',
-            }).catch();
-          }
-          break;
         case 'notificationwhisper':
         case 'notificationhighlight':
           if (val) {

@@ -41,6 +41,7 @@ import ChatInputHistory from './history';
 import ChatUserFocus from './focus';
 import ChatStore from './store';
 import Settings from './settings';
+import { PENDING_KEY, SYNCED_KEY, resolveSettings } from './settingssync';
 import ChatWindow from './window';
 import { ChatPoll, parsePollFlags, parseQuestionAndTime } from './poll';
 import { isMuteActive, MutedTimer } from './mutedtimer';
@@ -122,6 +123,7 @@ class Chat {
     this.whispers = new Map();
     this.windows = new Map();
     this.settings = new Map(settingsdefault);
+    this.settingsLoadedFor = null;
     this.commands = new ChatCommands();
     this.autocomplete = new ChatAutoComplete();
     this.mentions = new Mentions();
@@ -325,7 +327,9 @@ class Chat {
     if (oldversion !== -1 && newversion > oldversion) {
       Settings.upgrade(this, oldversion, newversion);
       this.settings.set('schemaversion', newversion);
-      this.saveSettings();
+      // Not saveSettings: an upgrade isn't a change the user made, so it
+      // mustn't be marked pending and win over the profile copy.
+      this.cacheSettings();
     }
 
     this.taggednicks = new Map(this.settings.get('taggednicks'));
@@ -691,22 +695,56 @@ class Chat {
     this.source.connect(this.config.url);
   }
 
+  /**
+   * Loads the settings saved to the user's profile and reconciles them with
+   * this device's (see resolveSettings in settingssync.js). Uploads wait for
+   * this to finish, so they can't replace the profile copy before it has been
+   * read: a change made meanwhile is only marked pending, and goes up once
+   * the load has decided what survives.
+   */
   async loadSettings() {
-    return fetch(`${this.config.api.base}/api/chat/me/settings`, {
-      credentials: 'include',
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        // Set user settings.
-        const settings = new Map(data);
-        if (!settings.get('profilesettings')) {
-          return;
-        }
-        this.setSettings(settings);
-        this.cacheSettings();
-        this.getActiveWindow().update(true);
-      })
-      .catch(() => {});
+    const userId = this.user.id;
+    this.settingsLoadedFor = null;
+    let data;
+    try {
+      const res = await fetch(`${this.config.api.base}/api/chat/me/settings`, {
+        credentials: 'include',
+      });
+      if (!res.ok) {
+        return;
+      }
+      data = await res.json();
+    } catch {
+      // A failed load must not look like an empty profile copy, or the
+      // upload below would overwrite the real one.
+      return;
+    }
+    if (!Array.isArray(data) || userId !== this.user.id) {
+      return;
+    }
+
+    const { settings, upload } = resolveSettings(
+      new Map(data),
+      new Map(this.settings),
+      {
+        userId,
+        syncedFor: ChatStore.read(SYNCED_KEY),
+        pending: ChatStore.read(PENDING_KEY)?.user === userId,
+      },
+    );
+    if (!upload) {
+      // Whatever was pending is in the profile copy now, or was another
+      // account's.
+      ChatStore.remove(PENDING_KEY);
+    }
+    this.setSettings(settings);
+    this.cacheSettings();
+    ChatStore.write(SYNCED_KEY, userId);
+    this.getActiveWindow()?.update(true);
+    this.settingsLoadedFor = userId;
+    if (upload) {
+      this.uploadSettings();
+    }
   }
 
   async loadEmotesAndFlairs() {
@@ -812,14 +850,48 @@ class Chat {
 
   saveSettings() {
     this.cacheSettings();
-    if (this.authenticated && this.settings.get('profilesettings')) {
-      fetch(`${this.config.api.base}/api/chat/me/settings`, {
-        body: JSON.stringify([...this.settings]),
+    if (this.authenticated) {
+      this.uploadSettings();
+    }
+  }
+
+  /**
+   * Sends this device's settings to the profile. They stay marked pending
+   * until the profile has them, including while the profile copy is still
+   * loading, when nothing is sent. So a change that never got there (a failed
+   * request, or a reload that cancelled it) is sent by the next load instead
+   * of being replaced by the older profile copy.
+   */
+  uploadSettings() {
+    const userId = this.user.id;
+    const token = `${Date.now()}-${Math.random()}`;
+    ChatStore.write(PENDING_KEY, { user: userId, token });
+    if (this.settingsLoadedFor !== userId) {
+      return;
+    }
+
+    const body = JSON.stringify([...this.settings]);
+    // The browser's own fetch: the whatwg-fetch polyfill imported above is
+    // XHR-based and ignores keepalive, which lets the request finish when the
+    // page is reloaded or closed right after a change.
+    const send = (keepalive) =>
+      window.fetch(`${this.config.api.base}/api/chat/me/settings`, {
+        body,
         credentials: 'include',
         method: 'POST',
         headers: { 'X-CSRF-Guard': 'YEE' },
-      }).catch();
-    }
+        keepalive,
+      });
+    // Browsers refuse keepalive bodies over 64 KiB, so retry without it.
+    send(true)
+      .catch(() => send(false))
+      .then((res) => {
+        // Unless a newer change has been marked pending since.
+        if (res.ok && ChatStore.read(PENDING_KEY)?.token === token) {
+          ChatStore.remove(PENDING_KEY);
+        }
+      })
+      .catch(() => {});
   }
 
   cacheSettings() {

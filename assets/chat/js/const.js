@@ -116,6 +116,7 @@ const settingsdefault = new Map(
     showtime: false,
     showentireurl: false,
     hideflairicons: false,
+    // Set on profile copies saved before syncing was automatic; see settingssync.js.
     profilesettings: false,
     timestampformat: 'HH:mm',
     maxlines: 250,
