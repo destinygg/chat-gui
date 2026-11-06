@@ -112,6 +112,12 @@ $link-color-map: (
   }
 }
 
+@keyframes rainbow-hue {
+  to {
+    filter: hue-rotate(-360deg);
+  }
+}
+
 .onstreamchat {
   .msg-chat {
     color: a.$text-color;

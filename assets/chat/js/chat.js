@@ -66,6 +66,7 @@ import MessageTemplateHTML from '../../views/templates.html';
 import EventBarEvent from './event-bar/EventBarEvent';
 import Mentions from './mentions';
 import { buildLinkPreview } from './linkpreview';
+import applyRainbowFlairs from './rainbowFlairs';
 
 // What the chat server answers a MSG with instead of broadcasting it.
 const MESSAGE_REJECTED_ERRORS = new Set([
@@ -845,6 +846,7 @@ class Chat {
     this.flairs = flairs;
     this.flairsMap = new Map();
     flairs.forEach((v) => this.flairsMap.set(v.name, v));
+    applyRainbowFlairs(flairs);
     return this;
   }
 
