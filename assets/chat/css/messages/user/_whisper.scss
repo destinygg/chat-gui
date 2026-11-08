@@ -9,6 +9,9 @@
     border-radius: a.$bradius;
     font-weight: normal;
     color: white;
+    // The pill hides a rainbow flair's gradient, so moving it would only
+    // repaint the name for nothing.
+    animation: none;
 
     &:hover {
       text-decoration: none;
