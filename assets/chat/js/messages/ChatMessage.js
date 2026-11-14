@@ -171,8 +171,9 @@ export default class ChatMessage extends ChatUIMessage {
    * without having to find the message object.
    *
    * @param {string|null} key
+   * @param {string} spotlightedBy
    */
-  setSpotlight(key) {
+  setSpotlight(key, spotlightedBy) {
     this.spotlightKey = key ?? null;
 
     // A message can be spotlighted before it renders, or after it has been
@@ -185,6 +186,15 @@ export default class ChatMessage extends ChatUIMessage {
     if (key) {
       this.ui.dataset.spotlightKey = key;
       this.buildSpotlightFrame();
+      const info = this.ui.querySelector('.spotlight-frame .event-info');
+      if (info && spotlightedBy) {
+        const attribution =
+          info.querySelector('.spotlight-attribution') ??
+          document.createElement('span');
+        attribution.className = 'spotlight-attribution';
+        attribution.textContent = ` spotlighted by ${spotlightedBy}`;
+        info.append(attribution);
+      }
     } else {
       delete this.ui.dataset.spotlightKey;
       this.removeSpotlightFrame();
@@ -252,6 +262,7 @@ export default class ChatMessage extends ChatUIMessage {
       return;
     }
 
+    wrapper.querySelector('.spotlight-attribution')?.remove();
     const header = [...wrapper.querySelector('.event-info').childNodes];
     const body = [...wrapper.querySelector('.event-bottom').childNodes];
     this.ui.append(...header, ...body);

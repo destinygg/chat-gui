@@ -67,7 +67,7 @@ describe('setSpotlight', () => {
   it('rebuilds the message as an event card', () => {
     const message = renderedMessage();
 
-    message.setSpotlight('abc123');
+    message.setSpotlight('abc123', 'Moderator');
 
     const { ui } = message;
     expect(ui.classList.contains('msg-spotlighted')).toBe(true);
@@ -76,6 +76,7 @@ describe('setSpotlight', () => {
     const info = ui.querySelector('.event-top .event-info');
     expect(info.querySelector('time')).not.toBeNull();
     expect(info.querySelector('.user').textContent).toBe('Destiny');
+    expect(info.textContent).toContain(' spotlighted by Moderator');
     expect(info.querySelector('.text')).toBeNull();
 
     expect(ui.querySelector('.event-top .event-icon.spotlight')).not.toBeNull();
@@ -87,7 +88,7 @@ describe('setSpotlight', () => {
   it('restores the flat message when the spotlight is cleared', () => {
     const message = renderedMessage();
 
-    message.setSpotlight('abc123');
+    message.setSpotlight('abc123', 'Moderator');
     message.setSpotlight(null);
 
     expect(message.ui.classList.contains('msg-spotlighted')).toBe(false);
@@ -101,11 +102,17 @@ describe('setSpotlight', () => {
   it('does not build a second frame when re-asserted', () => {
     const message = renderedMessage();
 
-    message.setSpotlight('abc123');
-    message.setSpotlight('abc123');
+    message.setSpotlight('abc123', 'Moderator');
+    message.setSpotlight('abc123', 'AnotherModerator');
 
     expect(message.ui.querySelectorAll('.event-wrapper')).toHaveLength(1);
     expect(message.ui.querySelectorAll('.event-icon')).toHaveLength(1);
+    expect(message.ui.querySelectorAll('.spotlight-attribution')).toHaveLength(
+      1,
+    );
+    expect(message.ui.querySelector('.spotlight-attribution').textContent).toBe(
+      ' spotlighted by AnotherModerator',
+    );
   });
 
   // Messages keep the mutators that operate on a rendered message working,
