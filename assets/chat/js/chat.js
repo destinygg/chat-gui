@@ -1900,7 +1900,10 @@ class Chat {
    */
   applySpotlight(data) {
     this.spotlights.set(data.key, data);
-    this.findSpotlightedMessage(data.key)?.setSpotlight(data.key);
+    this.findSpotlightedMessage(data.key)?.setSpotlight(
+      data.key,
+      data.spotlightedBy,
+    );
   }
 
   removeSpotlight(key) {
