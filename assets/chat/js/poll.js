@@ -19,15 +19,26 @@ const PollType = {
 };
 
 /**
- * Strip a leading `--hidden` from a poll command's arguments.
+ * Strip the leading flags (`--hidden`, `--weighted`, in any order) from a poll
+ * command's arguments. Reading stops at the first word that isn't a flag, so a
+ * flag later on can still be an option.
  * @param {string[]} parts
- * @return {{hidden: boolean, parts: string[]}}
+ * @return {{hidden: boolean, weighted: boolean, parts: string[]}}
  */
 function parsePollFlags(parts) {
-  if (parts[0]?.toLowerCase() === '--hidden') {
-    return { hidden: true, parts: parts.slice(1) };
+  const flags = { hidden: false, weighted: false };
+  let i = 0;
+  for (; i < parts.length; i += 1) {
+    const flag = parts[i].toLowerCase();
+    if (flag === '--hidden') {
+      flags.hidden = true;
+    } else if (flag === '--weighted') {
+      flags.weighted = true;
+    } else {
+      break;
+    }
   }
-  return { hidden: false, parts };
+  return { ...flags, parts: parts.slice(i) };
 }
 
 function parseQuestion(msg) {

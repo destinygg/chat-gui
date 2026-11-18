@@ -109,7 +109,7 @@ const CHAT_COMMANDS = [
   {
     name: 'poll',
     description:
-      'Start a poll. Add --hidden to hide the results until it ends.',
+      'Start a poll. Add --hidden to hide the results until it ends, or --weighted to weight votes by sub tier.',
     alias: ['vote'],
   },
   {
@@ -151,12 +151,6 @@ const CHAT_COMMANDS = [
     name: 'showpoll',
     description: 'Show last poll.',
     alias: ['showvote'],
-  },
-  {
-    name: 'spoll',
-    description:
-      'Start a sub-weighted poll. Add --hidden to hide the results until it ends.',
-    alias: ['svote'],
   },
   {
     name: 'stalk',
