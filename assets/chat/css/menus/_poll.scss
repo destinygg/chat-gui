@@ -20,7 +20,7 @@ $poll-max-height: 40em;
     display: flex;
   }
 
-  // Too tall for that, so only the question shows until the poll is tapped.
+  // A collapsed poll hides its options until tapped.
   // A finished poll shows its winner as well.
   &.poll-collapsed {
     max-height: none;

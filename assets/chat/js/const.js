@@ -142,6 +142,7 @@ const settingsdefault = new Map(
     censorbadwords: false,
     disableanimations: false,
     previewallimages: false,
+    collapsepolls: false,
   }),
 );
 

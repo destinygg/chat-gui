@@ -1,9 +1,90 @@
+import $ from 'jquery';
+import { settingsdefault } from './const';
 import {
+  ChatPoll,
   buildPollOptionHtml,
   hasClippedOptions,
   parsePollFlags,
   parseQuestionAndTime,
 } from './poll';
+
+jest.mock('./scroll', () => ({
+  __esModule: true,
+  default: class {
+    reset() {}
+  },
+}));
+
+describe('Collapse polls by default', () => {
+  let chat;
+  let poll;
+  let frame;
+
+  beforeEach(() => {
+    globalThis.ResizeObserver = class {
+      observe() {}
+    };
+    chat = {
+      ui: $(`
+        <div>
+          <div id="chat-poll-frame">
+            <div class="poll-frame">
+              <span class="poll-toggle"></span>
+              <div class="poll-options-scroller">
+                <div class="poll-options"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `),
+      settings: new Map(settingsdefault),
+      addMessage: jest.fn(),
+      mainwindow: { update: jest.fn() },
+    };
+    poll = new ChatPoll(chat);
+    frame = chat.ui.find('#chat-poll-frame');
+  });
+
+  afterEach(() => {
+    delete globalThis.ResizeObserver;
+  });
+
+  function startPoll() {
+    poll.startPoll({
+      start: Date.now(),
+      now: Date.now(),
+      time: 30000,
+      question: 'Pizza?',
+      options: ['Yes', 'No'],
+      totals: [0, 0],
+      totalvotes: 0,
+      myvote: 0,
+    });
+  }
+
+  test('keeps a poll whose options fit open with the default setting', () => {
+    startPoll();
+
+    expect(frame.hasClass('poll-collapsed')).toBe(false);
+  });
+
+  test('starts collapsed and lets the reader toggle options for each poll', () => {
+    chat.settings.set('collapsepolls', true);
+    startPoll();
+    expect(frame.hasClass('poll-collapsed')).toBe(true);
+
+    const toggle = frame.find('.poll-toggle');
+    toggle.trigger('click');
+    expect(frame.hasClass('poll-expanded')).toBe(true);
+
+    toggle.trigger('click');
+    expect(frame.hasClass('poll-collapsed')).toBe(true);
+
+    toggle.trigger('click');
+    startPoll();
+    expect(frame.hasClass('poll-collapsed')).toBe(true);
+  });
+});
 
 /**
  * Parse an option's rendered HTML into a detached DOM node so we can inspect

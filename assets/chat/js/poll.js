@@ -122,9 +122,9 @@ class ChatPoll {
     this.poll = null;
     this.voting = false;
     this.hidden = true;
-    // Whether the reader asked to see every option of a poll too tall for the
-    // space it gets. Only ever set by a click, and cleared for each new poll.
+    // A reader can expand the current poll without affecting the next one.
     this.expanded = false;
+    this.collapseByDefault = false;
     this.timerHidePoll = -1;
     this.ui.on('click touch', '.poll-close', () => this.hide());
     // A collapsed poll expands wherever it is tapped; an expanded one only
@@ -209,8 +209,8 @@ class ChatPoll {
   }
 
   /**
-   * Collapse the poll down to its question if all of its options do not fit in
-   * the space a poll gets by default, unless the reader expanded it.
+   * Collapse the poll if the reader prefers it or the options overflow,
+   * unless the reader expanded it.
    */
   updateCollapsed() {
     const viewport = this.ui.options.get(0);
@@ -222,9 +222,11 @@ class ChatPoll {
     // have to scroll. Both classes go straight back on before anything paints.
     this.ui.removeClass('poll-collapsed poll-expanded');
     // A pixel of slack, since subpixel layout leaves flush edges just over.
-    const fits = viewport.scrollHeight <= viewport.clientHeight + 1;
-    this.ui.toggleClass('poll-collapsed', !fits && !this.expanded);
-    this.ui.toggleClass('poll-expanded', !fits && this.expanded);
+    const collapsible =
+      this.collapseByDefault ||
+      viewport.scrollHeight > viewport.clientHeight + 1;
+    this.ui.toggleClass('poll-collapsed', collapsible && !this.expanded);
+    this.ui.toggleClass('poll-expanded', collapsible && this.expanded);
     this.ui.toggle.attr(
       'title',
       this.expanded ? 'Hide options' : 'Show all options',
@@ -284,6 +286,7 @@ class ChatPoll {
 
     this.reset();
     this.expanded = false;
+    this.collapseByDefault = this.chat.settings.get('collapsepolls');
     const kind =
       this.poll.type === PollType.Weighted ? 'sub-weighted poll' : 'poll';
     this.ui.title.text(
