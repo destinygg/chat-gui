@@ -221,7 +221,8 @@ class ChatPoll {
 
   /**
    * Collapse the poll down to its question if all of its options do not fit in
-   * the space a poll gets by default, unless the reader expanded it.
+   * the space a poll gets by default, or always with the `collapsepolls`
+   * setting, unless the reader expanded it.
    */
   updateCollapsed() {
     const viewport = this.ui.options.get(0);
@@ -234,8 +235,9 @@ class ChatPoll {
     this.ui.removeClass('poll-collapsed poll-expanded');
     // A pixel of slack, since subpixel layout leaves flush edges just over.
     const fits = viewport.scrollHeight <= viewport.clientHeight + 1;
-    this.ui.toggleClass('poll-collapsed', !fits && !this.expanded);
-    this.ui.toggleClass('poll-expanded', !fits && this.expanded);
+    const collapsible = !fits || this.chat.settings.get('collapsepolls');
+    this.ui.toggleClass('poll-collapsed', collapsible && !this.expanded);
+    this.ui.toggleClass('poll-expanded', collapsible && this.expanded);
     this.ui.toggle.attr(
       'title',
       this.expanded ? 'Hide options' : 'Show all options',

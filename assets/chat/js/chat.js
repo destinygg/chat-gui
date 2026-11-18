@@ -967,6 +967,9 @@ class Chat {
 
     this.mentions.resimulateMessages(this.mainwindow.messages);
 
+    // Not created yet on the first call, from the constructor.
+    this.chatpoll?.updateCollapsed();
+
     return Promise.resolve(this);
   }
 
