@@ -251,8 +251,6 @@ class Chat {
     this.control.on('V', (data) => this.cmdPOLL(data, 'POLL'));
     this.control.on('POLL', (data) => this.cmdPOLL(data, 'POLL'));
     this.control.on('VOTE', (data) => this.cmdPOLL(data, 'POLL'));
-    this.control.on('SPOLL', (data) => this.cmdPOLL(data, 'SPOLL'));
-    this.control.on('SVOTE', (data) => this.cmdPOLL(data, 'SPOLL'));
     this.control.on('POLLSTOP', (data) => this.cmdPOLLSTOP(data));
     this.control.on('VOTESTOP', (data) => this.cmdPOLLSTOP(data));
     this.control.on('VS', (data) => this.cmdPOLLSTOP(data));
@@ -2134,7 +2132,7 @@ class Chat {
 
   cmdPOLL(args, command) {
     const slashCommand = `/${command.toLowerCase()}`;
-    const { hidden, parts } = parsePollFlags(args);
+    const { hidden, weighted, parts } = parsePollFlags(args);
     const textOnly = parts.join(' ');
 
     try {
@@ -2142,7 +2140,7 @@ class Chat {
       parseQuestionAndTime(textOnly);
     } catch {
       MessageBuilder.info(
-        `Usage: ${slashCommand} [--hidden] <question>? <option 1> or <option 2> [or <option 3> [or <option 4> ... [or <option n>]]] [<time>].`,
+        `Usage: ${slashCommand} [--hidden] [--weighted] <question>? <option 1> or <option 2> [or <option 3> [or <option 4> ... [or <option n>]]] [<time>].`,
       ).into(this);
       return;
     }
@@ -2161,7 +2159,7 @@ class Chat {
 
     const { question, options, time } = parseQuestionAndTime(textOnly);
     const dataOut = {
-      weighted: slashCommand === '/spoll',
+      weighted,
       hidden,
       time,
       question,

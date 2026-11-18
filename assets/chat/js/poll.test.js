@@ -127,26 +127,67 @@ describe('Detecting poll options cut off by the scroller', () => {
   });
 });
 
-describe('Parsing the --hidden poll flag', () => {
+describe('Parsing the poll flags', () => {
   test('strips a leading --hidden and marks the poll hidden', () => {
     expect(parsePollFlags(['--hidden', 'Pizza?', 'yes', 'or', 'no'])).toEqual({
       hidden: true,
+      weighted: false,
       parts: ['Pizza?', 'yes', 'or', 'no'],
+    });
+  });
+
+  test('strips a leading --weighted and marks the poll weighted', () => {
+    expect(parsePollFlags(['--weighted', 'Pizza?', 'yes', 'or', 'no'])).toEqual(
+      {
+        hidden: false,
+        weighted: true,
+        parts: ['Pizza?', 'yes', 'or', 'no'],
+      },
+    );
+  });
+
+  test.each([
+    [['--hidden', '--weighted', 'Pizza?']],
+    [['--weighted', '--hidden', 'Pizza?']],
+  ])('takes both flags in either order: %j', (args) => {
+    expect(parsePollFlags(args)).toEqual({
+      hidden: true,
+      weighted: true,
+      parts: ['Pizza?'],
     });
   });
 
   test('is case-insensitive', () => {
     expect(parsePollFlags(['--HIDDEN', 'Pizza?']).hidden).toBe(true);
+    expect(parsePollFlags(['--Weighted', 'Pizza?']).weighted).toBe(true);
   });
 
-  test('leaves a poll without the flag untouched', () => {
+  test('leaves a poll without flags untouched', () => {
     const parts = ['Pizza?', 'yes', 'or', 'no'];
-    expect(parsePollFlags(parts)).toEqual({ hidden: false, parts });
+    expect(parsePollFlags(parts)).toEqual({
+      hidden: false,
+      weighted: false,
+      parts,
+    });
   });
 
-  test('only reads the flag at the start, so it can still be an option', () => {
-    const parts = ['Which', 'flag?', '--hidden', 'or', '--shown'];
-    expect(parsePollFlags(parts)).toEqual({ hidden: false, parts });
+  test('only reads flags at the start, so they can still be options', () => {
+    const parts = ['Which', 'flag?', '--hidden', 'or', '--weighted'];
+    expect(parsePollFlags(parts)).toEqual({
+      hidden: false,
+      weighted: false,
+      parts,
+    });
+  });
+
+  test('stops at the first word that is not a flag', () => {
+    expect(
+      parsePollFlags(['--hidden', 'Which', 'flag?', '--weighted', 'or', 'no']),
+    ).toEqual({
+      hidden: true,
+      weighted: false,
+      parts: ['Which', 'flag?', '--weighted', 'or', 'no'],
+    });
   });
 
   test('leaves no question when the flag is all there is', () => {
