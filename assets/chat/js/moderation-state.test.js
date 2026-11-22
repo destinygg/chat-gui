@@ -281,7 +281,7 @@ describe('Building the tooltip content', () => {
 
     expect(section.title).toBe('1 nuke is still lingering');
     expect(section.detail).toBe(
-      'Messages matching one of these nukes will be muted.',
+      'Messages matching one of these nukes will be muted or banned, depending on the nuke type.',
     );
     expect(section.rows).toEqual([
       {
