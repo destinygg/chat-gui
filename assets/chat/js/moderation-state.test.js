@@ -279,8 +279,10 @@ describe('Building the tooltip content', () => {
       now,
     );
 
-    expect(section.title).toBe('1 nuke is active.');
-    expect(section.detail).toBe('Messages matching them are muted.');
+    expect(section.title).toBe('1 nuke is still lingering.');
+    expect(section.detail).toBe(
+      'Messages matching one of these nukes are muted.',
+    );
     expect(section.rows).toEqual([
       {
         phrase: '"KING MOUTON"',
@@ -302,6 +304,19 @@ describe('Building the tooltip content', () => {
     );
 
     expect(sections[1].title).toBe('Nukes: 1 active.');
+  });
+
+  test('pluralizes the lingering nuke count', () => {
+    const [section] = buildModerationTooltipSections(
+      state({
+        nukes: [nuke(), nuke({ key: 'plain:second', phrase: 'SECOND' })],
+      }),
+      ['nuke'],
+      regularUser(),
+      now,
+    );
+
+    expect(section.title).toBe('2 nukes are still lingering.');
   });
 
   test('marks regex and mega rules', () => {

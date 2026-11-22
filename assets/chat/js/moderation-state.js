@@ -300,8 +300,8 @@ function buildNukeSection(state, { combined, isMod, now }) {
           nukes.length,
           'is',
           'are',
-        )} active.`,
-    detail: 'Messages matching them are muted.',
+        )} still lingering.`,
+    detail: 'Messages matching one of these nukes are muted.',
     rows: nukes.map((nuke) => ({
       phrase: formatNukePhrase(nuke),
       countdown: formatCountdown(nuke.expiresAt, now),
