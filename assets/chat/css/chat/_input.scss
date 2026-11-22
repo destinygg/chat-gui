@@ -34,18 +34,212 @@
   }
 }
 
-#chat-input-subonly {
-  cursor: default;
-  display: none;
+#chat-input-state {
   position: absolute;
   top: a.$gutter-md;
   right: a.$gutter-sm;
   width: 1.5em;
   height: 1.5em;
 
-  .btn-icon {
-    opacity: 0.75;
-
-    @include a.icon-background('../img/icon-subonly.svg');
+  &[data-mode='subonly'] .btn-icon {
+    @include a.icon-background('../img/icon-dollar-sign.svg');
   }
+
+  &[data-mode='nuke'] .btn-icon {
+    @include a.icon-background('../img/icon-radiation.svg');
+  }
+
+  &[data-mode='mutelinks'] .btn-icon {
+    @include a.icon-background('../img/icon-link.svg');
+  }
+
+  &[data-mode='breakingnews'] .btn-icon {
+    @include a.icon-background('../img/icon-newspaper.svg');
+  }
+}
+
+.chat-state-icon {
+  position: relative;
+  display: block;
+  width: 1.5em;
+  height: 1.5em;
+  cursor: default;
+  outline: none;
+
+  &:focus-visible {
+    outline: 2px solid a.$color-accent;
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  .btn-icon {
+    display: block;
+    width: 100%;
+    height: 100%;
+    opacity: 0.75;
+    background: transparent no-repeat center center / contain;
+  }
+}
+
+.chat-state-badge {
+  position: absolute;
+  top: -0.35em;
+  right: -0.45em;
+  min-width: 1.6em;
+  padding: 0 0.25em;
+  border-radius: 0.8em;
+  background: a.$color-accent;
+  color: a.$color-light;
+  font-size: 0.7em;
+  font-weight: 600;
+  line-height: 1.4;
+  text-align: center;
+  pointer-events: none;
+  box-sizing: border-box;
+}
+
+.tippy-box[data-theme~='dgg'][data-theme~='modstate'] {
+  background-color: a.$color-surface-dark4;
+  border-radius: 6px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
+}
+
+.tippy-box[data-theme~='dgg'][data-theme~='modstate'] > .tippy-svg-arrow {
+  fill: a.$color-surface-dark4;
+}
+
+.tippy-box[data-theme~='dgg'][data-theme~='modstate'] > .tippy-content {
+  padding: 0;
+}
+
+.moderation-tooltip {
+  width: 280px;
+  max-width: calc(100vw - 24px);
+  max-height: min(45vh, 320px);
+  padding: 10px 12px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+  box-sizing: border-box;
+  color: a.$color-chat-text2;
+  text-align: left;
+  scrollbar-width: thin;
+  scrollbar-color: a.$color-surface-dark2 transparent;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: a.$color-surface-dark2;
+    border-radius: 3px;
+  }
+}
+
+.mod-state-section + .mod-state-section {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid a.$color-surface-dark3;
+}
+
+.mod-state-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.mod-state-icon {
+  flex: 0 0 auto;
+  width: 14px;
+  height: 14px;
+  margin-top: 1px;
+  opacity: 0.8;
+
+  &[data-mode='subonly'] {
+    @include a.icon-background('../img/icon-dollar-sign.svg');
+  }
+
+  &[data-mode='nuke'] {
+    @include a.icon-background('../img/icon-radiation.svg');
+  }
+
+  &[data-mode='mutelinks'] {
+    @include a.icon-background('../img/icon-link.svg');
+  }
+
+  &[data-mode='breakingnews'] {
+    @include a.icon-background('../img/icon-newspaper.svg');
+  }
+}
+
+.mod-state-title {
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.35;
+  color: a.$color-chat-text1;
+  overflow-wrap: anywhere;
+}
+
+.mod-state-detail {
+  margin-top: 2px;
+  font-size: 12px;
+  color: a.$color-chat-text2;
+}
+
+.mod-state-rules {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.mod-state-rule {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.mod-state-rule-main {
+  display: flex;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.mod-state-phrase {
+  overflow-wrap: anywhere;
+}
+
+.mod-state-mega {
+  padding: 0 4px;
+  border-radius: 3px;
+  background: a.$color-darkred;
+  color: a.$color-light;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  line-height: 1.5;
+}
+
+.mod-state-rule-meta {
+  flex-basis: 100%;
+  font-size: 11px;
+  color: a.$color-chat-text3;
+}
+
+.mod-state-countdown {
+  flex: 0 0 auto;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  color: a.$color-chat-text3;
+}
+
+.mod-state-meta {
+  margin-top: 6px;
+  font-size: 11px;
+  color: a.$color-chat-text3;
 }
