@@ -171,10 +171,10 @@ describe('Selecting visible modes', () => {
     ).toEqual(['subonly']);
   });
 
-  test('keeps nukes visible from nuked users alone', () => {
+  test('hides nukes when only expired-nuke victims remain', () => {
     expect(
       getVisibleModes(state({ nukedUsers: [nukedUser()] }), regularUser()),
-    ).toEqual(['nuke']);
+    ).toEqual([]);
   });
 
   test('orders modes by priority', () => {
@@ -333,30 +333,6 @@ describe('Building the tooltip content', () => {
     expect(section.rows[0].phrase).toBe('/spoiler/');
     expect(section.rows[0].mega).toBe(true);
     expect(section.rows[0].effect).toBe('Banned for 10m');
-  });
-
-  test('keeps the nuke mode when only nuked users remain', () => {
-    const [section] = buildModerationTooltipSections(
-      state({ nukes: [], nukedUsers: [nukedUser()] }),
-      ['nuke'],
-      regularUser(),
-      now,
-    );
-
-    expect(section.title).toBe('Nuke mutes are still active');
-    expect(section.rows).toEqual([]);
-    expect(section.meta).toEqual([]);
-  });
-
-  test('shows the muted-user count when only nuked users remain', () => {
-    const [section] = buildModerationTooltipSections(
-      state({ nukes: [], nukedUsers: [nukedUser()] }),
-      ['nuke'],
-      modUser(),
-      now,
-    );
-
-    expect(section.meta).toEqual(['1 user is currently muted by nukes.']);
   });
 
   test('adds added-by rows and the muted-user count for mods', () => {

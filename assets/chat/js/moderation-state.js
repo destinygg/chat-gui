@@ -188,7 +188,9 @@ export function getVisibleModes(state, user) {
   // Protected-only users are not affected by nukes, link banning, or breaking
   // news, so those modes are hidden from them.
   if (!isProtectedOnly) {
-    if (state.nukes.length > 0 || state.nukedUsers.length > 0) {
+    // Expired nukes can leave victims muted, but the nuke itself is no longer
+    // lingering, so there is nothing to advertise.
+    if (state.nukes.length > 0) {
       visible.push('nuke');
     }
     if (state.mutelinks.mode !== 'off') {
@@ -287,15 +289,6 @@ function buildNukeSection(state, { combined, isMod, now }) {
           )} currently muted by nukes.`,
         ]
       : [];
-
-  if (nukes.length === 0) {
-    return {
-      mode: 'nuke',
-      title: 'Nuke mutes are still active',
-      rows: [],
-      meta: mutedUsersMeta,
-    };
-  }
 
   return {
     mode: 'nuke',

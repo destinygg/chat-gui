@@ -132,6 +132,25 @@ describe('Chat moderation state', () => {
     expect(chat.moderationBadge.prop('hidden')).toBe(true);
   });
 
+  test('hides nukes when only expired-nuke victims remain', () => {
+    const chat = createChat();
+
+    chat.onSTATES(
+      states({
+        nukedUsers: [
+          {
+            id: 1,
+            nick: 'Chatter',
+            nukeKey: 'plain:gone',
+            expiresAt: Date.now() + 60000,
+          },
+        ],
+      }),
+    );
+
+    expect(chat.moderationStateContainer.prop('hidden')).toBe(true);
+  });
+
   test('MODACTION renders a subonly line from its payload', () => {
     const chat = createChat();
     const into = jest.fn();
