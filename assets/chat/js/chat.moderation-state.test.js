@@ -241,6 +241,9 @@ describe('Chat moderation state', () => {
     chat.moderationTippy.show();
 
     expect(document.querySelector('.moderation-tooltip')).not.toBeNull();
+    expect(document.querySelector('.mod-state-countdown').textContent).toMatch(
+      / left$/,
+    );
     expect(chat.moderationTicker).not.toBeNull();
 
     chat.moderationTippy.hide();

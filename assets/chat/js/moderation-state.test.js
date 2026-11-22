@@ -4,6 +4,7 @@ import {
   createDefaultModerationState,
   formatCountdown,
   formatModAction,
+  formatNukeCountdown,
   getVisibleModes,
   isMalformedModerationState,
   normalizeModerationState,
@@ -239,6 +240,11 @@ describe('Formatting nuke countdowns', () => {
   test('rounds a partial second up', () => {
     expect(formatCountdown(1500, 1000)).toBe('00:01');
   });
+
+  test('labels the nuke linger countdown', () => {
+    expect(formatNukeCountdown(1000 + 272 * 1000, 1000)).toBe('04:32 left');
+    expect(formatNukeCountdown(1000, 2000)).toBe('00:00 left');
+  });
 });
 
 describe('Building the tooltip content', () => {
@@ -280,16 +286,14 @@ describe('Building the tooltip content', () => {
     );
 
     expect(section.title).toBe('1 nuke is still lingering');
-    expect(section.detail).toBe(
-      'Messages matching one of these nukes will be muted or banned, depending on the nuke type.',
-    );
+    expect(section.detail).toBeUndefined();
     expect(section.rows).toEqual([
       {
         phrase: '"KING MOUTON"',
-        countdown: '05:00',
+        countdown: '05:00 left',
         expiresAt: 1770000300000,
         mega: false,
-        effect: 'Muted for 10m',
+        effect: 'Mutes for 10m',
         addedBy: null,
       },
     ]);
@@ -332,7 +336,7 @@ describe('Building the tooltip content', () => {
 
     expect(section.rows[0].phrase).toBe('/spoiler/');
     expect(section.rows[0].mega).toBe(true);
-    expect(section.rows[0].effect).toBe('Banned for 10m');
+    expect(section.rows[0].effect).toBe('Bans for 10m');
   });
 
   test('adds added-by rows and the muted-user count for mods', () => {
@@ -484,17 +488,21 @@ describe('Rendering tooltip DOM', () => {
   });
 
   test('sets expiry data for the live countdown and mega marker', () => {
+    const now = 1770000000000;
     const sections = buildModerationTooltipSections(
       state({ nukes: [nuke({ mega: true })] }),
       ['nuke'],
       modUser(),
-      Date.now(),
+      now,
     );
     const element = buildModerationTooltipElement(sections);
 
     expect(element.querySelector('.mod-state-mega').textContent).toBe('MEGA');
     expect(element.querySelector('.mod-state-rule-meta').textContent).toBe(
-      'Banned for 10m · added by ModName',
+      'Bans for 10m · added by ModName',
+    );
+    expect(element.querySelector('.mod-state-countdown').textContent).toBe(
+      '05:00 left',
     );
     expect(
       element.querySelector('.mod-state-countdown').dataset.expiresAt,

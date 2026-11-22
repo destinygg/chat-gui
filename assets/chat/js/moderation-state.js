@@ -221,7 +221,7 @@ function formatNukePhrase(nuke) {
 
 function formatNukeEffect(nuke) {
   const duration = nuke.duration > 0 ? nuke.duration : 600;
-  return `${nuke.mega ? 'Banned' : 'Muted'} for ${formatShortDuration(duration)}`;
+  return `${nuke.mega ? 'Bans' : 'Mutes'} for ${formatShortDuration(duration)}`;
 }
 
 function pluralize(count, singular, plural = `${singular}s`) {
@@ -239,6 +239,14 @@ export function formatCountdown(expiresAt, now = Date.now()) {
     2,
     '0',
   )}`;
+}
+
+/**
+ * Nuke linger time, labelled so it reads separately from the mute/ban
+ * duration on the same row.
+ */
+export function formatNukeCountdown(expiresAt, now = Date.now()) {
+  return `${formatCountdown(expiresAt, now)} left`;
 }
 
 function formatShortDuration(seconds) {
@@ -299,11 +307,9 @@ function buildNukeSection(state, { combined, isMod, now }) {
           'is',
           'are',
         )} still lingering`,
-    detail:
-      'Messages matching one of these nukes will be muted or banned, depending on the nuke type.',
     rows: nukes.map((nuke) => ({
       phrase: formatNukePhrase(nuke),
-      countdown: formatCountdown(nuke.expiresAt, now),
+      countdown: formatNukeCountdown(nuke.expiresAt, now),
       expiresAt: nuke.expiresAt,
       mega: nuke.mega,
       effect: formatNukeEffect(nuke),
@@ -437,10 +443,6 @@ export function buildModerationTooltipElement(sections) {
     header.append(icon);
     header.append(createElement('span', 'mod-state-title', section.title));
     wrapper.append(header);
-
-    if (section.detail) {
-      wrapper.append(createElement('div', 'mod-state-detail', section.detail));
-    }
 
     if (section.rows.length > 0) {
       const rules = createElement('div', 'mod-state-rules');

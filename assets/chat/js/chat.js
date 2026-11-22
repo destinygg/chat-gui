@@ -71,8 +71,8 @@ import {
   buildModerationTooltipElement,
   buildModerationTooltipSections,
   createDefaultModerationState,
-  formatCountdown,
   formatModAction,
+  formatNukeCountdown,
   getVisibleModes,
   isMalformedModerationState,
   normalizeModerationState,
@@ -828,7 +828,7 @@ class Chat {
     for (const element of popper.querySelectorAll('.mod-state-countdown')) {
       const expiresAt = Number(element.dataset.expiresAt);
       if (Number.isFinite(expiresAt)) {
-        element.textContent = formatCountdown(expiresAt);
+        element.textContent = formatNukeCountdown(expiresAt);
       }
     }
   }
