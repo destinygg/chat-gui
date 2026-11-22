@@ -11,8 +11,8 @@ export const MODERATION_MODES = Object.freeze([
 ]);
 
 export const MODERATION_MODE_LABELS = Object.freeze({
-  subonly: 'Subscriber only',
-  nuke: 'Nuke rules',
+  subonly: 'Subscriber only mode',
+  nuke: 'Nukes',
   mutelinks: 'Link banning',
   breakingnews: 'Breaking news',
 });
@@ -256,8 +256,9 @@ function formatModerationMeta(changedBy, timestamp) {
   return parts.length > 0 ? `Set ${parts.join(' · ')}` : null;
 }
 
-function buildSubonlySection(state) {
-  const { tier } = state.subonly;
+function buildSubonlySection(state, { isMod }) {
+  const { tier, changedBy, timestamp } = state.subonly;
+  const meta = isMod ? formatModerationMeta(changedBy, timestamp) : null;
   return {
     mode: 'subonly',
     title:
@@ -265,7 +266,7 @@ function buildSubonlySection(state) {
         ? `Subscriber only mode is on (Tier ${tier}+).`
         : 'Subscriber only mode is on.',
     rows: [],
-    meta: [],
+    meta: meta ? [meta] : [],
   };
 }
 
@@ -294,11 +295,12 @@ function buildNukeSection(state, { combined, isMod, now }) {
   return {
     mode: 'nuke',
     title: combined
-      ? `Nuke rules: ${nukes.length} active.`
-      : `${nukes.length} nuke ${pluralize(
+      ? `Nukes: ${nukes.length} active.`
+      : `${nukes.length} nuke${pluralize(nukes.length, '', 's')} ${pluralize(
           nukes.length,
-          'rule',
-        )} ${pluralize(nukes.length, 'is', 'are')} active.`,
+          'is',
+          'are',
+        )} active.`,
     detail: 'Messages matching them are muted.',
     rows: nukes.map((nuke) => ({
       phrase: formatNukePhrase(nuke),
@@ -319,14 +321,14 @@ function buildMutelinksSection(state, { isMod }) {
   switch (mode) {
     case 'on':
       title = mention
-        ? `Links in messages mentioning @${mention} are muted for ${seconds}s.`
-        : `Links in messages mentioning the configured user are muted for ${seconds}s.`;
+        ? `Messages mentioning @${mention} with links will be muted for ${seconds}s.`
+        : `Messages mentioning the configured user with links will be muted for ${seconds}s.`;
       break;
     case 'all':
-      title = `All links are muted for ${seconds}s.`;
+      title = `Messages with links will be muted for ${seconds}s.`;
       break;
     case 'repeat':
-      title = `Repeated links are muted for ${seconds}s.`;
+      title = `Messages with repeated links will be muted for ${seconds}s.`;
       break;
     default:
       title = '';
@@ -349,11 +351,11 @@ function buildBreakingNewsSection(state, { isMod }) {
   switch (mode) {
     case 'on':
       title = mention
-        ? `Breaking news mode is on: links mentioning @${mention} older than ${age} are affected.`
-        : `Breaking news mode is on: links older than ${age} are affected.`;
+        ? `Breaking news mode is on: messages mentioning @${mention} with links older than ${age} will be muted.`
+        : `Breaking news mode is on: messages with links older than ${age} will be muted.`;
       break;
     case 'all':
-      title = `Breaking news mode is on: links older than ${age} are affected.`;
+      title = `Breaking news mode is on: messages with links older than ${age} will be muted.`;
       break;
     default:
       title = '';
@@ -386,7 +388,7 @@ export function buildModerationTooltipSections(
   for (const mode of visible) {
     switch (mode) {
       case 'subonly':
-        sections.push(buildSubonlySection(state));
+        sections.push(buildSubonlySection(state, { isMod }));
         break;
       case 'nuke':
         sections.push(buildNukeSection(state, { combined, isMod, now }));

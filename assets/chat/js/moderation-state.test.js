@@ -279,7 +279,7 @@ describe('Building the tooltip content', () => {
       now,
     );
 
-    expect(section.title).toBe('1 nuke rule is active.');
+    expect(section.title).toBe('1 nuke is active.');
     expect(section.detail).toBe('Messages matching them are muted.');
     expect(section.rows).toEqual([
       {
@@ -301,7 +301,7 @@ describe('Building the tooltip content', () => {
       now,
     );
 
-    expect(sections[1].title).toBe('Nuke rules: 1 active.');
+    expect(sections[1].title).toBe('Nukes: 1 active.');
   });
 
   test('marks regex and mega rules', () => {
@@ -367,7 +367,7 @@ describe('Building the tooltip content', () => {
       now,
     )[0];
     expect(on.title).toBe(
-      'Links in messages mentioning @ModName are muted for 90s.',
+      'Messages mentioning @ModName with links will be muted for 90s.',
     );
 
     const all = buildModerationTooltipSections(
@@ -376,7 +376,7 @@ describe('Building the tooltip content', () => {
       regularUser(),
       now,
     )[0];
-    expect(all.title).toBe('All links are muted for 60s.');
+    expect(all.title).toBe('Messages with links will be muted for 60s.');
 
     const repeat = buildModerationTooltipSections(
       state({ mutelinks: { mode: 'repeat', duration: 30 } }),
@@ -384,7 +384,9 @@ describe('Building the tooltip content', () => {
       regularUser(),
       now,
     )[0];
-    expect(repeat.title).toBe('Repeated links are muted for 30s.');
+    expect(repeat.title).toBe(
+      'Messages with repeated links will be muted for 30s.',
+    );
   });
 
   test('describes breaking-news modes with a short age', () => {
@@ -397,7 +399,7 @@ describe('Building the tooltip content', () => {
       now,
     )[0];
     expect(on.title).toBe(
-      'Breaking news mode is on: links mentioning @ModName older than 5m are affected.',
+      'Breaking news mode is on: messages mentioning @ModName with links older than 5m will be muted.',
     );
 
     const all = buildModerationTooltipSections(
@@ -407,7 +409,7 @@ describe('Building the tooltip content', () => {
       now,
     )[0];
     expect(all.title).toBe(
-      'Breaking news mode is on: links older than 15m are affected.',
+      'Breaking news mode is on: messages with links older than 15m will be muted.',
     );
   });
 
@@ -435,6 +437,40 @@ describe('Building the tooltip content', () => {
       now,
     )[0];
     expect(regularSection.meta).toEqual([]);
+  });
+
+  test('shows who enabled subscriber-only to mods only', () => {
+    const stateWithMeta = state({
+      subonly: {
+        tier: 1,
+        changedBy: 'ModName',
+        timestamp: Date.UTC(2026, 0, 2, 3, 4),
+      },
+    });
+
+    const modSection = buildModerationTooltipSections(
+      stateWithMeta,
+      ['subonly'],
+      modUser(),
+      now,
+    )[0];
+    expect(modSection.meta[0]).toContain('Set by ModName');
+
+    const regularSection = buildModerationTooltipSections(
+      stateWithMeta,
+      ['subonly'],
+      regularUser(),
+      now,
+    )[0];
+    expect(regularSection.meta).toEqual([]);
+
+    const protectedSection = buildModerationTooltipSections(
+      stateWithMeta,
+      ['subonly'],
+      protectedUser(),
+      now,
+    )[0];
+    expect(protectedSection.meta).toEqual([]);
   });
 });
 

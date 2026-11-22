@@ -861,7 +861,7 @@ class Chat {
     this.moderationStateContainer.prop('hidden', false).attr('data-mode', mode);
     this.moderationIndicator.attr(
       'aria-label',
-      `${MODERATION_MODE_LABELS[mode]} mode active${extra}`,
+      `${MODERATION_MODE_LABELS[mode]} active${extra}`,
     );
     this.moderationBadge
       .text(`+${additional}`)
