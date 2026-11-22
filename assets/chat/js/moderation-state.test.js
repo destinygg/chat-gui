@@ -367,7 +367,7 @@ describe('Building the tooltip content', () => {
       now,
     )[0];
     expect(on.title).toBe(
-      'Messages mentioning @ModName with links will be muted for 90s.',
+      'Messages that include links and mention @ModName will be muted for 90s.',
     );
 
     const all = buildModerationTooltipSections(
@@ -376,7 +376,9 @@ describe('Building the tooltip content', () => {
       regularUser(),
       now,
     )[0];
-    expect(all.title).toBe('Messages with links will be muted for 60s.');
+    expect(all.title).toBe(
+      'Messages that include links will be muted for 60s.',
+    );
 
     const repeat = buildModerationTooltipSections(
       state({ mutelinks: { mode: 'repeat', duration: 30 } }),
@@ -385,7 +387,7 @@ describe('Building the tooltip content', () => {
       now,
     )[0];
     expect(repeat.title).toBe(
-      'Messages with repeated links will be muted for 30s.',
+      'Messages that include repeated links will be muted for 30s.',
     );
   });
 
@@ -399,7 +401,7 @@ describe('Building the tooltip content', () => {
       now,
     )[0];
     expect(on.title).toBe(
-      'Breaking news mode is on: messages mentioning @ModName with links older than 5m will be muted.',
+      'Breaking news mode is on: messages that include links older than 5m and mention @ModName will be muted.',
     );
 
     const all = buildModerationTooltipSections(
@@ -409,7 +411,7 @@ describe('Building the tooltip content', () => {
       now,
     )[0];
     expect(all.title).toBe(
-      'Breaking news mode is on: messages with links older than 15m will be muted.',
+      'Breaking news mode is on: messages that include links older than 15m will be muted.',
     );
   });
 

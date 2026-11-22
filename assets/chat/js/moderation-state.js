@@ -321,14 +321,14 @@ function buildMutelinksSection(state, { isMod }) {
   switch (mode) {
     case 'on':
       title = mention
-        ? `Messages mentioning @${mention} with links will be muted for ${seconds}s.`
-        : `Messages mentioning the configured user with links will be muted for ${seconds}s.`;
+        ? `Messages that include links and mention @${mention} will be muted for ${seconds}s.`
+        : `Messages that include links and mention the configured user will be muted for ${seconds}s.`;
       break;
     case 'all':
-      title = `Messages with links will be muted for ${seconds}s.`;
+      title = `Messages that include links will be muted for ${seconds}s.`;
       break;
     case 'repeat':
-      title = `Messages with repeated links will be muted for ${seconds}s.`;
+      title = `Messages that include repeated links will be muted for ${seconds}s.`;
       break;
     default:
       title = '';
@@ -351,11 +351,11 @@ function buildBreakingNewsSection(state, { isMod }) {
   switch (mode) {
     case 'on':
       title = mention
-        ? `Breaking news mode is on: messages mentioning @${mention} with links older than ${age} will be muted.`
-        : `Breaking news mode is on: messages with links older than ${age} will be muted.`;
+        ? `Breaking news mode is on: messages that include links older than ${age} and mention @${mention} will be muted.`
+        : `Breaking news mode is on: messages that include links older than ${age} will be muted.`;
       break;
     case 'all':
-      title = `Breaking news mode is on: messages with links older than ${age} will be muted.`;
+      title = `Breaking news mode is on: messages that include links older than ${age} will be muted.`;
       break;
     default:
       title = '';
