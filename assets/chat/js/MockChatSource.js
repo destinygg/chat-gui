@@ -1,5 +1,10 @@
 import EventEmitter from './emitter';
 import {
+  createDefaultModerationState,
+  normalizeModerationState,
+} from './moderation-state';
+
+import {
   USERS,
   ALL_USERS,
   buildMSG,
@@ -65,6 +70,7 @@ class MockChatSource extends EventEmitter {
     // REMOVEEVENT can rebroadcast the list the way the server does.
     this.barEvents = [];
     this.subonlyOn = false;
+    this.moderationState = createDefaultModerationState();
   }
 
   connect() {
@@ -280,6 +286,15 @@ class MockChatSource extends EventEmitter {
     this.emit(type, data);
   }
 
+  emitStates() {
+    const data = {
+      ...this.moderationState,
+      timestamp: Date.now(),
+    };
+    this.emit('DISPATCH', { data, event: 'STATES' });
+    this.emit('STATES', data);
+  }
+
   emitInfo(message) {
     const msg = buildMSG('InfoBot', message, ['bot', 'flair11'], ['BOT']);
     this.emit('DISPATCH', { data: msg, event: 'MSG' });
@@ -304,6 +319,7 @@ class MockChatSource extends EventEmitter {
       this.history = buildHistoryMessages();
       this.emit('HISTORY', this.history);
     });
+    this.schedule(85, () => this.emitStates());
     this.schedule(90, () => {
       this.barEvents = buildPaidEvents();
       this.emit('PAIDEVENTS', this.barEvents);
@@ -448,13 +464,26 @@ class MockChatSource extends EventEmitter {
       }
       case 'SUBONLY': {
         this.subonlyOn = !this.subonlyOn;
-        const data = {
-          data: this.subonlyOn ? 'on' : 'off',
+        const timestamp = Date.now();
+        const tier = this.subonlyOn ? 1 : 0;
+        this.moderationState = normalizeModerationState({
+          ...this.moderationState,
+          subonly: {
+            tier,
+            changedBy: 'ModMike',
+            timestamp,
+          },
+          timestamp,
+        });
+        const action = {
+          action: 'subonly',
+          payload: { mode: this.subonlyOn ? 'on' : 'off', tier },
           nick: 'ModMike',
-          timestamp: Date.now(),
+          timestamp,
         };
-        this.emit('DISPATCH', { data, event: 'SUBONLY' });
-        this.emit('SUBONLY', data);
+        this.emit('DISPATCH', { data: action, event: 'MODACTION' });
+        this.emit('MODACTION', action);
+        this.emitStates();
         break;
       }
       default:
