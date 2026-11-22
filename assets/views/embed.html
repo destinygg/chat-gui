@@ -53,9 +53,21 @@
         autofocus
         spellcheck
       ></textarea>
-      <a id="chat-input-subonly" class="chat-tool-btn" title="Subonly mode">
-        <i class="btn-icon"></i>
-      </a>
+      <div id="chat-input-state" hidden>
+        <span
+          id="chat-input-state-icon"
+          class="chat-state-icon"
+          tabindex="0"
+          role="img"
+        >
+          <i class="btn-icon"></i>
+          <span
+            id="chat-input-state-badge"
+            class="chat-state-badge"
+            aria-hidden="true"
+          ></span>
+        </span>
+      </div>
     </div>
     <div id="chat-tools-wrap">
       <div class="chat-tools-group">

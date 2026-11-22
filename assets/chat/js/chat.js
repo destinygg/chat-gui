@@ -66,6 +66,18 @@ import MessageTemplateHTML from '../../views/templates.html';
 import EventBarEvent from './event-bar/EventBarEvent';
 import Mentions from './mentions';
 import { buildLinkPreview } from './linkpreview';
+import {
+  MODERATION_MODE_LABELS,
+  buildModerationTooltipElement,
+  buildModerationTooltipSections,
+  createDefaultModerationState,
+  formatModAction,
+  formatNukeCountdown,
+  getVisibleModes,
+  isMalformedModerationState,
+  normalizeModerationState,
+  resolveIndicator,
+} from './moderation-state';
 
 // What the chat server answers a MSG with instead of broadcasting it.
 const MESSAGE_REJECTED_ERRORS = new Set([
@@ -100,7 +112,14 @@ class Chat {
     this.css = null;
     this.output = null;
     this.input = null;
-    this.subonlyicon = null;
+    this.moderationIndicator = null;
+    this.moderationBadge = null;
+    this.moderationStateContainer = null;
+    this.moderationTippy = null;
+    this.moderationTicker = null;
+    this.visibleModerationModes = [];
+    this.moderationState = createDefaultModerationState();
+    this.moderationStateWarned = false;
     this.loginscrn = null;
     this.loadingscrn = null;
     this.showmotd = true;
@@ -167,7 +186,8 @@ class Chat {
     this.source.on('UNBAN', (data) => this.onUNBAN(data));
     this.source.on('ERR', (data) => this.onERR(data));
     this.source.on('SOCKETERROR', (data) => this.onSOCKETERROR(data));
-    this.source.on('SUBONLY', (data) => this.onSUBONLY(data));
+    this.source.on('STATES', (data) => this.onSTATES(data));
+    this.source.on('MODACTION', (data) => this.onMODACTION(data));
     this.source.on('BROADCAST', (data) => this.onBROADCAST(data));
     this.source.on('RELOAD', () => this.onRELOAD());
     this.source.on('REFRESHCHATASSETS', (data) =>
@@ -365,7 +385,10 @@ class Chat {
     this.ishidden = (document.visibilityState || 'visible') !== 'visible';
     this.output = this.ui.find('#chat-output-frame');
     this.input = this.ui.find('#chat-input-control');
-    this.subonlyicon = this.ui.find('#chat-input-subonly');
+    this.moderationStateContainer = this.ui.find('#chat-input-state');
+    this.moderationIndicator = this.ui.find('#chat-input-state-icon');
+    this.moderationBadge = this.ui.find('#chat-input-state-badge');
+    this.setupModerationTippy();
     this.loginscrn = this.ui.find('#chat-login-screen');
     this.loadingscrn = this.ui.find('#chat-loading');
     this.windowselect = this.ui.find('#chat-windows-select');
@@ -687,6 +710,167 @@ class Chat {
     this.setDefaultPlaceholderText();
     MessageBuilder.status(this.config.welcomeMessage).into(this);
     return Promise.resolve(this);
+  }
+
+  setupModerationTippy() {
+    if (this.moderationIndicator.length === 0) {
+      return;
+    }
+
+    let openedByKeyboard = false;
+    this.moderationTippy = tippy(this.moderationIndicator[0], {
+      content: '',
+      interactive: true,
+      interactiveDebounce: 100,
+      delay: [0, 100],
+      duration: 0,
+      arrow: roundArrow,
+      placement: 'top-end',
+      theme: 'dgg modstate',
+      maxWidth: 300,
+      appendTo: document.body,
+      trigger: 'mouseenter focus',
+      hideOnClick: false,
+      onShow: () => {
+        this.refreshModerationTooltip();
+        this.startModerationTicker();
+      },
+      onMount: (instance) => {
+        // Keyboard focus opens the card; put focus in it so arrow keys scroll
+        // long nuke lists. Mouse and touch opens leave focus on the indicator.
+        if (openedByKeyboard) {
+          instance.popper
+            .querySelector('.moderation-tooltip')
+            ?.focus({ preventScroll: true });
+          openedByKeyboard = false;
+        }
+      },
+      onHide: () => this.stopModerationTicker(),
+    });
+
+    this.moderationIndicator.on('focus', () => {
+      openedByKeyboard = this.moderationIndicator[0].matches(':focus-visible');
+    });
+
+    // Tippy's focus trigger opens the card as the indicator is tapped, before
+    // the click arrives. Remember whether it was open beforehand so a tap
+    // toggles the card instead of immediately closing what focus opened.
+    let visibleOnPress = false;
+    this.moderationIndicator.on('pointerdown', () => {
+      visibleOnPress = Boolean(this.moderationTippy?.state.isVisible);
+    });
+    this.moderationIndicator.on('click', (event) => {
+      event.preventDefault();
+      if (visibleOnPress) {
+        this.moderationTippy?.hide();
+      } else {
+        this.moderationTippy?.show();
+      }
+    });
+
+    // The instance opts out of the global `hideOnClick: false`, so close the
+    // card ourselves when a tap or click lands outside both the indicator and
+    // the card. Clicks inside the card must not close it.
+    document.addEventListener(
+      'pointerdown',
+      (event) => {
+        if (!this.moderationTippy?.state.isVisible) {
+          return;
+        }
+        const { target } = event;
+        if (
+          this.moderationIndicator[0].contains(target) ||
+          this.moderationTippy.popper.contains(target)
+        ) {
+          return;
+        }
+        this.moderationTippy.hide();
+      },
+      true,
+    );
+  }
+
+  refreshModerationTooltip() {
+    if (!this.moderationTippy) {
+      return;
+    }
+    const sections = buildModerationTooltipSections(
+      this.moderationState,
+      this.visibleModerationModes,
+      this.user,
+    );
+    this.moderationTippy.setContent(buildModerationTooltipElement(sections));
+  }
+
+  startModerationTicker() {
+    this.stopModerationTicker();
+    if (!this.visibleModerationModes.includes('nuke')) {
+      return;
+    }
+    this.moderationTicker = setInterval(
+      () => this.updateModerationCountdowns(),
+      1000,
+    );
+  }
+
+  stopModerationTicker() {
+    if (this.moderationTicker !== null) {
+      clearInterval(this.moderationTicker);
+      this.moderationTicker = null;
+    }
+  }
+
+  updateModerationCountdowns() {
+    const popper = this.moderationTippy?.popper;
+    if (!popper) {
+      return;
+    }
+    for (const element of popper.querySelectorAll('.mod-state-countdown')) {
+      const expiresAt = Number(element.dataset.expiresAt);
+      if (Number.isFinite(expiresAt)) {
+        element.textContent = formatNukeCountdown(expiresAt);
+      }
+    }
+  }
+
+  renderModerationState() {
+    if (!this.moderationStateContainer?.length) {
+      return;
+    }
+
+    const visible = getVisibleModes(this.moderationState, this.user);
+    this.visibleModerationModes = visible;
+    const { mode, additional } = resolveIndicator(visible);
+
+    if (!mode) {
+      this.moderationStateContainer.prop('hidden', true);
+      this.moderationIndicator.removeAttr('aria-label');
+      this.moderationBadge.text('').prop('hidden', true);
+      this.stopModerationTicker();
+      this.moderationTippy?.hide();
+      this.refreshModerationTooltip();
+      return;
+    }
+
+    const extra =
+      additional > 0
+        ? `, ${additional} more active moderation ${
+            additional === 1 ? 'mode' : 'modes'
+          }`
+        : '';
+    this.moderationStateContainer.prop('hidden', false).attr('data-mode', mode);
+    this.moderationIndicator.attr(
+      'aria-label',
+      `${MODERATION_MODE_LABELS[mode]} active${extra}`,
+    );
+    this.moderationBadge
+      .text(`+${additional}`)
+      .prop('hidden', additional === 0);
+
+    this.refreshModerationTooltip();
+    if (this.moderationTippy?.state.isVisible) {
+      this.startModerationTicker();
+    }
   }
 
   connect() {
@@ -1379,6 +1563,7 @@ class Chat {
       this.menus.get('whisper-users').invalidate();
       this.refreshEmoteAutocomplete();
     }
+    this.renderModerationState();
   }
 
   onOPEN() {
@@ -1661,30 +1846,24 @@ class Chat {
     // console.error(e)
   }
 
-  onSUBONLY(data) {
-    const isOn = data.data === 'on';
-    this.subonly = isOn ? data.tier || 1 : 0;
-    const tierText = this.subonly > 1 ? ` (Tier ${this.subonly}+)` : '';
-    MessageBuilder.command(
-      `Subscriber only mode${tierText} ${isOn ? 'enabled' : 'disabled'}${
-        data.nick ? ` by ${data.nick}` : ''
-      }.`,
-      data.timestamp,
-    ).into(this);
-    if (
-      this.subonly &&
-      !this.user.isPrivileged() &&
-      this.user.subTier < this.subonly
-    ) {
-      this.subonlyicon.attr(
-        'title',
-        this.subonly > 1
-          ? `Subscriber only mode (Tier ${this.subonly}+)`
-          : 'Subscriber only mode',
+  onSTATES(data) {
+    if (!this.moderationStateWarned && isMalformedModerationState(data)) {
+      this.moderationStateWarned = true;
+      console.warn(
+        'Chat: received a malformed moderation state; using safe defaults.',
       );
-      this.subonlyicon.show();
-    } else {
-      this.subonlyicon.hide();
+    }
+    this.moderationState = normalizeModerationState(data);
+    this.subonly = this.moderationState.subonly.tier;
+    this.renderModerationState();
+  }
+
+  onMODACTION(data) {
+    // Actions are history, not state: render the point-in-time line and leave
+    // the indicator to the authoritative `STATES` snapshot.
+    const line = formatModAction(data);
+    if (line) {
+      MessageBuilder.command(line, data.timestamp).into(this);
     }
   }
 
@@ -2096,6 +2275,7 @@ class Chat {
       for (const window of this.windows.values()) {
         window.updateMessages(this);
       }
+      this.renderModerationState();
     }
   }
 
