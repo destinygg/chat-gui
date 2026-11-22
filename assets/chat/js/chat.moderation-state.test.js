@@ -67,6 +67,7 @@ describe('Chat moderation state', () => {
     expect(command).not.toHaveBeenCalled();
     expect(chat.subonly).toBe(2);
     expect(chat.moderationStateContainer.prop('hidden')).toBe(false);
+    expect(chat.moderationStateContainer.attr('hidden')).toBeUndefined();
     expect(chat.moderationStateContainer.attr('data-mode')).toBe('subonly');
     expect(chat.moderationBadge.prop('hidden')).toBe(true);
     expect(chat.moderationIndicator.attr('aria-label')).toBe(

@@ -717,6 +717,7 @@ class Chat {
       return;
     }
 
+    let openedByKeyboard = false;
     this.moderationTippy = tippy(this.moderationIndicator[0], {
       content: '',
       interactive: true,
@@ -734,7 +735,21 @@ class Chat {
         this.refreshModerationTooltip();
         this.startModerationTicker();
       },
+      onMount: (instance) => {
+        // Keyboard focus opens the card; put focus in it so arrow keys scroll
+        // long nuke lists. Mouse and touch opens leave focus on the indicator.
+        if (openedByKeyboard) {
+          instance.popper
+            .querySelector('.moderation-tooltip')
+            ?.focus({ preventScroll: true });
+          openedByKeyboard = false;
+        }
+      },
       onHide: () => this.stopModerationTicker(),
+    });
+
+    this.moderationIndicator.on('focus', () => {
+      openedByKeyboard = this.moderationIndicator[0].matches(':focus-visible');
     });
 
     // Tippy's focus trigger opens the card as the indicator is tapped, before
