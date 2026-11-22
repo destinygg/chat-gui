@@ -271,21 +271,28 @@ function buildSubonlySection(state) {
 
 function buildNukeSection(state, { combined, isMod, now }) {
   const { nukes, nukedUsers } = state;
-  const sections = {
-    mode: 'nuke',
-    rows: [],
-    meta: [],
-  };
+  const mutedUsersMeta =
+    isMod && nukedUsers.length > 0
+      ? [
+          `${nukedUsers.length} ${pluralize(
+            nukedUsers.length,
+            'user is',
+            'users are',
+          )} currently muted by nukes.`,
+        ]
+      : [];
 
   if (nukes.length === 0) {
     return {
-      ...sections,
+      mode: 'nuke',
       title: 'Nuke mutes are still active.',
+      rows: [],
+      meta: mutedUsersMeta,
     };
   }
 
   return {
-    ...sections,
+    mode: 'nuke',
     title: combined
       ? `Nuke rules: ${nukes.length} active.`
       : `${nukes.length} nuke ${pluralize(
@@ -300,16 +307,7 @@ function buildNukeSection(state, { combined, isMod, now }) {
       mega: nuke.mega,
       addedBy: isMod && nuke.addedBy ? `added by ${nuke.addedBy}` : null,
     })),
-    meta:
-      isMod && nukedUsers.length > 0
-        ? [
-            `${nukedUsers.length} ${pluralize(
-              nukedUsers.length,
-              'user is',
-              'users are',
-            )} currently muted by nukes.`,
-          ]
-        : [],
+    meta: mutedUsersMeta,
   };
 }
 

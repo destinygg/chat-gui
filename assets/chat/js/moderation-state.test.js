@@ -328,6 +328,18 @@ describe('Building the tooltip content', () => {
 
     expect(section.title).toBe('Nuke mutes are still active.');
     expect(section.rows).toEqual([]);
+    expect(section.meta).toEqual([]);
+  });
+
+  test('shows the muted-user count when only nuked users remain', () => {
+    const [section] = buildModerationTooltipSections(
+      state({ nukes: [], nukedUsers: [nukedUser()] }),
+      ['nuke'],
+      modUser(),
+      now,
+    );
+
+    expect(section.meta).toEqual(['1 user is currently muted by nukes.']);
   });
 
   test('adds added-by rows and the muted-user count for mods', () => {

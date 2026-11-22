@@ -202,6 +202,34 @@ describe('Chat moderation state', () => {
     expect(into).toHaveBeenCalledWith(chat);
   });
 
+  test('opens the interactive tooltip and ticks nuke countdowns', () => {
+    const chat = createChat();
+    chat.moderationStateContainer.appendTo(document.body);
+    chat.setupModerationTippy();
+    chat.onSTATES(
+      states({
+        nukes: [
+          {
+            key: 'plain:hi',
+            phrase: 'hi',
+            expiresAt: Date.now() + 60000,
+          },
+        ],
+      }),
+    );
+
+    chat.moderationTippy.show();
+
+    expect(document.querySelector('.moderation-tooltip')).not.toBeNull();
+    expect(chat.moderationTicker).not.toBeNull();
+
+    chat.moderationTippy.hide();
+
+    expect(chat.moderationTicker).toBeNull();
+    chat.moderationTippy.destroy();
+    chat.moderationStateContainer.remove();
+  });
+
   test('malformed state is logged once and falls back to defaults', () => {
     const chat = createChat();
     const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
