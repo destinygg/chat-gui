@@ -217,6 +217,11 @@ function formatNukePhrase(nuke) {
   return nuke.regex ? `/${nuke.phrase}/` : `"${nuke.phrase}"`;
 }
 
+function formatNukeEffect(nuke) {
+  const duration = nuke.duration > 0 ? nuke.duration : 600;
+  return `${nuke.mega ? 'Banned' : 'Muted'} for ${formatShortDuration(duration)}`;
+}
+
 function pluralize(count, singular, plural = `${singular}s`) {
   return count === 1 ? singular : plural;
 }
@@ -263,8 +268,8 @@ function buildSubonlySection(state, { isMod }) {
     mode: 'subonly',
     title:
       tier > 1
-        ? `Subscriber only mode is on (Tier ${tier}+).`
-        : 'Subscriber only mode is on.',
+        ? `Subscriber only mode is on (Tier ${tier}+)`
+        : 'Subscriber only mode is on',
     rows: [],
     meta: meta ? [meta] : [],
   };
@@ -286,7 +291,7 @@ function buildNukeSection(state, { combined, isMod, now }) {
   if (nukes.length === 0) {
     return {
       mode: 'nuke',
-      title: 'Nuke mutes are still active.',
+      title: 'Nuke mutes are still active',
       rows: [],
       meta: mutedUsersMeta,
     };
@@ -295,18 +300,19 @@ function buildNukeSection(state, { combined, isMod, now }) {
   return {
     mode: 'nuke',
     title: combined
-      ? `Nukes: ${nukes.length} active.`
+      ? `Nukes: ${nukes.length} active`
       : `${nukes.length} nuke${pluralize(nukes.length, '', 's')} ${pluralize(
           nukes.length,
           'is',
           'are',
-        )} still lingering.`,
-    detail: 'Messages matching one of these nukes are muted.',
+        )} still lingering`,
+    detail: 'Messages matching one of these nukes will be muted.',
     rows: nukes.map((nuke) => ({
       phrase: formatNukePhrase(nuke),
       countdown: formatCountdown(nuke.expiresAt, now),
       expiresAt: nuke.expiresAt,
       mega: nuke.mega,
+      effect: formatNukeEffect(nuke),
       addedBy: isMod && nuke.addedBy ? `added by ${nuke.addedBy}` : null,
     })),
     meta: mutedUsersMeta,
@@ -321,14 +327,14 @@ function buildMutelinksSection(state, { isMod }) {
   switch (mode) {
     case 'on':
       title = mention
-        ? `Messages that include links and mention @${mention} will be muted for ${seconds}s.`
-        : `Messages that include links and mention the configured user will be muted for ${seconds}s.`;
+        ? `Messages that include links and mention @${mention} will be muted for ${seconds}s`
+        : `Messages that include links and mention the configured user will be muted for ${seconds}s`;
       break;
     case 'all':
-      title = `Messages that include links will be muted for ${seconds}s.`;
+      title = `Messages that include links will be muted for ${seconds}s`;
       break;
     case 'repeat':
-      title = `Messages that include repeated links will be muted for ${seconds}s.`;
+      title = `Messages that include repeated links will be muted for ${seconds}s`;
       break;
     default:
       title = '';
@@ -351,11 +357,11 @@ function buildBreakingNewsSection(state, { isMod }) {
   switch (mode) {
     case 'on':
       title = mention
-        ? `Breaking news mode is on: messages that include links older than ${age} and mention @${mention} will be muted.`
-        : `Breaking news mode is on: messages that include links older than ${age} will be muted.`;
+        ? `Breaking news mode is on: messages that include links older than ${age} and mention @${mention} will be muted`
+        : `Breaking news mode is on: messages that include links older than ${age} will be muted`;
       break;
     case 'all':
-      title = `Breaking news mode is on: messages that include links older than ${age} will be muted.`;
+      title = `Breaking news mode is on: messages that include links older than ${age} will be muted`;
       break;
     default:
       title = '';
@@ -451,10 +457,9 @@ export function buildModerationTooltipElement(sections) {
         if (rule.mega) {
           main.append(createElement('span', 'mod-state-mega', 'MEGA'));
         }
-        if (rule.addedBy) {
-          main.append(
-            createElement('span', 'mod-state-rule-meta', rule.addedBy),
-          );
+        const rowMeta = [rule.effect, rule.addedBy].filter(Boolean).join(' · ');
+        if (rowMeta) {
+          main.append(createElement('span', 'mod-state-rule-meta', rowMeta));
         }
 
         const countdown = createElement(

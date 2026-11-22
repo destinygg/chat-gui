@@ -255,7 +255,7 @@ describe('Building the tooltip content', () => {
     ).toEqual([
       {
         mode: 'subonly',
-        title: 'Subscriber only mode is on.',
+        title: 'Subscriber only mode is on',
         rows: [],
         meta: [],
       },
@@ -268,7 +268,7 @@ describe('Building the tooltip content', () => {
         regularUser(),
         now,
       )[0].title,
-    ).toBe('Subscriber only mode is on (Tier 2+).');
+    ).toBe('Subscriber only mode is on (Tier 2+)');
   });
 
   test('lists nuke phrases for regular users without moderator detail', () => {
@@ -279,9 +279,9 @@ describe('Building the tooltip content', () => {
       now,
     );
 
-    expect(section.title).toBe('1 nuke is still lingering.');
+    expect(section.title).toBe('1 nuke is still lingering');
     expect(section.detail).toBe(
-      'Messages matching one of these nukes are muted.',
+      'Messages matching one of these nukes will be muted.',
     );
     expect(section.rows).toEqual([
       {
@@ -289,6 +289,7 @@ describe('Building the tooltip content', () => {
         countdown: '05:00',
         expiresAt: 1770000300000,
         mega: false,
+        effect: 'Muted for 10m',
         addedBy: null,
       },
     ]);
@@ -303,7 +304,7 @@ describe('Building the tooltip content', () => {
       now,
     );
 
-    expect(sections[1].title).toBe('Nukes: 1 active.');
+    expect(sections[1].title).toBe('Nukes: 1 active');
   });
 
   test('pluralizes the lingering nuke count', () => {
@@ -316,7 +317,7 @@ describe('Building the tooltip content', () => {
       now,
     );
 
-    expect(section.title).toBe('2 nukes are still lingering.');
+    expect(section.title).toBe('2 nukes are still lingering');
   });
 
   test('marks regex and mega rules', () => {
@@ -331,6 +332,7 @@ describe('Building the tooltip content', () => {
 
     expect(section.rows[0].phrase).toBe('/spoiler/');
     expect(section.rows[0].mega).toBe(true);
+    expect(section.rows[0].effect).toBe('Banned for 10m');
   });
 
   test('keeps the nuke mode when only nuked users remain', () => {
@@ -341,7 +343,7 @@ describe('Building the tooltip content', () => {
       now,
     );
 
-    expect(section.title).toBe('Nuke mutes are still active.');
+    expect(section.title).toBe('Nuke mutes are still active');
     expect(section.rows).toEqual([]);
     expect(section.meta).toEqual([]);
   });
@@ -382,7 +384,7 @@ describe('Building the tooltip content', () => {
       now,
     )[0];
     expect(on.title).toBe(
-      'Messages that include links and mention @ModName will be muted for 90s.',
+      'Messages that include links and mention @ModName will be muted for 90s',
     );
 
     const all = buildModerationTooltipSections(
@@ -391,9 +393,7 @@ describe('Building the tooltip content', () => {
       regularUser(),
       now,
     )[0];
-    expect(all.title).toBe(
-      'Messages that include links will be muted for 60s.',
-    );
+    expect(all.title).toBe('Messages that include links will be muted for 60s');
 
     const repeat = buildModerationTooltipSections(
       state({ mutelinks: { mode: 'repeat', duration: 30 } }),
@@ -402,7 +402,7 @@ describe('Building the tooltip content', () => {
       now,
     )[0];
     expect(repeat.title).toBe(
-      'Messages that include repeated links will be muted for 30s.',
+      'Messages that include repeated links will be muted for 30s',
     );
   });
 
@@ -416,7 +416,7 @@ describe('Building the tooltip content', () => {
       now,
     )[0];
     expect(on.title).toBe(
-      'Breaking news mode is on: messages that include links older than 5m and mention @ModName will be muted.',
+      'Breaking news mode is on: messages that include links older than 5m and mention @ModName will be muted',
     );
 
     const all = buildModerationTooltipSections(
@@ -426,7 +426,7 @@ describe('Building the tooltip content', () => {
       now,
     )[0];
     expect(all.title).toBe(
-      'Breaking news mode is on: messages that include links older than 15m will be muted.',
+      'Breaking news mode is on: messages that include links older than 15m will be muted',
     );
   });
 
@@ -517,6 +517,9 @@ describe('Rendering tooltip DOM', () => {
     const element = buildModerationTooltipElement(sections);
 
     expect(element.querySelector('.mod-state-mega').textContent).toBe('MEGA');
+    expect(element.querySelector('.mod-state-rule-meta').textContent).toBe(
+      'Banned for 10m · added by ModName',
+    );
     expect(
       element.querySelector('.mod-state-countdown').dataset.expiresAt,
     ).toBe('1770000300000');
